@@ -71,7 +71,7 @@ if ($filters['category_id']) { $where[] = 'p.category_id = ?'; $types .= 'i'; $p
 if ($filters['listing_type']) { $where[] = 'p.listing_type = ?'; $types .= 's'; $params[] = $filters['listing_type']; }
 if ($filters['status']) { $where[] = 'p.status = ?'; $types .= 's'; $params[] = $filters['status']; }
 
-$sql = "SELECT p.id, p.title, p.price, p.location, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name
+$sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name
 	FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
@@ -79,7 +79,7 @@ $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
 $stmtRecent = $mysqli->prepare($sql);
 if ($stmtRecent && $types !== '') { $stmtRecent->bind_param($types, ...$params); }
 $stmtRecent && $stmtRecent->execute();
-$recentProperties = $stmtRecent ? $stmtRecent->get_result() : $mysqli->query("SELECT p.id, p.title, p.price, p.location, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 8");
+$recentProperties = $stmtRecent ? $stmtRecent->get_result() : $mysqli->query("SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 8");
 $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, %Y') as created_at FROM blogs ORDER BY created_at DESC LIMIT 5");
 $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_at,'%b %d, %Y') as created_at FROM testimonials ORDER BY created_at DESC LIMIT 5");
 $recentActivity = $mysqli->query("SELECT a.id, COALESCE(u.username,'System') as actor, a.action, DATE_FORMAT(a.created_at,'%b %d, %Y %h:%i %p') as created_at FROM activity_logs a LEFT JOIN admin_users u ON u.id = a.admin_id ORDER BY a.created_at DESC LIMIT 10");
@@ -127,11 +127,13 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Modern toolbar */
-		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+		.toolbar .row-bottom{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 		.toolbar .chip{ padding:6px 12px; border:1px solid var(--line); border-radius:9999px; background:#fff; color:#374151; text-decoration:none; font-size:.875rem; }
 		.toolbar .chip:hover{ border-color:#d1d5db; }
 		.toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
-		.toolbar .divider{ width:1px; height:28px; background:var(--line); margin:0 4px; }
+		.toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
 		/* Table */
 		.table{ --bs-table-bg:transparent; }
 		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
@@ -141,11 +143,24 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
+		.sticky-side{ position:sticky; top:96px; }
 		/* Filters */
 		.form-label{ font-weight:600; }
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+		/* Drawer */
+		.drawer{ position:fixed; top:0; right:-420px; width:420px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .25s ease; z-index:1040; }
+		.drawer.open{ right:0; }
+		.drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+		.drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
+		.drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
+		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
+		/* Modern list rows for blogs/testimonials */
+		.item-row{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+		.item-row:hover{ box-shadow:0 6px 18px rgba(0,0,0,.06); }
+		.item-title{ font-weight:600; }
+		.item-meta{ color:#6b7280; font-size:.9rem; }
 	</style>
 </head>
 <body>
@@ -154,30 +169,6 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
 		<div class="container-fluid p-4">
-			<!-- Clean toolbar instead of heavy form -->
-			<div class="toolbar mb-4">
-				<form class="d-flex flex-grow-1" method="get">
-					<div class="input-group">
-						<span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-						<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title'] ?? ''); ?>" placeholder="Search properties by name">
-					</div>
-					<button class="btn btn-primary ms-2" type="submit">Search</button>
-					<a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
-				</form>
-				<div class="divider"></div>
-				<!-- Listing type chips -->
-				<?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
-					<?php $isActive = ($filters['listing_type'] ?? '') === $lt; ?>
-					<a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?lt=<?php echo urlencode($lt); ?>"><?php echo $lt; ?></a>
-				<?php endforeach; ?>
-				<div class="divider"></div>
-				<!-- Category chips -->
-				<?php while($pc = $pillCategories->fetch_assoc()): ?>
-					<?php $isC = (string)($filters['category_id'] ?? '') === (string)$pc['id']; ?>
-					<a class="chip <?php echo $isC ? 'active' : ''; ?>" href="?cat=<?php echo (int)$pc['id']; ?>"><?php echo htmlspecialchars($pc['name']); ?></a>
-				<?php endwhile; ?>
-			</div>
-
 			<div class="row g-3 mb-3">
 				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
 				<div class="col-sm-6 col-xl-3">
@@ -226,6 +217,31 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				</div>
 			</div>
 
+			<!-- Search toolbar moved up here -->
+			<div class="toolbar mb-4">
+				<div class="row-top">
+					<form class="d-flex flex-grow-1" method="get">
+						<div class="input-group">
+							<span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+							<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title'] ?? ''); ?>" placeholder="Search properties by name">
+						</div>
+						<button class="btn btn-primary ms-2" type="submit">Search</button>
+						<a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
+					</form>
+				</div>
+				<div class="row-bottom">
+					<?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
+						<?php $isActive = ($filters['listing_type'] ?? '') === $lt; ?>
+						<a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?lt=<?php echo urlencode($lt); ?>"><?php echo $lt; ?></a>
+					<?php endforeach; ?>
+					<span class="divider"></span>
+					<?php while($pc = $pillCategories->fetch_assoc()): ?>
+						<?php $isC = (string)($filters['category_id'] ?? '') === (string)$pc['id']; ?>
+						<a class="chip <?php echo $isC ? 'active' : ''; ?>" href="?cat=<?php echo (int)$pc['id']; ?>"><?php echo htmlspecialchars($pc['name']); ?></a>
+					<?php endwhile; ?>
+				</div>
+			</div>
+
 			<div class="row g-4">
 				<div class="col-xl-8">
 					<div class="card quick-card mb-4">
@@ -234,7 +250,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 								<div class="h6 mb-0">Properties</div>
 								<button class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</button>
 							</div>
-							<table class="table align-middle">
+							<table class="table align-middle" id="propertiesTable">
 								<thead>
 									<tr>
 										<th>Name</th>
@@ -248,14 +264,14 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 								</thead>
 								<tbody>
 									<?php while($row = $recentProperties->fetch_assoc()): ?>
-									<tr>
+									<tr data-prop='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 										<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
 										<td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category_name'] ?? '—'); ?></span></td>
 										<td><span class="badge badge-soft"><?php echo htmlspecialchars($row['listing_type']); ?></span></td>
 										<td>₹<?php echo number_format((float)$row['price']); ?></td>
 										<td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>
 										<td class="text-muted"><?php echo $row['created_at']; ?></td>
-										<td class="text-end"><button class="btn btn-sm btn-outline-secondary">View</button></td>
+										<td class="text-end"><button class="btn btn-sm btn-outline-secondary btn-view">View</button></td>
 									</tr>
 									<?php endwhile; ?>
 								</tbody>
@@ -271,14 +287,14 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 										<div class="h6 mb-0">Recent Blogs</div>
 										<a href="#" class="small">View all</a>
 									</div>
-									<ul class="list-group list-group-flush">
+									<div>
 										<?php while($b = $recentBlogs->fetch_assoc()): ?>
-										<li class="list-group-item d-flex align-items-center justify-content-between">
-											<span class="fw-medium"><?php echo htmlspecialchars($b['title']); ?></span>
-											<span class="text-muted small"><?php echo $b['created_at']; ?></span>
-										</li>
+										<div class="item-row">
+											<span class="item-title"><?php echo htmlspecialchars($b['title']); ?></span>
+											<span class="item-meta"><?php echo $b['created_at']; ?></span>
+										</div>
 										<?php endwhile; ?>
-									</ul>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -289,23 +305,26 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 										<div class="h6 mb-0">Testimonials</div>
 										<a href="#" class="small">View all</a>
 									</div>
-									<ul class="list-group list-group-flush">
+									<div>
 										<?php while($t = $recentTestimonials->fetch_assoc()): ?>
-										<li class="list-group-item d-flex align-items-center justify-content-between">
-											<span class="fw-medium"><?php echo htmlspecialchars($t['name']); ?></span>
+										<div class="item-row">
+											<span class="item-title"><?php echo htmlspecialchars($t['name']); ?></span>
 											<span class="text-warning"><?php echo str_repeat('★', (int)$t['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5-(int)$t['rating']); ?></span></span>
-										</li>
+										</div>
 										<?php endwhile; ?>
-									</ul>
+									</div>
 								</div>
 							</div>
 						</div>
 				</div>
 
 				<div class="col-xl-4">
-					<div class="card h-100">
+					<div class="card h-100 sticky-side">
 						<div class="card-body">
-							<div class="h6 mb-3">Activity</div>
+							<div class="d-flex align-items-center justify-content-between mb-2">
+								<div class="h6 mb-0">Activity</div>
+								<span class="badge bg-light text-dark border">Logs</span>
+							</div>
 							<div class="list-activity">
 								<?php while($a = $recentActivity->fetch_assoc()): ?>
 								<div class="d-flex align-items-start gap-2 mb-3">
@@ -320,8 +339,63 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 						</div>
 					</div>
 				</div>
+
+				<!-- Drawer for property details and backdrop -->
+				<div class="drawer" id="propDrawer">
+					<div class="drawer-header">
+						<h6 class="mb-0" id="drawerTitle">Property</h6>
+						<button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+					</div>
+					<div class="drawer-body" id="drawerBody"></div>
+				</div>
+				<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
 			</div>
 		</div>
+	</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script>
+		function openDrawer(data){
+			const drawer = document.getElementById('propDrawer');
+			const backdrop = document.getElementById('drawerBackdrop');
+			document.getElementById('drawerTitle').textContent = data.title || 'Property';
+			const body = document.getElementById('drawerBody');
+			body.innerHTML = `
+				<div class="mb-3"><span class="text-muted small">Category</span><div><span class="badge bg-light text-dark border">${data.category_name || '—'}</span></div></div>
+				<div class="mb-3"><span class="text-muted small">Listing</span><div><span class="badge badge-soft">${data.listing_type || ''}</span></div></div>
+				<div class="row g-2">
+					<div class="col-6"><div class="text-muted small">Price</div><div class="fw-semibold">₹${Number(data.price||0).toLocaleString()}</div></div>
+					<div class="col-6"><div class="text-muted small">Area</div><div class="fw-semibold">${data.area || '—'} sqft</div></div>
+				</div>
+				<div class="mt-2"><i class="fa-solid fa-location-dot me-1"></i>${data.location || ''} <span class="text-muted">${data.landmark? '('+data.landmark+')' : ''}</span></div>
+				<hr/>
+				<div class="row g-2">
+					<div class="col-6"><div class="text-muted small">Config</div><div>${data.configuration || '—'}</div></div>
+					<div class="col-6"><div class="text-muted small">Furniture</div><div>${data.furniture_status || '—'}</div></div>
+					<div class="col-6"><div class="text-muted small">Ownership</div><div>${data.ownership_type || '—'}</div></div>
+					<div class="col-6"><div class="text-muted small">Facing</div><div>${data.facing || '—'}</div></div>
+					<div class="col-6"><div class="text-muted small">Parking</div><div>${data.parking || '—'}</div></div>
+					<div class="col-6"><div class="text-muted small">Balcony</div><div>${data.balcony || 0}</div></div>
+				</div>
+				<hr/>
+				<div><div class="text-muted small">Description</div><div>${(data.description || '').slice(0,800)}</div></div>
+			`;
+			drawer.classList.add('open');
+			backdrop.classList.add('open');
+		}
+		function closeDrawer(){
+			document.getElementById('propDrawer').classList.remove('open');
+			document.getElementById('drawerBackdrop').classList.remove('open');
+		}
+		// attach events
+		document.addEventListener('DOMContentLoaded', function(){
+			document.querySelectorAll('#propertiesTable .btn-view').forEach(btn => {
+				btn.addEventListener('click', function(){
+					const tr = this.closest('tr');
+					const data = JSON.parse(tr.getAttribute('data-prop'));
+					openDrawer(data);
+				});
+			});
+		});
+	</script>
 </body>
 </html>
