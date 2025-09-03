@@ -25,15 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Sanitize username to prevent SQL injection
         $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
         
-        // Attempt to authenticate user
-        if (authenticateUser($username, $password)) {
+        // Attempt to authenticate user and get user data
+        $user_data = authenticateUser($username, $password);
+        if ($user_data) {
             // Set session variables
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_username'] = $username;
             $_SESSION['admin_login_time'] = time();
+            $_SESSION['admin_id'] = $user_data['id'];
             
             // Log successful login
-            logLoginAttempt($username, true, $_SERVER['REMOTE_ADDR'] ?? '');
+            logLoginAttempt($username, true, $_SERVER['REMOTE_ADDR'] ?? '', $user_data['id']);
             
             // Redirect to dashboard
             header('Location: ../dashboard/');
@@ -51,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * Authenticate user against database
  * @param string $username
  * @param string $password
- * @return bool
+ * @return array|false Returns user data array on success, false on failure
  */
 function authenticateUser($username, $password) {
     try {
@@ -69,7 +71,7 @@ function authenticateUser($username, $password) {
             // Verify password using password_verify (assuming passwords are hashed with password_hash)
             if (password_verify($password, $user['password'])) {
                 $stmt->close();
-                return true;
+                return $user; // Return user data instead of just true
             }
         }
         
@@ -88,13 +90,13 @@ function authenticateUser($username, $password) {
  * @param bool $success
  * @param string $ip_address
  */
-function logLoginAttempt($username, $success, $ip_address) {
+function logLoginAttempt($username, $success, $ip_address, $admin_id = 0) {
     try {
         $mysqli = getMysqliConnection();
         $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
         
-        $admin_id = 0; // Default if user not found
-        if ($success) {
+        // Use provided admin_id or get it from database if not provided
+        if ($success && $admin_id == 0) {
             // Get admin ID for successful login
             $user_stmt = $mysqli->prepare("SELECT id FROM admin_users WHERE username = ?");
             $user_stmt->bind_param("s", $username);

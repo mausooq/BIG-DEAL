@@ -10,12 +10,12 @@ if (!function_exists('renderAdminSidebar')) {
 	function renderAdminSidebar(string $active = ''): void {
 		$items = [
 			['key' => 'dashboard', 'icon' => 'fa-grip', 'label' => 'Dashboard', 'href' => '../dashboard/'],
-			['key' => 'properties', 'icon' => 'fa-building-circle-check', 'label' => 'Properties', 'href' => '#'],
-			['key' => 'categories', 'icon' => 'fa-tags', 'label' => 'Categories', 'href' => '#'],
-			['key' => 'enquiries', 'icon' => 'fa-envelope-open-text', 'label' => 'Enquiries', 'href' => '#'],
+			['key' => 'properties', 'icon' => 'fa-building-circle-check', 'label' => 'Properties', 'href' => '../properties/'],
+			['key' => 'categories', 'icon' => 'fa-tags', 'label' => 'Categories', 'href' => '../categories/'],
+			['key' => 'enquiries', 'icon' => 'fa-envelope-open-text', 'label' => 'Enquiries', 'href' => '../enquiries/'],
 			['key' => 'blogs', 'icon' => 'fa-newspaper', 'label' => 'Blogs', 'href' => '#'],
 			['key' => 'testimonials', 'icon' => 'fa-face-smile', 'label' => 'Testimonials', 'href' => '#'],
-			['key' => 'logout', 'icon' => 'fa-arrow-right-from-bracket', 'label' => 'Logout', 'href' => '../login/'],
+			['key' => 'logout', 'icon' => 'fa-arrow-right-from-bracket', 'label' => 'Logout', 'href' => '../logout.php'],
 		];
 		?>
 		<div class="sidebar p-3 d-flex flex-column gap-3">
