@@ -130,12 +130,56 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
         .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
         /* Drawer styles */
-        .drawer{ position:fixed; top:0; right:-420px; width:420px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .25s ease; z-index:1040; }
+        .drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
         .drawer.open{ right:0; }
         .drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
         .drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
-        .drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
+        .drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.3); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:1035; }
         .drawer-backdrop.open{ opacity:1; pointer-events:auto; }
+        .drawer-image{ width:100%; height:250px; object-fit:contain; border-radius:8px; margin-bottom:1rem; background:#f8f9fa; border:1px solid #e9ecef; }
+        .drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; }
+        .drawer-image-thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; }
+        .drawer-image-thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
+        .drawer-image-thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .drawer-image{ cursor:pointer; transition:transform 0.2s ease; }
+        .drawer-image:hover{ transform:scale(1.02); }
+        /* More images button styles */
+        .more-images-btn{ 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+            border: 2px solid #3b82f6;
+        }
+        .more-images-btn:hover{ 
+            background: linear-gradient(135deg, #1d4ed8, #1e40af); 
+            transform: scale(1.05); 
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        .more-images-content{ 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 2px;
+        }
+        .more-images-content i{ 
+            font-size: 1.2rem; 
+        }
+        .more-count{ 
+            font-size: 0.75rem; 
+            font-weight: 600; 
+        }
+        .remaining-images{ 
+            margin-top: 8px; 
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn{ 
+            from{ opacity: 0; transform: translateY(-10px); } 
+            to{ opacity: 1; transform: translateY(0); } 
+        }
         .property-detail{ margin-bottom:1rem; }
         .property-detail .label{ color:var(--muted); font-size:0.875rem; font-weight:600; margin-bottom:0.25rem; }
         .property-detail .value{ font-weight:600; color:#111827; }
@@ -153,6 +197,9 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             .content{ margin-left:0; }
             .table{ font-size:.9rem; }
             .drawer{ width:100vw; right:-100vw; }
+            .drawer-image{ height:200px; object-fit:contain; }
+            .drawer-image-gallery{ gap:6px; }
+            .drawer-image-thumb{ width:70px; height:70px; }
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
@@ -334,8 +381,6 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 </div>
             </div>
 
-
-
             <!-- Delete Property Modal (placeholder) -->
             <div class="modal fade" id="deletePropertyModal" tabindex="-1">
                 <div class="modal-dialog">
@@ -374,117 +419,366 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Drawer functions
+        // Performance optimized drawer system
+        let drawerCache = new Map();
+        let isDrawerOpening = false;
+        let currentPropertyId = null;
+        let abortController = null;
+
+        // Pre-cache DOM elements
+        const drawer = document.getElementById('propertyDrawer');
+        const backdrop = document.getElementById('drawerBackdrop');
+        const drawerBody = document.getElementById('drawerBody');
+        const drawerTitle = document.getElementById('drawerTitle');
+
         function openDrawer(propertyId) {
-            const drawer = document.getElementById('propertyDrawer');
-            const backdrop = document.getElementById('drawerBackdrop');
-            const drawerBody = document.getElementById('drawerBody');
-            const drawerTitle = document.getElementById('drawerTitle');
+            // Prevent multiple simultaneous opens
+            if (isDrawerOpening || currentPropertyId === propertyId) return;
             
-            // Show loading state
-            drawerBody.innerHTML = '<div class="text-center"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading property details...</p></div>';
+            // Cancel any pending request
+            if (abortController) {
+                abortController.abort();
+            }
+            
+            isDrawerOpening = true;
+            currentPropertyId = propertyId;
+            
+            // Open drawer immediately for better UX
             drawer.classList.add('open');
             backdrop.classList.add('open');
             
-            // Fetch property details
-            fetch(`get_property_details.php?id=${propertyId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        drawerTitle.textContent = data.property.title || 'Property Details';
-                        drawerBody.innerHTML = `
-                            <div class="property-detail">
-                                <div class="label">Category</div>
-                                <div class="value badge bg-light text-dark border">${data.property.category_name || '—'}</div>
+            // Check cache first
+            if (drawerCache.has(propertyId)) {
+                renderPropertyDetails(drawerCache.get(propertyId));
+                isDrawerOpening = false;
+                return;
+            }
+            
+            // Show loading state
+            drawerBody.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading...</p></div>';
+            
+            // Create new abort controller
+            abortController = new AbortController();
+            
+            // Fetch with timeout
+            const timeoutId = setTimeout(() => abortController.abort(), 8000);
+            
+            fetch(`get_property_details.php?id=${propertyId}`, {
+                signal: abortController.signal,
+                headers: {
+                    'Accept': 'application/json',
+                    'Cache-Control': 'no-cache'
+                }
+            })
+            .then(response => {
+                clearTimeout(timeoutId);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && currentPropertyId === propertyId) {
+                    drawerCache.set(propertyId, data);
+                    renderPropertyDetails(data);
+                } else {
+                    throw new Error(data.message || 'Failed to load property details');
+                }
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError' && currentPropertyId === propertyId) {
+                    console.error('Error loading property:', error);
+                    drawerBody.innerHTML = `
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            Unable to load property details. Please try again.
+                            <div class="mt-2">
+                                <button class="btn btn-sm btn-outline-primary" onclick="retryLoad(${propertyId})">
+                                    <i class="fa-solid fa-refresh me-1"></i>Retry
+                                </button>
                             </div>
-                            <div class="property-detail">
-                                <div class="label">Listing</div>
-                                <div class="value badge badge-soft">${data.property.listing_type || ''}</div>
-                            </div>
-                            <div class="two-col">
-                                <div class="property-detail">
-                                    <div class="label">Price</div>
-                                    <div class="value price">₹${Number(data.property.price || 0).toLocaleString()}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Area</div>
-                                    <div class="value area">${data.property.area || '—'} sqft</div>
-                                </div>
-                            </div>
-                            <div class="property-detail">
-                                <div class="label">Location</div>
-                                <div class="value location">
-                                    <i class="fa-solid fa-location-dot"></i>
-                                    ${data.property.location || ''} ${data.property.landmark ? '(' + data.property.landmark + ')' : ''}
-                                </div>
-                            </div>
-                            <div class="divider"></div>
-                            <div class="two-col">
-                                <div class="property-detail">
-                                    <div class="label">Config</div>
-                                    <div class="value">${data.property.configuration || '—'}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Furniture</div>
-                                    <div class="value">${data.property.furniture_status || '—'}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Ownership</div>
-                                    <div class="value">${data.property.ownership_type || '—'}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Facing</div>
-                                    <div class="value">${data.property.facing || '—'}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Parking</div>
-                                    <div class="value">${data.property.parking || '—'}</div>
-                                </div>
-                                <div class="property-detail">
-                                    <div class="label">Balcony</div>
-                                    <div class="value">${data.property.balcony || 0}</div>
-                                </div>
-                            </div>
-                            <div class="divider"></div>
-                            <div class="property-detail">
-                                <div class="label">Description</div>
-                                <div class="value">${(data.property.description || '').slice(0, 200)}${(data.property.description || '').length > 200 ? '...' : ''}</div>
-                            </div>
-                        `;
-                    } else {
-                        drawerBody.innerHTML = '<div class="alert alert-danger">Error loading property details</div>';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    drawerBody.innerHTML = '<div class="alert alert-danger">Error loading property details</div>';
-                });
-        }
-        
-        function closeDrawer() {
-            document.getElementById('propertyDrawer').classList.remove('open');
-            document.getElementById('drawerBackdrop').classList.remove('open');
+                        </div>`;
+                }
+            })
+            .finally(() => {
+                clearTimeout(timeoutId);
+                isDrawerOpening = false;
+                abortController = null;
+            });
         }
 
-        // Wire View buttons
-        document.querySelectorAll('.btn-view').forEach(btn => {
-            btn.addEventListener('click', function(){
-                const tr = this.closest('tr');
-                const propertyId = tr.dataset.id;
-                openDrawer(propertyId);
+        function renderPropertyDetails(data) {
+            if (!data || !data.property) return;
+            
+            const property = data.property;
+            const images = data.images || [];
+            
+            drawerTitle.textContent = property.title || 'Property Details';
+            
+             // Build HTML efficiently
+             const content = `
+                 ${images.length > 0 ? `
+                     <div class="property-detail">
+                         <div class="label">Property Images (${images.length})</div>
+                         <img src="../../uploads/properties/${images[0].image_url}" 
+                              alt="Property Image" 
+                              class="drawer-image" 
+                              id="mainImage"
+                              loading="lazy">
+                         ${images.length > 1 ? `
+                             <div class="drawer-image-gallery">
+                                 ${images.slice(0, 4).map((img, index) => `
+                                     <img src="../../uploads/properties/${img.image_url}" 
+                                          alt="Property Image ${index + 1}" 
+                                          class="drawer-image-thumb ${index === 0 ? 'active' : ''}" 
+                                          data-image-url="${img.image_url}"
+                                          data-index="${index}"
+                                          loading="lazy">
+                                 `).join('')}
+                                 ${images.length > 4 ? `
+                                     <div class="drawer-image-thumb more-images-btn" 
+                                          data-total="${images.length}" 
+                                          data-remaining="${images.length - 4}"
+                                          onclick="showMoreImages(${property.id})">
+                                         <div class="more-images-content">
+                                             <i class="fa-solid fa-plus"></i>
+                                             <span class="more-count">+${images.length - 4}</span>
+                                         </div>
+                                     </div>
+                                 ` : ''}
+                             </div>
+                             ${images.length > 4 ? `
+                                 <div class="drawer-image-gallery remaining-images" id="remaining-images-${property.id}" style="display: none;">
+                                     ${images.slice(4).map((img, index) => `
+                                         <img src="../../uploads/properties/${img.image_url}" 
+                                              alt="Property Image ${index + 5}" 
+                                              class="drawer-image-thumb" 
+                                              data-image-url="${img.image_url}"
+                                              data-index="${index + 4}"
+                                              loading="lazy">
+                                     `).join('')}
+                                 </div>
+                             ` : ''}
+                         ` : ''}
+                     </div>
+                     <div class="divider"></div>
+                 ` : ''}
+                
+                <div class="property-detail">
+                    <div class="label">Category</div>
+                    <div class="value badge bg-light text-dark border">${escapeHtml(property.category_name) || '—'}</div>
+                </div>
+                <div class="property-detail">
+                    <div class="label">Listing</div>
+                    <div class="value badge badge-soft">${escapeHtml(property.listing_type) || ''}</div>
+                </div>
+                <div class="two-col">
+                    <div class="property-detail">
+                        <div class="label">Price</div>
+                        <div class="value price">₹${formatNumber(property.price || 0)}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Area</div>
+                        <div class="value area">${escapeHtml(property.area) || '—'} sqft</div>
+                    </div>
+                </div>
+                <div class="property-detail">
+                    <div class="label">Location</div>
+                    <div class="value location">
+                        <i class="fa-solid fa-location-dot"></i>
+                        ${escapeHtml(property.location) || ''} ${property.landmark ? '(' + escapeHtml(property.landmark) + ')' : ''}
+                    </div>
+                </div>
+                <div class="divider"></div>
+                <div class="two-col">
+                    <div class="property-detail">
+                        <div class="label">Config</div>
+                        <div class="value">${escapeHtml(property.configuration) || '—'}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Furniture</div>
+                        <div class="value">${escapeHtml(property.furniture_status) || '—'}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Ownership</div>
+                        <div class="value">${escapeHtml(property.ownership_type) || '—'}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Facing</div>
+                        <div class="value">${escapeHtml(property.facing) || '—'}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Parking</div>
+                        <div class="value">${escapeHtml(property.parking) || '—'}</div>
+                    </div>
+                    <div class="property-detail">
+                        <div class="label">Balcony</div>
+                        <div class="value">${property.balcony || 0}</div>
+                    </div>
+                </div>
+                ${property.description ? `
+                    <div class="divider"></div>
+                    <div class="property-detail">
+                        <div class="label">Description</div>
+                        <div class="value">${escapeHtml(property.description).substring(0, 300)}${property.description.length > 300 ? '...' : ''}</div>
+                    </div>
+                ` : ''}
+                <div class="divider"></div>
+                <div class="property-detail">
+                    <div class="label">Property ID</div>
+                    <div class="value">#${property.id}</div>
+                </div>
+                <div class="property-detail">
+                    <div class="label">Status</div>
+                    <div class="value">
+                        <span class="badge ${getStatusBadgeClass(property.status)}">${escapeHtml(property.status)}</span>
+                    </div>
+                </div>
+                <div class="property-detail">
+                    <div class="label">Created</div>
+                    <div class="value">${formatDate(property.created_at)}</div>
+                </div>
+            `;
+            
+            drawerBody.innerHTML = content;
+        }
+
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            backdrop.classList.remove('open');
+            currentPropertyId = null;
+            
+            // Cancel any pending request
+            if (abortController) {
+                abortController.abort();
+                abortController = null;
+            }
+            
+            // Clear cache periodically to prevent memory leaks
+            if (drawerCache.size > 15) {
+                drawerCache.clear();
+            }
+        }
+
+        function retryLoad(propertyId) {
+            drawerCache.delete(propertyId);
+            isDrawerOpening = false;
+            currentPropertyId = null;
+            openDrawer(propertyId);
+        }
+
+        // Utility functions
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatNumber(num) {
+            return new Intl.NumberFormat('en-IN').format(num);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '—';
+            return new Date(dateString).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
             });
+        }
+
+         function getStatusBadgeClass(status) {
+             switch (status) {
+                 case 'Available': return 'bg-success';
+                 case 'Sold': return 'bg-danger';
+                 case 'Rented': return 'bg-warning';
+                 default: return 'bg-secondary';
+             }
+         }
+
+         // Function to show more images
+         function showMoreImages(propertyId) {
+             const remainingImagesDiv = document.getElementById(`remaining-images-${propertyId}`);
+             const moreBtn = document.querySelector(`[data-total][onclick="showMoreImages(${propertyId})"]`);
+             
+             if (remainingImagesDiv && moreBtn) {
+                 if (remainingImagesDiv.style.display === 'none') {
+                     remainingImagesDiv.style.display = 'flex';
+                     moreBtn.innerHTML = '<div class="more-images-content"><i class="fa-solid fa-minus"></i><span class="more-count">Less</span></div>';
+                     moreBtn.setAttribute('onclick', `hideMoreImages(${propertyId})`);
+                 }
+             }
+         }
+
+         // Function to hide more images
+         function hideMoreImages(propertyId) {
+             const remainingImagesDiv = document.getElementById(`remaining-images-${propertyId}`);
+             const moreBtn = document.querySelector(`[data-total][onclick="hideMoreImages(${propertyId})"]`);
+             
+             if (remainingImagesDiv && moreBtn) {
+                 remainingImagesDiv.style.display = 'none';
+                 const remainingCount = moreBtn.getAttribute('data-remaining');
+                 moreBtn.innerHTML = `<div class="more-images-content"><i class="fa-solid fa-plus"></i><span class="more-count">+${remainingCount}</span></div>`;
+                 moreBtn.setAttribute('onclick', `showMoreImages(${propertyId})`);
+             }
+         }
+
+
+        // Event delegation for better performance
+        document.addEventListener('click', function(event) {
+            // Handle view button clicks
+            const viewBtn = event.target.closest('.btn-view');
+            if (viewBtn) {
+                const tr = viewBtn.closest('tr');
+                const propertyId = tr?.dataset?.id;
+                if (propertyId && !isDrawerOpening) {
+                    openDrawer(parseInt(propertyId));
+                }
+                return;
+            }
+            
+             // Handle image thumbnail clicks
+             const thumb = event.target.closest('.drawer-image-thumb');
+             if (thumb && !thumb.classList.contains('more-images-btn')) {
+                 const imageUrl = thumb.dataset.imageUrl;
+                 const mainImage = document.getElementById('mainImage');
+                 if (imageUrl && mainImage) {
+                     // Update main image
+                     mainImage.src = `../../uploads/properties/${imageUrl}`;
+                     
+                     // Update active state
+                     document.querySelectorAll('.drawer-image-thumb').forEach(t => t.classList.remove('active'));
+                     thumb.classList.add('active');
+                 }
+                 return;
+             }
+             
+            
+            // Handle delete button clicks
+            const deleteBtn = event.target.closest('.btn-delete');
+            if (deleteBtn) {
+                const tr = deleteBtn.closest('tr');
+                const deleteId = document.getElementById('delete-id');
+                const deleteTitle = document.getElementById('delete-title');
+                if (deleteId) deleteId.value = tr.dataset.id || '';
+                if (deleteTitle) deleteTitle.textContent = tr.dataset.title || 'this property';
+                return;
+            }
         });
 
-        // Wire Delete buttons
-        document.querySelectorAll('.btn-delete').forEach(btn => {
-            btn.addEventListener('click', function(){
-                const tr = this.closest('tr');
-                document.getElementById('delete-id').value = tr.dataset.id;
-                document.getElementById('delete-title').textContent = tr.dataset.title || 'this property';
-            });
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && drawer.classList.contains('open')) {
+                closeDrawer();
+            }
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (abortController) {
+                abortController.abort();
+            }
+            drawerCache.clear();
         });
     </script>
 </body>
 </html>
-
-

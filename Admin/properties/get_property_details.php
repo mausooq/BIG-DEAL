@@ -34,6 +34,13 @@ try {
         exit();
     }
     
+    // Fetch property images
+    $images_stmt = $mysqli->prepare("SELECT id, image_url FROM property_images WHERE property_id = ? ORDER BY id");
+    $images_stmt->bind_param('i', $property_id);
+    $images_stmt->execute();
+    $images = $images_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $images_stmt->close();
+    
     // Format the property data
     $formatted_property = [
         'id' => $property['id'],
@@ -55,7 +62,7 @@ try {
         'created_at' => $property['created_at']
     ];
     
-    echo json_encode(['success' => true, 'property' => $formatted_property]);
+    echo json_encode(['success' => true, 'property' => $formatted_property, 'images' => $images]);
     
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);

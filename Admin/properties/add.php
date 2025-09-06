@@ -73,17 +73,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $uploaded_images = [];
-            for ($i = 0; $i < count($_FILES['images']['name']); $i++) {
+            $image_count = count($_FILES['images']['name']);
+            
+            for ($i = 0; $i < $image_count; $i++) {
                 if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
                     $file_extension = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
                     $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                     
                     if (in_array($file_extension, $allowed_extensions)) {
-                        $filename = 'property_' . $property_id . '_' . time() . '_' . $i . '.' . $file_extension;
+                        // Generate unique filename with property ID, timestamp, and index
+                        $timestamp = time();
+                        $filename = 'property_' . $property_id . '_' . $timestamp . '_' . $i . '.' . $file_extension;
                         $file_path = $upload_dir . $filename;
                         
+                        // Check file size (max 5MB per image)
+                        if ($_FILES['images']['size'][$i] > 5 * 1024 * 1024) {
+                            throw new Exception('Image ' . ($i + 1) . ' is too large. Maximum size is 5MB.');
+                        }
+                        
                         if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $file_path)) {
-                            $image_url = 'uploads/properties/' . $filename;
+                            $image_url = $filename; // Store only filename, not full path
                             $uploaded_images[] = $image_url;
                             
                             // Insert image record
@@ -91,9 +100,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $img_stmt->bind_param('is', $property_id, $image_url);
                             $img_stmt->execute();
                             $img_stmt->close();
+                        } else {
+                            throw new Exception('Failed to upload image ' . ($i + 1));
                         }
+                    } else {
+                        throw new Exception('Invalid file type for image ' . ($i + 1) . '. Allowed types: JPG, PNG, GIF, WebP');
+                    }
+                } else {
+                    $error_messages = [
+                        UPLOAD_ERR_INI_SIZE => 'Image ' . ($i + 1) . ' exceeds upload_max_filesize',
+                        UPLOAD_ERR_FORM_SIZE => 'Image ' . ($i + 1) . ' exceeds MAX_FILE_SIZE',
+                        UPLOAD_ERR_PARTIAL => 'Image ' . ($i + 1) . ' was only partially uploaded',
+                        UPLOAD_ERR_NO_FILE => 'No file uploaded for image ' . ($i + 1),
+                        UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder for image ' . ($i + 1),
+                        UPLOAD_ERR_CANT_WRITE => 'Failed to write image ' . ($i + 1) . ' to disk',
+                        UPLOAD_ERR_EXTENSION => 'Image ' . ($i + 1) . ' upload stopped by extension'
+                    ];
+                    $error_code = $_FILES['images']['error'][$i];
+                    if (isset($error_messages[$error_code])) {
+                        throw new Exception($error_messages[$error_code]);
                     }
                 }
+            }
+            
+            if (empty($uploaded_images)) {
+                throw new Exception('No valid images were uploaded');
             }
         }
 
@@ -316,7 +347,7 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                                 <div class="image-upload-area" id="imageUploadArea">
                                     <i class="fa-solid fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
                                     <h6>Drop images here or click to browse</h6>
-                                    <p class="text-muted small mb-3">Upload multiple images (JPG, PNG, GIF, WebP)</p>
+                                    <p class="text-muted small mb-3">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each</p>
                                     <input type="file" class="form-control d-none" name="images[]" id="imageInput" multiple accept="image/*">
                                     <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('imageInput').click()">
                                         <i class="fa-solid fa-plus me-2"></i>Choose Images
@@ -324,6 +355,7 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                                 </div>
                                 
                                 <div id="imagePreview" class="mt-3"></div>
+                                <div id="imageInfo" class="mt-2 text-muted small"></div>
                             </div>
                         </div>
                     </div>
@@ -368,6 +400,8 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
         const imageUploadArea = document.getElementById('imageUploadArea');
         const imageInput = document.getElementById('imageInput');
         const imagePreview = document.getElementById('imagePreview');
+        const imageInfo = document.getElementById('imageInfo');
+        let selectedFiles = [];
 
         // Drag and drop functionality
         imageUploadArea.addEventListener('dragover', (e) => {
@@ -375,8 +409,11 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
             imageUploadArea.classList.add('dragover');
         });
 
-        imageUploadArea.addEventListener('dragleave', () => {
-            imageUploadArea.classList.remove('dragover');
+        imageUploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (!imageUploadArea.contains(e.relatedTarget)) {
+                imageUploadArea.classList.remove('dragover');
+            }
         });
 
         imageUploadArea.addEventListener('drop', (e) => {
@@ -386,8 +423,10 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
             handleFiles(files);
         });
 
-        imageUploadArea.addEventListener('click', () => {
-            imageInput.click();
+        imageUploadArea.addEventListener('click', (e) => {
+            if (e.target === imageUploadArea || e.target.closest('.image-upload-area')) {
+                imageInput.click();
+            }
         });
 
         imageInput.addEventListener('change', (e) => {
@@ -395,19 +434,87 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
         });
 
         function handleFiles(files) {
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            
             Array.from(files).forEach(file => {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'image-preview';
-                        img.title = file.name;
-                        imagePreview.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
+                // Validate file type
+                if (!allowedTypes.includes(file.type)) {
+                    alert(`File "${file.name}" is not a valid image type. Please use JPG, PNG, GIF, or WebP.`);
+                    return;
                 }
+                
+                // Validate file size
+                if (file.size > maxSize) {
+                    alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                    return;
+                }
+                
+                // Add to selected files
+                selectedFiles.push(file);
+                
+                // Create preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewContainer = document.createElement('div');
+                    previewContainer.className = 'image-preview-container position-relative d-inline-block me-2 mb-2';
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'image-preview';
+                    img.title = file.name;
+                    img.style.width = '150px';
+                    img.style.height = '150px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '2px solid #e9eef5';
+                    
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'btn btn-sm btn-danger position-absolute';
+                    removeBtn.style.top = '5px';
+                    removeBtn.style.right = '5px';
+                    removeBtn.style.width = '24px';
+                    removeBtn.style.height = '24px';
+                    removeBtn.style.borderRadius = '50%';
+                    removeBtn.style.padding = '0';
+                    removeBtn.innerHTML = '<i class="fa-solid fa-times" style="font-size: 10px;"></i>';
+                    removeBtn.onclick = () => removeImage(previewContainer, file);
+                    
+                    previewContainer.appendChild(img);
+                    previewContainer.appendChild(removeBtn);
+                    imagePreview.appendChild(previewContainer);
+                };
+                reader.readAsDataURL(file);
             });
+            
+            updateImageInfo();
+        }
+
+        function removeImage(container, file) {
+            // Remove from selected files
+            selectedFiles = selectedFiles.filter(f => f !== file);
+            
+            // Remove from DOM
+            container.remove();
+            
+            updateImageInfo();
+        }
+
+        function updateImageInfo() {
+            const count = selectedFiles.length;
+            const totalSize = selectedFiles.reduce((sum, file) => sum + file.size, 0);
+            const sizeInMB = (totalSize / (1024 * 1024)).toFixed(2);
+            
+            if (count > 0) {
+                imageInfo.innerHTML = `
+                    <i class="fa-solid fa-info-circle me-1"></i>
+                    ${count} image${count !== 1 ? 's' : ''} selected (${sizeInMB} MB total)
+                `;
+            } else {
+                imageInfo.innerHTML = '';
+            }
         }
 
         // Form validation
@@ -436,6 +543,14 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                 alert('Please enter a valid area');
                 e.preventDefault();
                 return;
+            }
+            
+            // Validate images
+            if (selectedFiles.length === 0) {
+                if (!confirm('No images selected. Do you want to continue without images?')) {
+                    e.preventDefault();
+                    return;
+                }
             }
         });
     </script>

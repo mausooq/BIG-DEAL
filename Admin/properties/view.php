@@ -154,7 +154,7 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                             <div class="image-gallery">
                                 <?php foreach ($property_images as $image): ?>
                                 <div class="gallery-item">
-                                    <img src="../../<?php echo htmlspecialchars($image['image_url']); ?>" alt="Property Image" loading="lazy">
+                                    <img src="../../uploads/properties/<?php echo htmlspecialchars($image['image_url']); ?>" alt="Property Image" loading="lazy">
                                     <div class="gallery-overlay">
                                         <i class="fa-solid fa-expand gallery-icon"></i>
                                     </div>
