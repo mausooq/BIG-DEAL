@@ -11,6 +11,7 @@ if (!function_exists('renderAdminTopbar')) {
 		?>
 		<nav class="navbar navbar-light bg-white border-bottom sticky-top">
 			<div class="container-fluid">
+				<button class="btn btn-outline-secondary d-md-none" id="sidebarToggle" type="button" title="Toggle menu"><i class="fa-solid fa-bars"></i></button>
 				<form class="d-none d-md-flex" role="search">
 					<div class="input-group">
 						<span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
@@ -26,6 +27,17 @@ if (!function_exists('renderAdminTopbar')) {
 				</div>
 			</div>
 		</nav>
+		<script>
+		document.addEventListener('DOMContentLoaded', function(){
+			var btn = document.getElementById('sidebarToggle');
+			if (btn) {
+				btn.addEventListener('click', function(){
+					var sb = document.querySelector('.sidebar');
+					if (sb) { sb.classList.toggle('open'); }
+				});
+			}
+		});
+		</script>
 		<?php
 	}
 }

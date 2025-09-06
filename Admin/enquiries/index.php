@@ -121,6 +121,20 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
+        /* Actions cell */
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
+        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Mobile responsiveness */
+        @media (max-width: 991.98px){
+            .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
+            .sidebar.open{ left:12px; }
+            .content{ margin-left:0; }
+            .table{ font-size:.9rem; }
+        }
+        @media (max-width: 575.98px){
+            .actions-cell{ justify-content:center; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+        }
     </style>
 </head>
 <body>
@@ -234,11 +248,11 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                         </form>
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
-                                    <td class="text-end">
+                                    <td class="text-end actions-cell">
                                         <form method="post" onsubmit="return confirm('Delete this enquiry?')">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
-                                            <button class="btn btn-sm btn-outline-danger"><i class="fa-solid fa-trash"></i></button>
+                                            <button class="btn btn-sm btn-outline-danger" title="Delete Enquiry"><i class="fa-solid fa-trash"></i></button>
                                         </form>
                                     </td>
                                 </tr>

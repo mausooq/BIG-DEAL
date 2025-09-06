@@ -308,12 +308,28 @@ try {
         .table tbody tr:hover{ background:#f9fafb; }
         /* Badges (match dashboard) */
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        /* Actions cell */
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
+        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         /* Spacing utilities to mirror dashboard look */
         .main-content .page-header{ margin-bottom:16px; }
         .content-card.card{ padding:16px; }
+
+        /* Mobile responsiveness */
+        @media (max-width: 991.98px){
+            .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
+            .sidebar.open{ left:12px; }
+            .content{ margin-left:0; }
+            .table{ font-size:.9rem; }
+        }
+        @media (max-width: 575.98px){
+            .page-header .d-flex{ flex-direction:column; align-items:stretch!important; gap:8px; }
+            .actions-cell{ justify-content:center; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+        }
 
         .page-header {
             background: white;
@@ -569,7 +585,7 @@ try {
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <button class="btn btn-outline-primary btn-sm" 
+                                                    <button class="btn btn-outline-secondary btn-sm" 
                                                             onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
                                                             title="Edit Category">
                                                         <i class="fas fa-edit"></i>

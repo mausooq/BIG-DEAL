@@ -32,50 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $mysqli = db();
     try {
         switch ($_POST['action']) {
-            case 'add':
-                $title = trim($_POST['title'] ?? '');
-                $listing_type = $_POST['listing_type'] ?? 'Buy';
-                $price = $_POST['price'] !== '' ? (float)$_POST['price'] : null;
-                $location = trim($_POST['location'] ?? '');
-                $area = $_POST['area'] !== '' ? (float)$_POST['area'] : null;
-                $configuration = trim($_POST['configuration'] ?? '');
-                $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== '' ? (int)$_POST['category_id'] : null;
-                $status = $_POST['status'] ?? 'Available';
-
-                if ($title === '') { throw new Exception('Title is required'); }
-
-                $sql = "INSERT INTO properties (title, description, listing_type, price, location, landmark, area, configuration, category_id, furniture_status, ownership_type, facing, parking, balcony, status, created_at) VALUES (?, NULL, ?, ?, ?, NULL, ?, ?, ?, NULL, NULL, NULL, NULL, 0, ?, NOW())";
-                $stmt = $mysqli->prepare($sql);
-                $stmt->bind_param('ssdsisis', $title, $listing_type, $price, $location, $area, $configuration, $category_id, $status);
-                if (!$stmt->execute()) { throw new Exception('Failed to add property: ' . $mysqli->error); }
-                $stmt->close();
-                logActivity($mysqli, 'Added property', 'Title: ' . $title);
-                $message = 'Property added successfully';
-                $message_type = 'success';
-                break;
-
-            case 'edit':
-                $id = (int)($_POST['id'] ?? 0);
-                $title = trim($_POST['title'] ?? '');
-                $listing_type = $_POST['listing_type'] ?? 'Buy';
-                $price = $_POST['price'] !== '' ? (float)$_POST['price'] : null;
-                $location = trim($_POST['location'] ?? '');
-                $area = $_POST['area'] !== '' ? (float)$_POST['area'] : null;
-                $configuration = trim($_POST['configuration'] ?? '');
-                $category_id = isset($_POST['category_id']) && $_POST['category_id'] !== '' ? (int)$_POST['category_id'] : null;
-                $status = $_POST['status'] ?? 'Available';
-
-                if ($id <= 0 || $title === '') { throw new Exception('Invalid property data'); }
-
-                $sql = "UPDATE properties SET title=?, listing_type=?, price=?, location=?, area=?, configuration=?, category_id=?, status=? WHERE id=?";
-                $stmt = $mysqli->prepare($sql);
-                $stmt->bind_param('ssdsisisi', $title, $listing_type, $price, $location, $area, $configuration, $category_id, $status, $id);
-                if (!$stmt->execute()) { throw new Exception('Failed to update property: ' . $mysqli->error); }
-                $stmt->close();
-                logActivity($mysqli, 'Updated property', 'ID: ' . $id . ', Title: ' . $title);
-                $message = 'Property updated successfully';
-                $message_type = 'success';
-                break;
 
             case 'delete':
                 $id = (int)($_POST['id'] ?? 0);
@@ -170,6 +126,39 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        /* Actions cell */
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
+        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Drawer styles */
+        .drawer{ position:fixed; top:0; right:-420px; width:420px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .25s ease; z-index:1040; }
+        .drawer.open{ right:0; }
+        .drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+        .drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
+        .drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
+        .drawer-backdrop.open{ opacity:1; pointer-events:auto; }
+        .property-detail{ margin-bottom:1rem; }
+        .property-detail .label{ color:var(--muted); font-size:0.875rem; font-weight:600; margin-bottom:0.25rem; }
+        .property-detail .value{ font-weight:600; color:#111827; }
+        .property-detail .value.badge{ font-weight:500; }
+        .property-detail .value.price{ font-size:1.25rem; }
+        .property-detail .value.area{ font-size:1.25rem; }
+        .property-detail .value.location{ display:flex; align-items:center; gap:0.5rem; }
+        .property-detail .value.location i{ color:var(--muted); }
+        .divider{ height:1px; background:var(--line); margin:1rem 0; }
+        .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        /* Mobile responsiveness */
+        @media (max-width: 991.98px){
+            .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
+            .sidebar.open{ left:12px; }
+            .content{ margin-left:0; }
+            .table{ font-size:.9rem; }
+            .drawer{ width:100vw; right:-100vw; }
+        }
+        @media (max-width: 575.98px){
+            .toolbar .row-top{ flex-direction:column; align-items:stretch; }
+            .actions-cell{ justify-content:center; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+        }
     </style>
 </head>
 <body>
@@ -178,6 +167,22 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
         <div class="container-fluid p-4">
+            <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-check-circle me-2"></i>
+                    Property added successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_GET['updated']) && $_GET['updated'] == '1'): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-check-circle me-2"></i>
+                    Property updated successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            
             <!-- Stats (match dashboard) -->
             <div class="row g-3 mb-3">
                 <div class="col-sm-6 col-xl-3">
@@ -267,7 +272,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <div class="h6 mb-0">Properties</div>
-                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addPropertyModal"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</button>
+                        <a href="add.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle" id="propertiesTable">
@@ -316,9 +321,10 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
-                                    <td class="text-end">
-                                        <button class="btn btn-sm btn-outline-secondary me-1 btn-edit" data-bs-toggle="modal" data-bs-target="#editPropertyModal"><i class="fa-solid fa-pen"></i></button>
-                                        <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal"><i class="fa-solid fa-trash"></i></button>
+                                    <td class="text-end actions-cell">
+                                        <button class="btn btn-sm btn-outline-info me-1 btn-view" title="View Property"><i class="fa-solid fa-eye"></i></button>
+                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
+                                        <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
@@ -328,142 +334,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 </div>
             </div>
 
-            <!-- Add Property Modal (placeholder) -->
-            <div class="modal fade" id="addPropertyModal" tabindex="-1">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"><i class="fa-solid fa-circle-plus me-2"></i>Add Property</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form method="post" action="#">
-                            <input type="hidden" name="action" value="add">
-                            <div class="modal-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="title" placeholder="Property title">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Listing</label>
-                                        <select class="form-select" name="listing_type">
-                                            <option>Buy</option>
-                                            <option>Rent</option>
-                                            <option>PG/Co-living</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Price</label>
-                                        <input type="number" class="form-control" name="price" step="0.01" placeholder="0">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Location</label>
-                                        <input type="text" class="form-control" name="location" placeholder="City, Area">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Area (sqft)</label>
-                                        <input type="number" class="form-control" name="area" step="0.01">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Config</label>
-                                        <input type="text" class="form-control" name="configuration" placeholder="2BHK">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select" name="category_id">
-                                            <option value="">Select</option>
-                                            <?php $cats = db()->query("SELECT id,name FROM categories ORDER BY name"); while($c=$cats->fetch_assoc()): ?>
-                                                <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
-                                            <?php endwhile; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select" name="status">
-                                            <option>Available</option>
-                                            <option>Sold</option>
-                                            <option>Rented</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Save</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Edit Property Modal (placeholder) -->
-            <div class="modal fade" id="editPropertyModal" tabindex="-1">
-                <div class="modal-dialog modal-lg modal-dialog-scrollable">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title"><i class="fa-solid fa-pen me-2"></i>Edit Property</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <form method="post" action="#">
-                            <input type="hidden" name="action" value="edit">
-                            <input type="hidden" name="id" id="edit-id">
-                            <div class="modal-body">
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Title</label>
-                                        <input type="text" class="form-control" name="title" id="edit-title">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Listing</label>
-                                        <select class="form-select" name="listing_type" id="edit-listing">
-                                            <option>Buy</option>
-                                            <option>Rent</option>
-                                            <option>PG/Co-living</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Price</label>
-                                        <input type="number" class="form-control" name="price" step="0.01" id="edit-price">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Location</label>
-                                        <input type="text" class="form-control" name="location" id="edit-location">
-                                    </div>
-                                    <div class="col-md-2">
-                                        <label class="form-label">Area (sqft)</label>
-                                        <input type="number" class="form-control" name="area" step="0.01" id="edit-area">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Config</label>
-                                        <input type="text" class="form-control" name="configuration" id="edit-config">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Category</label>
-                                        <select class="form-select" name="category_id" id="edit-category">
-                                            <option value="">Select</option>
-                                            <?php $cats2 = db()->query("SELECT id,name FROM categories ORDER BY name"); while($c=$cats2->fetch_assoc()): ?>
-                                                <option value="<?php echo (int)$c['id']; ?>"><?php echo htmlspecialchars($c['name']); ?></option>
-                                            <?php endwhile; ?>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Status</label>
-                                        <select class="form-select" name="status" id="edit-status">
-                                            <option>Available</option>
-                                            <option>Sold</option>
-                                            <option>Rented</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary">Update</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
             <!-- Delete Property Modal (placeholder) -->
             <div class="modal fade" id="deletePropertyModal" tabindex="-1">
@@ -487,24 +358,120 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     </div>
                 </div>
             </div>
+
+            <!-- Property View Drawer -->
+            <div class="drawer" id="propertyDrawer">
+                <div class="drawer-header">
+                    <h6 class="mb-0" id="drawerTitle">Property Details</h6>
+                    <button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+                </div>
+                <div class="drawer-body" id="drawerBody">
+                    <!-- Property details will be loaded here -->
+                </div>
+            </div>
+            <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Wire Edit buttons
-        document.querySelectorAll('.btn-edit').forEach(btn => {
+        // Drawer functions
+        function openDrawer(propertyId) {
+            const drawer = document.getElementById('propertyDrawer');
+            const backdrop = document.getElementById('drawerBackdrop');
+            const drawerBody = document.getElementById('drawerBody');
+            const drawerTitle = document.getElementById('drawerTitle');
+            
+            // Show loading state
+            drawerBody.innerHTML = '<div class="text-center"><i class="fa-solid fa-spinner fa-spin fa-2x"></i><p class="mt-2">Loading property details...</p></div>';
+            drawer.classList.add('open');
+            backdrop.classList.add('open');
+            
+            // Fetch property details
+            fetch(`get_property_details.php?id=${propertyId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        drawerTitle.textContent = data.property.title || 'Property Details';
+                        drawerBody.innerHTML = `
+                            <div class="property-detail">
+                                <div class="label">Category</div>
+                                <div class="value badge bg-light text-dark border">${data.property.category_name || '—'}</div>
+                            </div>
+                            <div class="property-detail">
+                                <div class="label">Listing</div>
+                                <div class="value badge badge-soft">${data.property.listing_type || ''}</div>
+                            </div>
+                            <div class="two-col">
+                                <div class="property-detail">
+                                    <div class="label">Price</div>
+                                    <div class="value price">₹${Number(data.property.price || 0).toLocaleString()}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Area</div>
+                                    <div class="value area">${data.property.area || '—'} sqft</div>
+                                </div>
+                            </div>
+                            <div class="property-detail">
+                                <div class="label">Location</div>
+                                <div class="value location">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                    ${data.property.location || ''} ${data.property.landmark ? '(' + data.property.landmark + ')' : ''}
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="two-col">
+                                <div class="property-detail">
+                                    <div class="label">Config</div>
+                                    <div class="value">${data.property.configuration || '—'}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Furniture</div>
+                                    <div class="value">${data.property.furniture_status || '—'}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Ownership</div>
+                                    <div class="value">${data.property.ownership_type || '—'}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Facing</div>
+                                    <div class="value">${data.property.facing || '—'}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Parking</div>
+                                    <div class="value">${data.property.parking || '—'}</div>
+                                </div>
+                                <div class="property-detail">
+                                    <div class="label">Balcony</div>
+                                    <div class="value">${data.property.balcony || 0}</div>
+                                </div>
+                            </div>
+                            <div class="divider"></div>
+                            <div class="property-detail">
+                                <div class="label">Description</div>
+                                <div class="value">${(data.property.description || '').slice(0, 200)}${(data.property.description || '').length > 200 ? '...' : ''}</div>
+                            </div>
+                        `;
+                    } else {
+                        drawerBody.innerHTML = '<div class="alert alert-danger">Error loading property details</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    drawerBody.innerHTML = '<div class="alert alert-danger">Error loading property details</div>';
+                });
+        }
+        
+        function closeDrawer() {
+            document.getElementById('propertyDrawer').classList.remove('open');
+            document.getElementById('drawerBackdrop').classList.remove('open');
+        }
+
+        // Wire View buttons
+        document.querySelectorAll('.btn-view').forEach(btn => {
             btn.addEventListener('click', function(){
                 const tr = this.closest('tr');
-                document.getElementById('edit-id').value = tr.dataset.id;
-                document.getElementById('edit-title').value = tr.dataset.title || '';
-                document.getElementById('edit-listing').value = tr.dataset.listing || 'Buy';
-                document.getElementById('edit-price').value = tr.dataset.price || '';
-                document.getElementById('edit-location').value = tr.dataset.location || '';
-                document.getElementById('edit-area').value = tr.dataset.area || '';
-                document.getElementById('edit-config').value = tr.dataset.config || '';
-                const cat = document.getElementById('edit-category');
-                if (cat) { cat.value = tr.dataset.categoryId || ''; }
-                document.getElementById('edit-status').value = tr.dataset.status || 'Available';
+                const propertyId = tr.dataset.id;
+                openDrawer(propertyId);
             });
         });
 

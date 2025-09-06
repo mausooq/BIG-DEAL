@@ -161,6 +161,17 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.item-row:hover{ box-shadow:0 6px 18px rgba(0,0,0,.06); }
 		.item-title{ font-weight:600; }
 		.item-meta{ color:#6b7280; font-size:.9rem; }
+		/* Mobile responsiveness */
+		@media (max-width: 991.98px){ /* md breakpoint */
+			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
+			.sidebar.open{ left:12px; }
+			.content{ margin-left:0; }
+			.table{ font-size:.9rem; }
+		}
+		@media (max-width: 575.98px){ /* xs */
+			.toolbar .row-top{ flex-direction:column; align-items:stretch; }
+			.toolbar .row-bottom{ gap:6px; }
+		}
 	</style>
 </head>
 <body>
