@@ -123,12 +123,16 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
+        .table td{ vertical-align: middle; }
+        /* Inner borders (match Locations) */
+        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
+        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
+        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
-        /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
-        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Actions cell (align start like Locations) */
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:12px !important; padding-bottom:12px !important; }
+        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; padding:0; }
         /* Drawer styles */
         .drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
         .drawer.open{ right:0; }
@@ -232,8 +236,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:center; }
-            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+            .actions-cell{ justify-content:flex-start; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:left; }
         }
     </style>
 </head>
@@ -366,8 +370,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <div class="h6 mb-0">Properties</div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table align-middle" id="propertiesTable">
+                    <div class="table-responsive table-wrap">
+                        <table class="table table-hover table-inner" id="propertiesTable">
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -379,7 +383,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     <th>Config</th>
                                     <th>Status</th>
                                     <th>Created</th>
-                                    <th class="text-end">Actions</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -413,7 +417,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
-                                    <td class="text-end actions-cell">
+                                    <td class="actions-cell">
                                         <button class="btn btn-sm btn-outline-info me-1 btn-view" title="View Property"><i class="fa-solid fa-eye"></i></button>
                                         <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
                                         <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property"><i class="fa-solid fa-trash"></i></button>

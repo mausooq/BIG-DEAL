@@ -407,14 +407,19 @@ try {
         /* Table (match dashboard) */
         .table{ --bs-table-bg:transparent; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
+        .table td{ vertical-align: middle; }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        /* Inner-borders table styling to match Locations */
+        .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
+        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
+        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
+        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
         /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
-        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:0; padding-bottom:0; }
+        .actions-cell .btn{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; padding:0; }
         /* Badges */
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Buttons */
@@ -433,8 +438,8 @@ try {
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:center; }
-            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+            .actions-cell{ justify-content:flex-start; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:left; }
         }
 
         .page-header {
@@ -800,8 +805,8 @@ try {
                     </div>
 
                     <?php if ($categories_result && $categories_result->num_rows > 0): ?>
-                        <div class="table-responsive">
-                            <table class="table table-hover" id="categoriesTable">
+                        <div class="table-responsive table-wrap">
+                            <table class="table table-hover table-inner" id="categoriesTable">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -844,25 +849,23 @@ try {
                                             <td>
                                                 <small class="text-muted"><?php echo $category['created_date']; ?></small>
                                             </td>
-                                            <td>
-                                                <div class="action-buttons">
-                                                    <button class="btn btn-outline-secondary btn-sm" 
-                                                            onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['image'] ?? ''); ?>')"
-                                                            title="Edit Category">
-                                                        <i class="fas fa-edit"></i>
+                                            <td class="actions-cell">
+                                                <button class="btn btn-outline-secondary" 
+                                                        onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['image'] ?? ''); ?>')"
+                                                        title="Edit Category">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <?php if ($category['property_count'] == 0): ?>
+                                                    <button class="btn btn-outline-danger" 
+                                                            onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
+                                                            title="Delete Category">
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
-                                                    <?php if ($category['property_count'] == 0): ?>
-                                                        <button class="btn btn-outline-danger btn-sm" 
-                                                                onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
-                                                                title="Delete Category">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    <?php else: ?>
-                                                        <button class="btn btn-outline-secondary btn-sm" disabled title="Cannot delete - category has properties">
-                                                            <i class="fas fa-trash"></i>
-                                                        </button>
-                                                    <?php endif; ?>
-                                                </div>
+                                                <?php else: ?>
+                                                    <button class="btn btn-outline-secondary" disabled title="Cannot delete - category has properties">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endwhile; ?>

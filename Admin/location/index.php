@@ -269,12 +269,27 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         /* Table */
         .table{ --bs-table-bg:transparent; }
-        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .table tbody tr{ border-top:1px solid var(--line); }
+        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; }
         .table tbody tr:hover{ background:#f9fafb; }
+        .table td{ vertical-align: middle; }
+
+        /* Table wrapper */
+        .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
+        /* Inner borders (no outer table border) */
+        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
+        /* Uniform cell padding for consistent row height */
+        .table-inner thead th, .table-inner tbody td{ padding:0 }
+        /* Remove all inner borders for body cells */
+        .table-inner tbody td, .table-inner tbody th{ border:0 !important; }
+        .table-inner tbody tr{ border:0 !important; }
+        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
+        .table-inner tbody tr{ position:static; }
+        .table-inner tbody tr::after{ display:none !important; content:none; }
+
+        /* (removed unused .table-cards styles) */
         /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
-        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:14px !important; padding-bottom:14px !important; }
+        .actions-cell .btn{ width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px;}
         /* Badges */
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Activity list */
@@ -292,7 +307,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:center; }
+            .actions-cell{ justify-content:flex-start; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
         }
     </style>
@@ -386,15 +401,15 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
             </div>
 
             <div class="row g-4">
-                <div class="col-xl-8">
+                <div class="col-12">
                     <div class="card quick-card mb-4">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div class="h6 mb-0">Locations</div>
                                 <span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
                             </div>
-                            <div class="table-responsive">
-                                <table class="table align-middle" id="locationsTable">
+                            <div class="table-responsive table-wrap">
+                                <table class="table table-hover table-inner" id="locationsTable">
                                     <thead>
                                         <tr>
                                             <th>Image</th>
@@ -409,9 +424,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                                                 <tr data-location='<?php echo json_encode($location, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
                                                     <td>
                                                         <?php if ($location['image']): ?>
-                                                            <img src="../../uploads/locations/<?php echo htmlspecialchars($location['image']); ?>" 
-                                                                 alt="<?php echo htmlspecialchars($location['place_name']); ?>" 
-                                                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                            <img src="../../uploads/locations/<?php echo htmlspecialchars($location['image']); ?>" alt="<?php echo htmlspecialchars($location['place_name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                                         <?php else: ?>
                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
                                                                 <i class="fa-solid fa-map-location-dot text-muted"></i>
@@ -453,7 +466,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                     </div>
                 </div>
 
-                <div class="col-xl-4">
+                <!-- <div class="col-xl-4">
                     <div class="card h-100 sticky-side">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-2">
@@ -470,7 +483,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

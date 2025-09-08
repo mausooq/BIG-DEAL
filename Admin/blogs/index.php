@@ -332,7 +332,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			</div>
 
 			<div class="row g-4">
-				<div class="col-xl-8">
+				<div class="col-12">
 					<div class="card quick-card mb-4">
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-3">
@@ -393,7 +393,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 					</div>
 				</div>
 
-				<div class="col-xl-4">
+				<!-- <div class="col-xl-4">
 					<div class="card h-100 sticky-side">
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-2">
@@ -410,7 +410,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 							</div>
 						</div>
 					</div>
-				</div>
+				</div> -->
 			</div>
 		</div>
 	</div>
