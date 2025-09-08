@@ -259,7 +259,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-3">
 								<div class="h6 mb-0">Properties</div>
-								<button class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</button>
+								<a href="../properties/add.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</a>
 							</div>
 							<table class="table align-middle" id="propertiesTable">
 								<thead>

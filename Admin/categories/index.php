@@ -10,6 +10,13 @@ if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== tru
 
 function db() { return getMysqliConnection(); }
 
+function fetchScalar($sql) {
+    $mysqli = db();
+    $res = $mysqli->query($sql);
+    $row = $res ? $res->fetch_row() : [0];
+    return (int)($row[0] ?? 0);
+}
+
 // Handle form submissions
 $message = '';
 $message_type = '';
@@ -266,8 +273,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Fetch categories with property counts
+// Get categories with search
 $mysqli = db();
+$search = $_GET['search'] ?? '';
 
 // Check if created_at column exists, if not use a fallback
 $check_column = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'created_at'");
@@ -277,13 +285,18 @@ $has_created_at = $check_column && $check_column->num_rows > 0;
 $check_image = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'");
 $has_image = $check_image && $check_image->num_rows > 0;
 
+$whereClause = '';
+if ($search) {
+    $whereClause = ' WHERE c.name LIKE "%' . $mysqli->real_escape_string($search) . '%"';
+}
+
 if ($has_created_at && $has_image) {
     $categories_query = "
         SELECT c.id, c.name, c.image,
                COUNT(p.id) as property_count,
                DATE_FORMAT(c.created_at, '%b %d, %Y') as created_date
         FROM categories c 
-        LEFT JOIN properties p ON c.id = p.category_id 
+        LEFT JOIN properties p ON c.id = p.category_id" . $whereClause . "
         GROUP BY c.id, c.name, c.image, c.created_at 
         ORDER BY c.name ASC
     ";
@@ -293,7 +306,7 @@ if ($has_created_at && $has_image) {
                COUNT(p.id) as property_count,
                DATE_FORMAT(c.created_at, '%b %d, %Y') as created_date
         FROM categories c 
-        LEFT JOIN properties p ON c.id = p.category_id 
+        LEFT JOIN properties p ON c.id = p.category_id" . $whereClause . "
         GROUP BY c.id, c.name, c.created_at 
         ORDER BY c.name ASC
     ";
@@ -303,7 +316,7 @@ if ($has_created_at && $has_image) {
                COUNT(p.id) as property_count,
                'N/A' as created_date
         FROM categories c 
-        LEFT JOIN properties p ON c.id = p.category_id 
+        LEFT JOIN properties p ON c.id = p.category_id" . $whereClause . "
         GROUP BY c.id, c.name
         ORDER BY c.name ASC
     ";
@@ -350,23 +363,9 @@ try {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <!-- DataTables CSS -->
-    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
     
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary-color: #8b5cf6;
-            --accent-color: #06b6d4;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f8fafc;
-            --border-color: #e2e8f0;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
             --bg:#F1EFEC;
             --card:#ffffff;
             --muted:#6b7280;
@@ -388,6 +387,17 @@ try {
         .list-group-item:hover{ background:#f8fafc; }
         /* Topbar */
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .text-primary{ color:var(--primary)!important; }
+        .input-group .form-control{ border-color:var(--line); }
+        .input-group-text{ 
+            border-color:var(--line); 
+            background-color: #fff;
+            border-radius: 8px 0 0 8px;
+            padding: 0.5rem 0.75rem;
+        }
+        /* Button consistency */
+        .btn{ border-radius:8px; font-weight:500; }
+        .btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
         /* Cards (match dashboard) */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .content-card.card{ box-shadow:0 8px 24px rgba(0,0,0,.05); border:1px solid #eef2f7; }
@@ -399,11 +409,14 @@ try {
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
-        /* Badges (match dashboard) */
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        /* Toolbar */
+        .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+        .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         /* Actions cell */
         .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
         .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Badges */
+        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
@@ -419,7 +432,7 @@ try {
             .table{ font-size:.9rem; }
         }
         @media (max-width: 575.98px){
-            .page-header .d-flex{ flex-direction:column; align-items:stretch!important; gap:8px; }
+            .toolbar .row-top{ flex-direction:column; align-items:stretch; }
             .actions-cell{ justify-content:center; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
         }
@@ -456,7 +469,7 @@ try {
             margin-bottom: 1rem;
         }
 
-        .stats-icon.primary { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); }
+        .stats-icon.primary { background: var(--primary); }
         .stats-icon.success { background: linear-gradient(135deg, var(--success-color), #059669); }
         .stats-icon.warning { background: linear-gradient(135deg, var(--warning-color), #d97706); }
 
@@ -467,19 +480,6 @@ try {
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border: none;
-            border-radius: 8px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
 
         .table {
             border-radius: 8px;
@@ -521,14 +521,15 @@ try {
 
         .form-control {
             border-radius: 8px;
-            border: 2px solid var(--border-color);
-            padding: 0.75rem 1rem;
+            border: 1px solid var(--line);
+            padding: 0.5rem 0.75rem;
             transition: all 0.2s ease;
+            font-size: 0.875rem;
         }
 
         .form-control:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 29, 42, 0.1);
         }
 
         .alert {
@@ -537,11 +538,6 @@ try {
             padding: 1rem 1.5rem;
         }
 
-        .action-buttons .btn {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            border-radius: 6px;
-        }
 
         .empty-state {
             text-align: center;
@@ -676,7 +672,7 @@ try {
             display: block;
             width: 100%;
             padding: 1rem;
-            background: var(--primary-color);
+            background: var(--primary);
             color: white;
             border-radius: 8px;
             text-align: center;
@@ -688,7 +684,7 @@ try {
         .file-input-label:hover {
             background: var(--primary-600);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 4px 12px rgba(225, 29, 42, 0.3);
         }
 
         .upload-progress {
@@ -703,7 +699,7 @@ try {
 
         .upload-progress-bar {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: var(--primary);
             width: 0%;
             transition: width 0.3s ease;
         }
@@ -714,24 +710,6 @@ try {
     <div class="content">
         <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
         <div class="container-fluid p-4">
-                <!-- Page Header -->
-                <div class="page-header card">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h1 class="h3 mb-0">
-                                <i class="fas fa-tags text-primary me-2"></i>
-                                Categories Management
-                            </h1>
-                            <p class="text-muted mb-0">Manage property categories and classifications</p>
-                        </div>
-                        <div class="col-auto">
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                                <i class="fas fa-plus me-2"></i>Add Category
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Alert Messages -->
                 <?php if (!empty($message)): ?>
                     <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
@@ -741,62 +719,85 @@ try {
                     </div>
                 <?php endif; ?>
 
-                <!-- Stats Cards (match dashboard) -->
-                <div class="row g-3 mb-3">
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="card card-stat">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Categories</div>
-                                    <div class="h4 mb-0"><?php echo $total_categories; ?></div>
-                                </div>
-                                <div class="text-warning"><i class="fa-solid fa-layer-group fa-lg"></i></div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Categories</div>
+                                <div class="h4 mb-0"><?php echo $total_categories; ?></div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="card card-stat">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Properties</div>
-                                    <div class="h4 mb-0"><?php echo $total_properties; ?></div>
-                                </div>
-                                <div class="text-primary"><i class="fa-solid fa-building fa-lg"></i></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-xl-4">
-                        <div class="card card-stat">
-                            <div class="card-body d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="text-muted small">Active Categories</div>
-                                    <div class="h4 mb-0"><?php echo $categories_with_properties; ?></div>
-                                </div>
-                                <div class="text-success"><i class="fa-solid fa-chart-pie fa-lg"></i></div>
-                            </div>
+                            <div class="text-warning"><i class="fa-solid fa-layer-group fa-lg"></i></div>
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Properties</div>
+                                <div class="h4 mb-0"><?php echo $total_properties; ?></div>
+                            </div>
+                            <div class="text-primary"><i class="fa-solid fa-building fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Active Categories</div>
+                                <div class="h4 mb-0"><?php echo $categories_with_properties; ?></div>
+                            </div>
+                            <div class="text-success"><i class="fa-solid fa-chart-pie fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Enquiries</div>
+                                <div class="h4 mb-0"><?php echo fetchScalar('SELECT COUNT(*) FROM enquiries'); ?></div>
+                            </div>
+                            <div class="text-info"><i class="fa-regular fa-envelope fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search toolbar -->
+            <div class="toolbar mb-4">
+                <div class="row-top">
+                    <form class="d-flex flex-grow-1" method="get">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" class="form-control" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search categories by name">
+                        </div>
+                        <button class="btn btn-primary ms-2" type="submit">Search</button>
+                        <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
+                    </form>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                        <i class="fa-solid fa-circle-plus me-1"></i>Add Category
+                    </button>
+                </div>
+            </div>
 
                 <!-- Categories Table -->
                 <div class="content-card card p-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 class="mb-0">All Categories</h4>
-                    <div class="d-flex gap-2">
-                        <div class="input-group" style="max-width: 300px;">
-                            <input type="text" class="form-control" id="searchInput" placeholder="Search categories...">
-                            <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
-                                <i class="fas fa-times"></i>
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">All Categories</h4>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
+                                <i class="fas fa-sync-alt me-1"></i>Refresh
+                            </button>
+                            <button class="btn btn-outline-info btn-sm" onclick="exportCategories()">
+                                <i class="fas fa-download me-1"></i>Export
                             </button>
                         </div>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
-                            <i class="fas fa-sync-alt me-1"></i>Refresh
-                        </button>
-                        <button class="btn btn-outline-info btn-sm" onclick="exportCategories()">
-                            <i class="fas fa-download me-1"></i>Export
-                        </button>
                     </div>
-                </div>
 
                     <?php if ($categories_result && $categories_result->num_rows > 0): ?>
                         <div class="table-responsive">
@@ -1048,23 +1049,8 @@ try {
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
     
     <script>
-        // Initialize DataTable
-        $(document).ready(function() {
-            $('#categoriesTable').DataTable({
-                pageLength: 25,
-                order: [[1, 'asc']], // Sort by category name
-                responsive: true,
-                language: {
-                    search: "Search categories:",
-                    lengthMenu: "Show _MENU_ categories per page",
-                    info: "Showing _START_ to _END_ of _TOTAL_ categories"
-                }
-            });
-        });
 
         // Edit category function
         function editCategory(id, name, image) {
@@ -1135,33 +1121,9 @@ try {
             window.URL.revokeObjectURL(url);
         }
 
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const table = document.getElementById('categoriesTable');
-            if (!table) return;
-            
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                const name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
-                if (name.includes(searchTerm)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-
-        // Clear search function
+        // Clear search function (now redirects to reset URL)
         function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            const table = document.getElementById('categoriesTable');
-            if (!table) return;
-            
-            const rows = table.querySelectorAll('tbody tr');
-            rows.forEach(row => {
-                row.style.display = '';
-            });
+            window.location.href = 'index.php';
         }
 
         // Auto-hide alerts after 5 seconds

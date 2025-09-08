@@ -201,6 +201,35 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             .drawer-image-gallery{ gap:6px; }
             .drawer-image-thumb{ width:70px; height:70px; }
         }
+        /* Toolbar */
+        .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+        .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        .text-primary{ color:var(--primary)!important; }
+        .input-group .form-control{ border-color:var(--line); }
+        .input-group-text{ 
+            border-color:var(--line); 
+            background-color: #fff;
+            border-radius: 8px 0 0 8px;
+            padding: 0.5rem 0.75rem;
+        }
+        /* Button consistency */
+        .btn{ border-radius:8px; font-weight:500; }
+        .btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
+        .btn-primary{ background-color: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover, .btn-primary:focus{ background-color: var(--primary-600); border-color: var(--primary-600); }
+        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+        .form-control {
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            padding: 0.5rem 0.75rem;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(225, 29, 42, 0.1);
+        }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
             .actions-cell{ justify-content:center; }
@@ -267,6 +296,23 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 </div>
             </div>
 
+            <!-- Search toolbar -->
+            <div class="toolbar mb-4">
+                <div class="row-top">
+                    <form class="d-flex flex-grow-1" method="get">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title']); ?>" placeholder="Search properties by title">
+                        </div>
+                        <button class="btn btn-primary btn-sm ms-2" type="submit">Search</button>
+                        <a class="btn btn-outline-secondary btn-sm ms-2" href="index.php">Reset</a>
+                    </form>
+                    <a href="add.php" class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-circle-plus me-1"></i>Add Property
+                    </a>
+                </div>
+            </div>
+
             <!-- Filter toolbar -->
             <div class="card mb-3">
                 <div class="card-body">
@@ -307,8 +353,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                             </select>
                         </div>
                         <div class="col-12 d-flex gap-2 justify-content-end">
-                            <a class="btn btn-outline-secondary" href="index.php">Reset</a>
-                            <button class="btn btn-primary" type="submit">Search</button>
+                            <button class="btn btn-primary btn-sm" type="submit">Search</button>
+                            <a class="btn btn-outline-secondary btn-sm" href="index.php">Reset</a>
                         </div>
                     </form>
                 </div>
@@ -319,7 +365,6 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between mb-3">
                         <div class="h6 mb-0">Properties</div>
-                        <a href="add.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</a>
                     </div>
                     <div class="table-responsive">
                         <table class="table align-middle" id="propertiesTable">

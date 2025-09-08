@@ -116,14 +116,28 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
         .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .text-primary{ color:var(--primary)!important; }
+        .input-group .form-control{ border-color:var(--line); }
+        .input-group-text{ border-color:var(--line); }
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
-        /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
-        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Toolbar */
+        .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+        .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        .toolbar .row-bottom{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .toolbar .chip{ padding:6px 12px; border:1px solid var(--line); border-radius:9999px; background:#fff; color:#374151; text-decoration:none; font-size:.875rem; }
+        .toolbar .chip:hover{ border-color:#d1d5db; }
+        .toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+        .toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
+         /* Actions cell */
+         .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
+         .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+         /* Buttons */
+         .btn-primary{ background:var(--primary); border-color:var(--primary); }
+         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         /* Mobile responsiveness */
         @media (max-width: 991.98px){
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
@@ -132,6 +146,8 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
             .table{ font-size:.9rem; }
         }
         @media (max-width: 575.98px){
+            .toolbar .row-top{ flex-direction:column; align-items:stretch; }
+            .toolbar .row-bottom{ gap:6px; }
             .actions-cell{ justify-content:center; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
         }
@@ -186,27 +202,23 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                 </div>
             </div>
 
-            <div class="card mb-3">
-                <div class="card-body">
-                    <form class="row g-2" method="get">
-                        <div class="col-md-6">
-                            <label class="form-label small text-muted">Search</label>
-                            <input type="text" class="form-control" name="q" value="<?php echo htmlspecialchars($filters['q']); ?>" placeholder="Name, email, phone or property">
+            <!-- Search toolbar -->
+            <div class="toolbar mb-4">
+                <div class="row-top">
+                    <form class="d-flex flex-grow-1" method="get">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" class="form-control" name="q" value="<?php echo htmlspecialchars($filters['q']); ?>" placeholder="Search enquiries by name, email, phone or property">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Status</label>
-                            <select class="form-select" name="status">
-                                <option value="">Any</option>
-                                <?php foreach(['New','In Progress','Closed'] as $s): $sel = ($filters['status']===$s)?'selected':''; ?>
-                                    <option value="<?php echo $s; ?>" <?php echo $sel; ?>><?php echo $s; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-12 d-flex gap-2 justify-content-end">
-                            <a class="btn btn-outline-secondary" href="index.php">Reset</a>
-                            <button class="btn btn-primary" type="submit">Search</button>
-                        </div>
+                        <button class="btn btn-primary ms-2" type="submit">Search</button>
+                        <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
+                </div>
+                <div class="row-bottom">
+                    <?php foreach(['New','In Progress','Closed'] as $status): ?>
+                        <?php $isActive = ($filters['status'] ?? '') === $status; ?>
+                        <a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?status=<?php echo urlencode($status); ?>&q=<?php echo urlencode($filters['q']); ?>"><?php echo $status; ?></a>
+                    <?php endforeach; ?>
                 </div>
             </div>
 
