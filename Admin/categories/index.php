@@ -33,16 +33,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $message = "Category '$name' already exists!";
                         $message_type = 'warning';
                     } else {
+                        // Handle image upload
+                        $image_path = null;
+                        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                            $upload_dir = '../../uploads/categories/';
+                            if (!is_dir($upload_dir)) {
+                                mkdir($upload_dir, 0755, true);
+                            }
+                            
+                            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                            
+                            if (in_array($file_extension, $allowed_extensions)) {
+                                $new_filename = 'category_' . time() . '_' . uniqid() . '.' . $file_extension;
+                                $upload_path = $upload_dir . $new_filename;
+                                
+                                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                                    $image_path = $new_filename; // Store only filename, not full path
+                                } else {
+                                    $message = "Error uploading image!";
+                                    $message_type = 'danger';
+                                    break;
+                                }
+                            } else {
+                                $message = "Invalid file type! Please upload JPG, PNG, GIF, or WebP images only.";
+                                $message_type = 'danger';
+                                break;
+                            }
+                        }
+                        
                         // Insert with timestamp columns if they exist
                         $check_column = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'created_at'");
                         $has_created_at = $check_column && $check_column->num_rows > 0;
+                        $check_image = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'");
+                        $has_image = $check_image && $check_image->num_rows > 0;
                         
-                        if ($has_created_at) {
+                        if ($has_created_at && $has_image) {
+                            $stmt = $mysqli->prepare("INSERT INTO categories (name, image, created_at, updated_at) VALUES (?, ?, NOW(), NOW())");
+                            $stmt->bind_param("ss", $name, $image_path);
+                        } elseif ($has_created_at) {
                             $stmt = $mysqli->prepare("INSERT INTO categories (name, created_at, updated_at) VALUES (?, NOW(), NOW())");
+                            $stmt->bind_param("s", $name);
+                        } elseif ($has_image) {
+                            $stmt = $mysqli->prepare("INSERT INTO categories (name, image) VALUES (?, ?)");
+                            $stmt->bind_param("ss", $name, $image_path);
                         } else {
                             $stmt = $mysqli->prepare("INSERT INTO categories (name) VALUES (?)");
+                            $stmt->bind_param("s", $name);
                         }
-                        $stmt->bind_param("s", $name);
                         
                         if ($stmt->execute()) {
                             $message = "Category '$name' added successfully!";
@@ -56,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $log_stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)");
                             }
                             $action = "Added new category";
-                            $details = "Category: $name";
+                            $details = "Category: $name" . ($image_path ? " with image" : "");
                             if ($admin_id === null) {
                                 $log_stmt->bind_param("ss", $action, $details);
                             } else {
@@ -92,16 +130,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $message = "Category name '$name' already exists!";
                         $message_type = 'warning';
                     } else {
+                        // Handle image upload
+                        $image_path = null;
+                        $update_image = false;
+                        
+                        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                            $upload_dir = '../../uploads/categories/';
+                            if (!is_dir($upload_dir)) {
+                                mkdir($upload_dir, 0755, true);
+                            }
+                            
+                            $file_extension = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+                            $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                            
+                            if (in_array($file_extension, $allowed_extensions)) {
+                                $new_filename = 'category_' . time() . '_' . uniqid() . '.' . $file_extension;
+                                $upload_path = $upload_dir . $new_filename;
+                                
+                                if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_path)) {
+                                    $image_path = $new_filename; // Store only filename, not full path
+                                    $update_image = true;
+                                } else {
+                                    $message = "Error uploading image!";
+                                    $message_type = 'danger';
+                                    break;
+                                }
+                            } else {
+                                $message = "Invalid file type! Please upload JPG, PNG, GIF, or WebP images only.";
+                                $message_type = 'danger';
+                                break;
+                            }
+                        }
+                        
                         // Update with timestamp if the column exists
                         $check_column = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'updated_at'");
                         $has_updated_at = $check_column && $check_column->num_rows > 0;
+                        $check_image = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'");
+                        $has_image = $check_image && $check_image->num_rows > 0;
                         
-                        if ($has_updated_at) {
+                        if ($has_updated_at && $has_image && $update_image) {
+                            $stmt = $mysqli->prepare("UPDATE categories SET name = ?, image = ?, updated_at = NOW() WHERE id = ?");
+                            $stmt->bind_param("ssi", $name, $image_path, $id);
+                        } elseif ($has_updated_at && $has_image) {
                             $stmt = $mysqli->prepare("UPDATE categories SET name = ?, updated_at = NOW() WHERE id = ?");
+                            $stmt->bind_param("si", $name, $id);
+                        } elseif ($has_updated_at) {
+                            $stmt = $mysqli->prepare("UPDATE categories SET name = ?, updated_at = NOW() WHERE id = ?");
+                            $stmt->bind_param("si", $name, $id);
                         } else {
                             $stmt = $mysqli->prepare("UPDATE categories SET name = ? WHERE id = ?");
+                            $stmt->bind_param("si", $name, $id);
                         }
-                        $stmt->bind_param("si", $name, $id);
                         
                         if ($stmt->execute()) {
                             $message = "Category updated successfully!";
@@ -115,7 +194,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $log_stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details) VALUES (?, ?, ?)");
                             }
                             $action = "Updated category";
-                            $details = "Category ID: $id, New name: $name";
+                            $details = "Category ID: $id, New name: $name" . ($update_image ? " with new image" : "");
                             if ($admin_id === null) {
                                 $log_stmt->bind_param("ss", $action, $details);
                             } else {
@@ -194,7 +273,21 @@ $mysqli = db();
 $check_column = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'created_at'");
 $has_created_at = $check_column && $check_column->num_rows > 0;
 
-if ($has_created_at) {
+// Check if image column exists
+$check_image = $mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'");
+$has_image = $check_image && $check_image->num_rows > 0;
+
+if ($has_created_at && $has_image) {
+    $categories_query = "
+        SELECT c.id, c.name, c.image,
+               COUNT(p.id) as property_count,
+               DATE_FORMAT(c.created_at, '%b %d, %Y') as created_date
+        FROM categories c 
+        LEFT JOIN properties p ON c.id = p.category_id 
+        GROUP BY c.id, c.name, c.image, c.created_at 
+        ORDER BY c.name ASC
+    ";
+} elseif ($has_created_at) {
     $categories_query = "
         SELECT c.id, c.name, 
                COUNT(p.id) as property_count,
@@ -461,6 +554,159 @@ try {
             margin-bottom: 1rem;
             opacity: 0.5;
         }
+
+        /* Image Upload Styles */
+        .image-upload-container {
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .image-upload-container:hover {
+            border-color: var(--primary-color);
+            background: #f8f9ff;
+        }
+
+        .image-upload-container.dragover {
+            border-color: var(--primary-color);
+            background: #f0f4ff;
+            transform: scale(1.02);
+        }
+
+        .image-upload-icon {
+            font-size: 2.5rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+        }
+
+        .image-upload-text {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .image-upload-subtext {
+            color: var(--muted);
+            font-size: 0.875rem;
+        }
+
+        .image-preview-container {
+            position: relative;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .image-preview:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .image-remove-btn:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .current-image-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .current-image-label {
+            font-size: 0.875rem;
+            color: var(--muted);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .current-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: block;
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-input-label:hover {
+            background: var(--primary-600);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .upload-progress {
+            width: 100%;
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .upload-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
     </style>
 </head>
 <body>
@@ -558,6 +804,7 @@ try {
                                 <thead>
                                     <tr>
                                         <th>ID</th>
+                                        <th>Image</th>
                                         <th>Category Name</th>
                                         <th>Properties</th>
                                         <th>Created Date</th>
@@ -569,6 +816,19 @@ try {
                                         <tr>
                                             <td>
                                                 <span class="badge bg-secondary">#<?php echo $category['id']; ?></span>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($category['image'])): ?>
+                                                    <img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" 
+                                                         alt="<?php echo htmlspecialchars($category['name']); ?>" 
+                                                         class="category-image" 
+                                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <?php else: ?>
+                                                    <div class="category-placeholder" 
+                                                         style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                <?php endif; ?>
                                             </td>
                                             <td>
                                                 <strong><?php echo htmlspecialchars($category['name']); ?></strong>
@@ -586,7 +846,7 @@ try {
                                             <td>
                                                 <div class="action-buttons">
                                                     <button class="btn btn-outline-secondary btn-sm" 
-                                                            onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
+                                                            onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['image'] ?? ''); ?>')"
                                                             title="Edit Category">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
@@ -633,7 +893,7 @@ try {
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="add">
                         <div class="mb-3">
@@ -645,6 +905,32 @@ try {
                             </div>
                             <div class="valid-feedback">
                                 Category name looks good!
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category Image</label>
+                            <div class="image-upload-container" id="addImageUploadContainer">
+                                <div class="image-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="image-upload-text">Click to upload or drag and drop</div>
+                                <div class="image-upload-subtext">JPG, PNG, GIF, or WebP (max 5MB)</div>
+                                <div class="file-input-wrapper">
+                                    <input type="file" class="file-input" id="categoryImage" name="image" 
+                                           accept="image/*" onchange="previewImage(this, 'addImagePreview')">
+                                    <label for="categoryImage" class="file-input-label">
+                                        <i class="fas fa-plus me-2"></i>Choose Image
+                                    </label>
+                                </div>
+                                <div class="upload-progress" id="addUploadProgress">
+                                    <div class="upload-progress-bar" id="addUploadProgressBar"></div>
+                                </div>
+                            </div>
+                            <div id="addImagePreview" class="image-preview-container" style="display: none;">
+                                <img id="addImagePreviewImg" src="" alt="Preview" class="image-preview">
+                                <button type="button" class="image-remove-btn" onclick="removeImage('categoryImage', 'addImagePreview')">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -669,7 +955,7 @@ try {
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST">
+                <form method="POST" enctype="multipart/form-data">
                     <div class="modal-body">
                         <input type="hidden" name="action" value="edit">
                         <input type="hidden" name="id" id="editCategoryId">
@@ -681,6 +967,42 @@ try {
                             </div>
                             <div class="valid-feedback">
                                 Category name looks good!
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Category Image</label>
+                            
+                            <!-- Current Image Display -->
+                            <div id="editCurrentImage" class="current-image-container" style="display: none;">
+                                <div class="current-image-label">Current Image</div>
+                                <img id="editCurrentImageImg" src="" alt="Current Image" class="current-image">
+                            </div>
+                            
+                            <!-- New Image Upload -->
+                            <div class="image-upload-container" id="editImageUploadContainer">
+                                <div class="image-upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="image-upload-text">Click to upload new image or drag and drop</div>
+                                <div class="image-upload-subtext">JPG, PNG, GIF, or WebP (max 5MB). Leave empty to keep current image.</div>
+                                <div class="file-input-wrapper">
+                                    <input type="file" class="file-input" id="editCategoryImage" name="image" 
+                                           accept="image/*" onchange="previewImage(this, 'editImagePreview')">
+                                    <label for="editCategoryImage" class="file-input-label">
+                                        <i class="fas fa-upload me-2"></i>Choose New Image
+                                    </label>
+                                </div>
+                                <div class="upload-progress" id="editUploadProgress">
+                                    <div class="upload-progress-bar" id="editUploadProgressBar"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- New Image Preview -->
+                            <div id="editImagePreview" class="image-preview-container" style="display: none;">
+                                <img id="editImagePreviewImg" src="" alt="New Image Preview" class="image-preview">
+                                <button type="button" class="image-remove-btn" onclick="removeImage('editCategoryImage', 'editImagePreview')">
+                                    <i class="fas fa-times"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -745,9 +1067,32 @@ try {
         });
 
         // Edit category function
-        function editCategory(id, name) {
+        function editCategory(id, name, image) {
             document.getElementById('editCategoryId').value = id;
             document.getElementById('editCategoryName').value = name;
+            
+            // Handle image preview
+            const currentImageDiv = document.getElementById('editCurrentImage');
+            const currentImageImg = document.getElementById('editCurrentImageImg');
+            const previewDiv = document.getElementById('editImagePreview');
+            const previewImg = document.getElementById('editImagePreviewImg');
+            const uploadContainer = document.getElementById('editImageUploadContainer');
+            
+            if (image && image.trim() !== '') {
+                currentImageImg.src = '../../uploads/categories/' + image;
+                currentImageDiv.style.display = 'block';
+            } else {
+                currentImageDiv.style.display = 'none';
+            }
+            
+            // Clear new image preview and reset upload container
+            previewImg.src = '';
+            previewDiv.style.display = 'none';
+            uploadContainer.style.display = 'block';
+            
+            // Reset file input
+            document.getElementById('editCategoryImage').value = '';
+            
             new bootstrap.Modal(document.getElementById('editCategoryModal')).show();
         }
 
@@ -879,6 +1224,115 @@ try {
                 }
             });
         });
+
+        // Image preview function
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            const previewImg = document.getElementById(previewId + 'Img');
+            const uploadContainer = input.closest('.image-upload-container');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                    uploadContainer.style.display = 'none';
+                };
+                
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.style.display = 'none';
+                uploadContainer.style.display = 'block';
+            }
+        }
+
+        // Remove image function
+        function removeImage(inputId, previewId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const uploadContainer = input.closest('.image-upload-container');
+            
+            input.value = '';
+            preview.style.display = 'none';
+            uploadContainer.style.display = 'block';
+        }
+
+        // File size validation and drag & drop
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', function() {
+                validateAndPreviewFile(this);
+            });
+        });
+
+        // Add drag and drop functionality
+        document.querySelectorAll('.image-upload-container').forEach(container => {
+            container.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            container.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            container.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    const input = this.querySelector('input[type="file"]');
+                    input.files = files;
+                    validateAndPreviewFile(input);
+                }
+            });
+        });
+
+        // File validation and preview function
+        function validateAndPreviewFile(input) {
+            const file = input.files[0];
+            if (file) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                if (file.size > maxSize) {
+                    showAlert('File size must be less than 5MB', 'warning');
+                    input.value = '';
+                    return;
+                }
+                
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+                if (!allowedTypes.includes(file.type)) {
+                    showAlert('Please select a valid image file (JPG, PNG, GIF, or WebP)', 'warning');
+                    input.value = '';
+                    return;
+                }
+                
+                // Show preview
+                const previewId = input.id === 'categoryImage' ? 'addImagePreview' : 'editImagePreview';
+                previewImage(input, previewId);
+            }
+        }
+
+        // Show alert function
+        function showAlert(message, type) {
+            const alertContainer = document.querySelector('.container-fluid');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : (type === 'warning' ? 'exclamation-triangle' : 'exclamation-circle')} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            alertContainer.insertBefore(alertDiv, alertContainer.firstChild);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                const bsAlert = new bootstrap.Alert(alertDiv);
+                bsAlert.close();
+            }, 5000);
+        }
     </script>
 </body>
 </html>
+

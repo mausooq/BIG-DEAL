@@ -46,6 +46,7 @@ try {
         'id' => $property['id'],
         'title' => $property['title'],
         'description' => $property['description'],
+        'map_embed_link' => $property['map_embed_link'],
         'listing_type' => $property['listing_type'],
         'price' => $property['price'],
         'location' => $property['location'],

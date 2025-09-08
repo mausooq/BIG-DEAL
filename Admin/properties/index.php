@@ -621,6 +621,29 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                         <div class="value">${escapeHtml(property.description).substring(0, 300)}${property.description.length > 300 ? '...' : ''}</div>
                     </div>
                 ` : ''}
+                ${property.map_embed_link ? `
+                    <div class="divider"></div>
+                    <div class="property-detail">
+                        <div class="label">Location Map</div>
+                        <div class="value">
+                            <div class="drawer-map-container" style="position: relative; width: 100%; height: 200px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 8px;">
+                                <iframe 
+                                    src="${escapeHtml(property.map_embed_link)}" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style="border:0; border-radius: 8px;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                            <small class="text-muted mt-2 d-block">
+                                <i class="fa-solid fa-info-circle me-1"></i>
+                                Interactive map showing property location
+                            </small>
+                        </div>
+                    </div>
+                ` : ''}
                 <div class="divider"></div>
                 <div class="property-detail">
                     <div class="label">Property ID</div>
@@ -635,6 +658,20 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 <div class="property-detail">
                     <div class="label">Created</div>
                     <div class="value">${formatDate(property.created_at)}</div>
+                </div>
+                <div class="divider"></div>
+                <div class="property-detail">
+                    <div class="label">Actions</div>
+                    <div class="value">
+                        <div class="d-flex gap-2 flex-wrap">
+                            <a href="view.php?id=${property.id}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                <i class="fa-solid fa-eye me-1"></i>View Details
+                            </a>
+                            <a href="edit.php?id=${property.id}" class="btn btn-outline-success btn-sm" target="_blank">
+                                <i class="fa-solid fa-pen me-1"></i>Edit Property
+                            </a>
+                        </div>
+                    </div>
                 </div>
             `;
             

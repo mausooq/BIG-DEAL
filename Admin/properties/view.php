@@ -179,6 +179,34 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                     </div>
                     <?php endif; ?>
 
+                    <!-- Property Location Map -->
+                    <?php if (!empty($property['map_embed_link'])): ?>
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="section-header">
+                                <h5 class="section-title"><i class="fa-solid fa-map-location-dot me-2"></i>Location Map</h5>
+                            </div>
+                            <div class="map-container" style="position: relative; width: 100%; height: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                                <iframe 
+                                    src="<?php echo htmlspecialchars($property['map_embed_link']); ?>" 
+                                    width="100%" 
+                                    height="100%" 
+                                    style="border:0; border-radius: 12px;" 
+                                    allowfullscreen="" 
+                                    loading="lazy" 
+                                    referrerpolicy="no-referrer-when-downgrade">
+                                </iframe>
+                            </div>
+                            <div class="mt-3">
+                                <small class="text-muted">
+                                    <i class="fa-solid fa-info-circle me-1"></i>
+                                    Interactive map showing the property location. You can zoom, pan, and explore the surrounding area.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Property Details -->
                     <div class="card mb-4">
                         <div class="card-body">

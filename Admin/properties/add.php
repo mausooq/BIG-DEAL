@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $parking = $_POST['parking'] ?? null;
         $balcony = (int)($_POST['balcony'] ?? 0);
         $status = $_POST['status'] ?? 'Available';
+        $map_embed_link = trim($_POST['map_embed_link'] ?? '');
 
         // Validation
         if ($title === '') { throw new Exception('Title is required'); }
@@ -54,9 +55,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($area === null || $area <= 0) { throw new Exception('Valid area is required'); }
 
         // Insert property
-        $sql = "INSERT INTO properties (title, description, listing_type, price, location, landmark, area, configuration, category_id, furniture_status, ownership_type, facing, parking, balcony, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO properties (title, description, listing_type, price, location, landmark, area, configuration, category_id, furniture_status, ownership_type, facing, parking, balcony, status, map_embed_link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param('sssdsisssssssis', $title, $description, $listing_type, $price, $location, $landmark, $area, $configuration, $category_id, $furniture_status, $ownership_type, $facing, $parking, $balcony, $status);
+        $stmt->bind_param('sssdsisssssssiss', $title, $description, $listing_type, $price, $location, $landmark, $area, $configuration, $category_id, $furniture_status, $ownership_type, $facing, $parking, $balcony, $status, $map_embed_link);
         
         if (!$stmt->execute()) { 
             throw new Exception('Failed to add property: ' . $mysqli->error); 
@@ -240,6 +241,15 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                                     <div class="col-12">
                                         <label class="form-label">Description</label>
                                         <textarea class="form-control" name="description" rows="4" placeholder="Describe the property features, amenities, and unique selling points..."></textarea>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <label class="form-label">Map Embed Link</label>
+                                        <input type="url" class="form-control" name="map_embed_link" placeholder="Paste Google Maps embed URL here (e.g., https://www.google.com/maps/embed?pb=...)">
+                                        <div class="form-text">
+                                            <i class="fa-solid fa-info-circle me-1"></i>
+                                            To get the embed link: Go to Google Maps → Search for your property → Click Share → Embed a map → Copy the iframe src URL
+                                        </div>
                                     </div>
                                     
                                     <div class="col-md-6">

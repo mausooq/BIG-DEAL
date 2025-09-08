@@ -25,10 +25,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$name = trim($_POST['name'] ?? '');
 		$feedback = trim($_POST['feedback'] ?? '');
 		$rating = (int)($_POST['rating'] ?? 0);
+		$profile_image = '';
+		$home_image = '';
+		
+		// Handle profile image upload
+		if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+			$upload_dir = '../../uploads/testimonials/';
+			if (!is_dir($upload_dir)) {
+				mkdir($upload_dir, 0777, true);
+			}
+			$file_extension = pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION);
+			$profile_image = 'testimonial_profile_' . time() . '_' . uniqid() . '.' . $file_extension;
+			$upload_path = $upload_dir . $profile_image;
+			if (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_path)) {
+				$_SESSION['error_message'] = 'Failed to upload profile image.';
+				header('Location: index.php');
+				exit();
+			}
+		}
+		
+		// Handle home image upload
+		if (isset($_FILES['home_image']) && $_FILES['home_image']['error'] === UPLOAD_ERR_OK) {
+			$upload_dir = '../../uploads/testimonials/';
+			if (!is_dir($upload_dir)) {
+				mkdir($upload_dir, 0777, true);
+			}
+			$file_extension = pathinfo($_FILES['home_image']['name'], PATHINFO_EXTENSION);
+			$home_image = 'testimonial_home_' . time() . '_' . uniqid() . '.' . $file_extension;
+			$upload_path = $upload_dir . $home_image;
+			if (!move_uploaded_file($_FILES['home_image']['tmp_name'], $upload_path)) {
+				$_SESSION['error_message'] = 'Failed to upload home image.';
+				header('Location: index.php');
+				exit();
+			}
+		}
+		
 		if ($name && $feedback && $rating >= 1 && $rating <= 5) {
-			$stmt = $mysqli->prepare('INSERT INTO testimonials (name, feedback, rating) VALUES (?,?,?)');
+			$stmt = $mysqli->prepare('INSERT INTO testimonials (name, feedback, rating, profile_image, home_image) VALUES (?,?,?,?,?)');
 			if ($stmt) {
-				$stmt->bind_param('ssi', $name, $feedback, $rating);
+				$stmt->bind_param('ssiss', $name, $feedback, $rating, $profile_image, $home_image);
 				if ($stmt->execute()) {
 					$_SESSION['success_message'] = 'Testimonial added successfully!';
 				} else {
@@ -46,10 +81,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$name = trim($_POST['name'] ?? '');
 		$feedback = trim($_POST['feedback'] ?? '');
 		$rating = (int)($_POST['rating'] ?? 0);
+		$profile_image = $_POST['current_profile_image'] ?? '';
+		$home_image = $_POST['current_home_image'] ?? '';
+		
+		// Handle profile image upload
+		if (isset($_FILES['profile_image']) && $_FILES['profile_image']['error'] === UPLOAD_ERR_OK) {
+			$upload_dir = '../../uploads/testimonials/';
+			if (!is_dir($upload_dir)) {
+				mkdir($upload_dir, 0777, true);
+			}
+			$file_extension = pathinfo($_FILES['profile_image']['name'], PATHINFO_EXTENSION);
+			$profile_image = 'testimonial_profile_' . time() . '_' . uniqid() . '.' . $file_extension;
+			$upload_path = $upload_dir . $profile_image;
+			if (!move_uploaded_file($_FILES['profile_image']['tmp_name'], $upload_path)) {
+				$_SESSION['error_message'] = 'Failed to upload profile image.';
+				header('Location: index.php');
+				exit();
+			}
+		}
+		
+		// Handle home image upload
+		if (isset($_FILES['home_image']) && $_FILES['home_image']['error'] === UPLOAD_ERR_OK) {
+			$upload_dir = '../../uploads/testimonials/';
+			if (!is_dir($upload_dir)) {
+				mkdir($upload_dir, 0777, true);
+			}
+			$file_extension = pathinfo($_FILES['home_image']['name'], PATHINFO_EXTENSION);
+			$home_image = 'testimonial_home_' . time() . '_' . uniqid() . '.' . $file_extension;
+			$upload_path = $upload_dir . $home_image;
+			if (!move_uploaded_file($_FILES['home_image']['tmp_name'], $upload_path)) {
+				$_SESSION['error_message'] = 'Failed to upload home image.';
+				header('Location: index.php');
+				exit();
+			}
+		}
+		
 		if ($id && $name && $feedback && $rating >= 1 && $rating <= 5) {
-			$stmt = $mysqli->prepare('UPDATE testimonials SET name = ?, feedback = ?, rating = ? WHERE id = ?');
+			$stmt = $mysqli->prepare('UPDATE testimonials SET name = ?, feedback = ?, rating = ?, profile_image = ?, home_image = ? WHERE id = ?');
 			if ($stmt) {
-				$stmt->bind_param('ssii', $name, $feedback, $rating, $id);
+				$stmt->bind_param('ssissi', $name, $feedback, $rating, $profile_image, $home_image, $id);
 				if ($stmt->execute()) {
 					if ($stmt->affected_rows > 0) {
 						$_SESSION['success_message'] = 'Testimonial updated successfully!';
@@ -119,7 +189,7 @@ if ($search) {
 	$params[] = $searchParam2;
 }
 
-$sql = 'SELECT id, name, feedback, rating, created_at FROM testimonials' . $whereClause . ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+$sql = 'SELECT id, name, feedback, rating, profile_image, home_image, created_at FROM testimonials' . $whereClause . ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
@@ -127,7 +197,7 @@ $params[] = $offset;
 $stmt = $mysqli->prepare($sql);
 if ($stmt && $types) { $stmt->bind_param($types, ...$params); }
 $stmt && $stmt->execute();
-$testimonials = $stmt ? $stmt->get_result() : $mysqli->query('SELECT id, name, feedback, rating, created_at FROM testimonials ORDER BY created_at DESC LIMIT 10');
+$testimonials = $stmt ? $stmt->get_result() : $mysqli->query('SELECT id, name, feedback, rating, profile_image, home_image, created_at FROM testimonials ORDER BY created_at DESC LIMIT 10');
 
 // Count
 $countSql = 'SELECT COUNT(*) FROM testimonials' . $whereClause;
@@ -314,6 +384,8 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 											<th>Name</th>
 											<th>Feedback</th>
 											<th>Rating</th>
+											<th>Profile Image</th>
+											<th>Home Image</th>
 											<th>Created</th>
 											<th>Actions</th>
 										</tr>
@@ -324,6 +396,20 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 											<td class="fw-semibold"><?php echo htmlspecialchars($row['name']); ?></td>
 											<td class="text-muted" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['feedback']); ?>"><?php echo htmlspecialchars($row['feedback']); ?></td>
 											<td><span class="text-warning"><?php echo str_repeat('★', (int)$row['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5 - (int)$row['rating']); ?></span></span></td>
+											<td>
+												<?php if ($row['profile_image']): ?>
+													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['profile_image']); ?>" alt="Profile" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
+												<?php else: ?>
+													<span class="text-muted">No image</span>
+												<?php endif; ?>
+											</td>
+											<td>
+												<?php if ($row['home_image']): ?>
+													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['home_image']); ?>" alt="Home" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+												<?php else: ?>
+													<span class="text-muted">No image</span>
+												<?php endif; ?>
+											</td>
 											<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
 											<td class="text-end actions-cell">
 												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editTestimonialModal" title="Edit Testimonial"><i class="fa-solid fa-pen"></i></button>
@@ -380,7 +466,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 					<h5 class="modal-title">Add New Testimonial</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<form method="POST">
+				<form method="POST" enctype="multipart/form-data">
 					<div class="modal-body">
 						<input type="hidden" name="action" value="add_testimonial">
 						<div class="mb-3">
@@ -398,6 +484,16 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 									<option value="<?php echo $r; ?>"><?php echo $r; ?></option>
 								<?php endfor; ?>
 							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Profile Image</label>
+							<input type="file" class="form-control" name="profile_image" accept="image/*">
+							<small class="text-muted">Upload a profile picture for the testimonial</small>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Home Image</label>
+							<input type="file" class="form-control" name="home_image" accept="image/*">
+							<small class="text-muted">Upload a home/property image for the testimonial</small>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -417,10 +513,12 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 					<h5 class="modal-title">Edit Testimonial</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
-				<form method="POST">
+				<form method="POST" enctype="multipart/form-data">
 					<div class="modal-body">
 						<input type="hidden" name="action" value="edit_testimonial">
 						<input type="hidden" name="id" id="edit_id">
+						<input type="hidden" name="current_profile_image" id="edit_current_profile_image">
+						<input type="hidden" name="current_home_image" id="edit_current_home_image">
 						<div class="mb-3">
 							<label class="form-label">Name</label>
 							<input type="text" class="form-control" name="name" id="edit_name" required>
@@ -436,6 +534,18 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 									<option value="<?php echo $r; ?>"><?php echo $r; ?></option>
 								<?php endfor; ?>
 							</select>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Profile Image</label>
+							<div id="edit_profile_image_preview" class="mb-2"></div>
+							<input type="file" class="form-control" name="profile_image" accept="image/*">
+							<small class="text-muted">Upload a new profile picture to replace the current one</small>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Home Image</label>
+							<div id="edit_home_image_preview" class="mb-2"></div>
+							<input type="file" class="form-control" name="home_image" accept="image/*">
+							<small class="text-muted">Upload a new home/property image to replace the current one</small>
 						</div>
 					</div>
 					<div class="modal-footer">
@@ -481,6 +591,24 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 					document.getElementById('edit_name').value = data.name || '';
 					document.getElementById('edit_feedback').value = data.feedback || '';
 					document.getElementById('edit_rating').value = data.rating || 5;
+					document.getElementById('edit_current_profile_image').value = data.profile_image || '';
+					document.getElementById('edit_current_home_image').value = data.home_image || '';
+					
+					// Update image previews
+					const profilePreview = document.getElementById('edit_profile_image_preview');
+					const homePreview = document.getElementById('edit_home_image_preview');
+					
+					if (data.profile_image) {
+						profilePreview.innerHTML = '<img src="../../uploads/testimonials/' + data.profile_image + '" alt="Current Profile" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 2px solid #ddd;">';
+					} else {
+						profilePreview.innerHTML = '<span class="text-muted">No profile image</span>';
+					}
+					
+					if (data.home_image) {
+						homePreview.innerHTML = '<img src="../../uploads/testimonials/' + data.home_image + '" alt="Current Home" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid #ddd;">';
+					} else {
+						homePreview.innerHTML = '<span class="text-muted">No home image</span>';
+					}
 				});
 			});
 
