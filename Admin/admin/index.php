@@ -112,12 +112,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		} else {
 			$_SESSION['error_message'] = 'Username and email are required.';
 		}
-	} elseif ($action === 'delete_admin') {
+	} elseif ($action === 'suspend_admin') {
 		$id = (int)($_POST['id'] ?? 0);
 		if ($id) {
-			// Prevent deleting current user
+			// Prevent suspending current user
 			if ($id == $_SESSION['admin_id']) {
-				$_SESSION['error_message'] = 'You cannot delete your own account!';
+				$_SESSION['error_message'] = 'You cannot suspend your own account!';
 			} else {
 				// Get username for logging
 				$get_stmt = $mysqli->prepare('SELECT username FROM admin_users WHERE id = ?');
@@ -126,23 +126,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				$user = $get_stmt->get_result()->fetch_assoc();
 				$get_stmt->close();
 				
-				$stmt = $mysqli->prepare('DELETE FROM admin_users WHERE id = ?');
+				$stmt = $mysqli->prepare('UPDATE admin_users SET status = ? WHERE id = ?');
 				if ($stmt) {
-					$stmt->bind_param('i', $id);
+					$status = 'suspended';
+					$stmt->bind_param('si', $status, $id);
 					if ($stmt->execute()) {
 						if ($stmt->affected_rows > 0) {
-							$_SESSION['success_message'] = 'Admin user deleted successfully!';
-							logActivity($mysqli, 'Deleted admin user', 'Username: ' . ($user['username'] ?? 'Unknown') . ', ID: ' . $id);
+							$_SESSION['success_message'] = 'Admin user suspended successfully!';
+							logActivity($mysqli, 'Suspended admin user', 'Username: ' . ($user['username'] ?? 'Unknown') . ', ID: ' . $id);
 						} else {
 							$_SESSION['error_message'] = 'Admin user not found.';
 						}
 					} else {
-						$_SESSION['error_message'] = 'Failed to delete admin user: ' . $mysqli->error;
+						$_SESSION['error_message'] = 'Failed to suspend admin user: ' . $mysqli->error;
 					}
 					$stmt->close();
 				} else {
 					$_SESSION['error_message'] = 'Database error: ' . $mysqli->error;
 				}
+			}
+		}
+	} elseif ($action === 'activate_admin') {
+		$id = (int)($_POST['id'] ?? 0);
+		if ($id) {
+			// Get username for logging
+			$get_stmt = $mysqli->prepare('SELECT username FROM admin_users WHERE id = ?');
+			$get_stmt->bind_param('i', $id);
+			$get_stmt->execute();
+			$user = $get_stmt->get_result()->fetch_assoc();
+			$get_stmt->close();
+			
+			$stmt = $mysqli->prepare('UPDATE admin_users SET status = ? WHERE id = ?');
+			if ($stmt) {
+				$status = 'active';
+				$stmt->bind_param('si', $status, $id);
+				if ($stmt->execute()) {
+					if ($stmt->affected_rows > 0) {
+						$_SESSION['success_message'] = 'Admin user activated successfully!';
+						logActivity($mysqli, 'Activated admin user', 'Username: ' . ($user['username'] ?? 'Unknown') . ', ID: ' . $id);
+					} else {
+						$_SESSION['error_message'] = 'Admin user not found.';
+					}
+				} else {
+					$_SESSION['error_message'] = 'Failed to activate admin user: ' . $mysqli->error;
+				}
+				$stmt->close();
+			} else {
+				$_SESSION['error_message'] = 'Database error: ' . $mysqli->error;
 			}
 		}
 	}
@@ -177,7 +207,7 @@ if ($search) {
 	$params[] = $searchParam2;
 }
 
-$sql = 'SELECT id, username, email, created_at FROM admin_users' . $whereClause . ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
+$sql = 'SELECT id, username, email, status, created_at FROM admin_users' . $whereClause . ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
@@ -185,7 +215,7 @@ $params[] = $offset;
 $stmt = $mysqli->prepare($sql);
 if ($stmt && $types) { $stmt->bind_param($types, ...$params); }
 $stmt && $stmt->execute();
-$adminUsers = $stmt ? $stmt->get_result() : $mysqli->query('SELECT id, username, email, created_at FROM admin_users ORDER BY created_at DESC LIMIT 10');
+$adminUsers = $stmt ? $stmt->get_result() : $mysqli->query('SELECT id, username, email, status, created_at FROM admin_users ORDER BY created_at DESC LIMIT 10');
 
 // Count
 $countSql = 'SELECT COUNT(*) FROM admin_users' . $whereClause;
@@ -370,22 +400,34 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 								<table class="table align-middle" id="adminUsersTable">
 									<thead>
 										<tr>
-											<th>Username</th>
-											<th>Email</th>
-											<th>Created</th>
-											<th>Actions</th>
+								<th>Username</th>
+								<th>Email</th>
+								<th>Status</th>
+								<th>Created</th>
+								<th>Actions</th>
 										</tr>
 									</thead>
 									<tbody>
 										<?php while($row = $adminUsers->fetch_assoc()): ?>
 										<tr data-admin='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-											<td class="fw-semibold"><?php echo htmlspecialchars($row['username']); ?></td>
-											<td class="text-muted"><?php echo htmlspecialchars($row['email']); ?></td>
-											<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-											<td class="text-end actions-cell">
-												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><i class="fa-solid fa-pen"></i></button>
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot delete your own account' : 'Delete Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><i class="fa-solid fa-trash"></i></button>
-											</td>
+								<td class="fw-semibold"><?php echo htmlspecialchars($row['username']); ?></td>
+								<td class="text-muted"><?php echo htmlspecialchars($row['email']); ?></td>
+								<td>
+									<?php if ($row['status'] == 'active'): ?>
+										<span class="badge bg-success">Active</span>
+									<?php else: ?>
+										<span class="badge bg-warning">Suspended</span>
+									<?php endif; ?>
+								</td>
+								<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+								<td class="text-end actions-cell">
+									<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><i class="fa-solid fa-pen"></i></button>
+									<?php if ($row['status'] == 'active'): ?>
+										<button class="btn btn-sm btn-outline-warning btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><i class="fa-solid fa-ban"></i></button>
+									<?php else: ?>
+										<button class="btn btn-sm btn-outline-success btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><i class="fa-solid fa-check"></i></button>
+									<?php endif; ?>
+								</td>
 										</tr>
 										<?php endwhile; ?>
 									</tbody>
@@ -499,23 +541,46 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 		</div>
 	</div>
 
-	<!-- Delete Confirmation Modal -->
-	<div class="modal fade" id="deleteModal" tabindex="-1">
+	<!-- Suspend Confirmation Modal -->
+	<div class="modal fade" id="suspendModal" tabindex="-1">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
-					<h5 class="modal-title">Confirm Delete</h5>
+					<h5 class="modal-title">Confirm Suspend</h5>
 					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 				</div>
 				<div class="modal-body">
-					<p>Are you sure you want to delete this admin user? This action cannot be undone.</p>
+					<p>Are you sure you want to suspend this admin user? They will not be able to access the admin panel until reactivated.</p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 					<form method="POST" style="display: inline;">
-						<input type="hidden" name="action" value="delete_admin">
-						<input type="hidden" name="id" id="delete_id">
-						<button type="submit" class="btn btn-danger">Delete</button>
+						<input type="hidden" name="action" value="suspend_admin">
+						<input type="hidden" name="id" id="suspend_id">
+						<button type="submit" class="btn btn-warning">Suspend</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Activate Confirmation Modal -->
+	<div class="modal fade" id="activateModal" tabindex="-1">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title">Confirm Activation</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<p>Are you sure you want to activate this admin user? They will regain access to the admin panel.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<form method="POST" style="display: inline;">
+						<input type="hidden" name="action" value="activate_admin">
+						<input type="hidden" name="id" id="activate_id">
+						<button type="submit" class="btn btn-success">Activate</button>
 					</form>
 				</div>
 			</div>
@@ -536,7 +601,7 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 				});
 			});
 
-			document.querySelectorAll('.btn-delete').forEach(btn => {
+			document.querySelectorAll('.btn-suspend').forEach(btn => {
 				btn.addEventListener('click', function(e){
 					if (this.disabled) {
 						e.preventDefault();
@@ -545,7 +610,15 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 					}
 					const tr = this.closest('tr');
 					const data = JSON.parse(tr.getAttribute('data-admin'));
-					document.getElementById('delete_id').value = data.id;
+					document.getElementById('suspend_id').value = data.id;
+				});
+			});
+
+			document.querySelectorAll('.btn-activate').forEach(btn => {
+				btn.addEventListener('click', function(e){
+					const tr = this.closest('tr');
+					const data = JSON.parse(tr.getAttribute('data-admin'));
+					document.getElementById('activate_id').value = data.id;
 				});
 			});
 

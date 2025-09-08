@@ -25,27 +25,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Sanitize username to prevent SQL injection
         $username = htmlspecialchars($username, ENT_QUOTES, 'UTF-8');
         
-        // Attempt to authenticate user and get user data
-        $user_data = authenticateUser($username, $password);
-        if ($user_data) {
-            // Set session variables
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_username'] = $username;
-            $_SESSION['admin_login_time'] = time();
-            $_SESSION['admin_id'] = $user_data['id'];
-            
-            // Log successful login
-            logLoginAttempt($username, true, $_SERVER['REMOTE_ADDR'] ?? '', $user_data['id']);
-            
-            // Redirect to dashboard
-            header('Location: ../dashboard/');
-            exit();
-        } else {
-            // Log failed login
+        // Check if admin exists but is suspended
+        $admin_status = checkAdminStatus($username);
+        if ($admin_status === 'suspended') {
+            // Log failed login attempt for suspended admin
             logLoginAttempt($username, false, $_SERVER['REMOTE_ADDR'] ?? '');
-            
-            $error_message = 'Invalid username or password.';
+            $error_message = 'Your account has been suspended. Please contact the administrator.';
+        } else {
+            // Attempt to authenticate user and get user data
+            $user_data = authenticateUser($username, $password);
+            if ($user_data) {
+                // Set session variables
+                $_SESSION['admin_logged_in'] = true;
+                $_SESSION['admin_username'] = $username;
+                $_SESSION['admin_login_time'] = time();
+                $_SESSION['admin_id'] = $user_data['id'];
+                
+                // Log successful login
+                logLoginAttempt($username, true, $_SERVER['REMOTE_ADDR'] ?? '', $user_data['id']);
+                
+                // Redirect to dashboard
+                header('Location: ../dashboard/');
+                exit();
+            } else {
+                // Log failed login
+                logLoginAttempt($username, false, $_SERVER['REMOTE_ADDR'] ?? '');
+                
+                $error_message = 'Invalid username or password.';
+            }
         }
+    }
+}
+
+/**
+ * Check admin status
+ * @param string $username
+ * @return string|false Returns status ('active', 'suspended') or false if not found
+ */
+function checkAdminStatus($username) {
+    try {
+        $mysqli = getMysqliConnection();
+        
+        // Check if admin exists and get status
+        $stmt = $mysqli->prepare("SELECT status FROM admin_users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows === 1) {
+            $user = $result->fetch_assoc();
+            $stmt->close();
+            return $user['status'];
+        }
+        
+        $stmt->close();
+        return false;
+        
+    } catch (Exception $e) {
+        error_log("Error checking admin status: " . $e->getMessage());
+        return false;
     }
 }
 
@@ -59,8 +97,8 @@ function authenticateUser($username, $password) {
     try {
         $mysqli = getMysqliConnection();
         
-        // Prepare statement to prevent SQL injection
-        $stmt = $mysqli->prepare("SELECT id, username, password FROM admin_users WHERE username = ?");
+        // Prepare statement to prevent SQL injection - only allow active admins
+        $stmt = $mysqli->prepare("SELECT id, username, password, status FROM admin_users WHERE username = ? AND status = 'active'");
         $stmt->bind_param("s", $username);
         $stmt->execute();
         $result = $stmt->get_result();
