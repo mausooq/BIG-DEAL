@@ -248,7 +248,6 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
             --radius:16px;
         }
         body{ background:var(--bg); color:#111827; }
-        .content{ margin-left:260px; }
         /* Sidebar */
         .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
         .content{ margin-left:284px; }
@@ -268,7 +267,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         /* Table */
-        .table{ --bs-table-bg:transparent; }
+        .table{ --bs-table-bg:transparent;  border-bottom-width:0 !important; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; }
         .table tbody tr:hover{ background:#f9fafb; }
         .table td{ vertical-align: middle; }
@@ -281,11 +280,11 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         .table-inner thead th, .table-inner tbody td{ padding:0 }
         /* Remove all inner borders for body cells */
         .table-inner tbody td, .table-inner tbody th{ border:0 !important; }
+x
         .table-inner tbody tr{ border:0 !important; }
         .table-inner td, .table-inner th{ border-left:0; border-right:0; }
         .table-inner tbody tr{ position:static; }
         .table-inner tbody tr::after{ display:none !important; content:none; }
-
         /* (removed unused .table-cards styles) */
         /* Actions cell */
         .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:14px !important; padding-bottom:14px !important; }

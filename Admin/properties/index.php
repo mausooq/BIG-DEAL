@@ -127,8 +127,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .table td{ vertical-align: middle; }
         /* Inner borders (match Locations) */
         .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
-        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
-        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
+        /* Remove inner borders for body cells and override Bootstrap defaults */
+        .table-inner td, .table-inner th{ border-left:0; border-right:0; } /*mausooq sooooooooooooooooooooooqqqqq*/
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Actions cell (align start like Locations) */
         .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:12px !important; padding-bottom:12px !important; }

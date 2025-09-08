@@ -78,13 +78,13 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         .info-card{ border:1px solid var(--line); border-radius:12px; padding:1.5rem; margin-bottom:1rem; background:#fff; }
         .info-label{ color:var(--muted); font-size:0.875rem; font-weight:600; margin-bottom:0.25rem; }
         .info-value{ font-weight:600; color:#111827; }
-        .image-gallery{ display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-top:1rem; }
-        .gallery-item{ position:relative; border-radius:12px; overflow:hidden; aspect-ratio:4/3; }
-        .gallery-item img{ width:100%; height:100%; object-fit:cover; transition:transform 0.3s ease; }
-        .gallery-item:hover img{ transform:scale(1.05); }
-        .gallery-overlay{ position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s ease; }
-        .gallery-item:hover .gallery-overlay{ opacity:1; }
-        .gallery-icon{ color:white; font-size:1.5rem; }
+        /* Hero image + thumbnails (match drawer style) */
+        .hero{ background:#fff; border-radius:12px; border:1px solid var(--line); padding:12px; margin-bottom:16px; }
+        .hero-main{ width:100%; height:360px; object-fit:contain; border-radius:8px; background:#f8f9fa; border:1px solid #e9ecef; }
+        .thumbs{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
+        .thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; background:#f3f4f6; }
+        .thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
+        .thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
         .status-badge{ padding:0.5rem 1rem; border-radius:20px; font-weight:600; font-size:0.875rem; }
         .status-available{ background:#dcfce7; color:#166534; }
         .status-sold{ background:#fecaca; color:#991b1b; }
@@ -101,8 +101,9 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
             .action-buttons{ flex-direction:column; }
         }
         @media (max-width: 575.98px){
-            .image-gallery{ grid-template-columns:1fr; }
             .property-header{ padding:1rem; }
+            .hero-main{ height:240px; }
+            .thumb{ width:70px; height:70px; }
         }
     </style>
 </head>
@@ -112,8 +113,84 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
         <div class="container-fluid p-4">
+            <!-- Top row: Hero (left) and Quick Info (right) -->
+            <div class="row g-4 mb-3">
+                <div class="col-lg-8">
+                    <?php if (!empty($property_images)): ?>
+                    <div class="hero">
+                        <?php $firstImage = $property_images[0]['image_url'] ?? null; ?>
+                        <img src="../../uploads/properties/<?php echo htmlspecialchars($firstImage); ?>" alt="Property Image" id="heroMainImage" class="hero-main" loading="lazy">
+                        <div class="thumbs">
+                            <?php foreach ($property_images as $index => $image): ?>
+                                <img 
+                                    src="../../uploads/properties/<?php echo htmlspecialchars($image['image_url']); ?>" 
+                                    alt="Thumb <?php echo $index+1; ?>" 
+                                    class="thumb <?php echo $index === 0 ? 'active' : ''; ?>" 
+                                    data-image-url="<?php echo htmlspecialchars($image['image_url']); ?>"
+                                    loading="lazy"
+                                >
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <div class="col-lg-4">
+                    <!-- Quick Info (moved next to hero) -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-semibold mb-3"><i class="fa-solid fa-info-circle me-2"></i>Quick Info</h6>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="info-label">Price</div>
+                                    <div class="info-value"><?php echo $formatted_price; ?></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Area</div>
+                                    <div class="info-value"><?php echo $formatted_area; ?></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Category</div>
+                                    <div class="info-value"><?php echo htmlspecialchars($property['category_name'] ?: 'Not categorized'); ?></div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="info-label">Status</div>
+                                    <div class="info-value">
+                                        <span class="status-badge status-<?php echo strtolower($property['status']); ?>"><?php echo htmlspecialchars($property['status']); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Compact Map Embed or Placeholder -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-semibold mb-3"><i class="fa-solid fa-map-location-dot me-2"></i>Location Map</h6>
+                            <?php if (!empty($property['map_embed_link'])): ?>
+                                <div class="map-container" style="position: relative; width: 100%; height: 220px; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
+                                    <iframe 
+                                        src="<?php echo htmlspecialchars($property['map_embed_link']); ?>" 
+                                        width="100%" 
+                                        height="100%" 
+                                        style="border:0; border-radius: 12px;" 
+                                        allowfullscreen="" 
+                                        loading="lazy" 
+                                        referrerpolicy="no-referrer-when-downgrade">
+                                    </iframe>
+                                </div>
+                            <?php else: ?>
+                                <div class="d-flex align-items-center justify-content-center" style="height: 160px; border:1px solid var(--line); border-radius:12px; background:#f8fafc;">
+                                    <div class="text-center text-muted">
+                                        <i class="fa-solid fa-map-location-dot" style="font-size: 1.5rem;"></i>
+                                        <div class="mt-2">No map provided</div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
             <!-- Property Header -->
-            <div class="property-header">
+            <!-- <div class="property-header">
                 <div class="d-flex justify-content-between align-items-start flex-wrap">
                     <div class="flex-grow-1">
                         <h1 class="property-title"><?php echo htmlspecialchars($property['title']); ?></h1>
@@ -139,31 +216,11 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                         </a>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="row g-4">
                 <!-- Main Content -->
                 <div class="col-lg-8">
-                    <!-- Property Images -->
-                    <?php if (!empty($property_images)): ?>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="section-header">
-                                <h5 class="section-title"><i class="fa-solid fa-images me-2"></i>Property Images</h5>
-                            </div>
-                            <div class="image-gallery">
-                                <?php foreach ($property_images as $image): ?>
-                                <div class="gallery-item">
-                                    <img src="../../uploads/properties/<?php echo htmlspecialchars($image['image_url']); ?>" alt="Property Image" loading="lazy">
-                                    <div class="gallery-overlay">
-                                        <i class="fa-solid fa-expand gallery-icon"></i>
-                                    </div>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
 
                     <!-- Property Description -->
                     <?php if ($property['description']): ?>
@@ -174,34 +231,6 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                             </div>
                             <div class="description-text">
                                 <?php echo nl2br(htmlspecialchars($property['description'])); ?>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Property Location Map -->
-                    <?php if (!empty($property['map_embed_link'])): ?>
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <div class="section-header">
-                                <h5 class="section-title"><i class="fa-solid fa-map-location-dot me-2"></i>Location Map</h5>
-                            </div>
-                            <div class="map-container" style="position: relative; width: 100%; height: 400px; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-                                <iframe 
-                                    src="<?php echo htmlspecialchars($property['map_embed_link']); ?>" 
-                                    width="100%" 
-                                    height="100%" 
-                                    style="border:0; border-radius: 12px;" 
-                                    allowfullscreen="" 
-                                    loading="lazy" 
-                                    referrerpolicy="no-referrer-when-downgrade">
-                                </iframe>
-                            </div>
-                            <div class="mt-3">
-                                <small class="text-muted">
-                                    <i class="fa-solid fa-info-circle me-1"></i>
-                                    Interactive map showing the property location. You can zoom, pan, and explore the surrounding area.
-                                </small>
                             </div>
                         </div>
                     </div>
@@ -257,33 +286,6 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
 
                 <!-- Sidebar -->
                 <div class="col-lg-4">
-                    <!-- Quick Info -->
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h6 class="fw-semibold mb-3"><i class="fa-solid fa-info-circle me-2"></i>Quick Info</h6>
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <div class="info-label">Price</div>
-                                    <div class="info-value"><?php echo $formatted_price; ?></div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="info-label">Area</div>
-                                    <div class="info-value"><?php echo $formatted_area; ?></div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="info-label">Category</div>
-                                    <div class="info-value"><?php echo htmlspecialchars($property['category_name'] ?: 'Not categorized'); ?></div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="info-label">Status</div>
-                                    <div class="info-value">
-                                        <span class="status-badge status-<?php echo strtolower($property['status']); ?>"><?php echo htmlspecialchars($property['status']); ?></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Property Stats -->
                     <div class="card mb-4">
                         <div class="card-body">
@@ -333,39 +335,17 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Image gallery functionality
+        // Hero thumbnails swap main image
         document.addEventListener('DOMContentLoaded', function() {
-            const galleryItems = document.querySelectorAll('.gallery-item');
-            
-            galleryItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    const img = this.querySelector('img');
-                    if (img) {
-                        // Create modal for image viewing
-                        const modal = document.createElement('div');
-                        modal.className = 'modal fade';
-                        modal.innerHTML = `
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title">Property Image</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body text-center">
-                                        <img src="${img.src}" class="img-fluid" alt="Property Image">
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        
-                        document.body.appendChild(modal);
-                        const bsModal = new bootstrap.Modal(modal);
-                        bsModal.show();
-                        
-                        modal.addEventListener('hidden.bs.modal', function() {
-                            document.body.removeChild(modal);
-                        });
-                    }
+            const hero = document.getElementById('heroMainImage');
+            if (!hero) return;
+            document.querySelectorAll('.thumb').forEach(t => {
+                t.addEventListener('click', function(){
+                    const url = this.getAttribute('data-image-url');
+                    if (!url) return;
+                    hero.src = `../../uploads/properties/${url}`;
+                    document.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
+                    this.classList.add('active');
                 });
             });
         });
