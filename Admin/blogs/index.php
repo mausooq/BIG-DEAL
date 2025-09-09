@@ -198,7 +198,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		/* Table */
 		.table{ --bs-table-bg:transparent; }
 		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-		.table tbody tr{ border-top:1px solid var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
@@ -225,8 +224,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.item-row:hover{ box-shadow:0 6px 18px rgba(0,0,0,.06); }
 		.item-title{ font-weight:600; }
 		.item-meta{ color:#6b7280; font-size:.9rem; }
-		/* Blog content preview */
-		.blog-preview{ max-height:100px; overflow:hidden; text-overflow:ellipsis; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; }
 		/* Modal styles */
 		.modal-content{ border:0; border-radius:var(--radius); }
 		.modal-header{ border-bottom:1px solid var(--line); }
@@ -354,7 +351,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 										<?php while($row = $blogs->fetch_assoc()): ?>
 										<tr data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 											<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
-											<td class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 100)) . '...'; ?></td>
+											<td><?php echo htmlspecialchars(substr($row['content'], 0, 100)) . '...'; ?></td>
 											<td>
 												<?php if ($row['image_url']): ?>
 													<img src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="Blog image" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">

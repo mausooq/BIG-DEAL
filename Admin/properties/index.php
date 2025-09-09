@@ -153,6 +153,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             vertical-align:middle;
             border-left:1px solid var(--line);
             white-space:nowrap;
+            overflow:hidden;
         }
         .actions-cell .btn{ 
             width:28px; 
@@ -292,6 +293,11 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        .toolbar .row-bottom{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .toolbar .chip{ padding:6px 12px; border:1px solid var(--line); border-radius:9999px; background:#fff; color:#374151; text-decoration:none; font-size:.875rem; }
+        .toolbar .chip:hover{ border-color:#d1d5db; }
+        .toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+        .toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
         .text-primary{ color:var(--primary)!important; }
         .input-group .form-control{ border-color:var(--line); }
         .input-group-text{ 
@@ -320,6 +326,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
+            .toolbar .row-bottom{ gap:6px; }
             .actions-cell{ justify-content:flex-start; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:left; }
         }
@@ -390,61 +397,28 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     <form class="d-flex flex-grow-1" method="get">
                         <div class="input-group">
                             <span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-                            <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title']); ?>" placeholder="Search properties by title">
+                            <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title']); ?>" placeholder="Search properties by name">
                         </div>
-                        <button class="btn btn-primary btn-sm ms-2" type="submit">Search</button>
-                        <a class="btn btn-outline-secondary btn-sm ms-2" href="index.php">Reset</a>
+                        <button class="btn btn-primary ms-2" type="submit">Search</button>
+                        <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
-                    <a href="add.php" class="btn btn-primary btn-sm">
+                    <a href="add.php" class="btn btn-primary">
                         <i class="fa-solid fa-circle-plus me-1"></i>Add Property
                     </a>
                 </div>
-            </div>
-
-            <!-- Filter toolbar -->
-            <div class="card mb-3">
-                <div class="card-body">
-                    <form class="row g-2" method="get">
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Title</label>
-                            <input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($filters['title']); ?>" placeholder="Search by title">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label small text-muted">Location</label>
-                            <input type="text" class="form-control" name="location" value="<?php echo htmlspecialchars($filters['location']); ?>" placeholder="City, Area">
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small text-muted">Listing</label>
-                            <select class="form-select" name="listing_type">
-                                <option value="">Any</option>
-                                <?php foreach(['Buy','Rent','PG/Co-living'] as $lt): $sel = ($filters['listing_type']===$lt)?'selected':''; ?>
-                                    <option value="<?php echo $lt; ?>" <?php echo $sel; ?>><?php echo $lt; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small text-muted">Category</label>
-                            <select class="form-select" name="category_id">
-                                <option value="">Any</option>
-                                <?php while($c = $categoriesRes->fetch_assoc()): $sel = ((string)$filters['category_id'] === (string)$c['id'])?'selected':''; ?>
-                                    <option value="<?php echo (int)$c['id']; ?>" <?php echo $sel; ?>><?php echo htmlspecialchars($c['name']); ?></option>
-                                <?php endwhile; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label small text-muted">Status</label>
-                            <select class="form-select" name="status">
-                                <option value="">Any</option>
-                                <?php foreach(['Available','Sold','Rented'] as $st): $sel = ($filters['status']===$st)?'selected':''; ?>
-                                    <option value="<?php echo $st; ?>" <?php echo $sel; ?>><?php echo $st; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-12 d-flex gap-2 justify-content-end">
-                            <button class="btn btn-primary btn-sm" type="submit">Search</button>
-                            <a class="btn btn-outline-secondary btn-sm" href="index.php">Reset</a>
-                        </div>
-                    </form>
+                <div class="row-bottom">
+                    <?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
+                        <?php $isActive = ($filters['listing_type'] ?? '') === $lt; ?>
+                        <a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?listing_type=<?php echo urlencode($lt); ?>"><?php echo $lt; ?></a>
+                    <?php endforeach; ?>
+                    <span class="divider"></span>
+                    <?php 
+                    // Reset categories result pointer
+                    $categoriesRes->data_seek(0);
+                    while($pc = $categoriesRes->fetch_assoc()): ?>
+                        <?php $isC = (string)($filters['category_id'] ?? '') === (string)$pc['id']; ?>
+                        <a class="chip <?php echo $isC ? 'active' : ''; ?>" href="?category_id=<?php echo (int)$pc['id']; ?>"><?php echo htmlspecialchars($pc['name']); ?></a>
+                    <?php endwhile; ?>
                 </div>
             </div>
 
@@ -463,8 +437,6 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     <th style="min-width:100px;">Listing</th>
                                     <th style="min-width:120px;">Price</th>
                                     <th style="min-width:150px;">Location</th>
-                                    <th style="min-width:80px;">Area</th>
-                                    <th style="min-width:80px;">Config</th>
                                     <th style="min-width:100px;">Status</th>
                                     <th style="min-width:100px;">Created</th>
                                     <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
@@ -489,8 +461,6 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     <td><span class="badge badge-soft"><?php echo htmlspecialchars($row['listing_type']); ?></span></td>
                                     <td>₹<?php echo number_format((float)$row['price']); ?></td>
                                     <td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>
-                                    <td class="text-muted"><?php echo htmlspecialchars((string)$row['area']); ?></td>
-                                    <td class="text-muted"><?php echo htmlspecialchars($row['configuration']); ?></td>
                                     <td>
                                         <?php if ($row['status']==='Available'): ?>
                                             <span class="badge bg-success-subtle text-success border">Available</span>
@@ -501,9 +471,9 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
-                                    <td class="actions-cell">
-                                        <button class="btn btn-sm btn-outline-info btn-view" title="View Property"><i class="fa-solid fa-eye"></i></button>
-                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
+                                    <td class="text-end actions-cell">
+                                        <button class="btn btn-sm btn-outline-info btn-view me-1" title="View Property"><i class="fa-solid fa-eye"></i></button>
+                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
                                         <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>

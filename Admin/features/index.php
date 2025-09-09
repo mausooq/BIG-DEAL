@@ -71,6 +71,9 @@ $totalBlogs = fetchScalar('SELECT COUNT(*) FROM blogs');
 $totalProperties = fetchScalar('SELECT COUNT(*) FROM properties');
 $totalEnquiries = fetchScalar('SELECT COUNT(*) FROM enquiries');
 
+// Get property_id from URL if coming from edit page
+$property_id_from_url = isset($_GET['property_id']) ? (int)$_GET['property_id'] : 0;
+
 // Get features with search and pagination
 $mysqli = db();
 $search = $_GET['search'] ?? '';
@@ -192,6 +195,19 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
 		<div class="container-fluid p-4">
+			<!-- Header -->
+			<?php if ($property_id_from_url > 0): ?>
+			<div class="d-flex align-items-center justify-content-between mb-4">
+				<div>
+					<h2 class="h4 mb-1">Manage Features</h2>
+					<p class="text-muted mb-0">Add or remove featured properties</p>
+				</div>
+				<a href="../properties/edit.php?id=<?php echo $property_id_from_url; ?>" class="btn btn-outline-secondary">
+					<i class="fa-solid fa-arrow-left me-2"></i>Back to Property Edit
+				</a>
+			</div>
+			<?php endif; ?>
+
 			<?php if (isset($_SESSION['success_message'])): ?>
 				<div class="alert alert-success alert-dismissible fade show" role="alert">
 					<?php echo htmlspecialchars($_SESSION['success_message']); unset($_SESSION['success_message']); ?>
@@ -373,7 +389,7 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 								$properties = $mysqli->query("SELECT id, title, location, price FROM properties ORDER BY title ASC");
 								while($prop = $properties->fetch_assoc()):
 								?>
-									<option value="<?php echo $prop['id']; ?>">
+									<option value="<?php echo $prop['id']; ?>" <?php echo ($property_id_from_url == $prop['id']) ? 'selected' : ''; ?>>
 										<?php echo htmlspecialchars($prop['title']); ?> - <?php echo htmlspecialchars($prop['location']); ?> (₹<?php echo number_format($prop['price']); ?>)
 									</option>
 								<?php endwhile; ?>
@@ -424,6 +440,12 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 					document.getElementById('delete_id').value = data.id;
 				});
 			});
+
+			// Auto-open modal if coming from edit page
+			<?php if ($property_id_from_url > 0): ?>
+			const addFeatureModal = new bootstrap.Modal(document.getElementById('addFeatureModal'));
+			addFeatureModal.show();
+			<?php endif; ?>
 
 			// Auto-hide alerts after 5 seconds
 			setTimeout(function(){

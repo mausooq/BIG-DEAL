@@ -18,7 +18,6 @@ if (!function_exists('renderAdminSidebar')) {
 			['key' => 'testimonials', 'icon' => 'fa-face-smile', 'label' => 'Testimonials', 'href' => '../testimonials/'],
 			['key' => 'notifications', 'icon' => 'fa-bell', 'label' => 'Notifications', 'href' => '../notification/'],
 			['key' => 'faq', 'icon' => 'fa-question-circle', 'label' => 'FAQs', 'href' => '../faq/'],
-			['key' => 'features', 'icon' => 'fa-star', 'label' => 'Features', 'href' => '../features/'],
 			['key' => 'social-media', 'icon' => 'fa-share-nodes', 'label' => 'Social Media', 'href' => '../social-link/'],
 			['key' => 'admin', 'icon' => 'fa-users', 'label' => 'Admin Users', 'href' => '../admin/'],
 			['key' => 'logout', 'icon' => 'fa-arrow-right-from-bracket', 'label' => 'Logout', 'href' => '../logout.php'],

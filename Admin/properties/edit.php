@@ -248,9 +248,14 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                     <h2 class="h4 mb-1">Edit Property</h2>
                     <p class="text-muted mb-0">Update property details and images</p>
                 </div>
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Back to Properties
-                </a>
+                <div class="d-flex gap-2">
+                    <a href="../features/index.php?property_id=<?php echo $property_id; ?>" class="btn btn-outline-info">
+                        <i class="fa-solid fa-star me-2"></i>Manage Features
+                    </a>
+                    <a href="index.php" class="btn btn-outline-secondary">
+                        <i class="fa-solid fa-arrow-left me-2"></i>Back to Properties
+                    </a>
+                </div>
             </div>
 
             <?php if ($message): ?>
@@ -438,6 +443,16 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                                 
                                 <div id="imagePreview" class="mt-3"></div>
                                 <div id="imageInfo" class="mt-2 text-muted small"></div>
+                                
+                                <!-- Form Actions -->
+                                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                                    <a href="index.php" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa-solid fa-save me-2"></i>Update Property
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -459,19 +474,6 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                     </div>
                 </div>
 
-                <!-- Form Actions -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex gap-2 justify-content-end">
-                            <a href="index.php" class="btn btn-outline-secondary">
-                                <i class="fa-solid fa-times me-2"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fa-solid fa-save me-2"></i>Update Property
-                            </button>
-                        </div>
-                    </div>
-                </div>
             </form>
         </div>
     </div>
