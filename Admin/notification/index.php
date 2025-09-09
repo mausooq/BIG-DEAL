@@ -141,7 +141,8 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		/* Cards */
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
-		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
+		/* Remove box styling on notifications wrapper */
+		.quick-card{ border:0; background:transparent; }
 		/* Toolbar */
 		.toolbar{ background:transparent; border:0; border-radius:0; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
@@ -161,6 +162,8 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
 		/* Notification specific styles */
 		.notification-card{ 
 			border:1px solid var(--line); 
@@ -172,17 +175,17 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 			position:relative;
 		}
 		.notification-card:hover{ 
-			box-shadow:0 4px 12px rgba(0,0,0,.08); 
+			box-shadow:0 4px 12px rgba(0,0,0,.06); 
 			transform:translateY(-1px);
 		}
 		.notification-unread{ 
-			background:#fef3f2; 
-			border-left:4px solid var(--primary);
-			box-shadow:0 2px 8px rgba(225, 29, 42, 0.1);
+			background:#fff; 
+			border-left:0;
+			box-shadow:none;
 		}
 		.notification-read{ 
-			background:#f8fafc; 
-			border-left:4px solid #e5e7eb;
+			background:#fff; 
+			border-left:0;
 		}
 		.notification-header{
 			display:flex;
@@ -215,7 +218,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 			font-size:0.75rem;
 			font-weight:500;
 		}
-		.notification-type.info{ background:#e0f2fe; color:#0277bd; }
+		.notification-type.info{ background:#fee2e2; color:var(--primary); }
 		.notification-type.warning{ background:#fff3e0; color:#f57c00; }
 		.notification-type.success{ background:#e8f5e8; color:#2e7d32; }
 		.notification-type.error{ background:#ffebee; color:#c62828; }
@@ -262,14 +265,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 			<?php endif; ?>
 
 
-			<!-- Toolbar (Mark All Read only) -->
-			<div class="toolbar mb-4">
-				<div class="row-top w-100" style="justify-content:flex-end;">
-					<button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
-						<i class="fa-solid fa-check-double me-1"></i>Mark All Read
-					</button>
-				</div>
-			</div>
+			<!-- Header only; toolbar removed -->
 
 			<div class="card quick-card mb-4">
 				<div class="card-body">
@@ -278,8 +274,11 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 						<div class="d-flex align-items-center gap-3">
 							<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
 							<?php if ($unreadNotifications > 0): ?>
-								<span class="badge bg-danger"><?php echo $unreadNotifications; ?> unread</span>
+								<span class="badge bg-light text-dark border"><?php echo $unreadNotifications; ?> unread</span>
 							<?php endif; ?>
+							<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
+								<i class="fa-solid fa-check-double me-1"></i>Mark All Read
+							</button>
 						</div>
 					</div>
 					
@@ -313,9 +312,9 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 										<?php echo ucfirst($type); ?>
 									</div>
 									<?php if ($row['is_read']): ?>
-										<span class="badge bg-success">Read</span>
+										<span class="badge bg-light text-dark border">Read</span>
 									<?php else: ?>
-										<span class="badge bg-warning">Unread</span>
+										<span class="badge bg-light text-dark border">Unread</span>
 									<?php endif; ?>
 								</div>
 							</div>
@@ -329,7 +328,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 								</span>
 								
 								<?php if (!$row['is_read']): ?>
-									<button class="btn btn-sm btn-outline-success btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
+									<button class="btn btn-sm btn-outline-primary btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
 										<i class="fa-solid fa-check me-1"></i>Mark as Read
 									</button>
 								<?php endif; ?>
@@ -379,7 +378,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 					<form method="POST" style="display: inline;">
 						<input type="hidden" name="action" value="mark_as_read">
 						<input type="hidden" name="id" id="mark_read_id">
-						<button type="submit" class="btn btn-success">Mark as Read</button>
+						<button type="submit" class="btn btn-primary">Mark as Read</button>
 					</form>
 				</div>
 			</div>
@@ -401,7 +400,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 					<form method="POST" style="display: inline;">
 						<input type="hidden" name="action" value="mark_all_read">
-						<button type="submit" class="btn btn-warning">Mark All as Read</button>
+						<button type="submit" class="btn btn-primary">Mark All as Read</button>
 					</form>
 				</div>
 			</div>

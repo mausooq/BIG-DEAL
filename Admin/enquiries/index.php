@@ -89,7 +89,7 @@ if ($filters['status'] !== '') {
 }
 
 $sql = "SELECT e.id, e.name, e.email, e.phone, e.message, e.status, DATE_FORMAT(e.created_at,'%b %d, %Y %h:%i %p') created_at,
-               p.title AS property_title
+               p.title AS property_title, p.id AS property_id
         FROM enquiries e LEFT JOIN properties p ON p.id = e.property_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY e.created_at DESC LIMIT 100';
@@ -97,7 +97,7 @@ $sql .= ' ORDER BY e.created_at DESC LIMIT 100';
 $stmt = $mysqli->prepare($sql);
 if ($stmt && $types !== '') { $stmt->bind_param($types, ...$params); }
 $stmt && $stmt->execute();
-$enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, e.email, e.phone, e.message, e.status, DATE_FORMAT(e.created_at,'%b %d, %Y %h:%i %p') created_at, NULL AS property_title FROM enquiries e ORDER BY e.created_at DESC LIMIT 100");
+$enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, e.email, e.phone, e.message, e.status, DATE_FORMAT(e.created_at,'%b %d, %Y %h:%i %p') created_at, NULL AS property_title, NULL AS property_id FROM enquiries e ORDER BY e.created_at DESC LIMIT 100");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -138,6 +138,23 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
          /* Buttons */
          .btn-primary{ background:var(--primary); border-color:var(--primary); }
          .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+        /* Modal theming to match dashboard / property view */
+        .modal-content{ border:1px solid var(--line); border-radius:16px; background:var(--card); box-shadow:0 12px 28px rgba(0,0,0,.12); }
+        .modal-header{ border-bottom:1px solid var(--line); }
+        .modal-footer{ border-top:1px solid var(--line); }
+        .info-label{ color:var(--muted); font-size:0.875rem; font-weight:600; margin-bottom:0.25rem; }
+        .info-value{ color:#111827; font-weight:600; }
+        .modal-body a{ color:var(--primary); text-decoration:none; }
+        .modal-body a:hover{ text-decoration:underline; }
+        .message-box{ border:1px solid var(--line); background:#fff; border-radius:12px; padding:10px 12px; color:#111827; }
+        .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
+        .divider{ height:1px; background:var(--line); margin:12px 0; }
+        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        .badge-status-success{ background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
+        .badge-status-warning{ background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
+        .badge-status-danger{ background:#fecaca; color:#991b1b; border:1px solid #fca5a5; }
         /* Mobile responsiveness */
         @media (max-width: 991.98px){
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
@@ -246,7 +263,15 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                         <?php echo htmlspecialchars($row['email'] ?: '—'); ?><br>
                                         <span class="small"><?php echo htmlspecialchars($row['phone'] ?: '—'); ?></span>
                                     </td>
-                                    <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['property_title'] ?: '—'); ?></span></td>
+                                    <td>
+                                        <?php if (!empty($row['property_id'])): ?>
+                                            <a href="../properties/view.php?id=<?php echo (int)$row['property_id']; ?>" class="badge bg-light text-dark border text-decoration-none">
+                                                <?php echo htmlspecialchars($row['property_title'] ?: ('#' . (int)$row['property_id'])); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-dark border">—</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="text-muted" style="max-width:360px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['message']); ?>"><?php echo htmlspecialchars($row['message']); ?></td>
                                     <td>
                                         <form method="post" class="d-flex align-items-center gap-2">
@@ -261,6 +286,11 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
                                     <td class="text-end actions-cell">
+                                        <button type="button" class="btn btn-sm btn-outline-primary btn-view-enquiry" 
+                                                title="View Enquiry"
+                                                data-enquiry='{"id":<?php echo (int)$row['id']; ?>,"name":<?php echo json_encode($row['name']); ?>,"email":<?php echo json_encode($row['email']); ?>,"phone":<?php echo json_encode($row['phone']); ?>,"message":<?php echo json_encode($row['message']); ?>,"status":<?php echo json_encode($row['status']); ?>,"created_at":<?php echo json_encode($row['created_at']); ?>, "property_title":<?php echo json_encode($row['property_title']); ?>, "property_id":<?php echo isset($row['property_id']) ? (int)$row['property_id'] : 'null'; ?>}'>
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
                                         <form method="post" onsubmit="return confirm('Delete this enquiry?')">
                                             <input type="hidden" name="action" value="delete">
                                             <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
@@ -276,7 +306,94 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
             </div>
         </div>
     </div>
+    <!-- View Enquiry Modal -->
+    <div class="modal fade" id="viewEnquiryModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enquiry Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="two-col">
+                        <div>
+                            <div class="info-label">Name</div>
+                            <div id="enqName" class="info-value">—</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Status</div>
+                            <div id="enqStatus" class="badge bg-light text-dark border rounded-pill px-3">—</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Email</div>
+                            <div id="enqEmail" class="info-value">—</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Phone</div>
+                            <div id="enqPhone" class="info-value">—</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Created</div>
+                            <div id="enqCreated" class="info-value">—</div>
+                        </div>
+                        <div>
+                            <div class="info-label">Property</div>
+                            <div id="enqProperty" class="info-value">—</div>
+                        </div>
+                        <div class="divider"></div>
+                        <div style="grid-column:1 / -1;">
+                            <div class="info-label">Message</div>
+                            <div id="enqMessage" class="message-box">—</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a id="enqPropertyBtn" href="#" class="btn btn-primary" style="display:none;">
+                        <i class="fa-solid fa-home me-1"></i>View Property
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('.btn-view-enquiry').forEach(function(btn){
+            btn.addEventListener('click', function(){
+                try{
+                    const data = JSON.parse(this.getAttribute('data-enquiry')) || {};
+                    document.getElementById('enqName').textContent = data.name || '—';
+                    const statusEl = document.getElementById('enqStatus');
+                    statusEl.textContent = data.status || '—';
+                    statusEl.classList.remove('badge-status-success','badge-status-warning','badge-status-danger');
+                    switch((data.status||'').toLowerCase()){
+                        case 'new': statusEl.classList.add('badge-status-warning'); break;
+                        case 'in progress': statusEl.classList.add('badge-status-warning'); break;
+                        case 'closed': statusEl.classList.add('badge-status-success'); break;
+                        default: break;
+                    }
+                    document.getElementById('enqEmail').textContent = data.email || '—';
+                    document.getElementById('enqPhone').textContent = data.phone || '—';
+                    document.getElementById('enqCreated').textContent = data.created_at || '—';
+                    const propEl = document.getElementById('enqProperty');
+                    const propBtn = document.getElementById('enqPropertyBtn');
+                    if (data.property_id) {
+                        const href = `../properties/view.php?id=${data.property_id}`;
+                        propEl.innerHTML = `<a href="${href}" class="text-decoration-none">${(data.property_title || ('#' + data.property_id))}</a>`;
+                        propBtn.href = href; propBtn.style.display = '';
+                    } else {
+                        propEl.textContent = '—';
+                        propBtn.style.display = 'none';
+                    }
+                    document.getElementById('enqMessage').textContent = data.message || '—';
+                    const modal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
+                    modal.show();
+                }catch(e){ console.error(e); }
+            });
+        });
+    });
+    </script>
 </body>
 </html>
 
