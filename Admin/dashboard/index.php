@@ -16,6 +16,19 @@ function fetchScalar($sql) {
 	return (int)($row[0] ?? 0);
 }
 
+function getPropertyImages($propertyId) {
+	$mysqli = db();
+	$stmt = $mysqli->prepare("SELECT image_url FROM property_images WHERE property_id = ? ORDER BY id ASC");
+	$stmt->bind_param("i", $propertyId);
+	$stmt->execute();
+	$result = $stmt->get_result();
+	$images = [];
+	while ($row = $result->fetch_assoc()) {
+		$images[] = $row;
+	}
+	return $images;
+}
+
 // Stats
 $totalProperties = fetchScalar("SELECT COUNT(*) FROM properties");
 $totalCategories = fetchScalar("SELECT COUNT(*) FROM categories");
@@ -71,7 +84,7 @@ if ($filters['category_id']) { $where[] = 'p.category_id = ?'; $types .= 'i'; $p
 if ($filters['listing_type']) { $where[] = 'p.listing_type = ?'; $types .= 's'; $params[] = $filters['listing_type']; }
 if ($filters['status']) { $where[] = 'p.status = ?'; $types .= 's'; $params[] = $filters['status']; }
 
-$sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name
+$sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, p.map_embed_link, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name
 	FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
@@ -80,8 +93,6 @@ $stmtRecent = $mysqli->prepare($sql);
 if ($stmtRecent && $types !== '') { $stmtRecent->bind_param($types, ...$params); }
 $stmtRecent && $stmtRecent->execute();
 $recentProperties = $stmtRecent ? $stmtRecent->get_result() : $mysqli->query("SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 8");
-$recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, %Y') as created_at FROM blogs ORDER BY created_at DESC LIMIT 5");
-$recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_at,'%b %d, %Y') as created_at FROM testimonials ORDER BY created_at DESC LIMIT 5");
 $recentActivity = $mysqli->query("SELECT a.id, COALESCE(u.username,'System') as actor, a.action, DATE_FORMAT(a.created_at,'%b %d, %Y %h:%i %p') as created_at FROM activity_logs a LEFT JOIN admin_users u ON u.id = a.admin_id ORDER BY a.created_at DESC LIMIT 10");
 // For toolbar chips
 $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name LIMIT 6");
@@ -149,24 +160,46 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
 		/* Drawer */
-		.drawer{ position:fixed; top:0; right:-420px; width:420px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .25s ease; z-index:1040; }
+		.drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
 		.drawer.open{ right:0; }
 		.drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
 		.drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
 		.drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
 		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
-		/* Modern list rows for blogs/testimonials */
-		.item-row{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-		.item-row:hover{ box-shadow:0 6px 18px rgba(0,0,0,.06); }
-		.item-title{ font-weight:600; }
-		.item-meta{ color:#6b7280; font-size:.9rem; }
+		/* Image gallery styles */
+		.drawer-image{ width:100%; height:250px; object-fit:contain; border-radius:8px; margin-bottom:1rem; background:#f8f9fa; border:1px solid #e9ecef; cursor:pointer; transition:transform 0.2s ease; }
+		.drawer-image:hover{ transform:scale(1.02); }
+		.drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; }
+		.drawer-image-thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; }
+		.drawer-image-thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
+		.drawer-image-thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
+		.more-images-btn{ 
+			background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+			color: white; 
+			display: flex; 
+			align-items: center; 
+			justify-content: center; 
+			font-size: 0.8rem; 
+			font-weight: 600;
+		}
+		.more-images-content{ text-align: center; }
+		.more-count{ font-size: 0.7rem; }
+		.drawer-map-container{ position: relative; width: 100%; height: 200px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 8px; }
+		.property-detail{ margin-bottom: 1rem; }
+		.property-detail .label{ font-size: 0.875rem; color: #6b7280; font-weight: 600; margin-bottom: 0.25rem; }
+		.property-detail .value{ font-size: 0.95rem; color: #111827; }
+		.two-col{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+		.divider{ height: 1px; background: #e5e7eb; margin: 1.5rem 0; }
 		/* Mobile responsiveness */
 		@media (max-width: 991.98px){ /* md breakpoint */
 			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
 			.sidebar.open{ left:12px; }
 			.content{ margin-left:0; }
 			.table{ font-size:.9rem; }
+			.drawer{ width:100vw; right:-100vw; }
 		}
 		@media (max-width: 575.98px){ /* xs */
 			.toolbar .row-top{ flex-direction:column; align-items:stretch; }
@@ -180,7 +213,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
 		<div class="container-fluid p-4">
-			<div class="row g-3 mb-3">
+			<div class="row mb-3">
 				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat">
@@ -253,7 +286,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				</div>
 			</div>
 
-			<div class="row g-4">
+			<div class="row">
 				<div class="col-xl-8">
 					<div class="card quick-card mb-4">
 						<div class="card-body">
@@ -289,48 +322,10 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 							</table>
 						</div>
 					</div>
-
-					<div class="row g-4">
-						<div class="col-md-6">
-							<div class="card h-100">
-								<div class="card-body">
-									<div class="d-flex align-items-center justify-content-between mb-3">
-										<div class="h6 mb-0">Recent Blogs</div>
-										<a href="#" class="small">View all</a>
-									</div>
-									<div>
-										<?php while($b = $recentBlogs->fetch_assoc()): ?>
-										<div class="item-row">
-											<span class="item-title"><?php echo htmlspecialchars($b['title']); ?></span>
-											<span class="item-meta"><?php echo $b['created_at']; ?></span>
-										</div>
-										<?php endwhile; ?>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-md-6">
-							<div class="card h-100">
-								<div class="card-body">
-									<div class="d-flex align-items-center justify-content-between mb-3">
-										<div class="h6 mb-0">Testimonials</div>
-										<a href="#" class="small">View all</a>
-									</div>
-									<div>
-										<?php while($t = $recentTestimonials->fetch_assoc()): ?>
-										<div class="item-row">
-											<span class="item-title"><?php echo htmlspecialchars($t['name']); ?></span>
-											<span class="text-warning"><?php echo str_repeat('★', (int)$t['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5-(int)$t['rating']); ?></span></span>
-										</div>
-										<?php endwhile; ?>
-									</div>
-								</div>
-							</div>
-						</div>
 				</div>
 
 				<div class="col-xl-4">
-					<div class="card h-100 sticky-side">
+					<div class="card h-95">
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-2">
 								<div class="h6 mb-0">Activity</div>
@@ -365,33 +360,244 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 	</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-		function openDrawer(data){
+		// Helper functions
+		function escapeHtml(text) {
+			const div = document.createElement('div');
+			div.textContent = text;
+			return div.innerHTML;
+		}
+		
+		function formatNumber(num) {
+			return Number(num || 0).toLocaleString();
+		}
+		
+		function formatDate(dateString) {
+			if (!dateString) return '—';
+			const date = new Date(dateString);
+			return date.toLocaleDateString('en-US', { 
+				year: 'numeric', 
+				month: 'short', 
+				day: 'numeric' 
+			});
+		}
+		
+		function getStatusBadgeClass(status) {
+			switch(status?.toLowerCase()) {
+				case 'active': return 'bg-success';
+				case 'inactive': return 'bg-secondary';
+				case 'pending': return 'bg-warning';
+				case 'sold': return 'bg-danger';
+				default: return 'bg-light text-dark';
+			}
+		}
+		
+		async function openDrawer(data){
 			const drawer = document.getElementById('propDrawer');
 			const backdrop = document.getElementById('drawerBackdrop');
 			document.getElementById('drawerTitle').textContent = data.title || 'Property';
 			const body = document.getElementById('drawerBody');
-			body.innerHTML = `
-				<div class="mb-3"><span class="text-muted small">Category</span><div><span class="badge bg-light text-dark border">${data.category_name || '—'}</span></div></div>
-				<div class="mb-3"><span class="text-muted small">Listing</span><div><span class="badge badge-soft">${data.listing_type || ''}</span></div></div>
-				<div class="row g-2">
-					<div class="col-6"><div class="text-muted small">Price</div><div class="fw-semibold">₹${Number(data.price||0).toLocaleString()}</div></div>
-					<div class="col-6"><div class="text-muted small">Area</div><div class="fw-semibold">${data.area || '—'} sqft</div></div>
-				</div>
-				<div class="mt-2"><i class="fa-solid fa-location-dot me-1"></i>${data.location || ''} <span class="text-muted">${data.landmark? '('+data.landmark+')' : ''}</span></div>
-				<hr/>
-				<div class="row g-2">
-					<div class="col-6"><div class="text-muted small">Config</div><div>${data.configuration || '—'}</div></div>
-					<div class="col-6"><div class="text-muted small">Furniture</div><div>${data.furniture_status || '—'}</div></div>
-					<div class="col-6"><div class="text-muted small">Ownership</div><div>${data.ownership_type || '—'}</div></div>
-					<div class="col-6"><div class="text-muted small">Facing</div><div>${data.facing || '—'}</div></div>
-					<div class="col-6"><div class="text-muted small">Parking</div><div>${data.parking || '—'}</div></div>
-					<div class="col-6"><div class="text-muted small">Balcony</div><div>${data.balcony || 0}</div></div>
-				</div>
-				<hr/>
-				<div><div class="text-muted small">Description</div><div>${(data.description || '').slice(0,800)}</div></div>
-			`;
+			
+			// Show loading state
+			body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading images...</p></div>';
+			
 			drawer.classList.add('open');
 			backdrop.classList.add('open');
+			
+			try {
+				// Fetch property images
+				const response = await fetch(`../properties/get_property_details.php?id=${data.id}`);
+				const result = await response.json();
+				const images = result.images || [];
+				
+				// Build enhanced content
+				const content = `
+					${images.length > 0 ? `
+						<div class="property-detail">
+							<div class="label">Property Images (${images.length})</div>
+							<img src="../../uploads/properties/${images[0].image_url}" 
+								 alt="Property Image" 
+								 class="drawer-image" 
+								 id="mainImage"
+								 loading="lazy">
+							${images.length > 1 ? `
+								<div class="drawer-image-gallery">
+									${images.slice(0, 4).map((img, index) => `
+										<img src="../../uploads/properties/${img.image_url}" 
+											 alt="Property Image ${index + 1}" 
+											 class="drawer-image-thumb ${index === 0 ? 'active' : ''}" 
+											 data-image-url="${img.image_url}"
+											 data-index="${index}"
+											 loading="lazy">
+									`).join('')}
+									${images.length > 4 ? `
+										<div class="drawer-image-thumb more-images-btn" 
+											 data-total="${images.length}" 
+											 data-remaining="${images.length - 4}">
+											<div class="more-images-content">
+												<i class="fa-solid fa-plus"></i>
+												<span class="more-count">+${images.length - 4}</span>
+											</div>
+										</div>
+									` : ''}
+								</div>
+							` : ''}
+						</div>
+						<div class="divider"></div>
+					` : ''}
+					
+					<div class="property-detail">
+						<div class="label">Category</div>
+						<div class="value badge bg-light text-dark border">${escapeHtml(data.category_name) || '—'}</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Listing</div>
+						<div class="value badge badge-soft">${escapeHtml(data.listing_type) || ''}</div>
+					</div>
+					<div class="two-col">
+						<div class="property-detail">
+							<div class="label">Price</div>
+							<div class="value price">₹${formatNumber(data.price)}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Area</div>
+							<div class="value area">${escapeHtml(data.area) || '—'} sqft</div>
+						</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Location</div>
+						<div class="value location">
+							<i class="fa-solid fa-location-dot"></i>
+							${escapeHtml(data.location) || ''} ${data.landmark ? '(' + escapeHtml(data.landmark) + ')' : ''}
+						</div>
+					</div>
+					<div class="divider"></div>
+					<div class="two-col">
+						<div class="property-detail">
+							<div class="label">Config</div>
+							<div class="value">${escapeHtml(data.configuration) || '—'}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Furniture</div>
+							<div class="value">${escapeHtml(data.furniture_status) || '—'}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Ownership</div>
+							<div class="value">${escapeHtml(data.ownership_type) || '—'}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Facing</div>
+							<div class="value">${escapeHtml(data.facing) || '—'}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Parking</div>
+							<div class="value">${escapeHtml(data.parking) || '—'}</div>
+						</div>
+						<div class="property-detail">
+							<div class="label">Balcony</div>
+							<div class="value">${data.balcony || 0}</div>
+						</div>
+					</div>
+					${data.description ? `
+						<div class="divider"></div>
+						<div class="property-detail">
+							<div class="label">Description</div>
+							<div class="value">${escapeHtml(data.description).substring(0, 300)}${data.description.length > 300 ? '...' : ''}</div>
+						</div>
+					` : ''}
+					${data.map_embed_link ? `
+						<div class="divider"></div>
+						<div class="property-detail">
+							<div class="label">Location Map</div>
+							<div class="value">
+								<div class="drawer-map-container">
+									<iframe 
+										src="${escapeHtml(data.map_embed_link)}" 
+										width="100%" 
+										height="100%" 
+										style="border:0; border-radius: 8px;" 
+										allowfullscreen="" 
+										loading="lazy" 
+										referrerpolicy="no-referrer-when-downgrade">
+									</iframe>
+								</div>
+								<small class="text-muted mt-2 d-block">
+									<i class="fa-solid fa-info-circle me-1"></i>
+									Interactive map showing property location
+								</small>
+							</div>
+						</div>
+					` : ''}
+					<div class="divider"></div>
+					<div class="property-detail">
+						<div class="label">Property ID</div>
+						<div class="value">#${data.id}</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Status</div>
+						<div class="value">
+							<span class="badge ${getStatusBadgeClass(data.status)}">${escapeHtml(data.status)}</span>
+						</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Created</div>
+						<div class="value">${formatDate(data.created_at)}</div>
+					</div>
+					<div class="divider"></div>
+					<div class="property-detail">
+						<div class="label">Actions</div>
+						<div class="value">
+							<div class="d-flex gap-2 flex-wrap">
+								<a href="../properties/view.php?id=${data.id}" class="btn btn-outline-primary btn-sm" target="_blank">
+									<i class="fa-solid fa-eye me-1"></i>View Details
+								</a>
+								<a href="../properties/edit.php?id=${data.id}" class="btn btn-outline-success btn-sm" target="_blank">
+									<i class="fa-solid fa-pen me-1"></i>Edit Property
+								</a>
+							</div>
+						</div>
+					</div>
+				`;
+				
+				body.innerHTML = content;
+				
+				// Add image gallery functionality
+				if (images.length > 1) {
+					document.querySelectorAll('.drawer-image-thumb').forEach((thumb, index) => {
+						thumb.addEventListener('click', function() {
+							if (this.classList.contains('more-images-btn')) return;
+							
+							// Update main image
+							const mainImage = document.getElementById('mainImage');
+							mainImage.src = this.src;
+							
+							// Update active thumbnail
+							document.querySelectorAll('.drawer-image-thumb').forEach(t => t.classList.remove('active'));
+							this.classList.add('active');
+						});
+					});
+				}
+				
+			} catch (error) {
+				console.error('Error loading property details:', error);
+				body.innerHTML = `
+					<div class="alert alert-warning">
+						<i class="fa-solid fa-exclamation-triangle me-2"></i>
+						Unable to load property details. Showing basic information.
+					</div>
+					<div class="property-detail">
+						<div class="label">Category</div>
+						<div class="value badge bg-light text-dark border">${escapeHtml(data.category_name) || '—'}</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Price</div>
+						<div class="value">₹${formatNumber(data.price)}</div>
+					</div>
+					<div class="property-detail">
+						<div class="label">Location</div>
+						<div class="value">${escapeHtml(data.location) || ''}</div>
+					</div>
+				`;
+			}
 		}
 		function closeDrawer(){
 			document.getElementById('propDrawer').classList.remove('open');
