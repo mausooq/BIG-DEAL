@@ -130,9 +130,42 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         /* Remove inner borders for body cells and override Bootstrap defaults */
         .table-inner td, .table-inner th{ border-left:0; border-right:0; } /*mausooq sooooooooooooooooooooooqqqqq*/
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
-        /* Actions cell (align start like Locations) */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:12px !important; padding-bottom:12px !important; }
-        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; padding:0; }
+        /* Actions column - fully integrated with table */
+        .actions-header{ 
+            position:sticky;
+            right:0;
+            background:white;
+            z-index:10;
+            text-align:center;
+            font-weight:600;
+            padding:12px 8px;
+            border-left:1px solid var(--line);
+        }
+        .actions-cell{ 
+            position:sticky;
+            right:0;
+            background:white;
+            z-index:10;
+            padding:8px 8px !important; 
+            min-width:120px;
+            max-width:120px;
+            text-align:center;
+            vertical-align:middle;
+            border-left:1px solid var(--line);
+            white-space:nowrap;
+        }
+        .actions-cell .btn{ 
+            width:28px; 
+            height:28px; 
+            display:inline-flex; 
+            align-items:center; 
+            justify-content:center; 
+            border-radius:4px; 
+            padding:0; 
+            margin:0 2px;
+            font-size:0.75rem;
+            border-width:1px;
+        }
         /* Drawer styles */
         .drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
         .drawer.open{ right:0; }
@@ -194,6 +227,27 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .property-detail .value.location i{ color:var(--muted); }
         .divider{ height:1px; background:var(--line); margin:1rem 0; }
         .two-col{ display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        /* Table zoom stability */
+        .table-responsive{
+            overflow-x:auto;
+            -webkit-overflow-scrolling:touch;
+            position:relative;
+        }
+        .table-responsive::-webkit-scrollbar{
+            height:8px;
+        }
+        .table-responsive::-webkit-scrollbar-track{
+            background:#f1f1f1;
+            border-radius:4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb{
+            background:#c1c1c1;
+            border-radius:4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover{
+            background:#a8a8a8;
+        }
+        
         /* Mobile responsiveness */
         @media (max-width: 991.98px){
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
@@ -204,6 +258,36 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             .drawer-image{ height:200px; object-fit:contain; }
             .drawer-image-gallery{ gap:6px; }
             .drawer-image-thumb{ width:70px; height:70px; }
+            .actions-header, .actions-cell{ min-width:100px; }
+            .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
+        }
+        
+        /* High zoom level stability */
+        @media (min-resolution: 1.5dppx) {
+            .table-responsive{
+                min-width:100%;
+            }
+            .actions-cell{
+                position:sticky;
+                right:0;
+                background:white;
+                z-index:10;
+                box-shadow:-2px 0 4px rgba(0,0,0,0.1);
+            }
+        }
+        
+        /* Zoom stability improvements */
+        .table{
+            table-layout:fixed;
+            width:100%;
+        }
+        
+        /* Ensure table rows maintain proper structure */
+        .table tbody tr{
+            border-top:1px solid var(--line);
+        }
+        .table tbody tr:hover{
+            background:#f9fafb;
         }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -374,16 +458,16 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                         <table class="table table-hover table-inner" id="propertiesTable">
                             <thead>
                                 <tr>
-                                    <th>Name</th>
-                                    <th>Category</th>
-                                    <th>Listing</th>
-                                    <th>Price</th>
-                                    <th>Location</th>
-                                    <th>Area</th>
-                                    <th>Config</th>
-                                    <th>Status</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                                    <th style="min-width:200px;">Name</th>
+                                    <th style="min-width:120px;">Category</th>
+                                    <th style="min-width:100px;">Listing</th>
+                                    <th style="min-width:120px;">Price</th>
+                                    <th style="min-width:150px;">Location</th>
+                                    <th style="min-width:80px;">Area</th>
+                                    <th style="min-width:80px;">Config</th>
+                                    <th style="min-width:100px;">Status</th>
+                                    <th style="min-width:100px;">Created</th>
+                                    <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -418,8 +502,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
                                     <td class="actions-cell">
-                                        <button class="btn btn-sm btn-outline-info me-1 btn-view" title="View Property"><i class="fa-solid fa-eye"></i></button>
-                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
+                                        <button class="btn btn-sm btn-outline-info btn-view" title="View Property"><i class="fa-solid fa-eye"></i></button>
+                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
                                         <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property"><i class="fa-solid fa-trash"></i></button>
                                     </td>
                                 </tr>

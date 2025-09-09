@@ -401,82 +401,118 @@ try {
         /* Cards (match dashboard) */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .content-card.card{ box-shadow:0 8px 24px rgba(0,0,0,.05); border:1px solid #eef2f7; }
-        .page-header.card{ box-shadow:0 8px 20px rgba(0,0,0,.05); border:1px solid var(--line); }
         /* Headings & muted text */
         .text-muted{ color:var(--muted)!important; }
-        /* Table (match dashboard) */
+        /* Table (match properties exactly) */
         .table{ --bs-table-bg:transparent; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr:hover{ background:#f9fafb; }
         .table td{ vertical-align: middle; }
+        /* Inner borders (match Properties exactly) */
+        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
+        /* Remove inner borders for body cells and override Bootstrap defaults */
+        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
+        /* Ensure consistent border thickness */
+        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
-        /* Inner-borders table styling to match Locations */
+        /* Table wrapper styling */
         .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
-        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
-        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
-        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
-        /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:0; padding-bottom:0; }
-        .actions-cell .btn{ width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; padding:0; }
+        /* Actions column - fully integrated with table */
+        .actions-header{ 
+            position:sticky;
+            right:0;
+            background:white;
+            z-index:10;
+            text-align:center;
+            font-weight:600;
+            padding:12px 8px;
+            border-left:1px solid var(--line);
+            border-bottom:1px solid var(--line) !important;
+        }
+        .actions-cell{ 
+            position:sticky;
+            right:0;
+            background:white;
+            z-index:10;
+            padding:8px 8px !important; 
+            min-width:120px;
+            max-width:120px;
+            text-align:center;
+            vertical-align:middle;
+            border-left:1px solid var(--line);
+            white-space:nowrap;
+        }
+        .actions-cell .btn{ 
+            width:28px; 
+            height:28px; 
+            display:inline-flex; 
+            align-items:center; 
+            justify-content:center; 
+            border-radius:4px; 
+            padding:0; 
+            margin:0 2px;
+            font-size:0.75rem;
+            border-width:1px;
+        }
         /* Badges */
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
-        /* Spacing utilities to mirror dashboard look */
-        .main-content .page-header{ margin-bottom:16px; }
         .content-card.card{ padding:16px; }
 
+        /* Table zoom stability */
+        .table-responsive{
+            overflow-x:auto;
+            -webkit-overflow-scrolling:touch;
+            position:relative;
+        }
+        .table-responsive::-webkit-scrollbar{
+            height:8px;
+        }
+        .table-responsive::-webkit-scrollbar-track{
+            background:#f1f1f1;
+            border-radius:4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb{
+            background:#c1c1c1;
+            border-radius:4px;
+        }
+        .table-responsive::-webkit-scrollbar-thumb:hover{
+            background:#a8a8a8;
+        }
+        
+        /* Zoom stability improvements */
+        .table{
+            table-layout:fixed;
+            width:100%;
+        }
+        
+        /* Ensure table rows maintain proper structure */
+        .table tbody tr{
+            border-top:1px solid var(--line);
+        }
+        .table tbody tr:hover{
+            background:#f9fafb;
+        }
+        
         /* Mobile responsiveness */
         @media (max-width: 991.98px){
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
             .sidebar.open{ left:12px; }
             .content{ margin-left:0; }
             .table{ font-size:.9rem; }
+            .actions-header, .actions-cell{ min-width:100px; }
+            .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:flex-start; }
-            .table thead th:last-child, .table tbody td:last-child{ text-align:left; }
+            .actions-cell{ justify-content:center; }
+            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
         }
 
-        .page-header {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .stats-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stats-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .stats-icon.primary { background: var(--primary); }
-        .stats-icon.success { background: linear-gradient(135deg, var(--success-color), #059669); }
-        .stats-icon.warning { background: linear-gradient(135deg, var(--warning-color), #d97706); }
 
         .content-card {
             background: white;
@@ -500,7 +536,6 @@ try {
 
         .table td {
             vertical-align: middle;
-            border-color: var(--border-color);
         }
 
         .badge {
@@ -725,53 +760,6 @@ try {
                 <?php endif; ?>
 
 
-            <div class="row g-3 mb-3">
-                <div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Categories</div>
-                                <div class="h4 mb-0"><?php echo $total_categories; ?></div>
-                            </div>
-                            <div class="text-warning"><i class="fa-solid fa-layer-group fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Properties</div>
-                                <div class="h4 mb-0"><?php echo $total_properties; ?></div>
-                            </div>
-                            <div class="text-primary"><i class="fa-solid fa-building fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Active Categories</div>
-                                <div class="h4 mb-0"><?php echo $categories_with_properties; ?></div>
-                            </div>
-                            <div class="text-success"><i class="fa-solid fa-chart-pie fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Enquiries</div>
-                                <div class="h4 mb-0"><?php echo fetchScalar('SELECT COUNT(*) FROM enquiries'); ?></div>
-                            </div>
-                            <div class="text-info"><i class="fa-regular fa-envelope fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Search toolbar -->
             <div class="toolbar mb-4">
@@ -793,7 +781,7 @@ try {
                 <!-- Categories Table -->
                 <div class="content-card card p-3">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h4 class="mb-0">All Categories</h4>
+                        <h5 class="mb-0">All Categories</h5>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh
@@ -809,20 +797,16 @@ try {
                             <table class="table table-hover table-inner" id="categoriesTable">
                                 <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Image</th>
-                                        <th>Category Name</th>
-                                        <th>Properties</th>
-                                        <th>Created Date</th>
-                                        <th>Actions</th>
+                                        <th style="min-width:80px;">Image</th>
+                                        <th style="min-width:200px;">Category Name</th>
+                                        <th style="min-width:120px;">Properties</th>
+                                        <th style="min-width:120px;">Created Date</th>
+                                        <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php while ($category = $categories_result->fetch_assoc()): ?>
                                         <tr>
-                                            <td>
-                                                <span class="badge bg-secondary">#<?php echo $category['id']; ?></span>
-                                            </td>
                                             <td>
                                                 <?php if (!empty($category['image'])): ?>
                                                     <img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" 
@@ -836,33 +820,29 @@ try {
                                                     </div>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <strong><?php echo htmlspecialchars($category['name']); ?></strong>
-                                            </td>
+                                            <td class="fw-semibold"><?php echo htmlspecialchars($category['name']); ?></td>
                                             <td>
                                                 <?php if ($category['property_count'] > 0): ?>
-                                                    <span class="badge bg-success"><?php echo $category['property_count']; ?> properties</span>
+                                                    <span class="badge bg-light text-dark border"><?php echo $category['property_count']; ?> properties</span>
                                                 <?php else: ?>
-                                                    <span class="badge bg-light text-dark">No properties</span>
+                                                    <span class="badge bg-light text-dark border">No properties</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <small class="text-muted"><?php echo $category['created_date']; ?></small>
-                                            </td>
+                                            <td class="text-muted"><?php echo $category['created_date']; ?></td>
                                             <td class="actions-cell">
-                                                <button class="btn btn-outline-secondary" 
+                                                <button class="btn btn-outline-secondary btn-sm" 
                                                         onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['image'] ?? ''); ?>')"
                                                         title="Edit Category">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
                                                 <?php if ($category['property_count'] == 0): ?>
-                                                    <button class="btn btn-outline-danger" 
+                                                    <button class="btn btn-outline-danger btn-sm" 
                                                             onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
                                                             title="Delete Category">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 <?php else: ?>
-                                                    <button class="btn btn-outline-secondary" disabled title="Cannot delete - category has properties">
+                                                    <button class="btn btn-outline-secondary btn-sm" disabled title="Cannot delete - category has properties">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 <?php endif; ?>
