@@ -269,21 +269,51 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
 
         /* Table wrapper */
         .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
-        /* Inner borders (no outer table border) */
+        /* Inner borders (match Properties) */
         .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
-        /* Uniform cell padding for consistent row height */
-        .table-inner thead th, .table-inner tbody td{ padding:0 }
-        /* Remove all inner borders for body cells */
-        .table-inner tbody td, .table-inner tbody th{ border:0 !important; }
-x
-        .table-inner tbody tr{ border:0 !important; }
+        .table-inner thead th, .table-inner tbody td{ padding:0; }
+        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
         .table-inner td, .table-inner th{ border-left:0; border-right:0; }
         .table-inner tbody tr{ position:static; }
         .table-inner tbody tr::after{ display:none !important; content:none; }
-        /* (removed unused .table-cards styles) */
-        /* Actions cell */
-        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; padding-top:14px !important; padding-bottom:14px !important; }
-        .actions-cell .btn{ width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px;}
+        /* Actions column - sticky like Properties */
+        .actions-header{ 
+            position:sticky;
+            right:0;
+            background:#fff;
+            z-index:10;
+            text-align:center;
+            font-weight:600;
+            padding:12px 8px;
+            border-left:1px solid var(--line);
+            border-bottom:1px solid var(--line) !important;
+        }
+        .actions-cell{ 
+            position:sticky;
+            right:0;
+            background:#fff;
+            z-index:10;
+            padding:8px 8px !important; 
+            min-width:120px;
+            max-width:120px;
+            text-align:center;
+            vertical-align:middle;
+            border-left:1px solid var(--line);
+            white-space:nowrap;
+            overflow:hidden;
+        }
+        .actions-cell .btn{ 
+            width:28px; 
+            height:28px; 
+            display:inline-flex; 
+            align-items:center; 
+            justify-content:center; 
+            border-radius:4px; 
+            padding:0; 
+            margin:0 2px;
+            font-size:0.75rem;
+            border-width:1px;
+        }
         /* Badges */
         .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
         /* Activity list */
@@ -301,7 +331,8 @@ x
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:flex-start; }
+            .actions-cell{ justify-content:center; }
+            .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
         }
     </style>
@@ -358,10 +389,10 @@ x
                                 <table class="table table-hover table-inner" id="locationsTable">
                                     <thead>
                                         <tr>
-                                            <th>Image</th>
-                                            <th>Place Name</th>
-                                            <th>Created</th>
-                                            <th>Actions</th>
+                                            <th style="min-width:80px;">Image</th>
+                                            <th style="min-width:200px;">Location Name</th>
+                                            <th style="min-width:120px;">Created</th>
+                                            <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -369,7 +400,7 @@ x
                                             <?php while ($location = $locations->fetch_assoc()): ?>
                                                 <tr data-location='<?php echo json_encode($location, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
                                                     <td>
-                                                        <?php if ($location['image']): ?>
+                                                        <?php if (!empty($location['image'])): ?>
                                                             <img src="../../uploads/locations/<?php echo htmlspecialchars($location['image']); ?>" alt="<?php echo htmlspecialchars($location['place_name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
                                                         <?php else: ?>
                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
@@ -379,8 +410,8 @@ x
                                                     </td>
                                                     <td class="fw-semibold"><?php echo htmlspecialchars($location['place_name']); ?></td>
                                                     <td class="text-muted"><?php echo date('M d, Y', strtotime($location['created_at'])); ?></td>
-                                                    <td class="text-end actions-cell">
-                                                        <button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editLocationModal" title="Edit Location"><i class="fa-solid fa-pen"></i></button>
+                                                    <td class="actions-cell">
+                                                        <button class="btn btn-sm btn-outline-secondary btn-edit me-1" data-bs-toggle="modal" data-bs-target="#editLocationModal" title="Edit Location"><i class="fa-solid fa-pen"></i></button>
                                                         <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteLocationModal" title="Delete Location"><i class="fa-solid fa-trash"></i></button>
                                                     </td>
                                                 </tr>

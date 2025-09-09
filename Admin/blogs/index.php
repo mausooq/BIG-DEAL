@@ -196,8 +196,10 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
 		.toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
 		/* Table */
-		.table{ --bs-table-bg:transparent; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
+		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
+		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+		.table thead th:last-child{ text-align:center; }
+		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }

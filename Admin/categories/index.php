@@ -462,6 +462,7 @@ try {
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         .content-card.card{ padding:16px; }
+        .small-title{ font-size:16px; }
 
         /* Table zoom stability */
         .table-responsive{
@@ -781,7 +782,7 @@ try {
                 <!-- Categories Table -->
                 <div class="content-card card p-3">
                     <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0">All Categories</h5>
+                        <h5 class="mb-0 small-title">All Categories</h5>
                         <div class="d-flex gap-2">
                             <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
                                 <i class="fas fa-sync-alt me-1"></i>Refresh

@@ -269,9 +269,9 @@ function getPlatformColor($platform) {
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		/* Table */
-		.table{ --bs-table-bg:transparent; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-		.table tbody tr{ border-top:1px solid var(--line); }
+		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
+		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; }

@@ -256,9 +256,12 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		/* Table */
-		.table{ --bs-table-bg:transparent; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-		.table tbody tr{ border-top:1px solid var(--line); }
+		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
+		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+		.table thead th.actions-cell{ text-align:center; padding-right:0; }
+		.table thead th:last-child{ text-align:center; padding-right:0; }
+		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
+		.table tbody td.actions-cell{ padding-right:0; display:flex; justify-content:center; }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
@@ -395,7 +398,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 										<tr data-test='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 											<td class="fw-semibold"><?php echo htmlspecialchars($row['name']); ?></td>
 											<td class="text-muted" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['feedback']); ?>"><?php echo htmlspecialchars($row['feedback']); ?></td>
-											<td><span class="badge bg-light text-dark border"><?php echo (int)$row['rating']; ?>/5</span></td>
+											<td><span class="text-warning"><?php echo str_repeat('★', (int)$row['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5 - (int)$row['rating']); ?></span></span></td>
 											<td>
 												<?php if ($row['profile_image']): ?>
 													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['profile_image']); ?>" alt="Profile" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">

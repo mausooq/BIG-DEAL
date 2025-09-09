@@ -254,13 +254,14 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		/* Table */
-		.table{ --bs-table-bg:transparent; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-		.table tbody tr{ border-top:1px solid var(--line); }
+		.table{ --bs-table-bg:transparent; border-collapse:collapse; margin-bottom:0; }
+		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
-		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; }
-		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; flex-shrink:0; }
+		.table thead th.actions-cell{ text-align:right; padding-right:99px; }
+		.table tbody td.actions-cell{ display:flex; gap:8px; justify-content:flex-end; align-items:center; white-space:nowrap; overflow:hidden; padding-right:8px; }
+		.table tbody td.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; flex-shrink:0; }
 		.actions-cell .btn:disabled{ opacity:0.5; cursor:not-allowed; }
 		/* FAQ content styling */
 		.faq-question{ font-weight:600; color:#111827; margin-bottom:4px; }
@@ -277,7 +278,7 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 		.order-cell{ width:60px; text-align:center; }
 		.question-cell{ width:30%; }
 		.answer-cell{ width:45%; }
-		.actions-cell{ width:15%; }
+		.actions-cell{ width:150px; }
 		#faqsTable{ width:100%; table-layout:fixed; }
 		/* Badges */
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
