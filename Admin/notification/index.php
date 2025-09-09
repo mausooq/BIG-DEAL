@@ -21,68 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	$action = $_POST['action'] ?? '';
 	$mysqli = db();
 
-	if ($action === 'add_notification') {
-		$message = trim($_POST['message'] ?? '');
-		if ($message) {
-			$stmt = $mysqli->prepare('INSERT INTO notifications (message) VALUES (?)');
-			if ($stmt) {
-				$stmt->bind_param('s', $message);
-				if ($stmt->execute()) {
-					$_SESSION['success_message'] = 'Notification added successfully!';
-				} else {
-					$_SESSION['error_message'] = 'Failed to add notification: ' . $mysqli->error;
-				}
-				$stmt->close();
-			} else {
-				$_SESSION['error_message'] = 'Database error: ' . $mysqli->error;
-			}
-		} else {
-			$_SESSION['error_message'] = 'Message is required.';
-		}
-	} elseif ($action === 'edit_notification') {
-		$id = (int)($_POST['id'] ?? 0);
-		$message = trim($_POST['message'] ?? '');
-		if ($id && $message) {
-			$stmt = $mysqli->prepare('UPDATE notifications SET message = ? WHERE id = ?');
-			if ($stmt) {
-				$stmt->bind_param('si', $message, $id);
-				if ($stmt->execute()) {
-					if ($stmt->affected_rows > 0) {
-						$_SESSION['success_message'] = 'Notification updated successfully!';
-					} else {
-						$_SESSION['error_message'] = 'No changes made or notification not found.';
-					}
-				} else {
-					$_SESSION['error_message'] = 'Failed to update notification: ' . $mysqli->error;
-				}
-				$stmt->close();
-			} else {
-				$_SESSION['error_message'] = 'Database error: ' . $mysqli->error;
-			}
-		} else {
-			$_SESSION['error_message'] = 'Message is required.';
-		}
-	} elseif ($action === 'delete_notification') {
-		$id = (int)($_POST['id'] ?? 0);
-		if ($id) {
-			$stmt = $mysqli->prepare('DELETE FROM notifications WHERE id = ?');
-			if ($stmt) {
-				$stmt->bind_param('i', $id);
-				if ($stmt->execute()) {
-					if ($stmt->affected_rows > 0) {
-						$_SESSION['success_message'] = 'Notification deleted successfully!';
-					} else {
-						$_SESSION['error_message'] = 'Notification not found.';
-					}
-				} else {
-					$_SESSION['error_message'] = 'Failed to delete notification: ' . $mysqli->error;
-				}
-				$stmt->close();
-			} else {
-				$_SESSION['error_message'] = 'Database error: ' . $mysqli->error;
-			}
-		}
-	} elseif ($action === 'mark_as_read') {
+	if ($action === 'mark_as_read') {
 		$id = (int)($_POST['id'] ?? 0);
 		if ($id) {
 			$stmt = $mysqli->prepare('UPDATE notifications SET is_read = TRUE WHERE id = ?');
@@ -204,7 +143,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Toolbar */
-		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+		.toolbar{ background:transparent; border:0; border-radius:0; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		/* Table */
 		.table{ --bs-table-bg:transparent; }
@@ -223,8 +162,72 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
 		/* Notification specific styles */
-		.notification-unread{ background:#fef3f2; border-left:4px solid var(--primary); }
-		.notification-read{ background:#f8fafc; }
+		.notification-card{ 
+			border:1px solid var(--line); 
+			border-radius:12px; 
+			padding:16px; 
+			margin-bottom:12px; 
+			background:#fff; 
+			transition:all 0.2s ease;
+			position:relative;
+		}
+		.notification-card:hover{ 
+			box-shadow:0 4px 12px rgba(0,0,0,.08); 
+			transform:translateY(-1px);
+		}
+		.notification-unread{ 
+			background:#fef3f2; 
+			border-left:4px solid var(--primary);
+			box-shadow:0 2px 8px rgba(225, 29, 42, 0.1);
+		}
+		.notification-read{ 
+			background:#f8fafc; 
+			border-left:4px solid #e5e7eb;
+		}
+		.notification-header{
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			margin-bottom:8px;
+		}
+		.notification-title{
+			font-weight:600;
+			font-size:0.95rem;
+			color:#111827;
+			margin:0;
+		}
+		.notification-meta{
+			display:flex;
+			align-items:center;
+			justify-content:space-between;
+			margin-top:8px;
+		}
+		.notification-time{
+			color:var(--muted);
+			font-size:0.85rem;
+		}
+		.notification-type{
+			display:inline-flex;
+			align-items:center;
+			gap:4px;
+			padding:4px 8px;
+			border-radius:6px;
+			font-size:0.75rem;
+			font-weight:500;
+		}
+		.notification-type.info{ background:#e0f2fe; color:#0277bd; }
+		.notification-type.warning{ background:#fff3e0; color:#f57c00; }
+		.notification-type.success{ background:#e8f5e8; color:#2e7d32; }
+		.notification-type.error{ background:#ffebee; color:#c62828; }
+		.unread-indicator{
+			position:absolute;
+			top:12px;
+			right:12px;
+			width:8px;
+			height:8px;
+			background:var(--primary);
+			border-radius:50%;
+		}
 		/* Mobile responsiveness */
 		@media (max-width: 991.98px){
 			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
@@ -258,213 +261,107 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 				</div>
 			<?php endif; ?>
 
-			<div class="row g-3 mb-3">
-				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Total Notifications</div>
-								<div class="h4 mb-0"><?php echo $totalNotifications; ?></div>
-							</div>
-							<div class="text-primary"><i class="fa-solid fa-bell fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Unread</div>
-								<div class="h4 mb-0"><?php echo $unreadNotifications; ?></div>
-							</div>
-							<div class="text-warning"><i class="fa-solid fa-bell-slash fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Properties</div>
-								<div class="h4 mb-0"><?php echo $totalProperties; ?></div>
-							</div>
-							<div class="text-success"><i class="fa-solid fa-building fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Enquiries</div>
-								<div class="h4 mb-0"><?php echo $totalEnquiries; ?></div>
-							</div>
-							<div class="text-info"><i class="fa-regular fa-envelope fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-			</div>
 
-			<!-- Search toolbar -->
+			<!-- Toolbar (Mark All Read only) -->
 			<div class="toolbar mb-4">
-				<div class="row-top">
-					<form class="d-flex flex-grow-1" method="get">
-						<div class="input-group">
-							<span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-							<input type="text" class="form-control" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Search notifications by message">
-						</div>
-						<button class="btn btn-primary ms-2" type="submit">Search</button>
-						<a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
-					</form>
-					<div class="d-flex gap-2">
-						<button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
-							<i class="fa-solid fa-check-double me-1"></i>Mark All Read
-						</button>
-						<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addNotificationModal">
-							<i class="fa-solid fa-circle-plus me-1"></i>Add Notification
-						</button>
-					</div>
+				<div class="row-top w-100" style="justify-content:flex-end;">
+					<button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
+						<i class="fa-solid fa-check-double me-1"></i>Mark All Read
+					</button>
 				</div>
 			</div>
 
-			<div class="row g-4">
-				<div class="col-xl-8">
-					<div class="card quick-card mb-4">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-3">
-								<div class="h6 mb-0">Notifications</div>
-								<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
-							</div>
-							<div class="table-responsive">
-								<table class="table align-middle" id="notificationsTable">
-									<thead>
-										<tr>
-											<th>Message</th>
-											<th>Status</th>
-											<th>Created</th>
-											<th>Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										<?php while($row = $notifications->fetch_assoc()): ?>
-										<tr data-notif='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>' class="<?php echo $row['is_read'] ? 'notification-read' : 'notification-unread'; ?>">
-											<td class="fw-semibold" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['message']); ?>"><?php echo htmlspecialchars($row['message']); ?></td>
-											<td>
-												<?php if ($row['is_read']): ?>
-													<span class="badge bg-success">Read</span>
-												<?php else: ?>
-													<span class="badge bg-warning">Unread</span>
-												<?php endif; ?>
-											</td>
-											<td class="text-muted"><?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?></td>
-											<td class="text-end actions-cell">
-												<?php if (!$row['is_read']): ?>
-													<button class="btn btn-sm btn-outline-success btn-mark-read me-2" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read"><i class="fa-solid fa-check"></i></button>
-												<?php endif; ?>
-												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editNotificationModal" title="Edit Notification"><i class="fa-solid fa-pen"></i></button>
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Notification"><i class="fa-solid fa-trash"></i></button>
-											</td>
-										</tr>
-										<?php endwhile; ?>
-									</tbody>
-								</table>
-							</div>
-
-							<?php if ($totalPages > 1): ?>
-							<nav aria-label="Notifications pagination">
-								<ul class="pagination justify-content-center">
-									<?php for ($i = 1; $i <= $totalPages; $i++): ?>
-									<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-										<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
-									</li>
-									<?php endfor; ?>
-								</ul>
-							</nav>
+			<div class="card quick-card mb-4">
+				<div class="card-body">
+					<div class="d-flex align-items-center justify-content-between mb-4">
+						<div class="h6 mb-0">Notifications</div>
+						<div class="d-flex align-items-center gap-3">
+							<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
+							<?php if ($unreadNotifications > 0): ?>
+								<span class="badge bg-danger"><?php echo $unreadNotifications; ?> unread</span>
 							<?php endif; ?>
 						</div>
 					</div>
-				</div>
-
-				<div class="col-xl-4">
-					<div class="card h-100 sticky-side">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-2">
-								<div class="h6 mb-0">Recent Notifications</div>
-								<span class="badge bg-light text-dark border">Latest</span>
-							</div>
-							<div class="list-activity">
-								<?php while($n = $recentNotifications->fetch_assoc()): ?>
-								<div class="item-row d-flex align-items-center justify-content-between" style="padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff;">
-									<div class="flex-grow-1">
-										<div class="item-title fw-semibold" style="font-size:0.9rem;"><?php echo htmlspecialchars(substr($n['message'], 0, 50)) . (strlen($n['message']) > 50 ? '...' : ''); ?></div>
-										<div class="text-muted small"><?php echo $n['created_at']; ?></div>
+					
+					<div class="notifications-container">
+						<?php 
+						$notifications->data_seek(0); // Reset pointer
+						while($row = $notifications->fetch_assoc()): 
+							// Determine notification type based on content
+							$type = 'info';
+							$icon = 'fa-bell';
+							if (stripos($row['message'], 'error') !== false || stripos($row['message'], 'failed') !== false) {
+								$type = 'error';
+								$icon = 'fa-exclamation-triangle';
+							} elseif (stripos($row['message'], 'success') !== false || stripos($row['message'], 'completed') !== false) {
+								$type = 'success';
+								$icon = 'fa-check-circle';
+							} elseif (stripos($row['message'], 'warning') !== false || stripos($row['message'], 'attention') !== false) {
+								$type = 'warning';
+								$icon = 'fa-exclamation-circle';
+							}
+						?>
+						<div class="notification-card <?php echo $row['is_read'] ? 'notification-read' : 'notification-unread'; ?>" data-notif='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+							<?php if (!$row['is_read']): ?>
+								<div class="unread-indicator"></div>
+							<?php endif; ?>
+							
+							<div class="notification-header">
+								<div class="d-flex align-items-center gap-3">
+									<div class="notification-type <?php echo $type; ?>">
+										<i class="fa-solid <?php echo $icon; ?>"></i>
+										<?php echo ucfirst($type); ?>
 									</div>
-									<?php if (!$n['is_read']): ?>
-										<span class="badge bg-warning">Unread</span>
-									<?php else: ?>
+									<?php if ($row['is_read']): ?>
 										<span class="badge bg-success">Read</span>
+									<?php else: ?>
+										<span class="badge bg-warning">Unread</span>
 									<?php endif; ?>
 								</div>
-								<?php endwhile; ?>
+							</div>
+							
+							<p class="notification-title"><?php echo htmlspecialchars($row['message']); ?></p>
+							
+							<div class="notification-meta">
+								<span class="notification-time">
+									<i class="fa-solid fa-clock me-1"></i>
+									<?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?>
+								</span>
+								
+								<?php if (!$row['is_read']): ?>
+									<button class="btn btn-sm btn-outline-success btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
+										<i class="fa-solid fa-check me-1"></i>Mark as Read
+									</button>
+								<?php endif; ?>
 							</div>
 						</div>
+						<?php endwhile; ?>
+						
+						<?php if ($totalCount == 0): ?>
+							<div class="text-center py-5">
+								<i class="fa-solid fa-bell-slash fa-3x text-muted mb-3"></i>
+								<h5 class="text-muted">No notifications found</h5>
+								<p class="text-muted">You're all caught up! No notifications to display.</p>
+							</div>
+						<?php endif; ?>
 					</div>
+
+					<?php if ($totalPages > 1): ?>
+					<nav aria-label="Notifications pagination" class="mt-4">
+						<ul class="pagination justify-content-center">
+							<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+							<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+								<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+							</li>
+							<?php endfor; ?>
+						</ul>
+					</nav>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Add Notification Modal -->
-	<div class="modal fade" id="addNotificationModal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Add New Notification</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<form method="POST">
-					<div class="modal-body">
-						<input type="hidden" name="action" value="add_notification">
-						<div class="mb-3">
-							<label class="form-label">Message</label>
-							<textarea class="form-control" name="message" rows="4" required placeholder="Enter notification message..."></textarea>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn btn-primary">Add Notification</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-
-	<!-- Edit Notification Modal -->
-	<div class="modal fade" id="editNotificationModal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Edit Notification</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<form method="POST">
-					<div class="modal-body">
-						<input type="hidden" name="action" value="edit_notification">
-						<input type="hidden" name="id" id="edit_id">
-						<div class="mb-3">
-							<label class="form-label">Message</label>
-							<textarea class="form-control" name="message" id="edit_message" rows="4" required placeholder="Enter notification message..."></textarea>
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn btn-primary">Update Notification</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
 
 	<!-- Mark as Read Modal -->
 	<div class="modal fade" id="markReadModal" tabindex="-1">
@@ -511,54 +408,15 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		</div>
 	</div>
 
-	<!-- Delete Confirmation Modal -->
-	<div class="modal fade" id="deleteModal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Confirm Delete</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<div class="modal-body">
-					<p>Are you sure you want to delete this notification? This action cannot be undone.</p>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-					<form method="POST" style="display: inline;">
-						<input type="hidden" name="action" value="delete_notification">
-						<input type="hidden" name="id" id="delete_id">
-						<button type="submit" class="btn btn-danger">Delete</button>
-					</form>
-				</div>
-			</div>
-		</div>
-	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function(){
-			document.querySelectorAll('.btn-edit').forEach(btn => {
-				btn.addEventListener('click', function(){
-					const tr = this.closest('tr');
-					const data = JSON.parse(tr.getAttribute('data-notif'));
-					document.getElementById('edit_id').value = data.id;
-					document.getElementById('edit_message').value = data.message || '';
-				});
-			});
-
 			document.querySelectorAll('.btn-mark-read').forEach(btn => {
 				btn.addEventListener('click', function(){
-					const tr = this.closest('tr');
-					const data = JSON.parse(tr.getAttribute('data-notif'));
+					const card = this.closest('.notification-card');
+					const data = JSON.parse(card.getAttribute('data-notif'));
 					document.getElementById('mark_read_id').value = data.id;
-				});
-			});
-
-			document.querySelectorAll('.btn-delete').forEach(btn => {
-				btn.addEventListener('click', function(){
-					const tr = this.closest('tr');
-					const data = JSON.parse(tr.getAttribute('data-notif'));
-					document.getElementById('delete_id').value = data.id;
 				});
 			});
 
