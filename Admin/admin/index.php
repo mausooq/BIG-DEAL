@@ -506,6 +506,25 @@ $totalPages = (int)ceil($totalCount / $limit);
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function(){
+			// If edit_id is present in URL, pre-open edit modal for that admin
+			(function(){
+				const params = new URLSearchParams(window.location.search);
+				const editId = params.get('edit_id');
+				if (editId) {
+					const row = Array.from(document.querySelectorAll('#adminUsersTable tbody tr')).find(tr => {
+						try { return JSON.parse(tr.getAttribute('data-admin')).id == editId; } catch(e) { return false; }
+					});
+					if (row) {
+						const data = JSON.parse(row.getAttribute('data-admin'));
+						document.getElementById('edit_id').value = data.id;
+						document.getElementById('edit_username').value = data.username || '';
+						document.getElementById('edit_email').value = data.email || '';
+						document.getElementById('edit_password').value = '';
+						const modal = new bootstrap.Modal(document.getElementById('editAdminModal'));
+						modal.show();
+					}
+				}
+			})();
 			document.querySelectorAll('.btn-edit').forEach(btn => {
 				btn.addEventListener('click', function(){
 					const tr = this.closest('tr');
