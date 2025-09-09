@@ -54,6 +54,31 @@ $images_stmt->execute();
 $existing_images = $images_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $images_stmt->close();
 
+// Determine if property is already featured
+$feat_check = $mysqli->prepare("SELECT id FROM features WHERE property_id = ? LIMIT 1");
+$feat_check->bind_param('i', $property_id);
+$feat_check->execute();
+$feat_res = $feat_check->get_result();
+$isFeatured = (bool)$feat_res->fetch_assoc();
+$feat_check->close();
+
+// Handle feature toggle (add/remove)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'toggle_feature') {
+    if ($isFeatured) {
+        $delf = $mysqli->prepare('DELETE FROM features WHERE property_id = ?');
+        $delf && $delf->bind_param('i', $property_id) && $delf->execute() && $delf->close();
+        logActivity($mysqli, 'Removed feature', 'Property ID: ' . $property_id);
+        header('Location: edit.php?id=' . $property_id . '&feat_removed=1');
+        exit();
+    } else {
+        $addf = $mysqli->prepare('INSERT INTO features (property_id) VALUES (?)');
+        if ($addf) { $addf->bind_param('i', $property_id); $addf->execute(); $addf->close(); }
+        logActivity($mysqli, 'Added feature', 'Property ID: ' . $property_id);
+        header('Location: edit.php?id=' . $property_id . '&feat_added=1');
+        exit();
+    }
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -249,9 +274,12 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                     <p class="text-muted mb-0">Update property details and images</p>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="../features/index.php?property_id=<?php echo $property_id; ?>" class="btn btn-outline-info">
-                        <i class="fa-solid fa-star me-2"></i>Manage Features
-                    </a>
+                    <form method="post">
+                        <input type="hidden" name="action" value="toggle_feature">
+                        <button type="submit" class="btn <?php echo $isFeatured ? 'btn-success' : 'btn-outline-primary'; ?>">
+                            <i class="fa-solid fa-star me-2"></i><?php echo $isFeatured ? 'Featured' : 'Add Feature'; ?>
+                        </button>
+                    </form>
                     <a href="index.php" class="btn btn-outline-secondary">
                         <i class="fa-solid fa-arrow-left me-2"></i>Back to Properties
                     </a>

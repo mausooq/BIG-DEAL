@@ -73,6 +73,7 @@ function fetchScalar($sql) { $m = db(); $r = $m->query($sql); $row = $r ? $r->fe
 $totalProperties = fetchScalar("SELECT COUNT(*) FROM properties");
 $availableCount = fetchScalar("SELECT COUNT(*) FROM properties WHERE status='Available'");
 $soldRentedCount = fetchScalar("SELECT COUNT(*) FROM properties WHERE status IN ('Sold','Rented')");
+$featuredCount = fetchScalar("SELECT COUNT(*) FROM features");
 
 // Dropdown data
 $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name");
@@ -387,6 +388,13 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                             </div>
                             <div class="text-danger"><i class="fa-solid fa-arrow-trend-down fa-lg"></i></div>
                         </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <a href="../features/index.php" class="btn btn-outline-primary btn-lg">
+                            <i class="fa-solid fa-star me-2"></i>Featured
+                        </a>
                     </div>
                 </div>
             </div>

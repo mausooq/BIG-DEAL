@@ -117,8 +117,7 @@ $totalCountRow = $countStmt ? $countStmt->get_result()->fetch_row() : [0];
 $totalCount = (int)($totalCountRow[0] ?? 0);
 $totalPages = (int)ceil($totalCount / $limit);
 
-// Recent
-$recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, f.id as feature_id FROM features f LEFT JOIN properties p ON f.property_id = p.id ORDER BY f.id DESC LIMIT 8");
+// Recent section removed per request
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -221,53 +220,7 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 				</div>
 			<?php endif; ?>
 
-			<div class="row g-3 mb-3">
-				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Features</div>
-								<div class="h4 mb-0"><?php echo $totalFeatures; ?></div>
-							</div>
-							<div class="text-primary"><i class="fa-solid fa-star fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Blogs</div>
-								<div class="h4 mb-0"><?php echo $totalBlogs; ?></div>
-							</div>
-							<div class="text-danger"><i class="fa-solid fa-rss fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Properties</div>
-								<div class="h4 mb-0"><?php echo $totalProperties; ?></div>
-							</div>
-							<div class="text-success"><i class="fa-solid fa-building fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Enquiries</div>
-								<div class="h4 mb-0"><?php echo $totalEnquiries; ?></div>
-							</div>
-							<div class="text-warning"><i class="fa-regular fa-envelope fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-			</div>
+			<!-- Quick Access removed -->
 
 			<!-- Search toolbar -->
 			<div class="toolbar mb-4">
@@ -280,14 +233,14 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 						<button class="btn btn-primary ms-2" type="submit">Search</button>
 						<a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
 					</form>
-					<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFeatureModal">
+					<!-- <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addFeatureModal">
 						<i class="fa-solid fa-circle-plus me-1"></i>Add Feature
-					</button>
+					</button> -->
 				</div>
 			</div>
 
 			<div class="row g-4">
-				<div class="col-xl-8">
+				<div class="col-12">
 					<div class="card quick-card mb-4">
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-3">
@@ -301,7 +254,6 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 											<th>Property</th>
 											<th>Location</th>
 											<th>Price</th>
-											<th>Feature ID</th>
 											<th class="text-start">Actions</th>
 										</tr>
 									</thead>
@@ -320,7 +272,6 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 													<span class="text-muted">N/A</span>
 												<?php endif; ?>
 											</td>
-											<td class="text-muted">#<?php echo $row['feature_id']; ?></td>
 											<td class="text-start actions-cell">
 												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Remove Feature"><i class="fa-solid fa-trash"></i></button>
 											</td>
@@ -344,28 +295,6 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 						</div>
 					</div>
 				</div>
-
-				<div class="col-xl-4">
-					<div class="card h-100 sticky-side">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-2">
-								<div class="h6 mb-0">Recent Features</div>
-								<span class="badge bg-light text-dark border">Latest</span>
-							</div>
-							<div class="list-activity">
-								<?php while($f = $recentFeatures->fetch_assoc()): ?>
-								<div class="item-row d-flex align-items-center justify-content-between" style="padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff;">
-									<div class="d-flex align-items-center gap-2">
-										<i class="fa-solid fa-building text-primary"></i>
-										<span class="item-title fw-semibold"><?php echo htmlspecialchars($f['property_title'] ?? 'N/A'); ?></span>
-									</div>
-									<span class="text-muted small"><?php echo htmlspecialchars($f['location'] ?? 'N/A'); ?></span>
-								</div>
-								<?php endwhile; ?>
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -386,11 +315,23 @@ $recentFeatures = $mysqli->query("SELECT p.title as property_title, p.location, 
 							<select class="form-select" name="property_id" required>
 								<option value="">Choose a property...</option>
 								<?php
+								// Get already featured property IDs
+								$featuredProperties = $mysqli->query("SELECT property_id FROM features");
+								$featuredIds = [];
+								while($featured = $featuredProperties->fetch_assoc()) {
+									$featuredIds[] = $featured['property_id'];
+								}
+								
 								$properties = $mysqli->query("SELECT id, title, location, price FROM properties ORDER BY title ASC");
 								while($prop = $properties->fetch_assoc()):
+									$isFeatured = in_array($prop['id'], $featuredIds);
 								?>
-									<option value="<?php echo $prop['id']; ?>" <?php echo ($property_id_from_url == $prop['id']) ? 'selected' : ''; ?>>
-										<?php echo htmlspecialchars($prop['title']); ?> - <?php echo htmlspecialchars($prop['location']); ?> (₹<?php echo number_format($prop['price']); ?>)
+									<option value="<?php echo $prop['id']; ?>" <?php echo ($property_id_from_url == $prop['id']) ? 'selected' : ''; ?> <?php echo $isFeatured ? 'disabled' : ''; ?>>
+										<?php if($isFeatured): ?>
+											✅ <?php echo htmlspecialchars($prop['title']); ?> - <?php echo htmlspecialchars($prop['location']); ?> (₹<?php echo number_format($prop['price']); ?>) - Already Featured
+										<?php else: ?>
+											<?php echo htmlspecialchars($prop['title']); ?> - <?php echo htmlspecialchars($prop['location']); ?> (₹<?php echo number_format($prop['price']); ?>)
+										<?php endif; ?>
 									</option>
 								<?php endwhile; ?>
 							</select>
