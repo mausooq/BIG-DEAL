@@ -3,22 +3,16 @@
  * Topbar component for Admin pages
  * Usage:
  *   require_once __DIR__ . '/topbar.php';
- *   renderAdminTopbar($username, $searchPlaceholder = 'Search anything...');
+ *   renderAdminTopbar($username);
  */
 
 if (!function_exists('renderAdminTopbar')) {
-	function renderAdminTopbar(string $username = 'Admin', string $searchPlaceholder = 'Search anything...'): void {
+	function renderAdminTopbar(string $username = 'Admin'): void {
 		?>
 		<nav class="navbar navbar-light bg-white border-bottom sticky-top">
 			<div class="container-fluid">
 				<button class="btn btn-outline-secondary d-md-none" id="sidebarToggle" type="button" title="Toggle menu"><i class="fa-solid fa-bars"></i></button>
-				<form class="d-none d-md-flex" role="search">
-					<div class="input-group">
-						<span class="input-group-text bg-white"><i class="fa-solid fa-magnifying-glass"></i></span>
-						<input class="form-control border-start-0" type="search" placeholder="<?php echo htmlspecialchars($searchPlaceholder); ?>">
-					</div>
-				</form>
-				<div class="d-flex align-items-center gap-3">
+				<div class="d-flex align-items-center gap-3 ms-auto">
 					<i class="fa-regular fa-bell"></i>
 					<div class="d-flex align-items-center gap-2">
 						<div class="fw-semibold"><?php echo htmlspecialchars($username); ?></div>

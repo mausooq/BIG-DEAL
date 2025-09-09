@@ -181,11 +181,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	exit();
 }
 
-// Stats
-$totalAdmins = fetchScalar('SELECT COUNT(*) FROM admin_users');
-$totalBlogs = fetchScalar('SELECT COUNT(*) FROM blogs');
-$totalProperties = fetchScalar('SELECT COUNT(*) FROM properties');
-$totalEnquiries = fetchScalar('SELECT COUNT(*) FROM enquiries');
 
 // Get admin users with search and pagination
 $mysqli = db();
@@ -230,8 +225,6 @@ $totalCountRow = $countStmt ? $countStmt->get_result()->fetch_row() : [0];
 $totalCount = (int)($totalCountRow[0] ?? 0);
 $totalPages = (int)ceil($totalCount / $limit);
 
-// Recent admin users
-$recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, %Y') as created_at FROM admin_users ORDER BY created_at DESC LIMIT 8");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -269,7 +262,6 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 		/* Cards */
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
-		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Toolbar */
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
@@ -284,9 +276,6 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 		.actions-cell .btn:disabled{ opacity:0.5; cursor:not-allowed; }
 		/* Badges */
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
-		/* Activity list */
-		.list-activity{ max-height:420px; overflow:auto; }
-		.sticky-side{ position:sticky; top:96px; }
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
@@ -307,7 +296,7 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('admin'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Search admin users...'); ?>
+		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
 		<div class="container-fluid p-4">
 			<?php if (isset($_SESSION['success_message'])): ?>
@@ -323,53 +312,6 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 				</div>
 			<?php endif; ?>
 
-			<div class="row g-3 mb-3">
-				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Total Admins</div>
-								<div class="h4 mb-0"><?php echo $totalAdmins; ?></div>
-							</div>
-							<div class="text-primary"><i class="fa-solid fa-users fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Enquiries</div>
-								<div class="h4 mb-0"><?php echo $totalEnquiries; ?></div>
-							</div>
-							<div class="text-success"><i class="fa-regular fa-envelope fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Properties</div>
-								<div class="h4 mb-0"><?php echo $totalProperties; ?></div>
-							</div>
-							<div class="text-info"><i class="fa-solid fa-building fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Blogs</div>
-								<div class="h4 mb-0"><?php echo $totalBlogs; ?></div>
-							</div>
-							<div class="text-warning"><i class="fa-solid fa-rss fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-			</div>
 
 			<!-- Search toolbar -->
 			<div class="toolbar mb-4">
@@ -388,87 +330,61 @@ $recentAdmins = $mysqli->query("SELECT username, DATE_FORMAT(created_at,'%b %d, 
 				</div>
 			</div>
 
-			<div class="row g-4">
-				<div class="col-xl-8">
-					<div class="card quick-card mb-4">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-3">
-								<div class="h6 mb-0">Admin Users</div>
-								<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
-							</div>
-							<div class="table-responsive">
-								<table class="table align-middle" id="adminUsersTable">
-									<thead>
-										<tr>
-								<th>Username</th>
-								<th>Email</th>
-								<th>Status</th>
-								<th>Created</th>
-								<th>Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										<?php while($row = $adminUsers->fetch_assoc()): ?>
-										<tr data-admin='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-								<td class="fw-semibold"><?php echo htmlspecialchars($row['username']); ?></td>
-								<td class="text-muted"><?php echo htmlspecialchars($row['email']); ?></td>
-								<td>
-									<?php if ($row['status'] == 'active'): ?>
-										<span class="badge bg-success">Active</span>
-									<?php else: ?>
-										<span class="badge bg-warning">Suspended</span>
-									<?php endif; ?>
-								</td>
-								<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-								<td class="text-end actions-cell">
-									<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><i class="fa-solid fa-pen"></i></button>
-									<?php if ($row['status'] == 'active'): ?>
-										<button class="btn btn-sm btn-outline-warning btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><i class="fa-solid fa-ban"></i></button>
-									<?php else: ?>
-										<button class="btn btn-sm btn-outline-success btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><i class="fa-solid fa-check"></i></button>
-									<?php endif; ?>
-								</td>
-										</tr>
-										<?php endwhile; ?>
-									</tbody>
-								</table>
-							</div>
-
-							<?php if ($totalPages > 1): ?>
-							<nav aria-label="Admin users pagination">
-								<ul class="pagination justify-content-center">
-									<?php for ($i = 1; $i <= $totalPages; $i++): ?>
-									<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-										<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
-									</li>
-									<?php endfor; ?>
-								</ul>
-							</nav>
-							<?php endif; ?>
-						</div>
+			<div class="card mb-4">
+				<div class="card-body">
+					<div class="d-flex align-items-center justify-content-between mb-3">
+						<div class="h6 mb-0">Admin Users</div>
+						<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
 					</div>
-				</div>
-
-				<div class="col-xl-4">
-					<div class="card h-100 sticky-side">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-2">
-								<div class="h6 mb-0">Recent Admin Users</div>
-								<span class="badge bg-light text-dark border">Latest</span>
-							</div>
-							<div class="list-activity">
-								<?php while($a = $recentAdmins->fetch_assoc()): ?>
-								<div class="item-row d-flex align-items-center justify-content-between" style="padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff;">
-									<div>
-										<span class="item-title fw-semibold"><?php echo htmlspecialchars($a['username']); ?></span>
-										<div class="text-muted small"><?php echo htmlspecialchars($a['created_at']); ?></div>
-									</div>
-									<span class="text-primary"><i class="fa-solid fa-user"></i></span>
-								</div>
+					<div class="table-responsive">
+						<table class="table align-middle" id="adminUsersTable">
+							<thead>
+								<tr>
+									<th>Username</th>
+									<th>Email</th>
+									<th>Status</th>
+									<th>Created</th>
+									<th>Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<?php while($row = $adminUsers->fetch_assoc()): ?>
+								<tr data-admin='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+									<td class="fw-semibold"><?php echo htmlspecialchars($row['username']); ?></td>
+									<td class="text-muted"><?php echo htmlspecialchars($row['email']); ?></td>
+									<td>
+										<?php if ($row['status'] == 'active'): ?>
+											<span class="badge bg-success">Active</span>
+										<?php else: ?>
+											<span class="badge bg-warning">Suspended</span>
+										<?php endif; ?>
+									</td>
+									<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
+									<td class="text-end actions-cell">
+										<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><i class="fa-solid fa-pen"></i></button>
+										<?php if ($row['status'] == 'active'): ?>
+											<button class="btn btn-sm btn-outline-warning btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><i class="fa-solid fa-ban"></i></button>
+										<?php else: ?>
+											<button class="btn btn-sm btn-outline-success btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><i class="fa-solid fa-check"></i></button>
+										<?php endif; ?>
+									</td>
+								</tr>
 								<?php endwhile; ?>
-							</div>
-						</div>
+							</tbody>
+						</table>
 					</div>
+
+					<?php if ($totalPages > 1): ?>
+					<nav aria-label="Admin users pagination">
+						<ul class="pagination justify-content-center">
+							<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+							<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+								<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+							</li>
+							<?php endfor; ?>
+						</ul>
+					</nav>
+					<?php endif; ?>
 				</div>
 			</div>
 		</div>

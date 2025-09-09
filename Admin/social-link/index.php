@@ -307,7 +307,7 @@ function getPlatformColor($platform) {
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('social-media'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Search social media links...'); ?>
+		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
 
 		<div class="container-fluid p-4">
 			<?php if (isset($_SESSION['success_message'])): ?>
