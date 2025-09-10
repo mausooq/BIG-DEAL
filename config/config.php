@@ -1,11 +1,11 @@
 <?php
 
-// Database configuration
-define('DB_HOST', 'localhost');
+// Database configuration (Hostinger remote host so it works locally and on server)
+define('DB_HOST', 'auth-db672.hstgr.io');
 define('DB_PORT', '3306');
-define('DB_NAME', 'big deal');
-define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_NAME', 'u232955123_bigdeal');
+define('DB_USER', 'u232955123_bigdeal');
+define('DB_PASS', 'Brandweave@24');
 
 
 function getMysqliConnection() {
@@ -39,5 +39,5 @@ function testDatabaseConnection() {
 }
 
 
-// testDatabaseConnection();
+testDatabaseConnection();
 ?>
