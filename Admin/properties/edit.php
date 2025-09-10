@@ -108,7 +108,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Update property
         $sql = "UPDATE properties SET title=?, description=?, listing_type=?, price=?, location=?, landmark=?, area=?, configuration=?, category_id=?, furniture_status=?, ownership_type=?, facing=?, parking=?, balcony=?, status=?, map_embed_link=? WHERE id=?";
         $stmt = $mysqli->prepare($sql);
-        $stmt->bind_param('sssdsisssssssissi', $title, $description, $listing_type, $price, $location, $landmark, $area, $configuration, $category_id, $furniture_status, $ownership_type, $facing, $parking, $balcony, $status, $map_embed_link, $property_id);
+        // Types: s s s d s s d s i s s s s i s s i
+        $stmt->bind_param('sssdssdsissssissi', $title, $description, $listing_type, $price, $location, $landmark, $area, $configuration, $category_id, $furniture_status, $ownership_type, $facing, $parking, $balcony, $status, $map_embed_link, $property_id);
         
         if (!$stmt->execute()) { 
             throw new Exception('Failed to update property: ' . $mysqli->error); 
@@ -277,7 +278,7 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                     <form method="post">
                         <input type="hidden" name="action" value="toggle_feature">
                         <button type="submit" class="btn <?php echo $isFeatured ? 'btn-success' : 'btn-outline-primary'; ?>">
-                            <i class="fa-solid fa-star me-2"></i><?php echo $isFeatured ? 'Featured' : 'Add Feature'; ?>
+                            <i class="fa-solid fa-star me-2"></i><?php echo $isFeatured ? 'Featured' : 'Add to Feature'; ?>
                         </button>
                     </form>
                     <a href="index.php" class="btn btn-outline-secondary">
@@ -536,14 +537,40 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
         });
 
         imageUploadArea.addEventListener('click', (e) => {
-            if (e.target === imageUploadArea || e.target.closest('.image-upload-area')) {
-                imageInput.click();
-            }
+            // Open file dialog when clicking anywhere in the drop area except the button or the file input
+            const isInteractive = e.target.closest('button, .btn, input[type="file"]');
+            if (isInteractive) return;
+            e.preventDefault();
+            e.stopPropagation();
+            imageInput.click();
         });
 
-        imageInput.addEventListener('change', (e) => {
-            handleFiles(e.target.files);
-        });
+        // Prevent bubbling from the "Choose Images" button so it doesn't trigger any parent handlers
+        const chooseBtn = document.querySelector('.image-upload-area .btn-outline-primary');
+        if (chooseBtn) {
+            chooseBtn.addEventListener('click', function(e){ e.stopPropagation(); });
+        }
+
+        let isHandlingSelection = false;
+        function onFilesSelected(e){
+            if (isHandlingSelection) return;
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            isHandlingSelection = true;
+            // Use rAF to ensure FileList is ready across browsers (first-time selection)
+            requestAnimationFrame(() => {
+                try {
+                    handleFiles(files);
+                } finally {
+                    // Allow re-selecting the same files immediately
+                    imageInput.value = '';
+                    isHandlingSelection = false;
+                }
+            });
+        }
+
+        imageInput.addEventListener('change', onFilesSelected, { passive: true });
+        imageInput.addEventListener('input', onFilesSelected, { passive: true });
 
         function handleFiles(files) {
             const maxSize = 5 * 1024 * 1024; // 5MB
