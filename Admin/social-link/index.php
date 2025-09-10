@@ -138,11 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	exit();
 }
 
-// Stats
-$totalSocialLinks = fetchScalar('SELECT COUNT(*) FROM social_links');
-$totalBlogs = fetchScalar('SELECT COUNT(*) FROM blogs');
-$totalProperties = fetchScalar('SELECT COUNT(*) FROM properties');
-$totalEnquiries = fetchScalar('SELECT COUNT(*) FROM enquiries');
 
 // Get social media links with search and pagination
 $mysqli = db();
@@ -263,7 +258,6 @@ function getPlatformColor($platform) {
 		.input-group-text{ border-color:var(--line); }
 		/* Cards */
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
-		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Toolbar */
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -323,53 +317,6 @@ function getPlatformColor($platform) {
 				</div>
 			<?php endif; ?>
 
-			<div class="row g-3 mb-3">
-				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Social Links</div>
-								<div class="h4 mb-0"><?php echo $totalSocialLinks; ?></div>
-							</div>
-							<div class="text-primary"><i class="fa-solid fa-share-nodes fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Properties</div>
-								<div class="h4 mb-0"><?php echo $totalProperties; ?></div>
-							</div>
-							<div class="text-info"><i class="fa-solid fa-building fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Blogs</div>
-								<div class="h4 mb-0"><?php echo $totalBlogs; ?></div>
-							</div>
-							<div class="text-warning"><i class="fa-solid fa-rss fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat">
-						<div class="card-body d-flex align-items-center justify-content-between">
-							<div>
-								<div class="text-muted small">Enquiries</div>
-								<div class="h4 mb-0"><?php echo $totalEnquiries; ?></div>
-							</div>
-							<div class="text-success"><i class="fa-regular fa-envelope fa-lg"></i></div>
-						</div>
-					</div>
-				</div>
-			</div>
 
 			<!-- Search toolbar -->
 			<div class="toolbar mb-4">

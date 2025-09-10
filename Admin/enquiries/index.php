@@ -66,11 +66,6 @@ $filters = [
 
 $mysqli = db();
 
-// Stats
-function fetchScalar($sql){ $m = db(); $r = $m->query($sql); $row = $r ? $r->fetch_row() : [0]; return (int)($row[0] ?? 0); }
-$totalEnquiries = fetchScalar('SELECT COUNT(*) FROM enquiries');
-$newEnquiries = fetchScalar("SELECT COUNT(*) FROM enquiries WHERE status='New'");
-$closedEnquiries = fetchScalar("SELECT COUNT(*) FROM enquiries WHERE status='Closed'");
 
 // Build query
 $where = [];
@@ -119,8 +114,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .text-primary{ color:var(--primary)!important; }
         .input-group .form-control{ border-color:var(--line); }
         .input-group-text{ border-color:var(--line); }
-        .card{ border:0; border-radius:var(--radius); background:var(--card); }
-        .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
+		.card{ border:0; border-radius:var(--radius); background:var(--card); }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr{ border-top:1px solid var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
@@ -183,41 +177,6 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                 </div>
             <?php endif; ?>
 
-            <div class="row g-3 mb-3">
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Enquiries</div>
-                                <div class="h4 mb-0"><?php echo $totalEnquiries; ?></div>
-                            </div>
-                            <div class="text-primary"><i class="fa-regular fa-envelope fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">New</div>
-                                <div class="h4 mb-0"><?php echo $newEnquiries; ?></div>
-                            </div>
-                            <div class="text-success"><i class="fa-solid fa-circle-dot fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-4">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Closed</div>
-                                <div class="h4 mb-0"><?php echo $closedEnquiries; ?></div>
-                            </div>
-                            <div class="text-danger"><i class="fa-regular fa-circle-check fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Search toolbar -->
             <div class="toolbar mb-4">
