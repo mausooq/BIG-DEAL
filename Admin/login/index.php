@@ -184,22 +184,23 @@ function hashPassword($password) {
     
     <style>
         :root {
-            --primary-color: #6366f1;
-            --primary-dark: #4f46e5;
-            --secondary-color: #8b5cf6;
-            --accent-color: #06b6d4;
-            --success-color: #10b981;
-            --danger-color: #ef4444;
+            /* Big Deal brand theme (black, white, red) */
+            --primary-color: #000000; /* black */
+            --primary-dark: #111111;
+            --secondary-color: #e31b23; /* logo red */
+            --accent-color: #e31b23;
+            --success-color: #12b981;
+            --danger-color: #e31b23;
             --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f8fafc;
-            --border-color: #e2e8f0;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --dark-color: #0b0b0b;
+            --light-color: #ffffff;
+            --border-color: #e5e7eb;
+            --text-primary: #0f172a; /* slate-900 */
+            --text-secondary: #6b7280; /* slate-500 */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.06);
+            --shadow-md: 0 6px 16px rgb(0 0 0 / 0.08);
+            --shadow-lg: 0 12px 24px rgb(0 0 0 / 0.12);
+            --shadow-xl: 0 20px 40px rgb(0 0 0 / 0.14);
         }
 
         * {
@@ -210,7 +211,9 @@ function hashPassword($password) {
 
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background:
+                radial-gradient(1200px 600px at -20% -10%, #fafafa 0%, #ffffff 60%),
+                radial-gradient(900px 500px at 120% 120%, #f6f7f9 10%, #ffffff 70%);
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -219,72 +222,29 @@ function hashPassword($password) {
             overflow-x: hidden;
         }
 
-        /* Animated background elements */
+        /* Minimal brand background stripes */
         .bg-shapes {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 0;
-        }
-
-        .shape {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape:nth-child(1) {
-            width: 80px;
-            height: 80px;
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 120px;
-            height: 120px;
-            top: 60%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .shape:nth-child(3) {
-            width: 60px;
-            height: 60px;
-            bottom: 20%;
-            left: 20%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { 
-                transform: translateY(0px) rotate(0deg); 
-                opacity: 0.7;
-            }
-            50% { 
-                transform: translateY(-20px) rotate(180deg); 
-                opacity: 1;
-            }
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(135deg, rgba(227,27,35,0.06) 0 25%, transparent 25% 50%, rgba(0,0,0,0.04) 50% 75%, transparent 75% 100%);
+            background-size: 28px 28px;
+            mask-image: radial-gradient(closest-side, #000 60%, transparent 100%);
         }
 
         .login-container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
+            background: var(--light-color);
+            border-radius: 18px;
             box-shadow: var(--shadow-xl);
-            padding: 3rem;
+            padding: 1.5rem;
             width: 100%;
-            max-width: 450px;
+            max-width: 380px;
             position: relative;
             z-index: 1;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-color);
             transform: translateY(0);
-            transition: all 0.3s ease;
+            transition: box-shadow .25s ease, transform .25s ease;
         }
 
         .login-container:hover {
@@ -298,38 +258,33 @@ function hashPassword($password) {
             top: 0;
             left: 0;
             right: 0;
-            height: 6px;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
-            border-radius: 24px 24px 0 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 18px 18px 0 0;
         }
 
         .logo-section {
             text-align: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
-        .logo-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.5rem;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .logo-icon i {
-            font-size: 2.5rem;
-            color: white;
+        .logo-img {
+            width: 110px;
+            height: auto;
+            display: block;
+            margin: 0 auto 0.75rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow-sm);
+            object-fit: contain;
+            background: #fff;
+            padding: 6px;
         }
 
         .logo-title {
             color: var(--text-primary);
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .logo-subtitle {
@@ -339,7 +294,7 @@ function hashPassword($password) {
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.1rem;
             position: relative;
         }
 
@@ -357,38 +312,38 @@ function hashPassword($password) {
 
         .form-control {
             width: 100%;
-            padding: 1rem 1rem 1rem 3rem;
-            border: 2px solid var(--border-color);
+            padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+            border: 1.5px solid var(--border-color);
             border-radius: 12px;
             font-size: 1rem;
-            transition: all 0.3s ease;
-            background: var(--light-color);
+            transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+            background: #fafafa;
             color: var(--text-primary);
             font-weight: 500;
         }
 
         .form-control:focus {
             outline: none;
-            border-color: var(--primary-color);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-            transform: translateY(-2px);
+            border-color: var(--secondary-color);
+            background: #ffffff;
+            box-shadow: 0 0 0 4px rgba(227, 27, 35, 0.12);
+            transform: translateY(-1px);
         }
 
         .input-icon {
             position: absolute;
-            left: 1rem;
+            left: 0.9rem;
             top: 50%;
             transform: translateY(-50%);
-            color: var(--primary-color);
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            transition: color .2s ease, transform .2s ease;
             z-index: 2;
         }
 
         .form-control:focus ~ .input-icon {
             color: var(--secondary-color);
-            transform: translateY(-50%) scale(1.1);
+            transform: translateY(-50%) scale(1.08);
         }
 
         .password-toggle {
@@ -401,7 +356,7 @@ function hashPassword($password) {
             color: var(--text-secondary);
             cursor: pointer;
             font-size: 1.2rem;
-            transition: all 0.3s ease;
+            transition: color .2s ease, background .2s ease, transform .2s ease;
             padding: 0.5rem;
             border-radius: 50%;
             z-index: 2;
@@ -414,43 +369,35 @@ function hashPassword($password) {
 
         .btn-login {
             width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
+            padding: 0.95rem 1rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: 1px solid var(--primary-dark);
             border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: .2px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
             position: relative;
             overflow: hidden;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
         }
 
         .btn-login::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,.14), transparent);
+            transform: translateX(-100%);
+            transition: transform .45s ease;
         }
 
-        .btn-login:hover::before {
-            left: 100%;
-        }
+        .btn-login:hover::before { transform: translateX(100%); }
 
-        .btn-login:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-lg);
-        }
+        .btn-login:hover { background: var(--secondary-color); border-color: var(--secondary-color); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
 
-        .btn-login:active {
-            transform: translateY(-1px);
-        }
+        .btn-login:active { transform: translateY(0); }
 
         .btn-login:disabled {
             opacity: 0.7;
@@ -481,15 +428,9 @@ function hashPassword($password) {
             }
         }
 
-        .alert-danger {
-            background: linear-gradient(135deg, #fef2f2, #fee2e2);
-            color: var(--danger-color);
-        }
+        .alert-danger { background: #fef2f2; color: var(--danger-color); }
 
-        .alert-success {
-            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
-            color: var(--success-color);
-        }
+        .alert-success { background: #f0fdf4; color: var(--success-color); }
 
         .forgot-password {
             text-align: center;
@@ -497,7 +438,7 @@ function hashPassword($password) {
         }
 
         .forgot-password a {
-            color: var(--primary-color);
+            color: var(--secondary-color);
             text-decoration: none;
             font-size: 0.9rem;
             font-weight: 500;
@@ -505,7 +446,7 @@ function hashPassword($password) {
         }
 
         .forgot-password a:hover {
-            color: var(--secondary-color);
+            color: var(--primary-color);
             text-decoration: underline;
         }
 
@@ -593,7 +534,7 @@ function hashPassword($password) {
         }
 
         ::-webkit-scrollbar-thumb {
-            background: var(--primary-color);
+            background: var(--secondary-color);
             border-radius: 4px;
         }
 
@@ -611,9 +552,7 @@ function hashPassword($password) {
 
     <div class="login-container">
         <div class="logo-section">
-            <div class="logo-icon">
-                <i class="fas fa-shield-alt"></i>
-            </div>
+            <img src="../../assets/logo.jpg" alt="Big Deal" class="logo-img" />
             <h1 class="logo-title">Admin Panel</h1>
             <p class="logo-subtitle">Big Deal Management System</p>
         </div>
@@ -678,14 +617,7 @@ function hashPassword($password) {
             <a href="#" onclick="showForgotPassword()">Forgot Password?</a>
         </div>
 
-        <div class="security-info">
-            <i class="fas fa-shield-alt"></i>
-            <span>Secure login with encrypted authentication</span>
-        </div>
-
-        <div class="footer">
-            <p>&copy; 2024 Big Deal. All rights reserved.</p>
-        </div>
+        
     </div>
 
     <!-- Bootstrap JS -->
