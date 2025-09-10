@@ -115,8 +115,12 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .input-group .form-control{ border-color:var(--line); }
         .input-group-text{ border-color:var(--line); }
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
-        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .table tbody tr{ border-top:1px solid var(--line); }
+        /* Table: row-level separators to avoid gaps */
+        .table{ --bs-table-bg:transparent; border-collapse:collapse; }
+        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+        .table tbody td{ border-top:0; border-bottom:0; }
+        .table tbody tr{ box-shadow: inset 0 1px 0 var(--line); }
+        .table tbody tr:last-child{ box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line); }
         .table tbody tr:hover{ background:#f9fafb; }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -127,7 +131,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
         .toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
          /* Actions cell */
-         .actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
+         .actions-cell{ display:flex; gap:8px; justify-content:center; }
          .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
          /* Buttons */
          .btn-primary{ background:var(--primary); border-color:var(--primary); }
@@ -211,7 +215,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                     <th>Message</th>
                                     <th>Status</th>
                                     <th>Created</th>
-                                    <th class="text-end">Actions</th>
+                                    <th class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -244,7 +248,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                         </form>
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
-                                    <td class="text-end actions-cell">
+                                    <td class="actions-cell">
                                         <button type="button" class="btn btn-sm btn-outline-primary btn-view-enquiry" 
                                                 title="View Enquiry"
                                                 data-enquiry='{"id":<?php echo (int)$row['id']; ?>,"name":<?php echo json_encode($row['name']); ?>,"email":<?php echo json_encode($row['email']); ?>,"phone":<?php echo json_encode($row['phone']); ?>,"message":<?php echo json_encode($row['message']); ?>,"status":<?php echo json_encode($row['status']); ?>,"created_at":<?php echo json_encode($row['created_at']); ?>, "property_title":<?php echo json_encode($row['property_title']); ?>, "property_id":<?php echo isset($row['property_id']) ? (int)$row['property_id'] : 'null'; ?>}'>
@@ -355,5 +359,4 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
     </script>
 </body>
 </html>
-
 
