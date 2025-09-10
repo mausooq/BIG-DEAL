@@ -265,7 +265,10 @@ function getPlatformColor($platform) {
 		/* Table */
 		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
 		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
-		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
+		/* Use row-level separators to avoid tiny gaps between cells */
+		.table tbody td{ border-top:0; border-bottom:0; }
+		.table tbody tr{ box-shadow: inset 0 1px 0 var(--line); }
+		.table tbody tr:last-child{ box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; }

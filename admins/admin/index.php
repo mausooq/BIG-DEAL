@@ -266,9 +266,12 @@ $totalPages = (int)ceil($totalCount / $limit);
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		/* Table */
-		.table{ --bs-table-bg:transparent; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-		.table tbody tr{ border-top:1px solid var(--line); }
+		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
+		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
+		/* Use row-level separators to avoid tiny gaps and remove default cell bottom borders */
+		.table tbody td{ border-top:0; border-bottom:0; }
+		.table tbody tr{ box-shadow: inset 0 1px 0 var(--line); }
+		.table tbody tr:last-child{ box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; }
