@@ -250,7 +250,10 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 		/* Table */
 		.table{ --bs-table-bg:transparent; border-collapse:collapse; margin-bottom:0; }
 		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
-		.table tbody td{ border-top:1px solid var(--line); border-bottom:0; }
+		/* Use row-level separators to avoid tiny gaps between cells */
+		.table tbody td{ border-top:0; border-bottom:0; }
+		.table tbody tr{ box-shadow: inset 0 1px 0 var(--line); }
+		.table tbody tr:last-child{ box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Actions cell */
 		.table thead th.actions-cell{ text-align:right; padding-right:99px; }

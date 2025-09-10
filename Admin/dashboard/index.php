@@ -214,7 +214,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 
 		<div class="container-fluid p-4">
 			<div class="row mb-3">
-				<div class="col-12"><div class="h5 mb-0">Quick Access</div></div>
+				<div class="col-12"><div class="h5 " style="margin-top: -20px;">Quick Access</div></div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat">
 						<div class="card-body d-flex align-items-center justify-content-between">

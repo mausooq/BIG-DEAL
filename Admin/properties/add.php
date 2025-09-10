@@ -156,36 +156,76 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root{ --bg:#F1EFEC; --card:#ffffff; --muted:#6b7280; --line:#e9eef5; --brand-dark:#2f2f2f; --primary:#e11d2a; --primary-600:#b91c1c; --radius:16px; }
+        /* Base */
+        :root{
+            --bg:#F1EFEC;/* page background */
+            --card:#ffffff;/* surfaces */
+            --muted:#6b7280;/* secondary text */
+            --line:#e9eef5;/* borders */
+            --brand-dark:#2f2f2f;/* logo dark */
+            --primary:#e11d2a;/* logo red accent */
+            --primary-600:#b91c1c;/* darker red hover */
+            --radius:16px;
+        }
         body{ background:var(--bg); color:#111827; }
-        .content{ margin-left:284px; }
-        /* Sidebar styles copied from dashboard */
+        .content{ margin-left:260px; }
+        /* Sidebar */
         .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .content{ margin-left:284px; } /* account for sidebar margin */
         .brand{ font-weight:700; font-size:1.25rem; }
         .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
         .list-group-item i{ width:18px; }
         .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
         .list-group-item:hover{ background:#f8fafc; }
+        /* Topbar */
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .text-primary{ color:var(--primary)!important; }
+        .input-group .form-control{ border-color:var(--line); }
+        .input-group-text{ border-color:var(--line); }
+        /* Cards */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
-        .form-control, .form-select{ border-radius:12px; border:1px solid var(--line); }
-        .form-control:focus, .form-select:focus{ border-color:#3b82f6; box-shadow:0 0 0 0.2rem rgba(59, 130, 246, 0.25); }
+        .quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
+         /* Form elements */
+         .form-control, .form-select{ border-radius:12px; border:1px solid var(--line); }
+         .form-control:focus, .form-select:focus{ border-color:var(--line); box-shadow:none; }
+         .form-control::placeholder{ font-weight:300; color:#9ca3af; opacity:0.8; }
+         .form-label{ font-weight:600; color:#111827; }
+         .form-text{ color:var(--muted); font-size:0.875rem; }
+        /* Buttons */   
         .btn{ border-radius:12px; font-weight:500; }
-        .btn-primary{ background:#3b82f6; border-color:#3b82f6; }
-        .btn-primary:hover{ background:#2563eb; border-color:#2563eb; }
+        .btn-primary{ background:var(--primary); border-color:var(--primary); }
+        .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+        .btn-outline-secondary{ color: var(--muted); border-color: var(--line); }
+        .btn-outline-secondary:hover{ background-color: var(--muted); border-color: var(--muted); color:#fff; }
+        /* Section styling */
         .section-header{ border-bottom:2px solid var(--line); padding-bottom:1rem; margin-bottom:2rem; }
         .section-title{ color:var(--brand-dark); font-weight:600; font-size:1.1rem; }
-        .required{ color:#dc2626; }
+        .required{ color:var(--primary); font-weight:600; }
+        /* Image upload */
         .image-preview{ max-width:150px; max-height:150px; object-fit:cover; border-radius:8px; margin:5px; }
         .image-upload-area{ border:2px dashed var(--line); border-radius:12px; padding:2rem; text-align:center; background:#f8fafc; transition:all 0.3s ease; }
-        .image-upload-area:hover{ border-color:#3b82f6; background:#f0f9ff; }
-        .image-upload-area.dragover{ border-color:#3b82f6; background:#f0f9ff; }
+        .image-upload-area:hover{ border-color:var(--primary); background:#fef2f2; }
+        .image-upload-area.dragover{ border-color:var(--primary); background:#fef2f2; }
+        /* Typography */
+        .h4, .h5, .h6{ font-weight:600; color:#111827; }
+        .text-muted{ color:var(--muted)!important; }
+        .fw-semibold{ font-weight:600; }
+        /* Alerts */
+        .alert{ border:0; border-radius:12px; }
+        .alert-success{ background:#f0f9ff; color:#1e40af; border-left:4px solid #3b82f6; }
+        .alert-danger{ background:#fef2f2; color:#dc2626; border-left:4px solid var(--primary); }
         /* Mobile responsiveness */
         @media (max-width: 991.98px){
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
             .sidebar.open{ left:12px; }
             .content{ margin-left:0; }
+        }
+        @media (max-width: 575.98px){
+            .section-title{ font-size:1rem; }
+            .form-label{ font-size:0.9rem; }
         }
     </style>
 </head>
@@ -198,7 +238,7 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
             <!-- Header -->
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div>
-                    <h2 class="h4 mb-1">Add New Property</h2>
+                    <h2 class="h4 mb-1 fw-semibold">Add New Property</h2>
                     <p class="text-muted mb-0">Fill in the details to add a new property listing</p>
                 </div>
                 <a href="index.php" class="btn btn-outline-secondary">
@@ -374,13 +414,13 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                     <div class="col-lg-4">
                         <div class="card">
                             <div class="card-body">
-                                <h6 class="fw-semibold mb-3"><i class="fa-solid fa-lightbulb me-2"></i>Tips for Better Listings</h6>
+                                <h6 class="fw-semibold mb-3 text-primary"><i class="fa-solid fa-lightbulb me-2"></i>Tips for Better Listings</h6>
                                 <ul class="list-unstyled small text-muted">
-                                    <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Use descriptive and attractive titles</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Add high-quality images</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Include accurate measurements</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Mention nearby amenities</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-success me-2"></i>Be specific about location</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Use descriptive and attractive titles</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Add high-quality images</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Include accurate measurements</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Mention nearby amenities</li>
+                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Be specific about location</li>
                                 </ul>
                             </div>
                         </div>
