@@ -10,6 +10,7 @@ if (!function_exists('renderAdminSidebar')) {
 	function renderAdminSidebar(string $active = ''): void {
 		$items = [
 			['key' => 'dashboard', 'icon' => 'fa-grip', 'label' => 'Dashboard', 'href' => '../dashboard/'],
+			['key' => 'sales-analytics', 'icon' => 'fa-chart-line', 'label' => 'Sales Analytics', 'href' => '../sales-analytics/'],
 			['key' => 'properties', 'icon' => 'fa-building-circle-check', 'label' => 'Properties', 'href' => '../properties/'],
 			['key' => 'categories', 'icon' => 'fa-tags', 'label' => 'Categories', 'href' => '../categories/'],
 			['key' => 'location', 'icon' => 'fa-map-location-dot', 'label' => 'Locations', 'href' => '../location/'],
