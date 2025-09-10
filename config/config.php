@@ -39,5 +39,5 @@ function testDatabaseConnection() {
 }
 
 
-testDatabaseConnection();
+// testDatabaseConnection();
 ?>
