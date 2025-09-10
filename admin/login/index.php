@@ -35,6 +35,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Attempt to authenticate user and get user data
             $user_data = authenticateUser($username, $password);
             if ($user_data) {
+                // Regenerate session ID to prevent session fixation
+                if (session_status() === PHP_SESSION_ACTIVE) {
+                    session_regenerate_id(true);
+                }
+
                 // Set session variables
                 $_SESSION['admin_logged_in'] = true;
                 $_SESSION['admin_username'] = $username;

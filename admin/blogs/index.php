@@ -1,11 +1,5 @@
 <?php
-session_start();
-require_once '../../config/config.php';
-
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-	header('Location: ../login/');
-	exit();
-}
+require_once __DIR__ . '/../auth.php';
 
 function db() { return getMysqliConnection(); }
 

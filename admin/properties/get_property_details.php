@@ -1,14 +1,10 @@
 <?php
-session_start();
-require_once '../../config/config.php';
+require_once __DIR__ . '/../auth.php';
 
 // Set JSON header
 header('Content-Type: application/json');
 
-if (!isset($_SESSION['admin_logged_in']) || $_SESSION['admin_logged_in'] !== true) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
-    exit();
-}
+// At this point, auth.php already ensured user is logged in
 
 function db() { return getMysqliConnection(); }
 
