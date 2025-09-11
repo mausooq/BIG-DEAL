@@ -82,7 +82,7 @@ $sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.
 	FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
-
+	
 $stmtRecent = $mysqli->prepare($sql);
 if ($stmtRecent && $types !== '') { $stmtRecent->bind_param($types, ...$params); }
 $stmtRecent && $stmtRecent->execute();
@@ -147,8 +147,30 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Badges */
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
-		/* Activity list */
-		.list-activity{ max-height:420px; overflow:auto; }
+		/* Activity feed container */
+		.list-activity {
+			max-height: 420px;
+			overflow-y: auto;
+			padding-right: 4px; /* lil breathing room */
+			margin-right: 0;    /* remove awkward gap */
+		}
+		/* Each activity item */
+		.activity-item {
+			font-size: 14px;
+			padding: 6px 0;
+			border-bottom: 1px solid #f1f1f1;
+		}
+		/* Smooth + minimal scrollbar */
+		.list-activity::-webkit-scrollbar {
+			width: 6px;
+		}
+		.list-activity::-webkit-scrollbar-thumb {
+			background: #d1d5db;
+			border-radius: 10px;
+		}
+		.list-activity::-webkit-scrollbar-track {
+			background: transparent;
+		}
 		.sticky-side{ position:sticky; top:96px; }
 		/* Filters */
 		.form-label{ font-weight:600; }
@@ -271,12 +293,12 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				<div class="row-bottom">
 					<?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
 						<?php $isActive = ($filters['listing_type'] ?? '') === $lt; ?>
-						<a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?lt=<?php echo urlencode($lt); ?>"><?php echo $lt; ?></a>
+						<a class="chip js-filter <?php echo $isActive ? 'active' : ''; ?>" href="#" data-filter="lt" data-value="<?php echo htmlspecialchars($lt, ENT_QUOTES); ?>" role="button"><?php echo $lt; ?></a>
 					<?php endforeach; ?>
 					<span class="divider"></span>
 					<?php while($pc = $pillCategories->fetch_assoc()): ?>
 						<?php $isC = (string)($filters['category_id'] ?? '') === (string)$pc['id']; ?>
-						<a class="chip <?php echo $isC ? 'active' : ''; ?>" href="?cat=<?php echo (int)$pc['id']; ?>"><?php echo htmlspecialchars($pc['name']); ?></a>
+						<a class="chip js-filter <?php echo $isC ? 'active' : ''; ?>" href="#" data-filter="cat" data-value="<?php echo (int)$pc['id']; ?>" role="button"><?php echo htmlspecialchars($pc['name']); ?></a>
 					<?php endwhile; ?>
 				</div>
 			</div>
@@ -328,13 +350,11 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				<div class="col-xl-4">
 					<div class="card h-95">
 						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-2">
-								<div class="h6 mb-0">Activity</div>
-								<span class="badge bg-light text-dark border">Logs</span>
-							</div>
+							<div class="h6 mb-2">Activity</div>
+							<a href="../activity-logs/index.php" class="badge bg-light text-dark border text-decoration-none mb-2 d-inline-block" role="button">Logs</a>
 							<div class="list-activity">
 								<?php while($a = $recentActivity->fetch_assoc()): ?>
-								<div class="d-flex align-items-start gap-2 mb-3">
+								<div class="d-flex align-items-start gap-2 mb-3 activity-item">
 									<div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center" style="width:36px;height:36px;"><i class="fa-solid fa-user"></i></div>
 									<div>
 										<div class="small"><strong><?php echo htmlspecialchars($a['actor']); ?></strong> - <?php echo htmlspecialchars($a['action']); ?></div>
@@ -606,6 +626,29 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		}
 		// attach events
 		document.addEventListener('DOMContentLoaded', function(){
+			// Toggleable chip filters for listing type (lt) and category (cat)
+			document.querySelectorAll('.js-filter').forEach(function(chip){
+				chip.addEventListener('click', function(e){
+					e.preventDefault();
+					var param = this.getAttribute('data-filter');
+					var val = this.getAttribute('data-value');
+					var url = new URL(window.location.href);
+					var params = url.searchParams;
+					// Normalize keys: our PHP accepts lt and cat as lightweight params
+					var key = param === 'lt' ? 'lt' : (param === 'cat' ? 'cat' : param);
+					var currently = params.get(key);
+					if (currently && currently.toString() === val.toString()) {
+						// Clicking the active chip clears this filter
+						params.delete(key);
+					} else {
+						// Set or switch the filter
+						params.set(key, val);
+					}
+					// Keep other params intact; navigate
+					url.search = params.toString();
+					window.location.href = url.toString();
+				});
+			});
 			document.querySelectorAll('#propertiesTable .btn-view').forEach(btn => {
 				btn.addEventListener('click', function(){
 					const tr = this.closest('tr');

@@ -767,13 +767,13 @@ try {
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
-                    <button class="btn-animated-add noselect btn-sm" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
+                    <a href="add.php" class="btn-animated-add noselect btn-sm">
                         <span class="text">Add Category</span>
                         <span class="icon">
                             <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"></svg>
                             <span class="buttonSpan">+</span>
                         </span>
-                    </button>
+                    </a>
                 </div>
             </div>
 
@@ -822,9 +822,9 @@ try {
                                             <td class="fw-semibold"><?php echo htmlspecialchars($category['name']); ?></td>
                                             <td>
                                                 <?php if ($category['property_count'] > 0): ?>
-                                                    <span class="badge bg-light text-dark border"><?php echo $category['property_count']; ?> properties</span>
+                                                    <a href="../properties/index.php?category_id=<?php echo (int)$category['id']; ?>" class="badge bg-light text-dark border text-decoration-none"><?php echo $category['property_count']; ?> properties</a>
                                                 <?php else: ?>
-                                                    <span class="badge bg-light text-dark border">No properties</span>
+                                                    <a href="../properties/index.php?category_id=<?php echo (int)$category['id']; ?>" class="badge bg-light text-dark border text-decoration-none">No properties</a>
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-muted"><?php echo $category['created_date']; ?></td>

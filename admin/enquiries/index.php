@@ -191,7 +191,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                 <div class="row-bottom">
                     <?php foreach(['New','In Progress','Closed'] as $status): ?>
                         <?php $isActive = ($filters['status'] ?? '') === $status; ?>
-                        <a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?status=<?php echo urlencode($status); ?>&q=<?php echo urlencode($filters['q']); ?>"><?php echo $status; ?></a>
+                        <a class="chip js-filter <?php echo $isActive ? 'active' : ''; ?>" href="#" data-filter="status" data-value="<?php echo htmlspecialchars($status, ENT_QUOTES); ?>" role="button"><?php echo $status; ?></a>
                     <?php endforeach; ?>
                 </div>
             </div>
@@ -316,6 +316,24 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function(){
+        // Toggleable status chips
+        document.querySelectorAll('.js-filter').forEach(function(chip){
+            chip.addEventListener('click', function(e){
+                e.preventDefault();
+                var key = this.getAttribute('data-filter');
+                var val = this.getAttribute('data-value');
+                var url = new URL(window.location.href);
+                var params = url.searchParams;
+                var current = params.get(key);
+                if (current && current.toString() === val.toString()) {
+                    params.delete(key);
+                } else {
+                    params.set(key, val);
+                }
+                url.search = params.toString();
+                window.location.href = url.toString();
+            });
+        });
         document.querySelectorAll('.btn-view-enquiry').forEach(function(btn){
             btn.addEventListener('click', function(){
                 try{

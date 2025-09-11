@@ -83,17 +83,44 @@ if ($filters['listing_type'] !== '') { $where[] = 'p.listing_type = ?'; $types .
 if ($filters['category_id'] !== null) { $where[] = 'p.category_id = ?'; $types .= 'i'; $params[] = (int)$filters['category_id']; }
 if ($filters['status'] !== '') { $where[] = 'p.status = ?'; $types .= 's'; $params[] = $filters['status']; }
 
+// Pagination
+$perPage = 10;
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($page - 1) * $perPage;
+
+// Total count for pagination
+$countSql = "SELECT COUNT(*)
+            FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
+if (!empty($where)) { $countSql .= ' WHERE ' . implode(' AND ', $where); }
+$countStmt = $mysqli->prepare($countSql);
+if ($countStmt && $types !== '') { $countStmt->bind_param($types, ...$params); }
+$totalRows = 0;
+if ($countStmt && $countStmt->execute()) {
+    $countRes = $countStmt->get_result();
+    $row = $countRes ? $countRes->fetch_row() : [0];
+    $totalRows = (int)($row[0] ?? 0);
+}
+$countStmt && $countStmt->close();
+
+$totalPages = max(1, (int)ceil($totalRows / $perPage));
+if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
+
+// Data query with pagination
 $sql = "SELECT p.id, p.title, p.price, p.location, p.landmark, p.area, p.configuration, p.listing_type, p.status, p.category_id,
                 DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at,
                 c.name AS category_name
          FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
-$sql .= ' ORDER BY p.created_at DESC LIMIT 50';
+$sql .= ' ORDER BY p.created_at DESC LIMIT ?, ?';
 
 $stmt = $mysqli->prepare($sql);
-if ($stmt && $types !== '') { $stmt->bind_param($types, ...$params); }
+$bindTypes = $types . 'ii';
+$bindParams = $params;
+$bindParams[] = $offset;
+$bindParams[] = $perPage;
+if ($stmt) { $stmt->bind_param($bindTypes, ...$bindParams); }
 $stmt && $stmt->execute();
-$properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title, p.price, p.location, p.landmark, p.area, p.configuration, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 50");
+$properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title, p.price, p.location, p.landmark, p.area, p.configuration, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 10 OFFSET 0");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -416,7 +443,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 <div class="row-bottom">
                     <?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
                         <?php $isActive = ($filters['listing_type'] ?? '') === $lt; ?>
-                        <a class="chip <?php echo $isActive ? 'active' : ''; ?>" href="?listing_type=<?php echo urlencode($lt); ?>"><?php echo $lt; ?></a>
+                        <a class="chip js-filter <?php echo $isActive ? 'active' : ''; ?>" href="#" data-filter="listing_type" data-value="<?php echo htmlspecialchars($lt, ENT_QUOTES); ?>" role="button"><?php echo $lt; ?></a>
                     <?php endforeach; ?>
                     <span class="divider"></span>
                     <?php 
@@ -424,7 +451,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     $categoriesRes->data_seek(0);
                     while($pc = $categoriesRes->fetch_assoc()): ?>
                         <?php $isC = (string)($filters['category_id'] ?? '') === (string)$pc['id']; ?>
-                        <a class="chip <?php echo $isC ? 'active' : ''; ?>" href="?category_id=<?php echo (int)$pc['id']; ?>"><?php echo htmlspecialchars($pc['name']); ?></a>
+                        <a class="chip js-filter <?php echo $isC ? 'active' : ''; ?>" href="#" data-filter="category_id" data-value="<?php echo (int)$pc['id']; ?>" role="button"><?php echo htmlspecialchars($pc['name']); ?></a>
                     <?php endwhile; ?>
                 </div>
             </div>
@@ -488,6 +515,41 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                             </tbody>
                         </table>
                     </div>
+                    <?php 
+                        $qs = [];
+                        foreach (['title','location','listing_type','status'] as $k) { if ($filters[$k] !== '') { $qs[$k] = $filters[$k]; } }
+                        if ($filters['category_id'] !== null) { $qs['category_id'] = (int)$filters['category_id']; }
+                        $buildPageUrl = function($p) use ($qs) {
+                            $qs['page'] = $p;
+                            return 'index.php?' . http_build_query($qs);
+                        };
+                    ?>
+                    <nav aria-label="Properties pagination" class="mt-3">
+                        <ul class="pagination mb-0">
+                            <li class="page-item <?php echo $page <= 1 ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $page <= 1 ? '#' : $buildPageUrl($page-1); ?>" tabindex="-1">Previous</a>
+                            </li>
+                            <?php 
+                                $start = max(1, $page - 2);
+                                $end = min($totalPages, $page + 2);
+                                if ($start > 1) {
+                                    echo '<li class="page-item"><a class="page-link" href="' . $buildPageUrl(1) . '">1</a></li>';
+                                    if ($start > 2) { echo '<li class="page-item disabled"><span class="page-link">…</span></li>'; }
+                                }
+                                for ($i = $start; $i <= $end; $i++) {
+                                    $active = $i === $page ? ' active' : '';
+                                    echo '<li class="page-item' . $active . '"><a class="page-link" href="' . $buildPageUrl($i) . '">' . $i . '</a></li>';
+                                }
+                                if ($end < $totalPages) {
+                                    if ($end < $totalPages - 1) { echo '<li class="page-item disabled"><span class="page-link">…</span></li>'; }
+                                    echo '<li class="page-item"><a class="page-link" href="' . $buildPageUrl($totalPages) . '">' . $totalPages . '</a></li>';
+                                }
+                            ?>
+                            <li class="page-item <?php echo $page >= $totalPages ? 'disabled' : ''; ?>">
+                                <a class="page-link" href="<?php echo $page >= $totalPages ? '#' : $buildPageUrl($page+1); ?>">Next</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
 
@@ -536,6 +598,27 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Toggleable chip filters for listing_type and category_id
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.js-filter').forEach(function(chip){
+                chip.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var key = this.getAttribute('data-filter');
+                    var val = this.getAttribute('data-value');
+                    var url = new URL(window.location.href);
+                    var params = url.searchParams;
+                    var current = params.get(key);
+                    if (current && current.toString() === val.toString()) {
+                        params.delete(key);
+                    } else {
+                        params.set(key, val);
+                    }
+                    url.search = params.toString();
+                    window.location.href = url.toString();
+                });
+            });
+        });
+
         // Performance optimized drawer system
         let drawerCache = new Map();
         let isDrawerOpening = false;
