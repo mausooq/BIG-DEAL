@@ -103,6 +103,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
     <title>Properties - Big Deal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
         :root{ --bg:#F1EFEC; --card:#ffffff; --muted:#6b7280; --line:#e9eef5; --brand-dark:#2f2f2f; --primary:#e11d2a; --primary-600:#b91c1c; --radius:16px; }
         body{ background:var(--bg); color:#111827; }
@@ -404,8 +405,12 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
-                    <a href="add.php" class="btn btn-primary">
-                        <i class="fa-solid fa-circle-plus me-1"></i>Add Property
+                    <a href="add.php" class="btn-animated-add noselect">
+                        <span class="text">Add Property</span>
+                        <span class="icon">
+                            <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"></svg>
+                            <span class="buttonSpan">+</span>
+                        </span>
                     </a>
                 </div>
                 <div class="row-bottom">
@@ -502,7 +507,14 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-danger">Delete</button>
+                                <button type="submit" class="btn-animated-delete noselect">
+                                    <span class="text">Delete</span>
+                                    <span class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                            <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                        </svg>
+                                    </span>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -772,8 +784,13 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                             <a href="view.php?id=${property.id}" class="btn btn-outline-primary btn-sm" target="_blank">
                                 <i class="fa-solid fa-eye me-1"></i>View Details
                             </a>
-                            <a href="edit.php?id=${property.id}" class="btn btn-outline-success btn-sm" target="_blank">
-                                <i class="fa-solid fa-pen me-1"></i>Edit Property
+                            <a href="edit.php?id=${property.id}" class="btn-animated-confirm noselect" target="_blank">
+                                <span class="text">Edit Property</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"></path>
+                                    </svg>
+                                </span>
                             </a>
                         </div>
                     </div>

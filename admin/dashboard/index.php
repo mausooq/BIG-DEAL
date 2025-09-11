@@ -99,6 +99,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 	<title>Dashboard - Big Deal</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 	<style>
 		/* Base */
 		:root{
@@ -286,7 +287,13 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 						<div class="card-body">
 							<div class="d-flex align-items-center justify-content-between mb-3">
 								<div class="h6 mb-0">Properties</div>
-								<a href="../properties/add.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-circle-plus me-1"></i>Add Property</a>
+								<a href="../properties/add.php" class="btn-animated-add noselect btn-sm">
+									<span class="text">Add Property</span>
+									<span class="icon">
+										<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"></svg>
+										<span class="buttonSpan">+</span>
+									</span>
+								</a>
 							</div>
 							<table class="table align-middle" id="propertiesTable">
 								<thead>

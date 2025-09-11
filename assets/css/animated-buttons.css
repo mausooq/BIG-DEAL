@@ -1,0 +1,309 @@
+/* Animated Buttons from Uiverse.io */
+
+/* Add Button Styles */
+.btn-animated-add {
+  width: auto;
+  height: auto;
+  min-width: 80px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  background: #e11d2a;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-add:hover,
+.btn-animated-add:focus,
+.btn-animated-add:active {
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-add,
+.btn-animated-add span {
+  transition: 200ms;
+}
+
+.btn-animated-add .text {
+  transform: translateX(0);
+  color: white;
+  font-weight: 500;
+  z-index: 2;
+  white-space: nowrap;
+  padding-right: 30px;
+}
+
+.btn-animated-add .icon {
+  position: absolute;
+  border-left: 1px solid #b91c1c;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding-right: 8px; /* inset the + a little from the edge */
+}
+
+.btn-animated-add svg {
+  width: 15px;
+  fill: #eee;
+}
+
+/* The Add button uses a text plus. Hide the empty svg so it doesn't offset centering */
+.btn-animated-add .icon svg {
+  display: none;
+}
+
+.btn-animated-add:hover {
+  background: #b91c1c;
+}
+
+.btn-animated-add:active {
+  background: #a01717;
+}
+
+.btn-animated-add:hover .text {
+  color: transparent;
+}
+
+.btn-animated-add:hover .icon {
+  width: 100%;
+  border-left: none;
+  transform: translateX(0);
+  left: 0;
+  right: 0;
+  padding-right: 0; /* allow full-bleed on expand */
+}
+
+.btn-animated-add:focus {
+  outline: none;
+}
+
+.btn-animated-add:active .icon svg {
+  transform: scale(0.8);
+}
+
+.buttonSpan {
+  color: white;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0;
+  line-height: 1;
+  display: inline-block;
+}
+
+/* Confirm Button Styles */
+.btn-animated-confirm {
+  width: auto;
+  height: auto;
+  min-width: 80px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  background: #e11d2a;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-confirm:hover,
+.btn-animated-confirm:focus,
+.btn-animated-confirm:active {
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-confirm,
+.btn-animated-confirm span {
+  transition: 200ms;
+}
+
+.btn-animated-confirm .text {
+  transform: translateX(0);
+  color: white;
+  font-weight: 500;
+  z-index: 2;
+  white-space: nowrap;
+  padding-right: 48px;
+}
+
+.btn-animated-confirm .icon {
+  position: absolute;
+  border-left: 1px solid #b91c1c;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding-right: 8px;
+}
+
+.btn-animated-confirm svg {
+  width: 20px;
+  fill: #eee;
+}
+
+.btn-animated-confirm:hover {
+  background: #b91c1c;
+}
+
+.btn-animated-confirm:hover .text {
+  color: transparent;
+}
+
+.btn-animated-confirm:hover .icon {
+  width: 100%;
+  border-left: none;
+  transform: translateX(0);
+  left: 0;
+  right: 0;
+  padding-right: 0;
+}
+
+.btn-animated-confirm:focus {
+  outline: none;
+}
+
+.btn-animated-confirm:active .icon svg {
+  transform: scale(0.8);
+}
+
+/* Delete Button Styles */
+.btn-animated-delete {
+  width: auto;
+  height: auto;
+  min-width: 80px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  background: #e11d2a;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-delete:hover,
+.btn-animated-delete:focus,
+.btn-animated-delete:active {
+  text-decoration: none;
+  color: white;
+}
+
+.btn-animated-delete,
+.btn-animated-delete span {
+  transition: 200ms;
+}
+
+.btn-animated-delete .text {
+  transform: translateX(0);
+  color: white;
+  font-weight: 500;
+  z-index: 2;
+  white-space: nowrap;
+  padding-right: 48px;
+}
+
+.btn-animated-delete .icon {
+  position: absolute;
+  border-left: 1px solid #b91c1c;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  padding-right: 8px;
+}
+
+.btn-animated-delete svg {
+  width: 15px;
+  fill: #eee;
+}
+
+.btn-animated-delete:hover {
+  background: #b91c1c;
+}
+
+.btn-animated-delete:hover .text {
+  color: transparent;
+}
+
+.btn-animated-delete:hover .icon {
+  width: 100%;
+  border-left: none;
+  transform: translateX(0);
+  left: 0;
+  right: 0;
+  padding-right: 0;
+}
+
+.btn-animated-delete:focus {
+  outline: none;
+}
+
+.btn-animated-delete:active .icon svg {
+  transform: scale(0.8);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+  .btn-animated-add,
+  .btn-animated-confirm,
+  .btn-animated-delete {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  
+  .btn-animated-add .text,
+  .btn-animated-confirm .text,
+  .btn-animated-delete .text {
+    padding-right: 41px;
+  }
+  
+  .btn-animated-add .icon,
+  .btn-animated-confirm .icon,
+  .btn-animated-delete .icon {
+    width: 35px;
+    padding-right: 6px;
+  }
+  
+  .btn-animated-add:hover .icon,
+  .btn-animated-confirm:hover .icon,
+  .btn-animated-delete:hover .icon {
+    width: 100%;
+    left: 0;
+    right: 0;
+    padding-right: 0;
+  }
+}
