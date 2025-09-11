@@ -278,8 +278,8 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                 <div class="d-flex gap-2">
                     <form method="post">
                         <input type="hidden" name="action" value="toggle_feature">
-                        <button type="submit" class="btn <?php echo $isFeatured ? 'btn-success' : 'btn-outline-primary'; ?>">
-                            <i class="fa-solid fa-star me-2"></i><?php echo $isFeatured ? 'Featured' : 'Add to Feature'; ?>
+                        <button type="submit" class="btn <?php echo $isFeatured ? 'btn-success' : 'btn-outline-primary'; ?> d-inline-flex align-items-center justify-content-center" style="width:44px;height:44px;border-radius:12px;padding:0;">
+                            <i class="fa-solid fa-star"></i>
                         </button>
                     </form>
                     <a href="index.php" class="btn btn-outline-secondary">
