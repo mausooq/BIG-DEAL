@@ -3,6 +3,20 @@ require_once __DIR__ . '/../auth.php';
 
 function db() { return getMysqliConnection(); }
 
+// Helper: check if a table column exists (to avoid errors when migrations not applied)
+function tableColumnExists(mysqli $mysqli, string $tableName, string $columnName): bool {
+    $res = $mysqli->query("SELECT DATABASE()");
+    $row = $res ? $res->fetch_row() : [null];
+    $dbName = $row[0] ?? null;
+    if (!$dbName) { return false; }
+    $stmt = $mysqli->prepare("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?");
+    if (!$stmt) { return false; }
+    $stmt->bind_param('sss', $dbName, $tableName, $columnName);
+    $stmt->execute();
+    $cntRow = $stmt->get_result()->fetch_row();
+    return ((int)($cntRow[0] ?? 0)) > 0;
+}
+
 // Filters
 $mysqli = db();
 $filters = [
@@ -29,7 +43,6 @@ $kpiSql = [
 	// Use placeholders for status conditions and a safe base WHERE
 	'total_available' => "SELECT COUNT(*) FROM properties p $baseWhere AND p.status = ?",
 	'total_sold' => "SELECT COUNT(*) FROM properties p $baseWhere AND p.status = ?",
-	'total_rented' => "SELECT COUNT(*) FROM properties p $baseWhere AND p.status = ?",
 	'new_enquiries' => "SELECT COUNT(*) FROM enquiries e" . (
 		($filters['start_date'] || $filters['end_date']) ?
 		' WHERE ' . implode(' AND ', array_filter([
@@ -58,10 +71,6 @@ $kpiTypesSold = $types . 's';
 $kpiParamsSold = $params;
 array_push($kpiParamsSold, 'Sold');
 
-$kpiTypesRent = $types . 's';
-$kpiParamsRent = $params;
-array_push($kpiParamsRent, 'Rented');
-
 // Enquiry params only include date range
 $enqTypes = '';
 $enqParams = [];
@@ -71,13 +80,12 @@ if ($filters['end_date'] !== '') { $enqTypes .= 's'; $enqParams[] = $filters['en
 $kpis = [
 	'available' => fetchCount($kpiSql['total_available'], $kpiTypesAvail, $kpiParamsAvail),
 	'sold' => fetchCount($kpiSql['total_sold'], $kpiTypesSold, $kpiParamsSold),
-	'rented' => fetchCount($kpiSql['total_rented'], $kpiTypesRent, $kpiParamsRent),
 	'enquiries' => fetchCount($kpiSql['new_enquiries'], $enqTypes, $enqParams),
 ];
 
-// Chart: monthly properties added (last 12 months within filter)
+// Chart: monthly sold properties (last 12 months within filter)
 $monthlySql = "SELECT DATE_FORMAT(p.created_at, '%Y-%m') ym, COUNT(*) cnt
-	FROM properties p $baseWhere
+	FROM properties p $baseWhere AND p.status = 'Sold'
 	GROUP BY ym
 	ORDER BY ym ASC";
 $stmt = $mysqli->prepare($monthlySql);
@@ -88,35 +96,45 @@ $monthlyLabels = [];
 $monthlyCounts = [];
 while ($r = $monthly->fetch_assoc()) { $monthlyLabels[] = $r['ym']; $monthlyCounts[] = (int)$r['cnt']; }
 
-// Chart: listing type distribution
-$ltSql = "SELECT p.listing_type lt, COUNT(*) cnt FROM properties p $baseWhere GROUP BY lt";
-$stmt2 = $mysqli->prepare($ltSql);
+// Chart: category-wise available vs sold
+$catSql = "SELECT COALESCE(c.name,'Uncategorized') cat,
+	SUM(CASE WHEN p.status='Available' THEN 1 ELSE 0 END) avail_cnt,
+	SUM(CASE WHEN p.status='Sold' THEN 1 ELSE 0 END) sold_cnt
+	FROM properties p
+	LEFT JOIN categories c ON c.id = p.category_id
+	$baseWhere
+	GROUP BY cat
+	ORDER BY cat ASC";
+$stmt2 = $mysqli->prepare($catSql);
 if ($stmt2 && $types !== '') { $stmt2->bind_param($types, ...$params); }
 $stmt2 && $stmt2->execute();
-$lt = $stmt2 ? $stmt2->get_result() : $mysqli->query($ltSql);
-$ltLabels = [];
-$ltCounts = [];
-while ($r = $lt->fetch_assoc()) { $ltLabels[] = $r['lt']; $ltCounts[] = (int)$r['cnt']; }
+$cat = $stmt2 ? $stmt2->get_result() : $mysqli->query($catSql);
+$catLabels = [];
+$catAvail = [];
+$catSold = [];
+while ($r = $cat->fetch_assoc()) { $catLabels[] = $r['cat']; $catAvail[] = (int)$r['avail_cnt']; $catSold[] = (int)$r['sold_cnt']; }
 
-// Chart: status distribution
-$stSql = "SELECT p.status st, COUNT(*) cnt FROM properties p $baseWhere GROUP BY st";
-$stmt3 = $mysqli->prepare($stSql);
+// Chart: city-wise available vs sold (top 10 cities by total)
+$useHierarchy = tableColumnExists($mysqli, 'properties_location', 'city_id') && tableColumnExists($mysqli, 'cities', 'name');
+$cityJoin = $useHierarchy ? " LEFT JOIN properties_location pl ON pl.property_id = p.id LEFT JOIN cities ci ON ci.id = pl.city_id " : "";
+$cityExpr = $useHierarchy ? "COALESCE(ci.name, p.location)" : "p.location";
+$citySql = "SELECT city, SUM(avail_cnt) avail_cnt, SUM(sold_cnt) sold_cnt FROM (
+    SELECT " . $cityExpr . " AS city,
+           CASE WHEN p.status='Available' THEN 1 ELSE 0 END AS avail_cnt,
+           CASE WHEN p.status='Sold' THEN 1 ELSE 0 END AS sold_cnt
+    FROM properties p" . $cityJoin . "
+    $baseWhere
+) t GROUP BY city ORDER BY (SUM(avail_cnt)+SUM(sold_cnt)) DESC LIMIT 10";
+$stmt3 = $mysqli->prepare($citySql);
 if ($stmt3 && $types !== '') { $stmt3->bind_param($types, ...$params); }
 $stmt3 && $stmt3->execute();
-$st = $stmt3 ? $stmt3->get_result() : $mysqli->query($stSql);
-$stLabels = [];
-$stCounts = [];
-while ($r = $st->fetch_assoc()) { $stLabels[] = $r['st']; $stCounts[] = (int)$r['cnt']; }
+$cityRes = $stmt3 ? $stmt3->get_result() : $mysqli->query($citySql);
+$cityLabels = [];
+$cityAvail = [];
+$citySold = [];
+while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] = (int)$r['avail_cnt']; $citySold[] = (int)$r['sold_cnt']; }
 
-// Chart: average price by month
-$avgSql = "SELECT DATE_FORMAT(p.created_at, '%Y-%m') ym, AVG(p.price) avg_price FROM properties p $baseWhere GROUP BY ym ORDER BY ym ASC";
-$stmt4 = $mysqli->prepare($avgSql);
-if ($stmt4 && $types !== '') { $stmt4->bind_param($types, ...$params); }
-$stmt4 && $stmt4->execute();
-$avg = $stmt4 ? $stmt4->get_result() : $mysqli->query($avgSql);
-$avgLabels = [];
-$avgValues = [];
-while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (float)$r['avg_price']; }
+// Done datasets
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -235,7 +253,7 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 
 		<div class="container-fluid p-4">
 			<div class="d-flex align-items-center justify-content-between mb-3">
-				<div class="h5 mb-0">Sales Analytics</div>
+				<div class="h5 mb-0">Sales Dashboard</div>
 			</div>
 
 			<div class="toolbar mb-4">
@@ -261,7 +279,7 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 						<label class="form-label">Status</label>
 						<select class="form-select" name="status">
 							<option value="">All</option>
-							<?php foreach (['Available','Sold','Rented'] as $st): ?>
+							<?php foreach (['Available','Sold'] as $st): ?>
 								<option value="<?php echo $st; ?>" <?php echo ($filters['status']===$st?'selected':''); ?>><?php echo $st; ?></option>
 							<?php endforeach; ?>
 						</select>
@@ -288,12 +306,6 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 				</div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
-						<div><div class="text-muted small">Rented</div><div class="h4 mb-0"><?php echo $kpis['rented']; ?></div></div>
-						<div class="text-primary"><i class="fa-solid fa-key fa-lg"></i></div>
-					</div></div>
-				</div>
-				<div class="col-sm-6 col-xl-3">
-					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
 						<div><div class="text-muted small">New Enquiries</div><div class="h4 mb-0"><?php echo $kpis['enquiries']; ?></div></div>
 						<div class="text-warning"><i class="fa-regular fa-envelope fa-lg"></i></div>
 					</div></div>
@@ -303,18 +315,14 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 			<div class="row g-4">
 				<div class="col-xl-8">
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">Monthly Properties Added</div>
+						<div class="h6 mb-3">Monthly Sold Properties</div>
 						<canvas id="chartMonthly" height="120"></canvas>
 					</div></div>
 				</div>
 				<div class="col-xl-4">
-					<div class="card mb-4"><div class="card-body">
-						<div class="h6 mb-3">Listing Type Mix</div>
-						<canvas id="chartListing" height="180"></canvas>
-					</div></div>
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">Status Distribution</div>
-						<canvas id="chartStatus" height="180"></canvas>
+						<div class="h6 mb-3">City-wise Available vs Sold</div>
+						<canvas id="chartCity" height="180"></canvas>
 					</div></div>
 				</div>
 			</div>
@@ -322,8 +330,8 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 			<div class="row g-4 mt-1">
 				<div class="col-12">
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">Average Price by Month</div>
-						<canvas id="chartAvgPrice" height="100"></canvas>
+						<div class="h6 mb-3">Category-wise Available vs Sold</div>
+						<canvas id="chartCategory" height="120"></canvas>
 					</div></div>
 				</div>
 			</div>
@@ -334,38 +342,39 @@ while ($r = $avg->fetch_assoc()) { $avgLabels[] = $r['ym']; $avgValues[] = (floa
 	<script>
 		const monthlyLabels = <?php echo json_encode($monthlyLabels); ?>;
 		const monthlyCounts = <?php echo json_encode($monthlyCounts); ?>;
-		const ltLabels = <?php echo json_encode($ltLabels); ?>;
-		const ltCounts = <?php echo json_encode($ltCounts); ?>;
-		const stLabels = <?php echo json_encode($stLabels); ?>;
-		const stCounts = <?php echo json_encode($stCounts); ?>;
-		const avgLabels = <?php echo json_encode($avgLabels); ?>;
-		const avgValues = <?php echo json_encode($avgValues); ?>;
+		const catLabels = <?php echo json_encode($catLabels); ?>;
+		const catAvail = <?php echo json_encode($catAvail); ?>;
+		const catSold = <?php echo json_encode($catSold); ?>;
+		const cityLabels = <?php echo json_encode($cityLabels); ?>;
+		const cityAvail = <?php echo json_encode($cityAvail); ?>;
+		const citySold = <?php echo json_encode($citySold); ?>;
 
 		const brand = '#e11d2a';
 		const brand600 = '#b91c1c';
 
+		const gridColor = 'rgba(17,24,39,0.06)';
+		const ticksColor = '#6b7280';
+		const titleFont = { size: 13, weight: '600' };
+		
 		new Chart(document.getElementById('chartMonthly'), {
 			type: 'bar',
-			data: { labels: monthlyLabels, datasets: [{ label: 'Properties', data: monthlyCounts, backgroundColor: brand }] },
-			options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
+			data: { labels: monthlyLabels, datasets: [{ label: 'Sold', data: monthlyCounts, backgroundColor: brand, borderRadius: 6, maxBarThickness: 28 }] },
+			options: { scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { display: false } } }
 		});
-
-		new Chart(document.getElementById('chartListing'), {
-			type: 'doughnut',
-			data: { labels: ltLabels, datasets: [{ data: ltCounts, backgroundColor: ['#f97316','#2563eb','#0ea5e9'] }] },
-			options: { plugins: { legend: { position: 'bottom' } } }
+		
+		new Chart(document.getElementById('chartCity'), {
+			type: 'bar',
+			data: { labels: cityLabels, datasets: [
+				{ label: 'Available', data: cityAvail, backgroundColor: '#16a34a', borderRadius: 6, maxBarThickness: 28 },
+				{ label: 'Sold', data: citySold, backgroundColor: '#ef4444', borderRadius: 6, maxBarThickness: 28 }
+			] },
+			options: { responsive: true, scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { position: 'bottom' } } }
 		});
-
-		new Chart(document.getElementById('chartStatus'), {
-			type: 'pie',
-			data: { labels: stLabels, datasets: [{ data: stCounts, backgroundColor: ['#16a34a','#ef4444','#3b82f6','#6b7280'] }] },
-			options: { plugins: { legend: { position: 'bottom' } } }
-		});
-
-		new Chart(document.getElementById('chartAvgPrice'), {
-			type: 'line',
-			data: { labels: avgLabels, datasets: [{ label: 'Average Price', data: avgValues, borderColor: brand, backgroundColor: brand, tension: 0.3, fill: false }] },
-			options: { scales: { y: { beginAtZero: false } }, plugins: { legend: { display: false } } }
+		
+		new Chart(document.getElementById('chartCategory'), {
+			type: 'bar',
+			data: { labels: catLabels, datasets: [{ label: 'Available', data: catAvail, backgroundColor: '#16a34a', borderRadius: 6, maxBarThickness: 28 }, { label: 'Sold', data: catSold, backgroundColor: '#ef4444', borderRadius: 6, maxBarThickness: 28 }] },
+			options: { scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { position: 'bottom' } } }
 		});
 	</script>
 </body>
