@@ -173,9 +173,9 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		/* Override sticky behavior for this page */
 		.navbar.sticky-top{ position:static; }
 		.text-primary{ color:var(--primary)!important; }
-		/* Cards */
-		.card{border-radius:24px; background:var(--card); box-shadow:0 10px 20px rgba(0,0,0,.05); }
-		.card-stat{box-shadow:0 10px 24px rgba(0,0,0,.08); border-radius:24px; }
+		/* Cards (match dashboard) */
+		.card{ border:0; border-radius:var(--radius); background:var(--card); }
+		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Charts */
 		.chart-wrap{ position:relative; width:100%; height:360px; overflow:hidden; }
