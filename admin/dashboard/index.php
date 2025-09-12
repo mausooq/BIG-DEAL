@@ -78,7 +78,7 @@ if ($filters['category_id']) { $where[] = 'p.category_id = ?'; $types .= 'i'; $p
 if ($filters['listing_type']) { $where[] = 'p.listing_type = ?'; $types .= 's'; $params[] = $filters['listing_type']; }
 if ($filters['status']) { $where[] = 'p.status = ?'; $types .= 's'; $params[] = $filters['status']; }
 
-$sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, p.map_embed_link, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name
+$sql = "SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, p.map_embed_link, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, c.name AS category_name, c.id AS category_id
 	FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
@@ -86,7 +86,7 @@ $sql .= ' ORDER BY p.created_at DESC LIMIT 25';
 $stmtRecent = $mysqli->prepare($sql);
 if ($stmtRecent && $types !== '') { $stmtRecent->bind_param($types, ...$params); }
 $stmtRecent && $stmtRecent->execute();
-$recentProperties = $stmtRecent ? $stmtRecent->get_result() : $mysqli->query("SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 8");
+$recentProperties = $stmtRecent ? $stmtRecent->get_result() : $mysqli->query("SELECT p.id, p.title, p.description, p.price, p.location, p.landmark, p.area, p.configuration, p.furniture_status, p.ownership_type, p.facing, p.parking, p.balcony, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name, NULL AS category_id FROM properties p ORDER BY p.created_at DESC LIMIT 8");
 $recentActivity = $mysqli->query("SELECT a.id, COALESCE(u.username,'System') as actor, a.action, DATE_FORMAT(a.created_at,'%b %d, %Y %h:%i %p') as created_at FROM activity_logs a LEFT JOIN admin_users u ON u.id = a.admin_id ORDER BY a.created_at DESC LIMIT 10");
 // For toolbar chips
 $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name LIMIT 6");
@@ -227,11 +227,10 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('dashboard'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Dashboard'); ?>
 
 		<div class="container-fluid p-4">
 			<div class="row mb-3">
-				<div class="col-12"><div class="h5 " style="margin-top: -20px;">Quick Access</div></div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat">
 						<div class="card-body d-flex align-items-center justify-content-between">
@@ -333,7 +332,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 									<?php while($row = $recentProperties->fetch_assoc()): ?>
 									<tr data-prop='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 										<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
-										<td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category_name'] ?? '—'); ?></span></td>
+										<td><?php if (!empty($row['category_id'])): ?><a href="index.php?cat=<?php echo (int)$row['category_id']; ?>" class="badge bg-light text-dark border text-decoration-none"><?php echo htmlspecialchars($row['category_name'] ?? '—'); ?></a><?php else: ?><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category_name'] ?? '—'); ?></span><?php endif; ?></td>
 										<td><span class="badge badge-soft"><?php echo htmlspecialchars($row['listing_type']); ?></span></td>
 										<td>₹<?php echo number_format((float)$row['price']); ?></td>
 										<td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>

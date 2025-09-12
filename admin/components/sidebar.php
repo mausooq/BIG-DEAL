@@ -8,6 +8,15 @@
 
 if (!function_exists('renderAdminSidebar')) {
 	function renderAdminSidebar(string $active = ''): void {
+		// Print sidebar hidden-scrollbar styles once
+		static $sidebarStylesPrinted = false;
+		if (!$sidebarStylesPrinted) {
+			echo '<style>
+				.sidebar{ -ms-overflow-style:none; scrollbar-width:none; }
+				.sidebar::-webkit-scrollbar{ width:0; height:0; display:none; }
+			</style>';
+			$sidebarStylesPrinted = true;
+		}
 		$items = [
 			['key' => 'dashboard', 'icon' => 'fa-grip', 'label' => 'Dashboard', 'href' => '../dashboard/'],
 			['key' => 'sales-analytics', 'icon' => 'fa-chart-line', 'label' => 'Sales Analytics', 'href' => '../sales-analytics/'],
@@ -24,7 +33,7 @@ if (!function_exists('renderAdminSidebar')) {
 			['key' => 'logout', 'icon' => 'fa-arrow-right-from-bracket', 'label' => 'Logout', 'href' => '../logout.php'],
 		];
 		?>
-		<div class="sidebar p-3 d-flex flex-column gap-3">
+		<div class="sidebar p-3 d-flex flex-column gap-3" style="max-height:100vh; overflow:auto; overscroll-behavior:contain;">
 			<div class="d-flex align-items-center gap-2">
 				<img src="../../assets/logo.jpg" alt="Big Deal" style="height:48px; width:auto; object-fit:contain; display:block;">
 			</div>

@@ -1,3 +1,4 @@
+
 <?php
 
 // Central database configuration (Hostinger remote host so it works locally and on server)
