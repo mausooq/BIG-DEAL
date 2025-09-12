@@ -358,7 +358,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('properties'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Properties'); ?>
 
         <div class="container-fluid p-4">
             <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
@@ -373,6 +373,14 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fa-solid fa-check-circle me-2"></i>
                     Property updated successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_GET['export']) && $_GET['export'] == 'no_data'): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    No data to export with the current filters applied.
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
@@ -432,6 +440,22 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
+                    <?php 
+                    // Build export URL with current filters
+                    $exportParams = [];
+                    foreach (['title','location','listing_type','status'] as $k) { 
+                        if ($filters[$k] !== '') { 
+                            $exportParams[$k] = $filters[$k]; 
+                        } 
+                    }
+                    if ($filters['category_id'] !== null) { 
+                        $exportParams['category_id'] = (int)$filters['category_id']; 
+                    }
+                    $exportUrl = 'export.php' . (!empty($exportParams) ? '?' . http_build_query($exportParams) : '');
+                    ?>
+                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2">
+                        <i class="fa-solid fa-download me-1"></i>Export
+                    </a>
                     <a href="add.php" class="btn-animated-add noselect">
                         <span class="text">Add Property</span>
                         <span class="icon">
@@ -491,7 +515,15 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     data-status="<?php echo htmlspecialchars($row['status'], ENT_QUOTES); ?>"
                                 >
                                     <td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
-                                    <td><span class="badge bg-light text-dark border"><?php echo htmlspecialchars($row['category_name'] ?? '—'); ?></span></td>
+                                    <td>
+                                        <?php if ($row['category_name'] && $row['category_id']): ?>
+                                            <a href="../categories/index.php?category_id=<?php echo (int)$row['category_id']; ?>" class="badge bg-light text-dark border text-decoration-none">
+                                                <?php echo htmlspecialchars($row['category_name']); ?>
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="badge bg-light text-dark border">—</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td><span class="badge badge-soft"><?php echo htmlspecialchars($row['listing_type']); ?></span></td>
                                     <td>₹<?php echo number_format((float)$row['price']); ?></td>
                                     <td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>

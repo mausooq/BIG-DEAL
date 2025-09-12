@@ -242,7 +242,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('notifications'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Notifications'); ?>
 
 		<div class="container-fluid p-4">
 			<?php if (isset($_SESSION['success_message'])): ?>

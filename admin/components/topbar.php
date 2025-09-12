@@ -7,11 +7,14 @@
  */
 
 if (!function_exists('renderAdminTopbar')) {
-	function renderAdminTopbar(string $username = 'Admin'): void {
+	function renderAdminTopbar(string $username = 'Admin', string $title = ''): void {
 		?>
 		<nav class="navbar navbar-light bg-white border-bottom sticky-top">
 			<div class="container-fluid">
 				<button class="btn btn-outline-secondary d-md-none" id="sidebarToggle" type="button" title="Toggle menu"><i class="fa-solid fa-bars"></i></button>
+				<?php if ($title !== ''): ?>
+					<div class="h5 mb-0 text-dark fw-semibold ms-3	"><?php echo htmlspecialchars($title); ?></div>
+				<?php endif; ?>
 				<div class="d-flex align-items-center gap-3 ms-auto">
 					<!-- Notifications dropdown -->
 					<div class="dropdown">

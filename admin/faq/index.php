@@ -297,7 +297,8 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('faq'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+	<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Faqs'); ?>
+
 
 		<div class="container-fluid p-4">
 			<!-- PHP Messages -->

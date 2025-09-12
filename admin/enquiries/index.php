@@ -165,12 +165,20 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('enquiries'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Enquiries'); ?>
 
         <div class="container-fluid p-4">
             <?php if ($message): ?>
                 <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
                     <?php echo htmlspecialchars($message); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            
+            <?php if (isset($_GET['export']) && $_GET['export'] == 'no_data'): ?>
+                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    No data to export with the current filters applied.
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
@@ -187,6 +195,20 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
                     </form>
+                    <?php 
+                    // Build export URL with current filters
+                    $exportParams = [];
+                    if ($filters['q'] !== '') { 
+                        $exportParams['q'] = $filters['q']; 
+                    }
+                    if ($filters['status'] !== '') { 
+                        $exportParams['status'] = $filters['status']; 
+                    }
+                    $exportUrl = 'export.php' . (!empty($exportParams) ? '?' . http_build_query($exportParams) : '');
+                    ?>
+                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2">
+                        <i class="fa-solid fa-download me-1"></i>Export
+                    </a>
                 </div>
                 <div class="row-bottom">
                     <?php foreach(['New','In Progress','Closed'] as $status): ?>

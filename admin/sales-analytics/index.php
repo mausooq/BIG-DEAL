@@ -224,12 +224,9 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 <body>
 	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('sales-analytics'); ?>
 	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Sales Analytics'); ?>
 
 		<div class="container-fluid p-4">
-			<div class="d-flex align-items-center justify-content-between mb-3">
-				<div class="h5 mb-0">Sales Dashboard</div>
-			</div>
 
 			<div class="toolbar mb-4">
 				<form class="row g-2" method="get">

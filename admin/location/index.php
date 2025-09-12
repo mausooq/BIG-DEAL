@@ -335,7 +335,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('location'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Locations'); ?>
 
         <div class="container-fluid p-4">
             <!-- Messages -->
@@ -407,7 +407,11 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                                                             </div>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td class="fw-semibold"><?php echo htmlspecialchars($location['place_name']); ?></td>
+                                                    <td class="fw-semibold">
+                                                        <a href="../properties/index.php?location=<?php echo urlencode($location['place_name']); ?>" class="badge bg-light text-dark border text-decoration-none" title="View properties in this location">
+                                                            <?php echo htmlspecialchars($location['place_name']); ?>
+                                                        </a>
+                                                    </td>
                                                     <td class="text-muted"><?php echo date('M d, Y', strtotime($location['created_at'])); ?></td>
                                                     <td class="actions-cell">
                                                         <button class="btn btn-sm btn-outline-secondary btn-edit me-1" data-bs-toggle="modal" data-bs-target="#editLocationModal" title="Edit Location"><i class="fa-solid fa-pen"></i></button>

@@ -743,7 +743,7 @@ try {
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('categories'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Categories'); ?>
         <div class="container-fluid p-4">
                 <!-- Alert Messages -->
                 <?php if (!empty($message)): ?>
