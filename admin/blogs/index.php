@@ -269,13 +269,13 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 						<button class="btn btn-primary ms-2" type="submit">Search</button>
 						<a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
 					</form>
-					<button class="btn-animated-add noselect btn-sm" data-bs-toggle="modal" data-bs-target="#addBlogModal">
+					<a class="btn-animated-add noselect btn-sm" href="add.php">
 						<span class="text">Add Blog</span>
 						<span class="icon">
 							<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"></svg>
 							<span class="buttonSpan">+</span>
 						</span>
-					</button>
+					</a>
 				</div>
 			</div>
 
@@ -363,45 +363,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		</div>
 	</div>
 
-	<!-- Add Blog Modal -->
-	<div class="modal fade" id="addBlogModal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Add New Blog Post</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<form method="POST">
-					<div class="modal-body">
-						<input type="hidden" name="action" value="add_blog">
-						<div class="mb-3">
-							<label class="form-label">Title</label>
-							<input type="text" class="form-control" name="title" required>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Content</label>
-							<textarea class="form-control" name="content" rows="6" required></textarea>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Image URL (optional)</label>
-							<input type="url" class="form-control" name="image_url" placeholder="https://example.com/image.jpg">
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn-animated-confirm noselect">
-							<span class="text">Add Blog Post</span>
-							<span class="icon">
-								<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-									<path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-								</svg>
-							</span>
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
+
 
 	<!-- Edit Blog Modal -->
 	<div class="modal fade" id="editBlogModal" tabindex="-1">
@@ -492,23 +454,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 				});
 			});
 
-			// Form validation for add blog
-			const addBlogModal = document.getElementById('addBlogModal');
-			if (addBlogModal) {
-				const addForm = addBlogModal.querySelector('form');
-				if (addForm) {
-					addForm.addEventListener('submit', function(e) {
-						const title = this.querySelector('input[name="title"]').value.trim();
-						const content = this.querySelector('textarea[name="content"]').value.trim();
-						
-						if (!title || !content) {
-							e.preventDefault();
-							alert('Please fill in both title and content fields.');
-							return false;
-						}
-					});
-				}
-			}
+
 
 			// Form validation for edit blog
 			const editBlogModal = document.getElementById('editBlogModal');
