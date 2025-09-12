@@ -150,13 +150,14 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 			--bg:#F1EFEC;/* page background */
 			--card:#ffffff;/* surfaces */
 			--muted:#6b7280;/* secondary text */
-			--line:#e9eef5;/* borders */
+			--line:#e9eef5;/* neutral borders (dashboard) */
 			--brand-dark:#2f2f2f;/* logo dark */
-			--primary:#e11d2a;/* logo red accent */
+			--primary:#e11d2a;/* brand red */
 			--primary-600:#b91c1c;/* darker red hover */
+			--primary-50:#fff1f1;/* soft card bg */
 			--radius:16px;
 		}
-		body{ background:var(--bg); color:#111827; }
+		body{ background:var(--bg);color:#111827;}
 		.content{ margin-left:260px; }
 		/* Sidebar */
 		/* Rounded sidebar with visible radius */
@@ -169,15 +170,19 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		.list-group-item:hover{ background:#f8fafc; }
 		/* Topbar */
 		.navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+		/* Override sticky behavior for this page */
+		.navbar.sticky-top{ position:static; }
 		.text-primary{ color:var(--primary)!important; }
-		.input-group .form-control{ border-color:var(--line); }
-		.input-group-text{ border-color:var(--line); }
 		/* Cards */
-		.card{ border:0; border-radius:var(--radius); background:var(--card); }
-		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
+		.card{border-radius:24px; background:var(--card); box-shadow:0 10px 20px rgba(0,0,0,.05); }
+		.card-stat{box-shadow:0 10px 24px rgba(0,0,0,.08); border-radius:24px; }
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
+		/* Charts */
+		.chart-wrap{ position:relative; width:100%; height:360px; overflow:hidden; }
+		.chart-wrap canvas{ width:100% !important; height:100% !important; display:block; }
+		@media (max-width: 575.98px){ .chart-wrap{ height:200px; } }
 		/* Modern toolbar */
-		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
+		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:24px; padding:16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 8px 20px rgba(0,0,0,.05); position:relative; overflow:hidden; }
 		.toolbar .row-top{ display:flex; gap:12px; align-items:center; }
 		.toolbar .row-bottom{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
 		.toolbar .chip{ padding:6px 12px; border:1px solid var(--line); border-radius:9999px; background:#fff; color:#374151; text-decoration:none; font-size:.875rem; }
@@ -201,37 +206,7 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
 		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
 		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
-		/* Drawer */
-		.drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:0 8px 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
-		.drawer.open{ right:0; }
-		.drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
-		.drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
-		.drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
-		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
-		/* Image gallery styles */
-		.drawer-image{ width:100%; height:250px; object-fit:contain; border-radius:8px; margin-bottom:1rem; background:#f8f9fa; border:1px solid #e9ecef; cursor:pointer; transition:transform 0.2s ease; }
-		.drawer-image:hover{ transform:scale(1.02); }
-		.drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; }
-		.drawer-image-thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; }
-		.drawer-image-thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
-		.drawer-image-thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
-		.more-images-btn{ 
-			background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
-			color: white; 
-			display: flex; 
-			align-items: center; 
-			justify-content: center; 
-			font-size: 0.8rem; 
-			font-weight: 600;
-		}
-		.more-images-content{ text-align: center; }
-		.more-count{ font-size: 0.7rem; }
-		.drawer-map-container{ position: relative; width: 100%; height: 200px; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 8px; }
-		.property-detail{ margin-bottom: 1rem; }
-		.property-detail .label{ font-size: 0.875rem; color: #6b7280; font-weight: 600; margin-bottom: 0.25rem; }
-		.property-detail .value{ font-size: 0.95rem; color: #111827; }
-		.two-col{ display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-		.divider{ height: 1px; background: #e5e7eb; margin: 1.5rem 0; }
+		/* Drawer: not used on this page */
 		/* Mobile responsiveness */
 		@media (max-width: 991.98px){ /* md breakpoint */
 			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
@@ -312,16 +287,18 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				</div>
 			</div>
 
+
+
 			<div class="row g-4">
 				<div class="col-xl-8">
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">Monthly Sold Properties</div>
-						<canvas id="chartMonthly" height="120"></canvas>
+						<div class="h6 mb-3">Monthly Sales Trend</div>
+						<div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
 					</div></div>
 				</div>
 				<div class="col-xl-4">
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">City-wise Available vs Sold</div>
+						<div class="h6 mb-3">Top Performing Cities</div>
 						<canvas id="chartCity" height="180"></canvas>
 					</div></div>
 				</div>
@@ -330,8 +307,8 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 			<div class="row g-4 mt-1">
 				<div class="col-12">
 					<div class="card"><div class="card-body">
-						<div class="h6 mb-3">Category-wise Available vs Sold</div>
-						<canvas id="chartCategory" height="120"></canvas>
+						<div class="h6 mb-3">Category Performance Analysis</div>
+						<canvas id="chartCategory" height="140"></canvas>
 					</div></div>
 				</div>
 			</div>
@@ -340,6 +317,23 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 	<script>
+		// Baseline plugin to draw a subtle line under the bars (match reference)
+		const baselinePlugin = {
+			id: 'baseline',
+			afterDatasetsDraw(chart) {
+				const { ctx, chartArea } = chart;
+				if (!chartArea) return;
+				ctx.save();
+				ctx.strokeStyle = '#9ca3af33';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(chartArea.left, chartArea.bottom - 1);
+				ctx.lineTo(chartArea.right, chartArea.bottom - 1);
+				ctx.stroke();
+				ctx.restore();
+			}
+		};
+		Chart.register(baselinePlugin);
 		const monthlyLabels = <?php echo json_encode($monthlyLabels); ?>;
 		const monthlyCounts = <?php echo json_encode($monthlyCounts); ?>;
 		const catLabels = <?php echo json_encode($catLabels); ?>;
@@ -357,9 +351,30 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		const titleFont = { size: 13, weight: '600' };
 		
 		new Chart(document.getElementById('chartMonthly'), {
-			type: 'bar',
-			data: { labels: monthlyLabels, datasets: [{ label: 'Sold', data: monthlyCounts, backgroundColor: brand, borderRadius: 6, maxBarThickness: 28 }] },
-			options: { scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { display: false } } }
+			type: 'line',
+			data: { 
+				labels: monthlyLabels, 
+				datasets: [{ 
+					label: 'Monthly Sales', 
+					data: monthlyCounts, 
+					borderColor: brand, 
+					backgroundColor: 'rgba(225,29,72,0.08)', 
+					tension: 0.35, 
+					fill: true, 
+					borderWidth: 2, 
+					pointRadius: 0, 
+					pointHoverRadius: 3
+				}]
+			},
+			options: { 
+				maintainAspectRatio: false,
+				responsive: true,
+				scales: { 
+					x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, 
+					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } 
+				}, 
+				plugins: { legend: { display: false } } 
+			}
 		});
 		
 		new Chart(document.getElementById('chartCity'), {
@@ -373,11 +388,24 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		
 		new Chart(document.getElementById('chartCategory'), {
 			type: 'bar',
-			data: { labels: catLabels, datasets: [{ label: 'Available', data: catAvail, backgroundColor: '#16a34a', borderRadius: 6, maxBarThickness: 28 }, { label: 'Sold', data: catSold, backgroundColor: '#ef4444', borderRadius: 6, maxBarThickness: 28 }] },
-			options: { scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { position: 'bottom' } } }
+			data: {
+				labels: catLabels,
+				datasets: [
+					{ label: 'Sold', data: catSold, backgroundColor: '#dc2626', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' },
+					{ label: 'Available', data: catAvail, backgroundColor: 'rgba(220,38,38,0.25)', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' }
+				]
+			},
+			options: {
+				responsive: true,
+				scales: {
+					x: { grid: { color: gridColor }, ticks: { color: ticksColor }, stacked: true },
+					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor }, stacked: true }
+				},
+				plugins: { legend: { position: 'bottom' } },
+				categoryPercentage: 0.6,
+				barPercentage: 0.8
+			}
 		});
 	</script>
 </body>
 </html>
-
-
