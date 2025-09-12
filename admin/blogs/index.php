@@ -291,9 +291,9 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 								<table class="table align-middle" id="blogsTable">
 									<thead>
 										<tr>
+											<th>Cover Image</th>
 											<th>Title</th>
 											<th>Content Preview</th>
-											<th>Image</th>
 											<th>Created</th>
 											<th>Actions</th>
 										</tr>
@@ -301,24 +301,28 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 									<tbody>
 										<?php while($row = $blogs->fetch_assoc()): ?>
 										<tr data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-											<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
-											<td><?php echo htmlspecialchars(substr($row['content'], 0, 100)) . '...'; ?></td>
 											<td>
-												<?php if ($row['image_url']): ?>
-													<img src="<?php echo htmlspecialchars($row['image_url']); ?>" alt="Blog image" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
+												<?php if (!empty($row['image_url'])): ?>
+													<?php 
+														$src = $row['image_url'];
+														if (strpos($src, 'http://') !== 0 && strpos($src, 'https://') !== 0) { $src = '../../' . ltrim($src, '/'); }
+													?>
+													<img src="<?php echo htmlspecialchars($src); ?>" alt="Cover image" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
 												<?php else: ?>
 													<span class="text-muted">No image</span>
 												<?php endif; ?>
 											</td>
+											<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
+											<td><?php echo htmlspecialchars(substr($row['content'], 0, 100)) . '...'; ?></td>
 											<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
 											<td class="text-end actions-cell">
-												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editBlogModal" title="Edit Blog">
-													<i class="fa-solid fa-pen"></i>
-												</button>
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog">
-													<i class="fa-solid fa-trash"></i>
-												</button>
-											</td>
+										<a class="btn btn-sm btn-outline-secondary me-2" href="edit.php?id=<?php echo (int)$row['id']; ?>" title="Edit Blog">
+											<i class="fa-solid fa-pen"></i>
+										</a>
+										<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog">
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</td>
 										</tr>
 										<?php endwhile; ?>
 									</tbody>
@@ -364,47 +368,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 	</div>
 
 
-
-	<!-- Edit Blog Modal -->
-	<div class="modal fade" id="editBlogModal" tabindex="-1">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title">Edit Blog Post</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-				</div>
-				<form method="POST">
-					<div class="modal-body">
-						<input type="hidden" name="action" value="edit_blog">
-						<input type="hidden" name="id" id="edit_id">
-						<div class="mb-3">
-							<label class="form-label">Title</label>
-							<input type="text" class="form-control" name="title" id="edit_title" required>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Content</label>
-							<textarea class="form-control" name="content" id="edit_content" rows="6" required></textarea>
-						</div>
-						<div class="mb-3">
-							<label class="form-label">Image URL (optional)</label>
-							<input type="url" class="form-control" name="image_url" id="edit_image_url" placeholder="https://example.com/image.jpg">
-						</div>
-					</div>
-					<div class="modal-footer">
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-						<button type="submit" class="btn-animated-confirm noselect">
-							<span class="text">Update Blog Post</span>
-							<span class="icon">
-								<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-									<path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-								</svg>
-							</span>
-						</button>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
 
 	<!-- Delete Confirmation Modal -->
 	<div class="modal fade" id="deleteModal" tabindex="-1">

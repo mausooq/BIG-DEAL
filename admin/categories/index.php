@@ -829,11 +829,11 @@ try {
                                             </td>
                                             <td class="text-muted"><?php echo $category['created_date']; ?></td>
                                             <td class="actions-cell">
-                                                <button class="btn btn-outline-secondary btn-sm" 
-                                                        onclick="editCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>', '<?php echo htmlspecialchars($category['image'] ?? ''); ?>')"
-                                                        title="Edit Category">
+                                                <a class="btn btn-outline-secondary btn-sm" 
+                                                   href="edit.php?id=<?php echo (int)$category['id']; ?>" 
+                                                   title="Edit Category">
                                                     <i class="fas fa-edit"></i>
-                                                </button>
+                                                </a>
                                                 <?php if ($category['property_count'] == 0): ?>
                                                     <button class="btn btn-outline-danger btn-sm" 
                                                             onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
@@ -933,82 +933,7 @@ try {
         </div>
     </div>
 
-    <!-- Edit Category Modal -->
-    <div class="modal fade" id="editCategoryModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-edit text-primary me-2"></i>Edit Category
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="modal-body">
-                        <input type="hidden" name="action" value="edit">
-                        <input type="hidden" name="id" id="editCategoryId">
-                        <div class="mb-3">
-                            <label for="editCategoryName" class="form-label">Category Name</label>
-                            <input type="text" class="form-control" id="editCategoryName" name="name" required>
-                            <div class="invalid-feedback">
-                                Category name must be 2-50 characters and contain only letters, numbers, spaces, hyphens, and underscores.
-                            </div>
-                            <div class="valid-feedback">
-                                Category name looks good!
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Category Image</label>
-                            
-                            <!-- Current Image Display -->
-                            <div id="editCurrentImage" class="current-image-container" style="display: none;">
-                                <div class="current-image-label">Current Image</div>
-                                <img id="editCurrentImageImg" src="" alt="Current Image" class="current-image">
-                            </div>
-                            
-                            <!-- New Image Upload -->
-                            <div class="image-upload-container" id="editImageUploadContainer">
-                                <div class="image-upload-icon">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                </div>
-                                <div class="image-upload-text">Click to upload new image or drag and drop</div>
-                                <div class="image-upload-subtext">JPG, PNG, GIF, or WebP (max 5MB). Leave empty to keep current image.</div>
-                                <div class="file-input-wrapper">
-                                    <input type="file" class="file-input" id="editCategoryImage" name="image" 
-                                           accept="image/*" onchange="previewImage(this, 'editImagePreview')">
-                                    <label for="editCategoryImage" class="file-input-label">
-                                        <i class="fas fa-upload me-2"></i>Choose New Image
-                                    </label>
-                                </div>
-                                <div class="upload-progress" id="editUploadProgress">
-                                    <div class="upload-progress-bar" id="editUploadProgressBar"></div>
-                                </div>
-                            </div>
-                            
-                            <!-- New Image Preview -->
-                            <div id="editImagePreview" class="image-preview-container" style="display: none;">
-                                <img id="editImagePreviewImg" src="" alt="New Image Preview" class="image-preview">
-                                <button type="button" class="image-remove-btn" onclick="removeImage('editCategoryImage', 'editImagePreview')">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn-animated-confirm noselect">
-                            <span class="text">Update Category</span>
-                            <span class="icon">
-                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                </svg>
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+    
 
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteCategoryModal" tabindex="-1">
