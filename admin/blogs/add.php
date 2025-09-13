@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			if (!move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $filename)) {
 				throw new Exception('Failed to upload image');
 			}
-			$image_url = 'uploads/blogs/' . $filename;
+			$image_url = $filename; // Store only filename, not full path
 		}
 
 		// Insert blog
@@ -60,7 +60,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		}
 
 		if (!$stmt || !$stmt->execute()) { throw new Exception('Failed to add blog post'); }
+		$blog_id = $mysqli->insert_id;
 		$stmt->close();
+
+		// Insert subtitles if provided
+		$subtitles = $_POST['subtitle_title'] ?? [];
+		$subcontents = $_POST['subtitle_content'] ?? [];
+		$orders = $_POST['subtitle_order'] ?? [];
+		$files = $_FILES['subtitle_image'] ?? null;
+		if (is_array($subtitles) && count($subtitles) > 0) {
+			for ($i = 0; $i < count($subtitles); $i++) {
+				$st = trim($subtitles[$i] ?? '');
+				$sc = trim($subcontents[$i] ?? '');
+				$on = isset($orders[$i]) && $orders[$i] !== '' ? (int)$orders[$i] : ($i + 1);
+				if ($sc === '') { continue; } // Only require content, subtitle can be null
+				$sub_image_url = null;
+				if ($files && isset($files['error'][$i]) && $files['error'][$i] === UPLOAD_ERR_OK) {
+					$uploadDir = '../../uploads/blogs/';
+					if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
+					$ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+					$allowed = ['jpg','jpeg','png','gif','webp'];
+					if (in_array($ext, $allowed) && $files['size'][$i] <= 5*1024*1024) {
+						$filename = 'blog_sub_' . $blog_id . '_' . time() . '_' . $i . '.' . $ext;
+						if (move_uploaded_file($files['tmp_name'][$i], $uploadDir . $filename)) {
+							$sub_image_url = $filename; // Store only filename, not full path
+						}
+					}
+				}
+				$ins = $mysqli->prepare('INSERT INTO blog_subtitles (blog_id, subtitle, content, image_url, order_no, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+				if ($ins) {
+					$st_null = $st === '' ? null : $st; // Convert empty string to null
+					$ins->bind_param('isssi', $blog_id, $st_null, $sc, $sub_image_url, $on);
+					$ins->execute();
+					$ins->close();
+				}
+			}
+		}
 
 		logActivity($mysqli, 'Added blog', 'Title: ' . $title);
 		header('Location: index.php?success=1');
@@ -130,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 			<form method="post" enctype="multipart/form-data" id="blogForm">
 				<div class="row">
-					<div class="col-lg-8">
+					<div class="col-lg-12">
 						<div class="card mb-4">
 							<div class="card-body">
 								<div class="mb-3">
@@ -138,12 +173,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 									<input type="text" class="form-control" name="title" placeholder="Enter blog title" required>
 								</div>
 								<div class="mb-3">
-									<label class="form-label">Content</label>
-									<textarea class="form-control" name="content" rows="8" placeholder="Write your blog content here" required></textarea>
-								</div>
-								<div class="mb-3">
-									<label class="form-label">Image Upload (optional)</label>
-									<div id="drop" class="image-drop">
+									<label class="form-label">Cover Image (optional)</label>
+									<div class="image-drop" id="drop">
 										<i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
 										<div class="mb-2">Drop image here or click to browse</div>
 										<input type="file" name="image" id="image" accept="image/*" class="d-none">
@@ -154,36 +185,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 										<img id="previewImg" src="" alt="Preview">
 									</div>
 								</div>
-								<!-- <div class="mb-0">
-									<label class="form-label">Or Image URL (optional)</label>
-									<input type="url" class="form-control" name="image_url" placeholder="https://example.com/image.jpg">
-								</div> -->
+								<div class="mb-3">
+									<label class="form-label">Content</label>
+									<textarea class="form-control" name="content" rows="8" placeholder="Write your blog content here" required></textarea>
+								</div>
+								<div class="mb-3">
+									<div class="d-flex align-items-center justify-content-between mb-2">
+										<label class="form-label mb-0">Subtitles / Sections</label>
+										<button type="button" class="btn btn-outline-primary btn-sm" id="addSubtitleRow"><i class="fa-solid fa-plus me-1"></i>Add Section</button>
+									</div>
+									<div id="subtitleList" class="vstack gap-3"></div>
+									<div class="text-muted small">Add multiple sections. Image per section is optional.</div>
+								</div>
+								<div class="d-flex justify-content-end gap-2 mt-3">
+									<a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
+									<button type="submit" class="btn-animated-confirm noselect">
+										<span class="text">Add Blog</span>
+										<span class="icon">
+											<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
+										</span>
+									</button>
+								</div>
 							</div>
 						</div>
-					</div>
-					<div class="col-lg-4">
-						<div class="card">
-							<div class="card-body">
-								<div class="text-muted small mb-2">Tips</div>
-								<ul class="small text-muted mb-0">
-									<li>Use a clear, descriptive title</li>
-									<li>Keep content structured for readability</li>
-									<li>Add an engaging featured image</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="card">
-					<div class="card-body d-flex justify-content-end gap-2">
-						<a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
-						<button type="submit" class="btn-animated-confirm noselect">
-							<span class="text">Add Blog</span>
-							<span class="icon">
-								<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
-							</span>
-						</button>
 					</div>
 				</div>
 			</form>
@@ -225,6 +249,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			const content = this.querySelector('textarea[name="content"]').value.trim();
 			if (title.length < 2 || content.length < 10) { e.preventDefault(); alert('Please enter a valid title and content'); }
 		});
+
+		// Subtitles builder
+		(function(){
+			const list = document.getElementById('subtitleList');
+			const addBtn = document.getElementById('addSubtitleRow');
+			if (!list || !addBtn) return;
+			function rowTemplate(index){
+				return `
+					<div class="border rounded p-3" data-index="${index}">
+						<div class="row g-3 align-items-start">
+							<div class="col-md-6">
+								<label class="form-label">Subtitle (optional)</label>
+								<input type="text" name="subtitle_title[]" class="form-control" placeholder="Section title (optional)">
+							</div>
+							<div class="col-md-3">
+								<label class="form-label">Order</label>
+								<input type="number" name="subtitle_order[]" class="form-control" min="1" value="${index+1}">
+							</div>
+							<div class="col-md-3 d-flex justify-content-end">
+								<button type="button" class="btn btn-outline-secondary mt-4 remove-subtitle">Remove</button>
+							</div>
+							<div class="col-12">
+								<label class="form-label">Content</label>
+								<textarea name="subtitle_content[]" class="form-control" rows="4" placeholder="Section content"></textarea>
+							</div>
+							<div class="col-md-6">
+								<label class="form-label">Image (optional)</label>
+								<input type="file" name="subtitle_image[]" accept="image/*" class="form-control">
+								<div class="form-text">JPG, PNG, GIF, WebP up to 5MB</div>
+							</div>
+						</div>
+					</div>`;
+			}
+			let count = 0;
+			function addRow(){
+				const wrapper = document.createElement('div');
+				wrapper.innerHTML = rowTemplate(count++);
+				const node = wrapper.firstElementChild;
+				list.appendChild(node);
+			}
+			addBtn.addEventListener('click', addRow);
+			list.addEventListener('click', function(e){
+				const btn = e.target.closest('.remove-subtitle');
+				if (!btn) return;
+				const card = btn.closest('[data-index]');
+				if (card) card.remove();
+			});
+		})();
 	</script>
 </body>
 </html>

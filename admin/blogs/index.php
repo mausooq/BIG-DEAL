@@ -305,7 +305,10 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 												<?php if (!empty($row['image_url'])): ?>
 													<?php 
 														$src = $row['image_url'];
-														if (strpos($src, 'http://') !== 0 && strpos($src, 'https://') !== 0) { $src = '../../' . ltrim($src, '/'); }
+														// If it's not a full URL, construct the path
+														if (strpos($src, 'http://') !== 0 && strpos($src, 'https://') !== 0) { 
+															$src = '../../uploads/blogs/' . $src; 
+														}
 													?>
 													<img src="<?php echo htmlspecialchars($src); ?>" alt="Cover image" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
 												<?php else: ?>

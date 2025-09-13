@@ -9,3 +9,6 @@ CREATE TABLE properties_location (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (properties_id) REFERENCES properties(id) ON DELETE CASCADE
 );
+
+-- Alter blog_subtitles table to make subtitle field nullable
+ALTER TABLE blog_subtitles MODIFY COLUMN subtitle VARCHAR(255) NULL;

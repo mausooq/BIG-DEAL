@@ -48,6 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($price === null || $price <= 0) { throw new Exception('Valid price is required'); }
         if ($area === null || $area <= 0) { throw new Exception('Valid area is required'); }
 
+        // Structured location
+        $state_id = isset($_POST['state_id']) && $_POST['state_id'] !== '' ? (int)$_POST['state_id'] : 0;
+        $district_id = isset($_POST['district_id']) && $_POST['district_id'] !== '' ? (int)$_POST['district_id'] : 0;
+        $city_id = isset($_POST['city_id']) && $_POST['city_id'] !== '' ? (int)$_POST['city_id'] : 0;
+        $town_id = isset($_POST['town_id']) && $_POST['town_id'] !== '' ? (int)$_POST['town_id'] : 0;
+        $pincode = trim($_POST['pincode'] ?? '');
+        if ($state_id <= 0 || $district_id <= 0 || $city_id <= 0 || $town_id <= 0 || $pincode === '') {
+            throw new Exception('Please select State, District, City, Town and enter Pincode');
+        }
+
         // Insert property
         $sql = "INSERT INTO properties (title, description, listing_type, price, location, landmark, area, configuration, category_id, furniture_status, ownership_type, facing, parking, balcony, status, map_embed_link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $mysqli->prepare($sql);
@@ -59,6 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $property_id = $mysqli->insert_id;
         $stmt->close();
+
+        // Insert properties_location
+        $pl = $mysqli->prepare("INSERT INTO properties_location (property_id, state_id, district_id, city_id, town_id, pincode) VALUES (?, ?, ?, ?, ?, ?)");
+        if ($pl) {
+            $pl->bind_param('iiiiis', $property_id, $state_id, $district_id, $city_id, $town_id, $pincode);
+            if (!$pl->execute()) {
+                throw new Exception('Failed to save property location');
+            }
+            $pl->close();
+        }
 
         // Handle image uploads
         if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
@@ -137,9 +157,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get categories for dropdown
+// Get categories and states for dropdowns
 $mysqli = db();
 $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name");
+$statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -193,7 +214,7 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
         .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
-        .btn-outline-secondary{ color: var(--muted); border-color: var(--line); }
+        .btn-outline-secondary{ color: var(--muted); border-color: var(--muted); }
         .btn-outline-secondary:hover{ background-color: var(--muted); border-color: var(--muted); color:#fff; }
         /* Section styling */
         .section-header{ border-bottom:2px solid var(--line); padding-bottom:1rem; margin-bottom:2rem; }
@@ -222,6 +243,11 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
             .section-title{ font-size:1rem; }
             .form-label{ font-size:0.9rem; }
         }
+        /* Inline add dropdown overlays */
+        .location-grid .col-md-6, .location-grid .col-md-12, .location-grid .col-md-4 { position: relative; }
+        .inline-add { position:absolute; left:0; right:0; top: calc(100% + 6px); z-index: 5; background: var(--card); }
+        .inline-add .input-group { box-shadow: 0 6px 20px rgba(0,0,0,.12); border-radius: 8px; }
+        .location-card { padding-bottom: 64px; }
     </style>
 </head>
 <body>
@@ -252,8 +278,8 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
             <form method="post" enctype="multipart/form-data" id="propertyForm">
                 <div class="row">
                     <!-- Basic Information -->
-                    <div class="col-lg-8">
-                        <div class="card mb-4">
+                    <div class="col-lg-12">
+                        <div class="card mb-4 location-card">
                             <div class="card-body">
                                 <div class="section-header">
                                     <h5 class="section-title"><i class="fa-solid fa-info-circle me-2"></i>Basic Information</h5>
@@ -330,6 +356,80 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                             </div>
                         </div>
 
+                        <!-- Structured Location -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <div class="section-header">
+                                    <h5 class="section-title"><i class="fa-solid fa-location-dot me-2"></i>Location Details</h5>
+                                </div>
+                                <div class="row g-3 align-items-end location-grid">
+                                    <div class="col-md-6">
+                                        <label class="form-label">State <span class="required">*</span></label>
+                                        <select class="form-select" id="stateSelect" name="state_id" required>
+                                            <option value="">Select State</option>
+                                            <?php while($s = $statesRes->fetch_assoc()): ?>
+                                                <option value="<?php echo (int)$s['id']; ?>"><?php echo htmlspecialchars($s['name']); ?></option>
+                                            <?php endwhile; ?>
+                                            <option value="__add__">+ Add State</option>
+                                        </select>
+                                        <div id="stateAddInline" class="mt-2 inline-add" style="display:none;">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="stateAddInput" placeholder="New state name">
+                                                <button class="btn btn-primary" type="button" id="stateAddSave">Save</button>
+                                                <button class="btn btn-outline-secondary" type="button" id="stateAddCancel">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">District <span class="required">*</span></label>
+                                        <select class="form-select" id="districtSelect" name="district_id" required>
+                                            <option value="">Select District</option>
+                                            <option value="__add__">+ Add District</option>
+                                        </select>
+                                        <div id="districtAddInline" class="mt-2 inline-add" style="display:none;">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="districtAddInput" placeholder="New district name">
+                                                <button class="btn btn-primary" type="button" id="districtAddSave">Save</button>
+                                                <button class="btn btn-outline-secondary" type="button" id="districtAddCancel">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">City <span class="required">*</span></label>
+                                        <select class="form-select" id="citySelect" name="city_id" required>
+                                            <option value="">Select City</option>
+                                            <option value="__add__">+ Add City</option>
+                                        </select>
+                                        <div id="cityAddInline" class="mt-2 inline-add" style="display:none;">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="cityAddInput" placeholder="New city name">
+                                                <button class="btn btn-primary" type="button" id="cityAddSave">Save</button>
+                                                <button class="btn btn-outline-secondary" type="button" id="cityAddCancel">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Town <span class="required">*</span></label>
+                                        <select class="form-select" id="townSelect" name="town_id" required>
+                                            <option value="">Select Town</option>
+                                            <option value="__add__">+ Add Town</option>
+                                        </select>
+                                        <div id="townAddInline" class="mt-2 inline-add" style="display:none;">
+                                            <div class="input-group">
+                                                <input type="text" class="form-control" id="townAddInput" placeholder="New town name">
+                                                <button class="btn btn-primary" type="button" id="townAddSave">Save</button>
+                                                <button class="btn btn-outline-secondary" type="button" id="townAddCancel">Cancel</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Pincode <span class="required">*</span></label>
+                                        <input type="text" class="form-control" name="pincode" id="pincodeInput" placeholder="e.g., 560001" required>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Property Details -->
                         <div class="card mb-4">
                             <div class="card-body">
@@ -401,42 +501,22 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
                                 
                                 <div id="imagePreview" class="mt-3"></div>
                                 <div id="imageInfo" class="mt-2 text-muted small"></div>
+                                
+                                <!-- Form Actions inside form -->
+                                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                                    <a href="index.php" class="btn btn-outline-secondary">
+                                        <i class="fa-solid fa-times me-2"></i>Cancel
+                                    </a>
+                                    <button type="submit" class="btn-animated-confirm noselect">
+                                        <span class="text">Add Property</span>
+                                        <span class="icon">
+                                            <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                            </svg>
+                                        </span>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Sidebar -->
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="fw-semibold mb-3 text-primary"><i class="fa-solid fa-lightbulb me-2"></i>Tips for Better Listings</h6>
-                                <ul class="list-unstyled small text-muted">
-                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Use descriptive and attractive titles</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Add high-quality images</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Include accurate measurements</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Mention nearby amenities</li>
-                                    <li class="mb-2"><i class="fa-solid fa-check text-primary me-2"></i>Be specific about location</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Form Actions -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex gap-2 justify-content-end">
-                            <a href="index.php" class="btn btn-outline-secondary">
-                                <i class="fa-solid fa-times me-2"></i>Cancel
-                            </a>
-                            <button type="submit" class="btn-animated-confirm noselect">
-                                <span class="text">Add Property</span>
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                    </svg>
-                                </span>
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -446,6 +526,162 @@ $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name")
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Location dependent selects and inline create
+        async function fetchJSON(url, options){ const r = await fetch(url, options); if(!r.ok) return []; try { return await r.json(); } catch { return []; } }
+        const stateSelect = document.getElementById('stateSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const citySelect = document.getElementById('citySelect');
+        const townSelect = document.getElementById('townSelect');
+        function hideAllInline(){
+            const ids = ['stateAddInline','districtAddInline','cityAddInline','townAddInline'];
+            ids.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+        }
+
+        stateSelect && stateSelect.addEventListener('change', async function(){
+            const sid = this.value || 0;
+            if (this.value === '__add__') {
+                hideAllInline();
+                this.value = '';
+                document.getElementById('stateAddInline').style.display = '';
+                document.getElementById('stateAddInput').focus();
+                return;
+            } else {
+                document.getElementById('stateAddInline').style.display = 'none';
+            }
+            districtSelect.innerHTML = '<option value="">Select District</option>';
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            townSelect.innerHTML = '<option value="">Select Town</option>';
+            if (sid) {
+                const d = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=districts&state_id=' + sid);
+                districtSelect.innerHTML = '<option value="">Select District</option>' + d.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add District</option>';
+            } else {
+                districtSelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add District</option>');
+            }
+        });
+        districtSelect && districtSelect.addEventListener('change', async function(){
+            const did = this.value || 0;
+            if (this.value === '__add__') {
+                hideAllInline();
+                this.value = '';
+                document.getElementById('districtAddInline').style.display = '';
+                document.getElementById('districtAddInput').focus();
+                return;
+            } else {
+                document.getElementById('districtAddInline').style.display = 'none';
+            }
+            citySelect.innerHTML = '<option value="">Select City</option>';
+            townSelect.innerHTML = '<option value="">Select Town</option>';
+            if (did) {
+                const c = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=cities&district_id=' + did);
+                citySelect.innerHTML = '<option value="">Select City</option>' + c.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add City</option>';
+            } else {
+                citySelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add City</option>');
+            }
+        });
+        citySelect && citySelect.addEventListener('change', async function(){
+            const cid = this.value || 0;
+            if (this.value === '__add__') {
+                hideAllInline();
+                this.value = '';
+                document.getElementById('cityAddInline').style.display = '';
+                document.getElementById('cityAddInput').focus();
+                return;
+            } else {
+                document.getElementById('cityAddInline').style.display = 'none';
+            }
+            townSelect.innerHTML = '<option value="">Select Town</option>';
+            if (cid) {
+                const t = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=towns&city_id=' + cid);
+                townSelect.innerHTML = '<option value="">Select Town</option>' + t.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add Town</option>';
+            } else {
+                townSelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add Town</option>');
+            }
+        });
+
+        // Town select inline add
+        townSelect && townSelect.addEventListener('change', function(){
+            if (this.value === '__add__') {
+                hideAllInline();
+                this.value = '';
+                document.getElementById('townAddInline').style.display = '';
+                document.getElementById('townAddInput').focus();
+            } else {
+                document.getElementById('townAddInline').style.display = 'none';
+            }
+        });
+        async function createItem(scope, payload){
+            const form = new FormData();
+            form.append('action', 'create');
+            form.append('scope', scope);
+            Object.entries(payload).forEach(([k,v])=> form.append(k, v));
+            const r = await fetch('../location-hierarchy/hierarchy.php', { method:'POST', body: form });
+            const j = await r.json().catch(()=>({}));
+            if (j && j.id) return j;
+            alert(j && j.error ? j.error : 'Failed to create');
+            return null;
+        }
+        // Inline add save/cancel handlers
+        document.getElementById('stateAddSave')?.addEventListener('click', async ()=>{
+            const name = document.getElementById('stateAddInput').value.trim(); if (!name) return;
+            const item = await createItem('state', { name }); if (!item) return;
+            stateSelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${item.name}</option>`);
+            stateSelect.value = item.id; document.getElementById('stateAddInline').style.display='none';
+            stateSelect.dispatchEvent(new Event('change'));
+        });
+        document.getElementById('stateAddCancel')?.addEventListener('click', ()=>{ document.getElementById('stateAddInline').style.display='none'; });
+        document.getElementById('districtAddSave')?.addEventListener('click', async ()=>{
+            const sid = stateSelect.value; if (!sid) { alert('Select state first'); return; }
+            const name = document.getElementById('districtAddInput').value.trim(); if (!name) return;
+            const item = await createItem('district', { name, state_id: sid }); if (!item) return;
+            districtSelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${item.name}</option>`);
+            districtSelect.value = item.id; document.getElementById('districtAddInline').style.display='none';
+            districtSelect.dispatchEvent(new Event('change'));
+        });
+        document.getElementById('districtAddCancel')?.addEventListener('click', ()=>{ document.getElementById('districtAddInline').style.display='none'; });
+        document.getElementById('cityAddSave')?.addEventListener('click', async ()=>{
+            const did = districtSelect.value; if (!did) { alert('Select district first'); return; }
+            const name = document.getElementById('cityAddInput').value.trim(); if (!name) return;
+            const item = await createItem('city', { name, district_id: did }); if (!item) return;
+            citySelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${item.name}</option>`);
+            citySelect.value = item.id; document.getElementById('cityAddInline').style.display='none';
+            citySelect.dispatchEvent(new Event('change'));
+        });
+        document.getElementById('cityAddCancel')?.addEventListener('click', ()=>{ document.getElementById('cityAddInline').style.display='none'; });
+        document.getElementById('townAddSave')?.addEventListener('click', async ()=>{
+            const cid = citySelect.value; if (!cid) { alert('Select city first'); return; }
+            const name = document.getElementById('townAddInput').value.trim(); if (!name) return;
+            const item = await createItem('town', { name, city_id: cid }); if (!item) return;
+            townSelect.insertAdjacentHTML('beforeend', `<option value="${item.id}">${item.name}</option>`);
+            townSelect.value = item.id; document.getElementById('townAddInline').style.display='none';
+        });
+        document.getElementById('townAddCancel')?.addEventListener('click', ()=>{ document.getElementById('townAddInline').style.display='none'; });
+
+        // UX: Enter saves; Esc or outside click cancels
+        function wireInlineUX(inputId, saveBtnId, cancelBtnId){
+            const input = document.getElementById(inputId);
+            const saveBtn = document.getElementById(saveBtnId);
+            const cancelBtn = document.getElementById(cancelBtnId);
+            if (!input) return;
+            input.addEventListener('keydown', (e)=>{
+                if (e.key === 'Enter') { e.preventDefault(); saveBtn?.click(); }
+                if (e.key === 'Escape') { e.preventDefault(); cancelBtn?.click(); }
+            });
+        }
+        wireInlineUX('stateAddInput','stateAddSave','stateAddCancel');
+        wireInlineUX('districtAddInput','districtAddSave','districtAddCancel');
+        wireInlineUX('cityAddInput','cityAddSave','cityAddCancel');
+        wireInlineUX('townAddInput','townAddSave','townAddCancel');
+
+        // Close inline add on outside click
+        document.addEventListener('mousedown', function(e){
+            const containers = ['stateAddInline','districtAddInline','cityAddInline','townAddInline']
+                .map(id => document.getElementById(id))
+                .filter(Boolean);
+            const clickedInside = containers.some(c => c.contains(e.target));
+            if (!clickedInside) {
+                hideAllInline();
+            }
+        });
         // Image upload handling
         const imageUploadArea = document.getElementById('imageUploadArea');
         const imageInput = document.getElementById('imageInput');
