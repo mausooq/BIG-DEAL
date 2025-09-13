@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 									<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
 								</div>
 								<div class="mb-3">
-									<label class="form-label">Replace Cover Image (optional)</label>
+									<label class="form-label">Replace Cover-Image (optional)</label>
 									<div class="image-drop" id="drop">
 										<i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
 										<div class="mb-2">Drop image here or click to browse</div>
