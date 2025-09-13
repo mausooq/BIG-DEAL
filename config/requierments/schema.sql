@@ -80,7 +80,7 @@ CREATE TABLE blogs (
 CREATE TABLE blog_subtitles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     blog_id INT NOT NULL,
-    subtitle VARCHAR(255) NOT NULL,
+    subtitle VARCHAR(255) NULL,
     content TEXT NOT NULL,
     image_url VARCHAR(255),
     order_no INT DEFAULT 1,
@@ -141,13 +141,15 @@ CREATE TABLE activity_logs (
 -- Normalized location hierarchy and mapping for properties
 CREATE TABLE IF NOT EXISTS states (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(255) NOT NULL UNIQUE
+    name VARCHAR(255) NOT NULL UNIQUE,
+    image_url VARCHAR(255) NULL
 );
 
 CREATE TABLE IF NOT EXISTS districts (
     id INT AUTO_INCREMENT PRIMARY KEY,
     state_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    image_url VARCHAR(255) NULL,
     FOREIGN KEY (state_id) REFERENCES states(id) ON DELETE CASCADE,
     UNIQUE(state_id, name)
 );
@@ -156,6 +158,7 @@ CREATE TABLE IF NOT EXISTS cities (
     id INT AUTO_INCREMENT PRIMARY KEY,
     district_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    image_url VARCHAR(255) NULL,
     FOREIGN KEY (district_id) REFERENCES districts(id) ON DELETE CASCADE,
     UNIQUE(district_id, name)
 );
@@ -164,6 +167,7 @@ CREATE TABLE IF NOT EXISTS towns (
     id INT AUTO_INCREMENT PRIMARY KEY,
     city_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,
+    image_url VARCHAR(255) NULL,
     FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,
     UNIQUE(city_id, name)
 );
