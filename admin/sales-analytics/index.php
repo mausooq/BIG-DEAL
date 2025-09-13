@@ -425,6 +425,21 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				barPercentage: 0.8
 			}
 		});
+
+		// Handle Enter key press in form inputs
+		document.addEventListener('DOMContentLoaded', function() {
+			const form = document.querySelector('form');
+			const inputs = form.querySelectorAll('input, select');
+			
+			inputs.forEach(input => {
+				input.addEventListener('keypress', function(e) {
+					if (e.key === 'Enter') {
+						e.preventDefault();
+						form.submit();
+					}
+				});
+			});
+		});
 	</script>
 </body>
 </html>
