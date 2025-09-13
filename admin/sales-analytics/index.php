@@ -49,6 +49,13 @@ $kpiSql = [
 			$filters['start_date'] ? 'e.created_at >= ?' : '',
 			$filters['end_date'] ? 'e.created_at <= ?' : ''
 		])) : ''
+	),
+	'notifications' => "SELECT COUNT(*) FROM notifications n" . (
+		($filters['start_date'] || $filters['end_date']) ?
+		' WHERE ' . implode(' AND ', array_filter([
+			$filters['start_date'] ? 'n.created_at >= ?' : '',
+			$filters['end_date'] ? 'n.created_at <= ?' : ''
+		])) : ''
 	)
 ];
 
@@ -81,6 +88,7 @@ $kpis = [
 	'available' => fetchCount($kpiSql['total_available'], $kpiTypesAvail, $kpiParamsAvail),
 	'sold' => fetchCount($kpiSql['total_sold'], $kpiTypesSold, $kpiParamsSold),
 	'enquiries' => fetchCount($kpiSql['new_enquiries'], $enqTypes, $enqParams),
+	'notifications' => fetchCount($kpiSql['notifications'], $enqTypes, $enqParams),
 ];
 
 // Chart: monthly sold properties (last 12 months within filter)
@@ -282,21 +290,27 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 						<div class="text-warning"><i class="fa-regular fa-envelope fa-lg"></i></div>
 					</div></div>
 				</div>
+				<div class="col-sm-6 col-xl-3">
+					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
+						<div><div class="text-muted small">Notifications</div><div class="h4 mb-0"><?php echo $kpis['notifications']; ?></div></div>
+						<div class="text-info"><i class="fa-solid fa-bell fa-lg"></i></div>
+					</div></div>
+				</div>
 			</div>
 
 
 
 			<div class="row g-4">
-				<div class="col-xl-8">
+				<div class="col-xl-6">	
 					<div class="card"><div class="card-body">
 						<div class="h6 mb-3">Monthly Sales Trend</div>
 						<div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
 					</div></div>
 				</div>
-				<div class="col-xl-4">
+				<div class="col-xl-6">
 					<div class="card"><div class="card-body">
 						<div class="h6 mb-3">Top Performing Cities</div>
-						<canvas id="chartCity" height="180"></canvas>
+						<div class="chart-wrap"><canvas id="chartCity"></canvas></div>
 					</div></div>
 				</div>
 			</div>
@@ -380,7 +394,15 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				{ label: 'Available', data: cityAvail, backgroundColor: '#16a34a', borderRadius: 6, maxBarThickness: 28 },
 				{ label: 'Sold', data: citySold, backgroundColor: '#ef4444', borderRadius: 6, maxBarThickness: 28 }
 			] },
-			options: { responsive: true, scales: { x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } }, plugins: { legend: { position: 'bottom' } } }
+			options: { 
+				maintainAspectRatio: false,
+				responsive: true, 
+				scales: { 
+					x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, 
+					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } 
+				}, 
+				plugins: { legend: { position: 'bottom' } } 
+			}
 		});
 		
 		new Chart(document.getElementById('chartCategory'), {
