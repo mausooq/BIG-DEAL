@@ -3,6 +3,12 @@ require_once __DIR__ . '/../auth.php';
 
 function db() { return getMysqliConnection(); }
 
+function fetchScalar($sql) {
+    $mysqli = db();
+    $res = $mysqli->query($sql);
+    $row = $res ? $res->fetch_row() : [0];
+    return (int)($row[0] ?? 0);
+}
 
 // Helper: activity logging
 function logActivity(mysqli $mysqli, string $action, string $details): void {
@@ -167,13 +173,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Get recent activity
-$mysqli = db();
-$recentStates = $mysqli->query("SELECT name, DATE_FORMAT(NOW(),'%b %d, %Y') as created_at FROM states ORDER BY id DESC LIMIT 5");
-$recentDistricts = $mysqli->query("SELECT d.name, s.name as state_name, DATE_FORMAT(NOW(),'%b %d, %Y') as created_at FROM districts d LEFT JOIN states s ON d.state_id = s.id ORDER BY d.id DESC LIMIT 5");
-$recentCities = $mysqli->query("SELECT c.name, d.name as district_name, s.name as state_name, DATE_FORMAT(NOW(),'%b %d, %Y') as created_at FROM cities c LEFT JOIN districts d ON c.district_id = d.id LEFT JOIN states s ON d.state_id = s.id ORDER BY c.id DESC LIMIT 5");
 
 // Get locations with search, filters and pagination
+$mysqli = db();
 $search = $_GET['search'] ?? '';
 $filter = $_GET['filter'] ?? '';
 $value = $_GET['value'] ?? '';
@@ -243,7 +245,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Location Management - Big Deal</title>
+    <title>Locations - Big Deal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
@@ -341,18 +343,6 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         /* Activity list */
         .list-activity{ max-height:420px; overflow:auto; }
         .sticky-side{ position:sticky; top:96px; }
-        .activity-item{ 
-            padding:12px; 
-            border:1px solid var(--line); 
-            border-radius:8px; 
-            margin-bottom:8px; 
-            background:#fff; 
-            transition:all .2s ease;
-        }
-        .activity-item:hover{ 
-            border-color:var(--primary); 
-            background:#fef2f2; 
-        }
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
@@ -361,6 +351,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
             .sidebar.open{ left:12px; }
             .content{ margin-left:0; }
+            .table{ font-size:.9rem; }
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
@@ -374,7 +365,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('location'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Location Management'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Locations'); ?>
 
         <div class="container-fluid p-4">
             <!-- Messages -->
@@ -470,36 +461,58 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                 </div>
             </div>
 
-
-            <!-- Quick Actions -->
-            <div class="row g-4 mb-5">
+            <div class="row g-4">
                 <div class="col-12">
-                    <div class="card quick-card">
+                    <div class="card quick-card mb-4">
                         <div class="card-body">
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="h6 mb-0">Quick Actions</div>
+                                <div class="h6 mb-0">Locations</div>
                             </div>
-                            <div class="row g-3">
-                                <div class="col-md-3">
-                                    <a href="states/add.php" class="btn btn-outline-primary w-100">
-                                        <i class="fa-solid fa-plus me-2"></i>Add State
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="districts/add.php" class="btn btn-outline-primary w-100">
-                                        <i class="fa-solid fa-plus me-2"></i>Add District
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="cities/add.php" class="btn btn-outline-primary w-100">
-                                        <i class="fa-solid fa-plus me-2"></i>Add City
-                                    </a>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="towns/add.php" class="btn btn-outline-primary w-100">
-                                        <i class="fa-solid fa-plus me-2"></i>Add Town
-                                    </a>
-                                </div>
+                            <div class="table-responsive table-wrap">
+                                <table class="table table-hover table-inner" id="locationsTable">
+                                    <thead>
+                                        <tr>
+                                            <th style="min-width:80px;">Image</th>
+                                            <th style="min-width:200px;">Location Name</th>
+                                            <th style="min-width:120px;">Created</th>
+                                            <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if ($locations && $locations->num_rows > 0): ?>
+                                            <?php while ($location = $locations->fetch_assoc()): ?>
+                                                <tr data-location='<?php echo json_encode($location, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                                    <td>
+                                                        <?php if (!empty($location['image'])): ?>
+                                                            <img src="../../uploads/locations/<?php echo htmlspecialchars($location['image']); ?>" alt="<?php echo htmlspecialchars($location['place_name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                        <?php else: ?>
+                                                            <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                                                <i class="fa-solid fa-map-location-dot text-muted"></i>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td class="fw-semibold">
+                                                        <a href="../properties/index.php?location=<?php echo urlencode($location['place_name']); ?>" class="badge bg-light text-dark border text-decoration-none" title="View properties in this location">
+                                                            <?php echo htmlspecialchars($location['place_name']); ?>
+                                                        </a>
+                                                    </td>
+                                                    <td class="text-muted"><?php echo date('M d, Y', strtotime($location['created_at'])); ?></td>
+                                                    <td class="actions-cell">
+                                                        <button class="btn btn-sm btn-outline-secondary btn-edit me-1" data-bs-toggle="modal" data-bs-target="#editLocationModal" title="Edit Location"><i class="fa-solid fa-pen"></i></button>
+                                                        <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteLocationModal" title="Delete Location"><i class="fa-solid fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            <?php endwhile; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="4" class="text-center py-4 text-muted">
+                                                    <i class="fa-solid fa-map-location-dot fa-2x mb-2"></i>
+                                                    <div>No locations found</div>
+                                                </td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
                             </div>
 
                             <?php if ($totalPages > 1): ?>
@@ -526,78 +539,129 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Recent Activity -->
-            <div class="row g-4">
-                <div class="col-lg-4">
+                <!-- <div class="col-xl-4">
                     <div class="card h-100 sticky-side">
                         <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="h6 mb-0">Recent States</div>
-                                <a href="states/index.php" class="btn btn-sm btn-outline-primary">View All</a>
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="h6 mb-0">Recent Locations</div>
+                                <span class="badge bg-light text-dark border">Latest</span>
                             </div>
                             <div class="list-activity">
-                                <?php while($state = $recentStates->fetch_assoc()): ?>
-                                <div class="activity-item">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <div class="fw-semibold"><?php echo htmlspecialchars($state['name']); ?></div>
-                                            <div class="text-muted small"><?php echo $state['created_at']; ?></div>
-                                        </div>
-                                        <i class="fa-solid fa-map text-primary"></i>
-                                    </div>
+                                <?php while($l = $recentLocations->fetch_assoc()): ?>
+                                <div class="item-row d-flex align-items-center justify-content-between" style="padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff;">
+                                    <span class="item-title fw-semibold"><?php echo htmlspecialchars($l['place_name']); ?></span>
+                                    <span class="text-muted small"><?php echo $l['created_at']; ?></span>
                                 </div>
                                 <?php endwhile; ?>
                             </div>
                         </div>
                     </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Location Modal -->
+    <div class="modal fade" id="addLocationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="col-lg-4">
-                    <div class="card h-100 sticky-side">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="h6 mb-0">Recent Districts</div>
-                                <a href="districts/index.php" class="btn btn-sm btn-outline-primary">View All</a>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="add_location">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Place Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="place_name" required>
                             </div>
-                            <div class="list-activity">
-                                <?php while($district = $recentDistricts->fetch_assoc()): ?>
-                                <div class="activity-item">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <div class="fw-semibold"><?php echo htmlspecialchars($district['name']); ?></div>
-                                            <div class="text-muted small"><?php echo $district['state_name']; ?> • <?php echo $district['created_at']; ?></div>
-                                        </div>
-                                        <i class="fa-solid fa-building text-primary"></i>
-                                    </div>
-                                </div>
-                                <?php endwhile; ?>
+                            <div class="col-12">
+                                <label class="form-label">Location Image</label>
+                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <div class="form-text">Upload an image for this location (JPG, PNG, GIF, WebP - Max 5MB)</div>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-animated-confirm noselect">
+                            <span class="text">Add Location</span>
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Location Modal -->
+    <div class="modal fade" id="editLocationModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Location</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="col-lg-4">
-                    <div class="card h-100 sticky-side">
-                        <div class="card-body">
-                            <div class="d-flex align-items-center justify-content-between mb-3">
-                                <div class="h6 mb-0">Recent Cities</div>
-                                <a href="cities/index.php" class="btn btn-sm btn-outline-primary">View All</a>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="edit_location">
+                        <input type="hidden" name="id" id="edit_id">
+                        <input type="hidden" name="current_image" id="edit_current_image">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label">Place Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" name="place_name" id="edit_place_name" required>
                             </div>
-                            <div class="list-activity">
-                                <?php while($city = $recentCities->fetch_assoc()): ?>
-                                <div class="activity-item">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div>
-                                            <div class="fw-semibold"><?php echo htmlspecialchars($city['name']); ?></div>
-                                            <div class="text-muted small"><?php echo $city['district_name']; ?>, <?php echo $city['state_name']; ?> • <?php echo $city['created_at']; ?></div>
-                                        </div>
-                                        <i class="fa-solid fa-city text-primary"></i>
-                                    </div>
-                                </div>
-                                <?php endwhile; ?>
+                            <div class="col-12">
+                                <label class="form-label">Location Image</label>
+                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div id="current_image_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-animated-confirm noselect">
+                            <span class="text">Update Location</span>
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteLocationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Delete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete the location "<span id="delete_location_name"></span>"?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST" style="display: inline;">
+                        <input type="hidden" name="action" value="delete_location">
+                        <input type="hidden" name="id" id="delete_id">
+                        <button type="submit" class="btn btn-danger">Delete Location</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -678,6 +742,22 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                     }
                 });
             });
+
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function(){
+                    const tr = this.closest('tr');
+                    const data = JSON.parse(tr.getAttribute('data-location'));
+                    document.getElementById('delete_id').value = data.id;
+                    document.getElementById('delete_location_name').textContent = data.place_name;
+                });
+            });
+
+            // Auto-hide alerts after 5 seconds
+            setTimeout(function(){
+                document.querySelectorAll('.alert').forEach(a => {
+                    try { (new bootstrap.Alert(a)).close(); } catch(e) {}
+                });
+            }, 5000);
         });
     </script>
 </body>
