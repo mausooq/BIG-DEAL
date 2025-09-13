@@ -174,9 +174,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 
-// Get locations with search and pagination
+// Get locations with search, filters and pagination
 $mysqli = db();
 $search = $_GET['search'] ?? '';
+$filter = $_GET['filter'] ?? '';
+$value = $_GET['value'] ?? '';
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 10;
 $offset = ($page - 1) * $limit;
@@ -185,11 +187,33 @@ $whereClause = '';
 $params = [];
 $types = '';
 
+// Build WHERE conditions
+$conditions = [];
+
 if ($search) {
-    $whereClause = ' WHERE place_name LIKE ?';
-    $types = 's';
+    $conditions[] = 'place_name LIKE ?';
+    $types .= 's';
     $searchParam = '%' . $mysqli->real_escape_string($search) . '%';
     $params[] = $searchParam;
+}
+
+// Apply additional filters
+if ($filter && $value) {
+    switch ($filter) {
+        case 'recent':
+            $conditions[] = 'created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+            break;
+        case 'with_images':
+            $conditions[] = 'image IS NOT NULL AND image != ""';
+            break;
+        case 'no_images':
+            $conditions[] = '(image IS NULL OR image = "")';
+            break;
+    }
+}
+
+if (!empty($conditions)) {
+    $whereClause = ' WHERE ' . implode(' AND ', $conditions);
 }
 
 $sql = 'SELECT id, place_name, image, created_at FROM locations' . $whereClause . ' ORDER BY created_at DESC LIMIT ? OFFSET ?';
@@ -205,9 +229,8 @@ $locations = $stmt ? $stmt->get_result() : $mysqli->query('SELECT id, place_name
 // Count
 $countSql = 'SELECT COUNT(*) FROM locations' . $whereClause;
 $countStmt = $mysqli->prepare($countSql);
-if ($countStmt && $search) {
-    $countSearchParam = '%' . $mysqli->real_escape_string($search) . '%';
-    $countStmt->bind_param('s', $countSearchParam);
+if ($countStmt && $types) {
+    $countStmt->bind_param($types, ...$params);
 }
 $countStmt && $countStmt->execute();
 $totalCountRow = $countStmt ? $countStmt->get_result()->fetch_row() : [0];
@@ -252,10 +275,16 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         .input-group-text{ border-color:var(--line); }
         /* Cards */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
+        .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
         .quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        .toolbar .row-bottom{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+        .toolbar .chip{ padding:6px 12px; border:1px solid var(--line); border-radius:9999px; background:#fff; color:#374151; text-decoration:none; font-size:.875rem; }
+        .toolbar .chip:hover{ border-color:#d1d5db; }
+        .toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
+        .toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
         /* Table */
         .table{ --bs-table-bg:transparent;  border-bottom-width:0 !important; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; }
@@ -326,6 +355,7 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
         }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
+            .toolbar .row-bottom{ gap:6px; }
             .actions-cell{ justify-content:center; }
             .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
             .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
@@ -355,6 +385,53 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                 </div>
             <?php endif; ?>
 
+            <!-- Stats -->
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Total Locations</div>
+                                <div class="h4 mb-0"><?php echo $totalCount; ?></div>
+                            </div>
+                            <div class="text-primary"><i class="fa-solid fa-map-location-dot fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">With Images</div>
+                                <div class="h4 mb-0"><?php echo fetchScalar("SELECT COUNT(*) FROM locations WHERE image IS NOT NULL AND image != ''"); ?></div>
+                            </div>
+                            <div class="text-success"><i class="fa-solid fa-image fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">Recent (7 days)</div>
+                                <div class="h4 mb-0"><?php echo fetchScalar("SELECT COUNT(*) FROM locations WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)"); ?></div>
+                            </div>
+                            <div class="text-warning"><i class="fa-solid fa-clock fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="card card-stat">
+                        <div class="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <div class="text-muted small">No Images</div>
+                                <div class="h4 mb-0"><?php echo fetchScalar("SELECT COUNT(*) FROM locations WHERE image IS NULL OR image = ''"); ?></div>
+                            </div>
+                            <div class="text-danger"><i class="fa-solid fa-image-slash fa-lg"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Search toolbar -->
             <div class="toolbar mb-4">
@@ -374,6 +451,13 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                             <span class="buttonSpan">+</span>
                         </span>
                     </button>
+                </div>
+                <div class="row-bottom">
+                    <a class="chip js-filter active" href="#" data-filter="all" data-value="all" role="button">All Locations</a>
+                    <span class="divider"></span>
+                    <a class="chip js-filter" href="#" data-filter="recent" data-value="recent" role="button">Recent</a>
+                    <a class="chip js-filter" href="#" data-filter="with_images" data-value="with_images" role="button">With Images</a>
+                    <a class="chip js-filter" href="#" data-filter="no_images" data-value="no_images" role="button">No Images</a>
                 </div>
             </div>
 
@@ -434,9 +518,19 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
                             <?php if ($totalPages > 1): ?>
                             <nav aria-label="Locations pagination">
                                 <ul class="pagination justify-content-center">
-                                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                                    <?php 
+                                    // Build pagination URL with current filters
+                                    $paginationParams = [];
+                                    if ($search) $paginationParams['search'] = $search;
+                                    if ($filter) $paginationParams['filter'] = $filter;
+                                    if ($value) $paginationParams['value'] = $value;
+                                    
+                                    for ($i = 1; $i <= $totalPages; $i++): 
+                                        $paginationParams['page'] = $i;
+                                        $paginationUrl = '?' . http_build_query($paginationParams);
+                                    ?>
                                     <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+                                        <a class="page-link" href="<?php echo $paginationUrl; ?>"><?php echo $i; ?></a>
                                     </li>
                                     <?php endfor; ?>
                                 </ul>
@@ -576,6 +670,53 @@ $recentLocations = $mysqli->query("SELECT place_name, DATE_FORMAT(created_at,'%b
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function(){
+            // Toggleable chip filters
+            document.querySelectorAll('.js-filter').forEach(function(chip){
+                chip.addEventListener('click', function(e){
+                    e.preventDefault();
+                    var filter = this.getAttribute('data-filter');
+                    var value = this.getAttribute('data-value');
+                    var url = new URL(window.location.href);
+                    var params = url.searchParams;
+                    
+                    // Remove existing filter params
+                    params.delete('filter');
+                    params.delete('value');
+                    
+                    // Add new filter if not 'all'
+                    if (value !== 'all') {
+                        params.set('filter', filter);
+                        params.set('value', value);
+                    }
+                    
+                    // Update active state
+                    document.querySelectorAll('.js-filter').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Navigate to new URL
+                    url.search = params.toString();
+                    window.location.href = url.toString();
+                });
+            });
+
+            // Set active chip based on current URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentFilter = urlParams.get('filter');
+            const currentValue = urlParams.get('value');
+            
+            if (currentFilter && currentValue) {
+                document.querySelectorAll('.js-filter').forEach(chip => {
+                    if (chip.getAttribute('data-filter') === currentFilter && chip.getAttribute('data-value') === currentValue) {
+                        chip.classList.add('active');
+                    } else {
+                        chip.classList.remove('active');
+                    }
+                });
+            } else {
+                // Default to 'all' if no filter is set
+                document.querySelector('.js-filter[data-value="all"]').classList.add('active');
+            }
+
             document.querySelectorAll('.btn-edit').forEach(btn => {
                 btn.addEventListener('click', function(){
                     const tr = this.closest('tr');
