@@ -184,6 +184,6 @@ CREATE TABLE IF NOT EXISTS properties_location (
     FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
     FOREIGN KEY (state_id) REFERENCES states(id) ON DELETE CASCADE,
     FOREIGN KEY (district_id) REFERENCES districts(id) ON DELETE CASCADE,
-    FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,
+    FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,  
     FOREIGN KEY (town_id) REFERENCES towns(id) ON DELETE CASCADE
 );

@@ -395,148 +395,74 @@ try {
         /* Cards (match dashboard) */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .content-card.card{ box-shadow:0 8px 24px rgba(0,0,0,.05); border:1px solid #eef2f7; }
+        
+        /* Category Cards */
+         .category-card{ 
+             background: transparent !important; 
+             border: none !important; 
+             border-radius: var(--radius); 
+             text-align: center; 
+             transition: all 0.3s ease;
+             cursor: pointer;
+             position: relative;
+             overflow: hidden;
+             min-height: 100px;
+         }
+        
+        /* Override Bootstrap card styling for category cards */
+        .card.category-card {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+        
+         .category-card:hover{ 
+             transform: translateY(-5px); 
+             box-shadow: 0 12px 28px rgba(0,0,0,.12); 
+         }
+         
+         /* White transparent overlay for better text readability */
+         .category-card .card-img-overlay::before {
+             content: '';
+             position: absolute;
+             top: 0;
+             left: 0;
+             right: 0;
+             bottom: 0;
+             background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.7) 100%);
+             z-index: 1;
+             pointer-events: none;
+             transition: all 0.3s ease;
+         }
+         
+         .category-card:hover .card-img-overlay::before {
+             background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.8) 100%);
+         }
+         
+         /* Ensure text and buttons are above overlay */
+         .category-card .card-img-overlay {
+             z-index: 2;
+         }
+         
+         .category-card .card-img-overlay > * {
+             position: relative;
+             z-index: 3;
+         }
         /* Headings & muted text */
         .text-muted{ color:var(--muted)!important; }
-        /* Table (match properties exactly) */
-        .table{ --bs-table-bg:transparent; }
-        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .table tbody tr:hover{ background:#f9fafb; }
-        .table td{ vertical-align: middle; }
-        /* Inner borders (match Properties exactly) */
-        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
-        /* Remove inner borders for body cells and override Bootstrap defaults */
-        .table-inner td, .table-inner th{ border-left:0; border-right:0; }
-        /* Ensure consistent border thickness */
-        .table-inner tbody td{ border-top:1px solid var(--line) !important; }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
-        /* Table wrapper styling */
-        .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
-        /* Actions column - fully integrated with table */
-        .actions-header{ 
-            position:sticky;
-            right:0;
-            background:white;
-            z-index:10;
-            text-align:center;
-            font-weight:600;
-            padding:12px 8px;
-            border-left:1px solid var(--line);
-            border-bottom:1px solid var(--line) !important;
-        }
-        .actions-cell{ 
-            position:sticky;
-            right:0;
-            background:white;
-            z-index:10;
-            padding:8px 8px !important; 
-            min-width:120px;
-            max-width:120px;
-            text-align:center;
-            vertical-align:middle;
-            border-left:1px solid var(--line);
-            white-space:nowrap;
-        }
-        .actions-cell .btn{ 
-            width:28px; 
-            height:28px; 
-            display:inline-flex; 
-            align-items:center; 
-            justify-content:center; 
-            border-radius:4px; 
-            padding:0; 
-            margin:0 2px;
-            font-size:0.75rem;
-            border-width:1px;
-        }
-        /* Badges */
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         .content-card.card{ padding:16px; }
         .small-title{ font-size:16px; }
-
-        /* Table zoom stability */
-        .table-responsive{
-            overflow-x:auto;
-            -webkit-overflow-scrolling:touch;
-            position:relative;
-        }
-        .table-responsive::-webkit-scrollbar{
-            height:8px;
-        }
-        .table-responsive::-webkit-scrollbar-track{
-            background:#f1f1f1;
-            border-radius:4px;
-        }
-        .table-responsive::-webkit-scrollbar-thumb{
-            background:#c1c1c1;
-            border-radius:4px;
-        }
-        .table-responsive::-webkit-scrollbar-thumb:hover{
-            background:#a8a8a8;
-        }
-        
-        /* Zoom stability improvements */
-        .table{
-            table-layout:fixed;
-            width:100%;
-        }
-        
-        /* Ensure table rows maintain proper structure */
-        .table tbody tr{
-            border-top:1px solid var(--line);
-        }
-        .table tbody tr:hover{
-            background:#f9fafb;
-        }
         
         /* Mobile responsiveness */
-        @media (max-width: 991.98px){
-            .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-            .sidebar.open{ left:12px; }
-            .content{ margin-left:0; }
-            .table{ font-size:.9rem; }
-            .actions-header, .actions-cell{ min-width:100px; }
-            .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
-        }
         @media (max-width: 575.98px){
             .toolbar .row-top{ flex-direction:column; align-items:stretch; }
-            .actions-cell{ justify-content:center; }
-            .table thead th:last-child, .table tbody td:last-child{ text-align:center; }
-        }
-
-
-        .content-card {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-
-        .table {
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        .table th {
-            background: var(--light-color);
-            border: none;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .table td {
-            vertical-align: middle;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.5rem 0.75rem;
-            border-radius: 6px;
         }
 
         .modal-content {
@@ -546,7 +472,7 @@ try {
         }
 
         .modal-header {
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--line);
             padding: 1.5rem 2rem;
         }
 
@@ -573,22 +499,9 @@ try {
             padding: 1rem 1.5rem;
         }
 
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-secondary);
-        }
-
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
         /* Image Upload Styles */
         .image-upload-container {
-            border: 2px dashed var(--border-color);
+            border: 2px dashed var(--line);
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
@@ -597,12 +510,12 @@ try {
         }
 
         .image-upload-container:hover {
-            border-color: var(--primary-color);
+            border-color: var(--primary);
             background: #f8f9ff;
         }
 
         .image-upload-container.dragover {
-            border-color: var(--primary-color);
+            border-color: var(--primary);
             background: #f0f4ff;
             transform: scale(1.02);
         }
@@ -614,7 +527,7 @@ try {
         }
 
         .image-upload-text {
-            color: var(--text-secondary);
+            color: var(--muted);
             margin-bottom: 0.5rem;
             font-weight: 500;
         }
@@ -635,7 +548,7 @@ try {
             max-height: 200px;
             border-radius: 12px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--line);
             transition: all 0.3s ease;
         }
 
@@ -651,7 +564,7 @@ try {
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: var(--danger-color);
+            background: #dc2626;
             color: white;
             border: none;
             display: flex;
@@ -663,7 +576,7 @@ try {
         }
 
         .image-remove-btn:hover {
-            background: #dc2626;
+            background: #b91c1c;
             transform: scale(1.1);
         }
 
@@ -672,7 +585,7 @@ try {
             border-radius: 12px;
             padding: 1rem;
             margin-top: 1rem;
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--line);
         }
 
         .current-image-label {
@@ -792,73 +705,74 @@ try {
                     </div>
 
                     <?php if ($categories_result && $categories_result->num_rows > 0): ?>
-                        <div class="table-responsive table-wrap">
-                            <table class="table table-hover table-inner" id="categoriesTable">
-                                <thead>
-                                    <tr>
-                                        <th style="min-width:80px;">Image</th>
-                                        <th style="min-width:200px;">Category Name</th>
-                                        <th style="min-width:120px;">Properties</th>
-                                        <th style="min-width:120px;">Created Date</th>
-                                        <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php while ($category = $categories_result->fetch_assoc()): ?>
-                                        <tr>
-                                            <td>
-                                                <?php if (!empty($category['image'])): ?>
-                                                    <img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" 
-                                                         alt="<?php echo htmlspecialchars($category['name']); ?>" 
-                                                         class="category-image" 
-                                                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
-                                                <?php else: ?>
-                                                    <div class="category-placeholder" 
-                                                         style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6c757d;">
-                                                        <i class="fas fa-image"></i>
-                                                    </div>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="fw-semibold"><?php echo htmlspecialchars($category['name']); ?></td>
-                                            <td>
-                                                <?php if ($category['property_count'] > 0): ?>
-                                                    <a href="../properties/index.php?category_id=<?php echo (int)$category['id']; ?>" class="badge bg-light text-dark border text-decoration-none"><?php echo $category['property_count']; ?> properties</a>
-                                                <?php else: ?>
-                                                    <a href="../properties/index.php?category_id=<?php echo (int)$category['id']; ?>" class="badge bg-light text-dark border text-decoration-none">No properties</a>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td class="text-muted"><?php echo $category['created_date']; ?></td>
-                                            <td class="actions-cell">
-                                                <a class="btn btn-outline-secondary btn-sm" 
-                                                   href="edit.php?id=<?php echo (int)$category['id']; ?>" 
-                                                   title="Edit Category">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <?php if ($category['property_count'] == 0): ?>
-                                                    <button class="btn btn-outline-danger btn-sm" 
-                                                            onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
-                                                            title="Delete Category">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                <?php else: ?>
-                                                    <button class="btn btn-outline-secondary btn-sm" disabled title="Cannot delete - category has properties">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
-                                    <?php endwhile; ?>
-                                </tbody>
-                            </table>
+                        <!-- Categories Cards -->
+                        <div class="row g-3">
+                            <?php while ($category = $categories_result->fetch_assoc()): ?>
+                                <div class="col-lg-2 col-md-2 col-sm-3 col-6 mb-4" data-category='<?php echo json_encode($category, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                    <div class="card category-card h-100 position-relative">
+                                        <!-- Full Cover Image -->
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
+                                            <?php if (!empty($category['image'])): ?>
+                                                <img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($category['name']); ?>" 
+                                                     class="w-100 h-100 position-absolute" 
+                                                     style="object-fit: cover; z-index: 0;">
+                                            <?php else: ?>
+                                                <!-- Default Icon for No Image -->
+                                                <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 0;">
+                                                    <i class="fa-solid fa-tags text-dark" style="font-size: 2.5rem;"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                           
+                                            <!-- Action Buttons Overlay -->
+                                            <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
+                                                <div class="d-flex gap-1">
+                                                    <a class="btn btn-light btn-sm shadow-sm" 
+                                                       href="edit.php?id=<?php echo (int)$category['id']; ?>" 
+                                                       title="Edit Category"
+                                                       style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                                                         <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                    </a>
+                                                    <?php if ($category['property_count'] == 0): ?>
+                                                        <button class="btn btn-light btn-sm shadow-sm" 
+                                                                onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
+                                                                title="Delete Category"
+                                                                style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+                                                            <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <button class="btn btn-light btn-sm shadow-sm" 
+                                                                disabled 
+                                                                title="Cannot delete - category has properties"
+                                                                style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
+                                                            <i class="fas fa-trash text-muted" style="font-size: 0.6rem;"></i>
+                                                        </button>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                           
+                                            <!-- Content Overlay -->
+                                            <div class="p-2 text-white d-flex flex-column justify-content-end" style="z-index: 1; height: 100%;">
+                                                <div class="mt-auto">
+                                                    <h6 class="card-title mb-1 fw-bold text-dark" style="font-size: 0.7rem;">
+                                                        <span class="text-dark fw-bold">
+                                                            <?php echo htmlspecialchars($category['name']); ?>
+                                                        </span>
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endwhile; ?>
                         </div>
                     <?php else: ?>
-                        <div class="empty-state">
-                            <i class="fas fa-tags"></i>
-                            <h5>No Categories Found</h5>
-                            <p class="mb-3">Get started by adding your first property category.</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCategoryModal">
-                                <i class="fas fa-plus me-2"></i>Add First Category
-                            </button>
+                        <div class="col-12">
+                            <div class="text-center py-5 text-muted">
+                                <i class="fa-solid fa-tags fa-3x mb-3"></i>
+                                <h5>No categories found</h5>
+                                <p>Add your first category to get started</p>
+                            </div>
                         </div>
                     <?php endif; ?>
                 </div>
