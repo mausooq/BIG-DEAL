@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $timestamp = time();
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
-                    $image_filename = 'uploads/locations/' . $image_filename; // Store full path in database
+                    // Store only filename in database
                     
                     if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
                         $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
@@ -105,7 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $timestamp = time();
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
-                    $image_filename = 'uploads/locations/' . $image_filename; // Store full path in database
+                    // Store only filename in database
                     
                     if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
                         $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
@@ -1115,7 +1115,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                         <!-- Full Cover Image -->
                                         <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($state['image_url'])): ?>
-                                                <img src="<?php echo htmlspecialchars($state['image_url']); ?>" 
+                                                <img src="../../uploads/locations/<?php echo htmlspecialchars($state['image_url']); ?>" 
                                                      alt="<?php echo htmlspecialchars($state['name']); ?>" 
                                                      class="w-100 h-100 position-absolute" 
                                                      style="object-fit: cover; z-index: 1;">
@@ -1227,7 +1227,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                         <!-- Full Cover Image -->
                                         <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($district['image_url'])): ?>
-                                                <img src="<?php echo htmlspecialchars($district['image_url']); ?>" 
+                                                <img src="../../uploads/locations/<?php echo htmlspecialchars($district['image_url']); ?>" 
                                                      alt="<?php echo htmlspecialchars($district['name']); ?>" 
                                                      class="w-100 h-100 position-absolute" 
                                                      style="object-fit: cover; z-index: 1;">
@@ -1345,7 +1345,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                         <!-- Full Cover Image -->
                                         <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($city['image_url'])): ?>
-                                                <img src="<?php echo htmlspecialchars($city['image_url']); ?>" 
+                                                <img src="../../uploads/locations/<?php echo htmlspecialchars($city['image_url']); ?>" 
                                                      alt="<?php echo htmlspecialchars($city['name']); ?>" 
                                                      class="w-100 h-100 position-absolute" 
                                                      style="object-fit: cover; z-index: 1;">
@@ -1463,7 +1463,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                         <!-- Full Cover Image -->
                                         <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($town['image_url'])): ?>
-                                                <img src="<?php echo htmlspecialchars($town['image_url']); ?>" 
+                                                <img src="../../uploads/locations/<?php echo htmlspecialchars($town['image_url']); ?>" 
                                                      alt="<?php echo htmlspecialchars($town['name']); ?>" 
                                                      class="w-100 h-100 position-absolute" 
                                                      style="object-fit: cover; z-index: 1;">
@@ -2095,7 +2095,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_image_preview');
                      if (stateData.image_url) {
-                         preview.innerHTML = '<img src="' + stateData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="../../uploads/locations/' + stateData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2132,7 +2132,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_district_image_preview');
                      if (districtData.image_url) {
-                         preview.innerHTML = '<img src="' + districtData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="../../uploads/locations/' + districtData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2162,7 +2162,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_city_image_preview');
                      if (cityData.image_url) {
-                         preview.innerHTML = '<img src="' + cityData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="../../uploads/locations/' + cityData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2192,7 +2192,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_town_image_preview');
                      if (townData.image_url) {
-                         preview.innerHTML = '<img src="' + townData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="../../uploads/locations/' + townData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
