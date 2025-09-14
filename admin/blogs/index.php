@@ -184,18 +184,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.toolbar .chip:hover{ border-color:#d1d5db; }
 		.toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
 		.toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
-		/* Table */
-		.table{ --bs-table-bg:transparent; border-collapse:collapse; }
-		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
-		.table thead th:last-child{ text-align:center; }
-		/* Use row-level separators to avoid tiny gaps between cells */
-		.table tbody td{ border-top:0; border-bottom:0; }
-		.table tbody tr{ box-shadow: inset 0 1px 0 var(--line); }
-		.table tbody tr:last-child{ box-shadow: inset 0 1px 0 var(--line), inset 0 -1px 0 var(--line); }
-		.table tbody tr:hover{ background:#f9fafb; }
-		/* Actions cell */
-		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
-		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
 		/* Badges */
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
 		/* Activity list */
@@ -213,11 +201,152 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
 		.drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
 		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
-		/* Modern list rows for blogs */
-		.item-row{ padding:10px 12px; border:1px solid var(--line); border-radius:12px; margin-bottom:10px; background:#fff; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-		.item-row:hover{ box-shadow:0 6px 18px rgba(0,0,0,.06); }
-		.item-title{ font-weight:600; }
-		.item-meta{ color:#6b7280; font-size:.9rem; }
+		/* Blog Cards */
+		.blog-card{ 
+			background:var(--card); 
+			border:1px solid var(--line); 
+			border-radius:var(--radius); 
+			overflow:hidden; 
+			transition:all 0.3s ease; 
+			height:100%; 
+			display:flex; 
+			flex-direction:column;
+			box-shadow:0 2px 8px rgba(0,0,0,.04);
+		}
+		.blog-card:hover{ 
+			transform:translateY(-4px); 
+			box-shadow:0 8px 24px rgba(0,0,0,.12); 
+			border-color:var(--primary);
+		}
+		.blog-image-container{ 
+			position:relative; 
+			height:100%; 
+			overflow:hidden; 
+			background:transparent;
+			margin:0;
+			padding:0;
+			flex:1;
+		}
+		.blog-image{ 
+			width:100%; 
+			height:100%; 
+			object-fit:cover; 
+			object-position:center;
+			transition:transform 0.3s ease;
+			display:block;
+		}
+		.blog-card:hover .blog-image{ 
+			transform:scale(1.05); 
+		}
+		.blog-image-placeholder{ 
+			width:100%; 
+			height:100%; 
+			display:flex; 
+			flex-direction:column; 
+			align-items:center; 
+			justify-content:center; 
+			color:var(--muted); 
+			background:linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+		}
+		.blog-image-placeholder i{ 
+			font-size:2rem; 
+			margin-bottom:0.5rem; 
+		}
+		.blog-overlay{ 
+			position:absolute; 
+			top:0; 
+			left:0; 
+			right:0; 
+			bottom:0; 
+			background:rgba(0,0,0,0.6); 
+			display:flex; 
+			align-items:center; 
+			justify-content:center; 
+			opacity:0; 
+			transition:opacity 0.3s ease;
+			z-index:2;
+		}
+		.blog-card:hover .blog-overlay{ 
+			opacity:1; 
+		}
+		.blog-content-overlay{
+			position:absolute;
+			bottom:0;
+			left:0;
+			right:0;
+			background:linear-gradient(transparent, rgba(0,0,0,0.8));
+			padding:1.25rem;
+			color:white;
+			z-index:1;
+		}
+		.blog-actions{ 
+			display:flex; 
+			gap:12px; 
+		}
+		.blog-actions .btn{ 
+			width:44px; 
+			height:44px; 
+			border-radius:50%; 
+			display:flex; 
+			align-items:center; 
+			justify-content:center; 
+			border:none; 
+			transition:all 0.2s ease;
+			box-shadow:0 2px 8px rgba(0,0,0,0.3);
+		}
+		.blog-actions .btn:hover{ 
+			transform:scale(1.1); 
+			box-shadow:0 4px 12px rgba(0,0,0,0.4);
+		}
+		.blog-actions .btn:first-child{ 
+			background:var(--primary); 
+			color:white; 
+		}
+		.blog-actions .btn:first-child:hover{ 
+			background:var(--primary-600); 
+		}
+		.blog-actions .btn:last-child{ 
+			background:#dc3545; 
+			color:white; 
+		}
+		.blog-actions .btn:last-child:hover{ 
+			background:#c82333; 
+		}
+		.blog-title{ 
+			font-weight:600; 
+			color:white; 
+			margin-bottom:0.75rem; 
+			line-height:1.4;
+			display:-webkit-box;
+			-webkit-line-clamp:2;
+			-webkit-box-orient:vertical;
+			overflow:hidden;
+		}
+		.blog-preview{ 
+			color:rgba(255,255,255,0.9); 
+			font-size:0.9rem; 
+			line-height:1.5; 
+			margin-bottom:1rem; 
+			flex:1;
+			display:-webkit-box;
+			-webkit-line-clamp:3;
+			-webkit-box-orient:vertical;
+			overflow:hidden;
+		}
+		.blog-meta{ 
+			margin-top:auto; 
+			padding-top:0.75rem; 
+			border-top:1px solid rgba(255,255,255,0.3);
+		}
+		.blog-date{ 
+			color:rgba(255,255,255,0.8); 
+			font-size:0.85rem; 
+			display:flex; 
+			align-items:center;
+		}
+		.blog-date i{ 
+			color:var(--primary); 
+		}
 		/* Modal styles */
 		.modal-content{ border:0; border-radius:var(--radius); }
 		.modal-header{ border-bottom:1px solid var(--line); }
@@ -227,12 +356,18 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
 			.sidebar.open{ left:12px; }
 			.content{ margin-left:0; }
-			.table{ font-size:.95rem; }
+			.blog-card{ margin-bottom:1rem; }
+		}
+		@media (max-width: 768px){
+			.blog-content-overlay{ padding:1rem; }
+			.blog-title{ font-size:1rem; }
+			.blog-preview{ font-size:0.85rem; }
 		}
 		@media (max-width: 575.98px){
 			.toolbar .row-top{ flex-direction:column; align-items:stretch; }
-			.actions-cell{ justify-content:center; }
-			.table thead th:last-child, .table tbody td:last-child{ text-align:center; }
+			.blog-actions .btn{ width:40px; height:40px; }
+			.blog-actions{ gap:8px; }
+			.blog-content-overlay{ padding:0.875rem; }
 		}
 	</style>
 </head>
@@ -281,71 +416,70 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 
 			<div class="row g-4">
 				<div class="col-12">
-					<div class="card quick-card mb-4">
-						<div class="card-body">
-							<div class="d-flex align-items-center justify-content-between mb-3">
-								<div class="h6 mb-0">Blog Posts</div>
-								<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
-							</div>
-							<div class="table-responsive">
-								<table class="table align-middle" id="blogsTable">
-									<thead>
-										<tr>
-											<th>Cover Image</th>
-											<th>Title</th>
-											<th>Content Preview</th>
-											<th>Created</th>
-											<th>Actions</th>
-										</tr>
-									</thead>
-									<tbody>
-										<?php while($row = $blogs->fetch_assoc()): ?>
-										<tr data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-											<td>
-												<?php if (!empty($row['image_url'])): ?>
-													<?php 
-														$src = $row['image_url'];
-														// If it's not a full URL, construct the path
-														if (strpos($src, 'http://') !== 0 && strpos($src, 'https://') !== 0) { 
-															$src = '../../uploads/blogs/' . $src; 
-														}
-													?>
-													<img src="<?php echo htmlspecialchars($src); ?>" alt="Cover image" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">
-												<?php else: ?>
-													<span class="text-muted">No image</span>
-												<?php endif; ?>
-											</td>
-											<td class="fw-semibold"><?php echo htmlspecialchars($row['title']); ?></td>
-											<td><?php echo htmlspecialchars(substr($row['content'], 0, 100)) . '...'; ?></td>
-											<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-											<td class="text-end actions-cell">
-										<a class="btn btn-sm btn-outline-secondary me-2" href="edit.php?id=<?php echo (int)$row['id']; ?>" title="Edit Blog">
-											<i class="fa-solid fa-pen"></i>
-										</a>
-										<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog">
-											<i class="fa-solid fa-trash"></i>
-										</button>
-									</td>
-										</tr>
-										<?php endwhile; ?>
-									</tbody>
-								</table>
-							</div>
-							
-							<!-- Pagination -->
-							<?php if ($totalPages > 1): ?>
-							<nav aria-label="Blog pagination">
-								<ul class="pagination justify-content-center">
-									<?php for ($i = 1; $i <= $totalPages; $i++): ?>
-									<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-										<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
-									</li>
-									<?php endfor; ?>
-								</ul>
-							</nav>
-							<?php endif; ?>
-						</div>
+					<div class="d-flex align-items-center justify-content-between mb-4">
+						<div class="h5 mb-0">Blog Posts</div>
+						<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
 					</div>
+					
+					<!-- Blog Cards Grid -->
+					<div class="row g-4" id="blogsGrid">
+						<?php while($row = $blogs->fetch_assoc()): ?>
+						<div class="col-lg-4 col-md-6 col-sm-12" data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+							<div class="blog-card">
+								<div class="blog-image-container">
+									<?php if (!empty($row['image_url'])): ?>
+										<?php 
+											$src = $row['image_url'];
+											// If it's not a full URL, construct the path
+											if (strpos($src, 'http://') !== 0 && strpos($src, 'https://') !== 0) { 
+												$src = '../../uploads/blogs/' . $src; 
+											}
+										?>
+										<img src="<?php echo htmlspecialchars($src); ?>" alt="Blog cover" class="blog-image">
+									<?php else: ?>
+										<div class="blog-image-placeholder">
+											<i class="fa-solid fa-image"></i>
+											<span>No Image</span>
+										</div>
+									<?php endif; ?>
+									<div class="blog-overlay">
+										<div class="blog-actions">
+											<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-light me-2" title="Edit Blog">
+												<i class="fa-solid fa-pen"></i>
+											</a>
+											<button class="btn btn-sm btn-light btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog">
+												<i class="fa-solid fa-trash"></i>
+											</button>
+										</div>
+									</div>
+									<div class="blog-content-overlay">
+										<h6 class="blog-title"><?php echo htmlspecialchars($row['title']); ?></h6>
+										<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 120)) . '...'; ?></p>
+										<div class="blog-meta">
+											<span class="blog-date">
+												<i class="fa-solid fa-calendar me-1"></i>
+												<?php echo date('M d, Y', strtotime($row['created_at'])); ?>
+											</span>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<?php endwhile; ?>
+					</div>
+					
+					<!-- Pagination -->
+					<?php if ($totalPages > 1): ?>
+					<nav aria-label="Blog pagination" class="mt-4">
+						<ul class="pagination justify-content-center">
+							<?php for ($i = 1; $i <= $totalPages; $i++): ?>
+							<li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
+								<a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
+							</li>
+							<?php endfor; ?>
+						</ul>
+					</nav>
+					<?php endif; ?>
 				</div>
 
 				<!-- <div class="col-xl-4">
@@ -397,25 +531,12 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-		// Handle edit button clicks
+		// Handle delete button clicks
 		document.addEventListener('DOMContentLoaded', function(){
-			document.querySelectorAll('.btn-edit').forEach(btn => {
-				btn.addEventListener('click', function(){
-					const tr = this.closest('tr');
-					const data = JSON.parse(tr.getAttribute('data-blog'));
-					
-					document.getElementById('edit_id').value = data.id;
-					document.getElementById('edit_title').value = data.title;
-					document.getElementById('edit_content').value = data.content;
-					document.getElementById('edit_image_url').value = data.image_url || '';
-				});
-			});
-
-			// Handle delete button clicks
 			document.querySelectorAll('.btn-delete').forEach(btn => {
 				btn.addEventListener('click', function(){
-					const tr = this.closest('tr');
-					const data = JSON.parse(tr.getAttribute('data-blog'));
+					const card = this.closest('[data-blog]');
+					const data = JSON.parse(card.getAttribute('data-blog'));
 					document.getElementById('delete_id').value = data.id;
 				});
 			});
