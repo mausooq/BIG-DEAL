@@ -51,6 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $timestamp = time();
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
+                    $image_filename = 'uploads/locations/' . $image_filename; // Store full path in database
                     
                     if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
                         $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
@@ -104,6 +105,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $timestamp = time();
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
+                    $image_filename = 'uploads/locations/' . $image_filename; // Store full path in database
                     
                     if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
                         $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
@@ -871,29 +873,40 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             box-shadow: 0 4px 12px rgba(225, 29, 42, 0.3);
         }
          /* Tab Navigation */
-         .nav-tabs{ border-bottom: 1px solid var(--line); }
+         .nav-tabs{ 
+             border: none; 
+             background: var(--card); 
+             border-radius: 12px; 
+             padding: 8px; 
+             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+         }
          .nav-tabs .nav-link{ 
              border: none; 
              color: var(--muted); 
              font-weight: 500; 
-             padding: 1rem 1.5rem; 
-             border-radius: 0;
+             padding: 0.75rem 1.5rem; 
+             border-radius: 8px;
              transition: all 0.3s ease;
+             margin: 0 4px;
+             background: transparent;
          }
          .nav-tabs .nav-link:hover{ 
              border: none; 
              color: var(--primary); 
-             background: rgba(225, 29, 42, 0.05);
+             background: rgba(225, 29, 42, 0.08);
+             transform: translateY(-1px);
          }
          .nav-tabs .nav-link.active{ 
              background: var(--primary); 
              color: white; 
              border: none;
              font-weight: 600;
+             box-shadow: 0 4px 12px rgba(225, 29, 42, 0.3);
          }
          .nav-tabs .nav-link.active:hover{ 
              background: var(--primary-600); 
              color: white; 
+             transform: translateY(-1px);
          }
          
          /* Table styles */
@@ -964,14 +977,50 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              border-radius:6px;
          }
          
-         /* Mobile responsiveness */
-         @media (max-width: 991.98px){
-             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-             .sidebar.open{ left:12px; }
-             .content{ margin-left:0; }
+         /* Toolbar styles */
+         .toolbar{ 
+             background: var(--card); 
+             border: 1px solid var(--line); 
+             border-radius: 12px; 
+             padding: 12px; 
+             display: flex; 
+             flex-direction: column; 
+             gap: 10px; 
          }
-         @media (max-width: 575.98px){
-             .nav-tabs .nav-link{ padding: 0.75rem 1rem; font-size: 0.875rem; }
+         .toolbar .row-top{ 
+             display: flex; 
+             gap: 12px; 
+             align-items: center; 
+             flex-wrap: nowrap;
+         }
+         .toolbar .btn-primary{ background: var(--primary); border-color: var(--primary); }
+         .toolbar .btn-primary:hover{ background: var(--primary-600); border-color: var(--primary-600); }
+         /* Location Cards */
+         .location-card {
+             border: 1px solid var(--line);
+             border-radius: 12px;
+             overflow: hidden;
+             min-height: 280px;
+         }
+         /* .location-card .card-img-overlay {
+             border-radius: 12px;
+         } */
+         .location-card .card-title {
+             font-size: 1.1rem;
+             font-weight: 600;
+             margin-bottom: 0.5rem;
+             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+         }
+         .location-card .badge {
+             font-size: 0.75rem;
+             padding: 0.375rem 0.75rem;
+             backdrop-filter: blur(10px);
+         }
+         .location-card .btn-group .btn {
+             backdrop-filter: blur(10px);
+             background: rgba(255, 255, 255, 0.9);
+             border: 1px solid rgba(255, 255, 255, 0.2);
+             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
          }
     </style>
 </head>
@@ -981,73 +1030,24 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Location Management'); ?>
 
         <div class="container-fluid p-4">
-            <!-- Header Section -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <h2 class="mb-1">Location Management</h2>
-                            <p class="text-muted mb-0">Manage states, districts, cities, and towns in your system</p>
+            <!-- Display Messages -->
+            <?php if (isset($_SESSION['success_message'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-check-circle me-2"></i>
+                    <?php echo htmlspecialchars($_SESSION['success_message']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshStats()">
-                                <i class="fa-solid fa-sync-alt me-1"></i>Refresh
-                            </button>
-                            <button class="btn btn-outline-info btn-sm" onclick="exportLocations()">
-                                <i class="fa-solid fa-download me-1"></i>Export All
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistics Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Total Locations</div>
-                                <div class="h4 mb-0"><?php echo $totalStates + $totalDistricts + $totalCities + $totalTowns; ?></div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
+            
+            <?php if (isset($_SESSION['error_message'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                    <?php echo htmlspecialchars($_SESSION['error_message']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
-                            <div class="text-primary"><i class="fa-solid fa-map-location-dot fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">States</div>
-                                <div class="h4 mb-0"><?php echo $totalStates; ?></div>
-                            </div>
-                            <div class="text-warning"><i class="fa-solid fa-map fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Districts</div>
-                                <div class="h4 mb-0"><?php echo $totalDistricts; ?></div>
-                            </div>
-                            <div class="text-danger"><i class="fa-solid fa-building fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="card card-stat">
-                        <div class="card-body d-flex align-items-center justify-content-between">
-                            <div>
-                                <div class="text-muted small">Cities & Towns</div>
-                                <div class="h4 mb-0"><?php echo $totalCities + $totalTowns; ?></div>
-                            </div>
-                            <div class="text-success"><i class="fa-solid fa-city fa-lg"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                <?php unset($_SESSION['error_message']); ?>
+            <?php endif; ?>
 
              <!-- Tab Navigation -->
              <div class="card mb-4">
@@ -1081,20 +1081,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              <div class="tab-content" id="locationTabsContent">
                  <!-- States Tab -->
                  <div class="tab-pane fade show active" id="states" role="tabpanel">
-                     <div class="card">
-                         <div class="card-header d-flex justify-content-between align-items-center">
-                             <h5 class="mb-0 small-title">States Management</h5>
-                             <div class="d-flex gap-2">
-                                 <button class="btn btn-outline-secondary btn-sm" onclick="refreshStates()">
-                                     <i class="fas fa-sync-alt me-1"></i>Refresh
-                                 </button>
-                                 <button class="btn btn-outline-info btn-sm" onclick="exportStates()">
-                                     <i class="fas fa-download me-1"></i>Export
-                                 </button>
-                             </div>
-                         </div>
-                         <div class="card-body">
-                             <!-- Search and Filter -->
+                    <!-- Search toolbar -->
                              <div class="toolbar mb-4">
                                  <div class="row-top">
                                      <form class="d-flex flex-grow-1" method="get">
@@ -1115,61 +1102,79 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  </div>
                              </div>
 
-                             <div class="table-responsive table-wrap">
-                                 <table class="table table-hover table-inner" id="statesTable">
-                                     <thead>
-                                         <tr>
-                                             <th style="min-width:80px;">Image</th>
-                                             <th style="min-width:200px;">State Name</th>
-                                             <th style="min-width:120px;">Districts</th>
-                                             <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody>
+                    <!-- States Cards -->
+                    <div class="row g-3">
                                          <?php if ($states && $states->num_rows > 0): ?>
                                              <?php while ($state = $states->fetch_assoc()): ?>
                                                  <?php
                                                  // Get district count for this state
                                                  $districtCount = fetchScalar("SELECT COUNT(*) FROM districts WHERE state_id = " . $state['id']);
                                                  ?>
-                                                 <tr data-state='<?php echo json_encode($state, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-                                                     <td>
+                                <div class="col-lg-3 col-md-4 col-sm-6" data-state='<?php echo json_encode($state, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                    <div class="card location-card h-100 position-relative">
+                                        <!-- Full Cover Image -->
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($state['image_url'])): ?>
-                                                             <img src="../../uploads/locations/<?php echo htmlspecialchars($state['image_url']); ?>" alt="<?php echo htmlspecialchars($state['name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <img src="<?php echo htmlspecialchars($state['image_url']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($state['name']); ?>" 
+                                                     class="w-100 h-100 position-absolute" 
+                                                     style="object-fit: cover; z-index: 1;">
                                                          <?php else: ?>
-                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                                                 <i class="fa-solid fa-map-location-dot text-muted"></i>
+                                                <!-- Black Icon for No Image -->
+                                                <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
+                                                    <i class="fa-solid fa-map-location-dot text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
-                                                     </td>
-                                                     <td class="fw-semibold">
-                                                         <a href="districts/index.php?state_id=<?php echo $state['id']; ?>" class="badge text-decoration-none" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;" title="View districts in this state">
-                                                             <?php echo htmlspecialchars($state['name']); ?>
-                                                         </a>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge badge-soft"><?php echo $districtCount; ?> districts</span>
-                                                     </td>
-                                                     <td class="actions-cell">
-                                                         <button class="btn btn-outline-secondary btn-sm btn-edit-state" data-bs-toggle="modal" data-bs-target="#editStateModal" title="Edit State">
+                                            
+                                            <!-- Action Buttons Overlay -->
+                                            <div class="position-absolute top-0 end-0 p-3" style="z-index: 2;">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-light btn-sm btn-edit-state" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editStateModal" 
+                                                            title="Edit State"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-edit"></i>
                                                          </button>
-                                                         <button class="btn btn-outline-danger btn-sm btn-delete-state" data-bs-toggle="modal" data-bs-target="#deleteStateModal" title="Delete State">
+                                                    <button class="btn btn-light btn-sm btn-delete-state" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteStateModal" 
+                                                            title="Delete State"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-trash"></i>
                                                          </button>
-                                                     </td>
-                                                 </tr>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Content Overlay -->
+                                            <div class="p-3 text-white d-flex flex-column justify-content-end" style="z-index: 1; height: 100%;">
+                                                <div class="mt-auto">
+                                                    <h5 class="card-title mb-2 fw-bold text-white">
+                                                        <a href="districts/index.php?state_id=<?php echo $state['id']; ?>" 
+                                                           class="text-decoration-none text-white" 
+                                                           title="View districts in this state">
+                                                            <?php echo htmlspecialchars($state['name']); ?>
+                                                        </a>
+                                                    </h5>
+                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                        <i class="fas fa-map-marker-alt me-1"></i>
+                                                        <?php echo $districtCount; ?> districts
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                              <?php endwhile; ?>
                                          <?php else: ?>
-                                             <tr>
-                                                 <td colspan="4" class="text-center py-4 text-muted">
-                                                     <i class="fa-solid fa-map-location-dot fa-2x mb-2"></i>
-                                                     <div>No states found</div>
-                                                 </td>
-                                             </tr>
+                            <div class="col-12">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-map-location-dot fa-3x mb-3"></i>
+                                    <h5>No states found</h5>
+                                    <p>Add your first state to get started</p>
+                                </div>
+                            </div>
                                          <?php endif; ?>
-                                     </tbody>
-                                 </table>
                              </div>
 
                              <?php if ($totalPages > 1): ?>
@@ -1189,20 +1194,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
                  <!-- Districts Tab -->
                  <div class="tab-pane fade" id="districts" role="tabpanel">
-                     <div class="card">
-                         <div class="card-header d-flex justify-content-between align-items-center">
-                             <h5 class="mb-0 small-title">Districts Management</h5>
-                             <div class="d-flex gap-2">
-                                 <button class="btn btn-outline-secondary btn-sm" onclick="refreshDistricts()">
-                                     <i class="fas fa-sync-alt me-1"></i>Refresh
-                                 </button>
-                                 <button class="btn btn-outline-info btn-sm" onclick="exportDistricts()">
-                                     <i class="fas fa-download me-1"></i>Export
-                                 </button>
-                             </div>
-                         </div>
-                         <div class="card-body">
-                             <!-- Search and Filter -->
+                    <!-- Search toolbar -->
                              <div class="toolbar mb-4">
                                  <div class="row-top">
                                      <form class="d-flex flex-grow-1" method="get">
@@ -1223,64 +1215,84 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  </div>
                              </div>
 
-                             <div class="table-responsive table-wrap">
-                                 <table class="table table-hover table-inner" id="districtsTable">
-                                     <thead>
-                                         <tr>
-                                             <th style="min-width:80px;">Image</th>
-                                             <th style="min-width:200px;">District Name</th>
-                                             <th style="min-width:150px;">State</th>
-                                             <th style="min-width:120px;">Cities</th>
-                                             <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody>
+                    <!-- Districts Cards -->
+                    <div class="row g-3">
                                          <?php if ($districts && $districts->num_rows > 0): ?>
                                              <?php while ($district = $districts->fetch_assoc()): ?>
                                                  <?php
                                                  $cityCount = fetchScalar("SELECT COUNT(*) FROM cities WHERE district_id = " . $district['id']);
                                                  ?>
-                                                 <tr data-district='<?php echo json_encode($district, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-                                                     <td>
+                                <div class="col-lg-3 col-md-4 col-sm-6" data-district='<?php echo json_encode($district, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                    <div class="card location-card h-100 position-relative">
+                                        <!-- Full Cover Image -->
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($district['image_url'])): ?>
-                                                             <img src="../../uploads/locations/<?php echo htmlspecialchars($district['image_url']); ?>" alt="<?php echo htmlspecialchars($district['name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <img src="<?php echo htmlspecialchars($district['image_url']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($district['name']); ?>" 
+                                                     class="w-100 h-100 position-absolute" 
+                                                     style="object-fit: cover; z-index: 1;">
                                                          <?php else: ?>
-                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                                                 <i class="fa-solid fa-building text-muted"></i>
+                                                <!-- Black Icon for No Image -->
+                                                <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
+                                                    <i class="fa-solid fa-building text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
-                                                     </td>
-                                                     <td class="fw-semibold">
-                                                         <a href="cities/index.php?district_id=<?php echo $district['id']; ?>" class="badge text-decoration-none" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;" title="View cities in this district">
-                                                             <?php echo htmlspecialchars($district['name']); ?>
-                                                         </a>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge bg-danger"><?php echo htmlspecialchars($district['state_name']); ?></span>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge badge-soft"><?php echo $cityCount; ?> cities</span>
-                                                     </td>
-                                                     <td class="actions-cell">
-                                                         <button class="btn btn-outline-secondary btn-sm btn-edit-district" data-bs-toggle="modal" data-bs-target="#editDistrictModal" title="Edit District">
+                                            
+                                            <!-- Action Buttons Overlay -->
+                                            <div class="position-absolute top-0 end-0 p-3" style="z-index: 2;">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-light btn-sm btn-edit-district" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editDistrictModal" 
+                                                            title="Edit District"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-edit"></i>
                                                          </button>
-                                                         <button class="btn btn-outline-danger btn-sm btn-delete-district" data-bs-toggle="modal" data-bs-target="#deleteDistrictModal" title="Delete District">
+                                                    <button class="btn btn-light btn-sm btn-delete-district" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteDistrictModal" 
+                                                            title="Delete District"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-trash"></i>
                                                          </button>
-                                                     </td>
-                                                 </tr>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Content Overlay -->
+                                            <div class="p-3 text-white d-flex flex-column justify-content-end" style="z-index: 1; height: 100%;">
+                                                <div class="mt-auto">
+                                                    <h5 class="card-title mb-2 fw-bold text-white">
+                                                        <a href="cities/index.php?district_id=<?php echo $district['id']; ?>" 
+                                                           class="text-decoration-none text-white" 
+                                                           title="View cities in this district">
+                                                            <?php echo htmlspecialchars($district['name']); ?>
+                                                        </a>
+                                                    </h5>
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                                            <?php echo htmlspecialchars($district['state_name']); ?>
+                                                        </span>
+                                                    </div>
+                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                        <i class="fas fa-city me-1"></i>
+                                                        <?php echo $cityCount; ?> cities
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                              <?php endwhile; ?>
                                          <?php else: ?>
-                                             <tr>
-                                                 <td colspan="5" class="text-center py-4 text-muted">
-                                                     <i class="fa-solid fa-building fa-2x mb-2"></i>
-                                                     <div>No districts found</div>
-                                                 </td>
-                                             </tr>
+                            <div class="col-12">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-building fa-3x mb-3"></i>
+                                    <h5>No districts found</h5>
+                                    <p>Add your first district to get started</p>
+                                </div>
+                            </div>
                                          <?php endif; ?>
-                                     </tbody>
-                                 </table>
                              </div>
 
                              <?php if ($districtTotalPages > 1): ?>
@@ -1300,20 +1312,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
                  <!-- Cities Tab -->
                  <div class="tab-pane fade" id="cities" role="tabpanel">
-                     <div class="card">
-                         <div class="card-header d-flex justify-content-between align-items-center">
-                             <h5 class="mb-0 small-title">Cities Management</h5>
-                             <div class="d-flex gap-2">
-                                 <button class="btn btn-outline-secondary btn-sm" onclick="refreshCities()">
-                                     <i class="fas fa-sync-alt me-1"></i>Refresh
-                                 </button>
-                                 <button class="btn btn-outline-info btn-sm" onclick="exportCities()">
-                                     <i class="fas fa-download me-1"></i>Export
-                                 </button>
-                             </div>
-                         </div>
-                         <div class="card-body">
-                             <!-- Search and Filter -->
+                    <!-- Search toolbar -->
                              <div class="toolbar mb-4">
                                  <div class="row-top">
                                      <form class="d-flex flex-grow-1" method="get">
@@ -1334,64 +1333,84 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  </div>
                              </div>
 
-                             <div class="table-responsive table-wrap">
-                                 <table class="table table-hover table-inner" id="citiesTable">
-                                     <thead>
-                                         <tr>
-                                             <th style="min-width:80px;">Image</th>
-                                             <th style="min-width:200px;">City Name</th>
-                                             <th style="min-width:150px;">District</th>
-                                             <th style="min-width:120px;">Towns</th>
-                                             <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody>
+                    <!-- Cities Cards -->
+                    <div class="row g-3">
                                          <?php if ($cities && $cities->num_rows > 0): ?>
                                              <?php while ($city = $cities->fetch_assoc()): ?>
                                                  <?php
                                                  $townCount = fetchScalar("SELECT COUNT(*) FROM towns WHERE city_id = " . $city['id']);
                                                  ?>
-                                                 <tr data-city='<?php echo json_encode($city, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-                                                     <td>
+                                <div class="col-lg-3 col-md-4 col-sm-6" data-city='<?php echo json_encode($city, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                    <div class="card location-card h-100 position-relative">
+                                        <!-- Full Cover Image -->
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($city['image_url'])): ?>
-                                                             <img src="../../uploads/locations/<?php echo htmlspecialchars($city['image_url']); ?>" alt="<?php echo htmlspecialchars($city['name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <img src="<?php echo htmlspecialchars($city['image_url']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($city['name']); ?>" 
+                                                     class="w-100 h-100 position-absolute" 
+                                                     style="object-fit: cover; z-index: 1;">
                                                          <?php else: ?>
-                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                                                 <i class="fa-solid fa-city text-muted"></i>
+                                                <!-- Black Icon for No Image -->
+                                                <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
+                                                    <i class="fa-solid fa-city text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
-                                                     </td>
-                                                     <td class="fw-semibold">
-                                                         <a href="towns/index.php?city_id=<?php echo $city['id']; ?>" class="badge text-decoration-none" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;" title="View towns in this city">
-                                                             <?php echo htmlspecialchars($city['name']); ?>
-                                                         </a>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge bg-danger"><?php echo htmlspecialchars($city['district_name']); ?></span>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge badge-soft"><?php echo $townCount; ?> towns</span>
-                                                     </td>
-                                                     <td class="actions-cell">
-                                                         <button class="btn btn-outline-secondary btn-sm btn-edit-city" data-bs-toggle="modal" data-bs-target="#editCityModal" title="Edit City">
+                                            
+                                            <!-- Action Buttons Overlay -->
+                                            <div class="position-absolute top-0 end-0 p-3" style="z-index: 2;">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-light btn-sm btn-edit-city" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editCityModal" 
+                                                            title="Edit City"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-edit"></i>
                                                          </button>
-                                                         <button class="btn btn-outline-danger btn-sm btn-delete-city" data-bs-toggle="modal" data-bs-target="#deleteCityModal" title="Delete City">
+                                                    <button class="btn btn-light btn-sm btn-delete-city" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteCityModal" 
+                                                            title="Delete City"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-trash"></i>
                                                          </button>
-                                                     </td>
-                                                 </tr>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Content Overlay -->
+                                            <div class="p-3 text-white d-flex flex-column justify-content-end" style="z-index: 1; height: 100%;">
+                                                <div class="mt-auto">
+                                                    <h5 class="card-title mb-2 fw-bold text-white">
+                                                        <a href="towns/index.php?city_id=<?php echo $city['id']; ?>" 
+                                                           class="text-decoration-none text-white" 
+                                                           title="View towns in this city">
+                                                            <?php echo htmlspecialchars($city['name']); ?>
+                                                        </a>
+                                                    </h5>
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                                            <?php echo htmlspecialchars($city['district_name']); ?>
+                                                        </span>
+                                                    </div>
+                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                        <i class="fas fa-home me-1"></i>
+                                                        <?php echo $townCount; ?> towns
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                              <?php endwhile; ?>
                                          <?php else: ?>
-                                             <tr>
-                                                 <td colspan="5" class="text-center py-4 text-muted">
-                                                     <i class="fa-solid fa-city fa-2x mb-2"></i>
-                                                     <div>No cities found</div>
-                                                 </td>
-                                             </tr>
+                            <div class="col-12">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-city fa-3x mb-3"></i>
+                                    <h5>No cities found</h5>
+                                    <p>Add your first city to get started</p>
+                                </div>
+                            </div>
                                          <?php endif; ?>
-                                     </tbody>
-                                 </table>
                              </div>
 
                              <?php if ($cityTotalPages > 1): ?>
@@ -1411,20 +1430,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
                  <!-- Towns Tab -->
                  <div class="tab-pane fade" id="towns" role="tabpanel">
-                     <div class="card">
-                         <div class="card-header d-flex justify-content-between align-items-center">
-                             <h5 class="mb-0 small-title">Towns Management</h5>
-                             <div class="d-flex gap-2">
-                                 <button class="btn btn-outline-secondary btn-sm" onclick="refreshTowns()">
-                                     <i class="fas fa-sync-alt me-1"></i>Refresh
-                                 </button>
-                                 <button class="btn btn-outline-info btn-sm" onclick="exportTowns()">
-                                     <i class="fas fa-download me-1"></i>Export
-                                 </button>
-                             </div>
-                         </div>
-                         <div class="card-body">
-                             <!-- Search and Filter -->
+                    <!-- Search toolbar -->
                              <div class="toolbar mb-4">
                                  <div class="row-top">
                                      <form class="d-flex flex-grow-1" method="get">
@@ -1445,64 +1451,82 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  </div>
                              </div>
 
-                             <div class="table-responsive table-wrap">
-                                 <table class="table table-hover table-inner" id="townsTable">
-                                     <thead>
-                                         <tr>
-                                             <th style="min-width:80px;">Image</th>
-                                             <th style="min-width:200px;">Town Name</th>
-                                             <th style="min-width:150px;">City</th>
-                                             <th style="min-width:120px;">Properties</th>
-                                             <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
-                                         </tr>
-                                     </thead>
-                                     <tbody>
+                    <!-- Towns Cards -->
+                    <div class="row g-3">
                                          <?php if ($towns && $towns->num_rows > 0): ?>
                                              <?php while ($town = $towns->fetch_assoc()): ?>
                                                  <?php
                                                  $propertyCount = fetchScalar("SELECT COUNT(*) FROM properties_location WHERE town_id = " . $town['id']);
                                                  ?>
-                                                 <tr data-town='<?php echo json_encode($town, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-                                                     <td>
+                                <div class="col-lg-3 col-md-4 col-sm-6" data-town='<?php echo json_encode($town, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+                                    <div class="card location-card h-100 position-relative">
+                                        <!-- Full Cover Image -->
+                                        <div class="card-img-overlay d-flex flex-column justify-content-between" style="padding: 0;">
                                                          <?php if (!empty($town['image_url'])): ?>
-                                                             <img src="../../uploads/locations/<?php echo htmlspecialchars($town['image_url']); ?>" alt="<?php echo htmlspecialchars($town['name']); ?>" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                                <img src="<?php echo htmlspecialchars($town['image_url']); ?>" 
+                                                     alt="<?php echo htmlspecialchars($town['name']); ?>" 
+                                                     class="w-100 h-100 position-absolute" 
+                                                     style="object-fit: cover; z-index: 1;">
                                                          <?php else: ?>
-                                                             <div style="width: 50px; height: 50px; background: #f8f9fa; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                                                                 <i class="fa-solid fa-map-marker-alt text-muted"></i>
+                                                <!-- Black Icon for No Image -->
+                                                <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
+                                                    <i class="fa-solid fa-map-marker-alt text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
-                                                     </td>
-                                                     <td class="fw-semibold">
-                                                         <span class="badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
-                                                             <?php echo htmlspecialchars($town['name']); ?>
-                                                         </span>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge bg-danger"><?php echo htmlspecialchars($town['city_name']); ?></span>
-                                                     </td>
-                                                     <td>
-                                                         <span class="badge badge-soft"><?php echo $propertyCount; ?> properties</span>
-                                                     </td>
-                                                     <td class="actions-cell">
-                                                         <button class="btn btn-outline-secondary btn-sm btn-edit-town" data-bs-toggle="modal" data-bs-target="#editTownModal" title="Edit Town">
+                                            
+                                            <!-- Action Buttons Overlay -->
+                                            <div class="position-absolute top-0 end-0 p-3" style="z-index: 2;">
+                                                <div class="btn-group" role="group">
+                                                    <button class="btn btn-light btn-sm btn-edit-town" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editTownModal" 
+                                                            title="Edit Town"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-edit"></i>
                                                          </button>
-                                                         <button class="btn btn-outline-danger btn-sm btn-delete-town" data-bs-toggle="modal" data-bs-target="#deleteTownModal" title="Delete Town">
+                                                    <button class="btn btn-light btn-sm btn-delete-town" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteTownModal" 
+                                                            title="Delete Town"
+                                                            style="border-radius: 50%; width: 36px; height: 36px; padding: 0; backdrop-filter: blur(10px); background: rgba(255,255,255,0.9);">
                                                              <i class="fas fa-trash"></i>
                                                          </button>
-                                                     </td>
-                                                 </tr>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Content Overlay -->
+                                            <div class="p-3 text-white d-flex flex-column justify-content-end" style="z-index: 1; height: 100%;">
+                                                <div class="mt-auto">
+                                                    <h5 class="card-title mb-2 fw-bold text-white">
+                                                        <span class="text-white">
+                                                            <?php echo htmlspecialchars($town['name']); ?>
+                                                        </span>
+                                                    </h5>
+                                                    <div class="mb-2">
+                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                                            <?php echo htmlspecialchars($town['city_name']); ?>
+                                                        </span>
+                                                    </div>
+                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
+                                                        <i class="fas fa-home me-1"></i>
+                                                        <?php echo $propertyCount; ?> properties
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                              <?php endwhile; ?>
                                          <?php else: ?>
-                                             <tr>
-                                                 <td colspan="5" class="text-center py-4 text-muted">
-                                                     <i class="fa-solid fa-map-marker-alt fa-2x mb-2"></i>
-                                                     <div>No towns found</div>
-                                                 </td>
-                                             </tr>
+                            <div class="col-12">
+                                <div class="text-center py-5 text-muted">
+                                    <i class="fa-solid fa-map-marker-alt fa-3x mb-3"></i>
+                                    <h5>No towns found</h5>
+                                    <p>Add your first town to get started</p>
+                                </div>
+                            </div>
                                          <?php endif; ?>
-                                     </tbody>
-                                 </table>
                              </div>
 
                              <?php if ($townTotalPages > 1): ?>
@@ -2020,85 +2044,31 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
      <script>
-         function refreshStats() {
-             window.location.reload();
-         }
-
-         function exportLocations() {
-             // Create a simple CSV export
-             const csvData = [
-                 ['Type', 'Name', 'Count'],
-                 ['States', 'Total States', <?php echo $totalStates; ?>],
-                 ['Districts', 'Total Districts', <?php echo $totalDistricts; ?>],
-                 ['Cities', 'Total Cities', <?php echo $totalCities; ?>],
-                 ['Towns', 'Total Towns', <?php echo $totalTowns; ?>]
-             ];
-             
-             const csvContent = csvData.map(row => row.join(',')).join('\n');
-             const blob = new Blob([csvContent], { type: 'text/csv' });
-             const url = window.URL.createObjectURL(blob);
-             const a = document.createElement('a');
-             a.href = url;
-             a.download = 'location_summary.csv';
-             a.click();
-             window.URL.revokeObjectURL(url);
-         }
 
          function searchStates() {
              const searchValue = document.getElementById('searchInput').value;
              window.location.href = '?search=' + encodeURIComponent(searchValue);
          }
 
-         function refreshStates() {
-             window.location.href = '?';
-         }
 
          function searchDistricts() {
              const searchValue = document.getElementById('districtSearchInput').value;
              window.location.href = '?district_search=' + encodeURIComponent(searchValue);
          }
 
-         function refreshDistricts() {
-             window.location.href = '?';
-         }
 
          function searchCities() {
              const searchValue = document.getElementById('citySearchInput').value;
              window.location.href = '?city_search=' + encodeURIComponent(searchValue);
          }
 
-         function refreshCities() {
-             window.location.href = '?';
-         }
 
          function searchTowns() {
              const searchValue = document.getElementById('townSearchInput').value;
              window.location.href = '?town_search=' + encodeURIComponent(searchValue);
          }
 
-         function refreshTowns() {
-             window.location.href = '?';
-         }
 
-         function exportStates() {
-             // Export states functionality
-             window.location.href = 'states/export.php';
-         }
-
-         function exportDistricts() {
-             // Export districts functionality
-             window.location.href = 'districts/export.php';
-         }
-
-         function exportCities() {
-             // Export cities functionality
-             window.location.href = 'cities/export.php';
-         }
-
-         function exportTowns() {
-             // Export towns functionality
-             window.location.href = 'towns/export.php';
-         }
 
          // Initialize Bootstrap tabs
          document.addEventListener('DOMContentLoaded', function() {
@@ -2115,8 +2085,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle edit state modal
              document.querySelectorAll('.btn-edit-state').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const stateData = JSON.parse(row.getAttribute('data-state'));
+                     const card = this.closest('[data-state]');
+                     const stateData = JSON.parse(card.getAttribute('data-state'));
                      
                      document.getElementById('edit_id').value = stateData.id;
                      document.getElementById('edit_name').value = stateData.name;
@@ -2125,7 +2095,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_image_preview');
                      if (stateData.image_url) {
-                         preview.innerHTML = '<img src="../../uploads/locations/' + stateData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="' + stateData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2135,8 +2105,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle delete state modal
              document.querySelectorAll('.btn-delete-state').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const stateData = JSON.parse(row.getAttribute('data-state'));
+                     const card = this.closest('[data-state]');
+                     const stateData = JSON.parse(card.getAttribute('data-state'));
                      document.getElementById('delete_id').value = stateData.id;
                  });
              });
@@ -2151,8 +2121,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle district edit modal
              document.querySelectorAll('.btn-edit-district').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const districtData = JSON.parse(row.getAttribute('data-district'));
+                     const card = this.closest('[data-district]');
+                     const districtData = JSON.parse(card.getAttribute('data-district'));
                      
                      document.getElementById('edit_district_id').value = districtData.id;
                      document.getElementById('edit_district_name').value = districtData.name;
@@ -2162,7 +2132,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_district_image_preview');
                      if (districtData.image_url) {
-                         preview.innerHTML = '<img src="../../uploads/locations/' + districtData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="' + districtData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2172,8 +2142,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle district delete modal
              document.querySelectorAll('.btn-delete-district').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const districtData = JSON.parse(row.getAttribute('data-district'));
+                     const card = this.closest('[data-district]');
+                     const districtData = JSON.parse(card.getAttribute('data-district'));
                      document.getElementById('delete_district_id').value = districtData.id;
                  });
              });
@@ -2181,8 +2151,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle city edit modal
              document.querySelectorAll('.btn-edit-city').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const cityData = JSON.parse(row.getAttribute('data-city'));
+                     const card = this.closest('[data-city]');
+                     const cityData = JSON.parse(card.getAttribute('data-city'));
                      
                      document.getElementById('edit_city_id').value = cityData.id;
                      document.getElementById('edit_city_name').value = cityData.name;
@@ -2192,7 +2162,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_city_image_preview');
                      if (cityData.image_url) {
-                         preview.innerHTML = '<img src="../../uploads/locations/' + cityData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="' + cityData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2202,8 +2172,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle city delete modal
              document.querySelectorAll('.btn-delete-city').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const cityData = JSON.parse(row.getAttribute('data-city'));
+                     const card = this.closest('[data-city]');
+                     const cityData = JSON.parse(card.getAttribute('data-city'));
                      document.getElementById('delete_city_id').value = cityData.id;
                  });
              });
@@ -2211,8 +2181,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle town edit modal
              document.querySelectorAll('.btn-edit-town').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const townData = JSON.parse(row.getAttribute('data-town'));
+                     const card = this.closest('[data-town]');
+                     const townData = JSON.parse(card.getAttribute('data-town'));
                      
                      document.getElementById('edit_town_id').value = townData.id;
                      document.getElementById('edit_town_name').value = townData.name;
@@ -2222,7 +2192,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      // Show current image if exists
                      const preview = document.getElementById('current_town_image_preview');
                      if (townData.image_url) {
-                         preview.innerHTML = '<img src="../../uploads/locations/' + townData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
+                         preview.innerHTML = '<img src="' + townData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">';
                      } else {
                          preview.innerHTML = '<div class="text-muted">No current image</div>';
                      }
@@ -2232,8 +2202,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              // Handle town delete modal
              document.querySelectorAll('.btn-delete-town').forEach(button => {
                  button.addEventListener('click', function() {
-                     const row = this.closest('tr');
-                     const townData = JSON.parse(row.getAttribute('data-town'));
+                     const card = this.closest('[data-town]');
+                     const townData = JSON.parse(card.getAttribute('data-town'));
                      document.getElementById('delete_town_id').value = townData.id;
                  });
              });
