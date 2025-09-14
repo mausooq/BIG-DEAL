@@ -774,12 +774,12 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         body{ background:var(--bg); color:#111827; }
         .content{ margin-left:284px; }
         /* Sidebar */
-        .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); z-index:1000; }
         .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
         .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
         .list-group-item:hover{ background:#f8fafc; }
         /* Topbar */
-        .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
+        .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); z-index:999; }
         .text-primary{ color:var(--primary)!important; }
         .input-group .form-control{ border-color:var(--line); }
         .input-group-text{ border-color:var(--line); }
@@ -792,12 +792,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             background: var(--card); 
             border: 1px solid var(--line); 
             border-radius: var(--radius); 
-            padding: 1.5rem; 
+            padding: 0; 
             text-align: center; 
             transition: all 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            height: 200px;
         }
         .location-card:hover{ 
             transform: translateY(-5px); 
@@ -1156,10 +1157,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                             <?php echo htmlspecialchars($state['name']); ?>
                                                         </a>
                                                     </h5>
-                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                                        <?php echo $districtCount; ?> districts
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1268,16 +1265,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                             <?php echo htmlspecialchars($district['name']); ?>
                                                         </a>
                                                     </h5>
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                            <i class="fas fa-map-marker-alt me-1"></i>
-                                                            <?php echo htmlspecialchars($district['state_name']); ?>
-                                                        </span>
-                                                    </div>
-                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                        <i class="fas fa-city me-1"></i>
-                                                        <?php echo $cityCount; ?> cities
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1352,7 +1339,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                          <?php else: ?>
                                                 <!-- Black Icon for No Image -->
                                                 <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
-                                                    <i class="fa-solid fa-city text-dark" style="font-size: 4rem;"></i>
+                                                    <i class="fa-solid fa-map-location-dot text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
                                             
@@ -1386,16 +1373,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                             <?php echo htmlspecialchars($city['name']); ?>
                                                         </a>
                                                     </h5>
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                            <i class="fas fa-map-marker-alt me-1"></i>
-                                                            <?php echo htmlspecialchars($city['district_name']); ?>
-                                                        </span>
-                                                    </div>
-                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                        <i class="fas fa-home me-1"></i>
-                                                        <?php echo $townCount; ?> towns
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
@@ -1470,7 +1447,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                          <?php else: ?>
                                                 <!-- Black Icon for No Image -->
                                                 <div class="position-absolute w-100 h-100 d-flex align-items-center justify-content-center" style="background: #f8f9fa; z-index: 1;">
-                                                    <i class="fa-solid fa-map-marker-alt text-dark" style="font-size: 4rem;"></i>
+                                                    <i class="fa-solid fa-map-location-dot text-dark" style="font-size: 4rem;"></i>
                                                              </div>
                                                          <?php endif; ?>
                                             
@@ -1502,16 +1479,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                             <?php echo htmlspecialchars($town['name']); ?>
                                                         </span>
                                                     </h5>
-                                                    <div class="mb-2">
-                                                        <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                            <i class="fas fa-map-marker-alt me-1"></i>
-                                                            <?php echo htmlspecialchars($town['city_name']); ?>
-                                                        </span>
-                                                    </div>
-                                                    <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-30">
-                                                        <i class="fas fa-home me-1"></i>
-                                                        <?php echo $propertyCount; ?> properties
-                                                    </span>
                                                 </div>
                                             </div>
                                         </div>
