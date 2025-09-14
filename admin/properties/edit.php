@@ -303,7 +303,7 @@ $pl_stmt && $pl_stmt->close();
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('properties'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Property'); ?>
 
         <div class="container-fluid p-4">
             <!-- Header -->

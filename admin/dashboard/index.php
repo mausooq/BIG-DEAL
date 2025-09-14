@@ -146,7 +146,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.table tbody tr{ border-top:1px solid var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity feed container */
 		.list-activity {
 			max-height: 420px;

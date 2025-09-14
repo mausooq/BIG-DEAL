@@ -253,7 +253,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('properties'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Property'); ?>
 
         <div class="container-fluid p-4">
             <!-- Header -->

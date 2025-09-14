@@ -110,7 +110,7 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('properties'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Property'); ?>
 
         <div class="container-fluid p-4">
             <!-- Top row: Hero (left) and Quick Info (right) -->

@@ -145,14 +145,14 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
-        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         .table tbody tr:hover{ background:#f9fafb; }
         .table td{ vertical-align: middle; }
         /* Inner borders (match Locations) */
-        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
+        .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600 !important; font-size:.875rem !important; }
+        .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
         /* Remove inner borders for body cells and override Bootstrap defaults */
         .table-inner td, .table-inner th{ border-left:0; border-right:0; } /*mausooq sooooooooooooooooooooooqqqqq*/
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        .badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
         /* Actions column - fully integrated with table */
         .actions-header{ 
             position:sticky;
