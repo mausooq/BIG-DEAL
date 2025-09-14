@@ -259,6 +259,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
 		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
 		/* Badges */
+		td .badge {background: var(--primary); }
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
@@ -347,7 +348,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 										<tr data-test='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 											<td class="fw-semibold"><?php echo htmlspecialchars($row['name']); ?></td>
 											<td class="text-muted" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['feedback']); ?>"><?php echo htmlspecialchars($row['feedback']); ?></td>
-											<td><span class="text-warning"><?php echo str_repeat('★', (int)$row['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5 - (int)$row['rating']); ?></span></span></td>
+											<td><span class="badge"><?php echo (int)$row['rating']; ?>/5</span></td>
 											<td>
 												<?php if ($row['profile_image']): ?>
 													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['profile_image']); ?>" alt="Profile" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
