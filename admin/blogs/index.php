@@ -401,11 +401,14 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 							<div class="blog-card">
 								<div class="blog-image-container">
 									<div class="blog-actions-fixed">
-										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-light btn-sm shadow-sm" title="Edit Blog" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-											<i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+										<button class="btn btn-sm btn-view-blog" title="View Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+											<i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+										</button>
+										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm" title="Edit Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+											<i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
 										</a>
-										<button class="btn btn-light btn-sm shadow-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-											<i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+										<button class="btn btn-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+											<i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
 										</button>
 									</div>
 									<?php if (!empty($row['image_url'])): ?>

@@ -742,25 +742,30 @@ try {
                                             <!-- Action Buttons Overlay -->
                                             <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-light btn-sm shadow-sm" 
+                                                    <button class="btn btn-sm btn-view-category" 
+                                                            title="View Category"
+                                                            style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+                                                        <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+                                                    </button>
+                                                    <a class="btn btn-sm" 
                                                        href="edit.php?id=<?php echo (int)$category['id']; ?>" 
                                                        title="Edit Category"
-                                                       style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                         <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                       style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+                                                         <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                     </a>
                                                     <?php if ($category['property_count'] == 0): ?>
-                                                        <button class="btn btn-light btn-sm shadow-sm" 
+                                                        <button class="btn btn-sm" 
                                                                 onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
                                                                 title="Delete Category"
-                                                                style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                            <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+                                                            <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
                                                         </button>
                                                     <?php else: ?>
-                                                        <button class="btn btn-light btn-sm shadow-sm" 
+                                                        <button class="btn btn-sm" 
                                                                 disabled 
                                                                 title="Cannot delete - category has properties"
-                                                                style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px);">
-                                                            <i class="fas fa-trash text-muted" style="font-size: 0.6rem;"></i>
+                                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #d1d5db; background: white; opacity: 0.5;">
+                                                            <i class="fas fa-trash text-muted" style="font-size: 0.75rem;"></i>
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>

@@ -1129,27 +1129,32 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <?php endif; ?>
                                                     
                                                      <!-- Action Buttons Overlay -->
-                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
+                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button class="btn btn-light btn-sm btn-edit-state shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-view-state" 
+                                                                     title="View State"
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+                                                             </button>
+                                                             <button type="button" class="btn btn-sm btn-edit-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editStateModal" 
                                                                      title="Edit State"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+                                                                 <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button class="btn btn-light btn-sm btn-delete-state shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-delete-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteStateModal" 
                                                                      title="Delete State"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
                                                              </button>
                                                          </div>
                                                      </div>
                                                     
                                                      <!-- Content Overlay -->
-                                                     <div class="p-2" style="z-index: 3; height: 100%;"></div>
+                                                     <div class="p-2" style="z-index: 3; height: 100%; pointer-events: none;"></div>
                                                  </div>
                                                  <div class="card-bottom p-2">
                                                      <h6 class="card-title mb-1 fw-bold text-dark" style="font-size: 0.7rem;">
@@ -1229,27 +1234,32 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <?php endif; ?>
                                                     
                                                      <!-- Action Buttons Overlay -->
-                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
+                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button class="btn btn-light btn-sm btn-edit-district shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-view-district" 
+                                                                     title="View District"
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+                                                             </button>
+                                                             <button type="button" class="btn btn-sm btn-edit-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editDistrictModal" 
                                                                      title="Edit District"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+                                                                 <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button class="btn btn-light btn-sm btn-delete-district shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-delete-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteDistrictModal" 
                                                                      title="Delete District"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
                                                              </button>
                                                          </div>
                                                      </div>
                                                     
                                                      <!-- Content Overlay -->
-                                                     <div class="p-2" style="z-index: 3; height: 100%;"></div>
+                                                     <div class="p-2" style="z-index: 3; height: 100%; pointer-events: none;"></div>
                                                  </div>
                                                  <div class="card-bottom p-2">
                                                      <h6 class="card-title mb-1 fw-bold text-dark" style="font-size: 0.7rem;">
@@ -1329,27 +1339,32 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <?php endif; ?>
                                                     
                                                      <!-- Action Buttons Overlay -->
-                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
+                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button class="btn btn-light btn-sm btn-edit-city shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-view-city" 
+                                                                     title="View City"
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+                                                             </button>
+                                                             <button type="button" class="btn btn-sm btn-edit-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editCityModal" 
                                                                      title="Edit City"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+                                                                 <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button class="btn btn-light btn-sm btn-delete-city shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-delete-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteCityModal" 
                                                                      title="Delete City"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
                                                              </button>
                                                          </div>
                                                      </div>
                                                     
                                                      <!-- Content Overlay -->
-                                                     <div class="p-2" style="z-index: 3; height: 100%;"></div>
+                                                     <div class="p-2" style="z-index: 3; height: 100%; pointer-events: none;"></div>
                                                  </div>
                                                  <div class="card-bottom p-2">
                                                      <h6 class="card-title mb-1 fw-bold text-dark" style="font-size: 0.7rem;">
@@ -1429,27 +1444,32 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <?php endif; ?>
                                                     
                                                      <!-- Action Buttons Overlay -->
-                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
+                                                     <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button class="btn btn-light btn-sm btn-edit-town shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-view-town" 
+                                                                     title="View Town"
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
+                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
+                                                             </button>
+                                                             <button type="button" class="btn btn-sm btn-edit-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editTownModal" 
                                                                      title="Edit Town"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
+                                                                 <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button class="btn btn-light btn-sm btn-delete-town shadow-sm" 
+                                                             <button type="button" class="btn btn-sm btn-delete-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteTownModal" 
                                                                      title="Delete Town"
-                                                                     style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
+                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
                                                              </button>
                                                          </div>
                                                      </div>
                                                     
                                                      <!-- Content Overlay -->
-                                                     <div class="p-2" style="z-index: 3; height: 100%;"></div>
+                                                     <div class="p-2" style="z-index: 3; height: 100%; pointer-events: none;"></div>
                                                  </div>
                                                  <div class="card-bottom p-2">
                                                      <h6 class="card-title mb-1 fw-bold text-dark" style="font-size: 0.7rem;">
@@ -2171,6 +2191,114 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                  }
              });
          });
+
+		document.addEventListener('DOMContentLoaded', function(){
+			// Delegated handlers for dynamically rendered buttons
+			document.addEventListener('click', function(e){
+				const editStateBtn = e.target.closest('.btn-edit-state');
+				if (editStateBtn) {
+					const card = editStateBtn.closest('[data-state]');
+					if (card) {
+						const stateData = JSON.parse(card.getAttribute('data-state'));
+						document.getElementById('edit_id').value = stateData.id;
+						document.getElementById('edit_name').value = stateData.name;
+						document.getElementById('edit_current_image').value = stateData.image_url || '';
+						const preview = document.getElementById('current_image_preview');
+						preview.innerHTML = stateData.image_url ? '<img src="../../uploads/locations/' + stateData.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">' : '<div class="text-muted">No current image</div>';
+					}
+				}
+				const deleteStateBtn = e.target.closest('.btn-delete-state');
+				if (deleteStateBtn) {
+					const card = deleteStateBtn.closest('[data-state]');
+					if (card) {
+						const stateData = JSON.parse(card.getAttribute('data-state'));
+						document.getElementById('delete_id').value = stateData.id;
+					}
+				}
+				const editDistrictBtn = e.target.closest('.btn-edit-district');
+				if (editDistrictBtn) {
+					const card = editDistrictBtn.closest('[data-district]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-district'));
+						document.getElementById('edit_district_id').value = data.id;
+						document.getElementById('edit_district_name').value = data.name;
+						document.getElementById('edit_district_state_id').value = data.state_id;
+						document.getElementById('edit_district_current_image').value = data.image_url || '';
+						const preview = document.getElementById('current_district_image_preview');
+						preview.innerHTML = data.image_url ? '<img src="../../uploads/locations/' + data.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">' : '<div class="text-muted">No current image</div>';
+					}
+				}
+				const deleteDistrictBtn = e.target.closest('.btn-delete-district');
+				if (deleteDistrictBtn) {
+					const card = deleteDistrictBtn.closest('[data-district]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-district'));
+						document.getElementById('delete_district_id').value = data.id;
+					}
+				}
+				const editCityBtn = e.target.closest('.btn-edit-city');
+				if (editCityBtn) {
+					const card = editCityBtn.closest('[data-city]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-city'));
+						document.getElementById('edit_city_id').value = data.id;
+						document.getElementById('edit_city_name').value = data.name;
+						document.getElementById('edit_city_district_id').value = data.district_id;
+						document.getElementById('edit_city_current_image').value = data.image_url || '';
+						const preview = document.getElementById('current_city_image_preview');
+						preview.innerHTML = data.image_url ? '<img src="../../uploads/locations/' + data.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">' : '<div class="text-muted">No current image</div>';
+					}
+				}
+				const deleteCityBtn = e.target.closest('.btn-delete-city');
+				if (deleteCityBtn) {
+					const card = deleteCityBtn.closest('[data-city]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-city'));
+						document.getElementById('delete_city_id').value = data.id;
+					}
+				}
+				const editTownBtn = e.target.closest('.btn-edit-town');
+				if (editTownBtn) {
+					const card = editTownBtn.closest('[data-town]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-town'));
+						document.getElementById('edit_town_id').value = data.id;
+						document.getElementById('edit_town_name').value = data.name;
+						document.getElementById('edit_town_city_id').value = data.city_id;
+						document.getElementById('edit_town_current_image').value = data.image_url || '';
+						const preview = document.getElementById('current_town_image_preview');
+						preview.innerHTML = data.image_url ? '<img src="../../uploads/locations/' + data.image_url + '" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px;" alt="Current Image">' : '<div class="text-muted">No current image</div>';
+					}
+				}
+				const deleteTownBtn = e.target.closest('.btn-delete-town');
+				if (deleteTownBtn) {
+					const card = deleteTownBtn.closest('[data-town]');
+					if (card) {
+						const data = JSON.parse(card.getAttribute('data-town'));
+						document.getElementById('delete_town_id').value = data.id;
+					}
+				}
+			});
+		});
      </script>
+	<button id="testEditBtn" type="button" class="btn btn-outline-secondary" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
+		<i class="fa-solid fa-pen me-1"></i>Test Edit
+	</button>
+	<script>
+		(function(){
+			const testBtn = document.getElementById('testEditBtn');
+			if (!testBtn) return;
+			testBtn.addEventListener('click', function(){
+				try {
+					document.getElementById('edit_id').value = 1;
+					document.getElementById('edit_name').value = 'Test State';
+					document.getElementById('edit_current_image').value = '';
+					const preview = document.getElementById('current_image_preview');
+					if (preview) preview.innerHTML = '<div class="text-muted">No current image</div>';
+					new bootstrap.Modal(document.getElementById('editStateModal')).show();
+				} catch(err) { console.error(err); }
+			});
+		})();
+	</script>
 </body>
 </html>
