@@ -336,7 +336,6 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 											<th>Name</th>
 											<th>Feedback</th>
 											<th>Rating</th>
-											<th>Profile Image</th>
 											<th>Home Image</th>
 											<th>Created</th>
 											<th>Actions</th>
@@ -345,16 +344,18 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 									<tbody>
 										<?php while($row = $testimonials->fetch_assoc()): ?>
 										<tr data-test='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
-											<td class="fw-semibold"><?php echo htmlspecialchars($row['name']); ?></td>
-											<td class="text-muted" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['feedback']); ?>"><?php echo htmlspecialchars($row['feedback']); ?></td>
-											<td><span class="text-warning"><?php echo str_repeat('★', (int)$row['rating']); ?><span class="text-muted"><?php echo str_repeat('☆', 5 - (int)$row['rating']); ?></span></span></td>
-											<td>
-												<?php if ($row['profile_image']): ?>
-													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['profile_image']); ?>" alt="Profile" style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%;">
-												<?php else: ?>
-													<span class="text-muted">No image</span>
-												<?php endif; ?>
+											<td class="fw-semibold">
+												<div class="d-flex align-items-center gap-2">
+													<?php if ($row['profile_image']): ?>
+														<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['profile_image']); ?>" alt="Profile" style="width: 36px; height: 36px; object-fit: cover; border-radius: 50%;">
+													<?php else: ?>
+														<span class="d-inline-block rounded-circle bg-light border" style="width:36px; height:36px;"></span>
+													<?php endif; ?>
+													<span><?php echo htmlspecialchars($row['name']); ?></span>
+												</div>
 											</td>
+											<td class="text-muted" style="max-width:420px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="<?php echo htmlspecialchars($row['feedback']); ?>"><?php echo htmlspecialchars($row['feedback']); ?></td>
+											<td class="text-center align-middle"><?php echo (int)$row['rating']; ?>/5</td>
 											<td>
 												<?php if ($row['home_image']): ?>
 													<img src="../../uploads/testimonials/<?php echo htmlspecialchars($row['home_image']); ?>" alt="Home" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">

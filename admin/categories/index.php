@@ -378,16 +378,30 @@ try {
         .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
         .list-group-item i{ width:18px; }
         .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-        .list-group-item:hover{ background:#f8fafc; }
+        /* .list-group-item:hover{ background:#f8fafc; } */
         /* Topbar */
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
         .text-primary{ color:var(--primary)!important; }
         .input-group .form-control{ border-color:var(--line); }
-        .input-group-text{ 
-            border-color:var(--line); 
-            background-color: #fff;
-            border-radius: 8px 0 0 8px;
-            padding: 0.5rem 0.75rem;
+        .input-group-text{ border-color:var(--line); }
+
+        /* Match FAQ search bar sizing inside toolbar */
+        .toolbar .form-control{
+            border-radius: .375rem;
+            padding: .375rem .75rem;
+            font-size: 1rem;
+        }
+        .toolbar .input-group-text{
+            border-radius: .375rem 0 0 .375rem;
+            padding: .375rem .75rem;
+        }
+
+        /* Ensure toolbar buttons (e.g., Export) keep icon and text inline */
+        .toolbar .btn{
+            display: inline-flex;
+            align-items: center;
+            gap: .375rem;
+            white-space: nowrap;
         }
         /* Button consistency */
         .btn{ border-radius:8px; font-weight:500; }
@@ -396,7 +410,7 @@ try {
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .content-card.card{ box-shadow:0 8px 24px rgba(0,0,0,.05); border:1px solid #eef2f7; }
         
-        /* Category Cards */
+        /* Category Cards (match Location UI) */
          .category-card{ 
              background: transparent !important; 
              border: none !important; 
@@ -406,22 +420,22 @@ try {
              cursor: pointer;
              position: relative;
              overflow: hidden;
-             min-height: 100px;
+             min-height: 140px;
          }
         
         /* Override Bootstrap card styling for category cards */
         .card.category-card {
             background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
         }
         
          .category-card:hover{ 
              transform: translateY(-5px); 
-             box-shadow: 0 12px 28px rgba(0,0,0,.12); 
+             box-shadow: 0 12px 28px rgba(0,0,0,.12);
          }
+
+         /* Removed top accent bar to avoid red border on hover */
          
-         /* White transparent overlay for better text readability */
+         /* Subtle light overlay for readability (kept minimal to match Location) */
          .category-card .card-img-overlay::before {
              content: '';
              position: absolute;
@@ -429,30 +443,39 @@ try {
              left: 0;
              right: 0;
              bottom: 0;
-             background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.7) 100%);
+             background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.45) 100%);
              z-index: 1;
              pointer-events: none;
              transition: all 0.3s ease;
          }
-         
-         .category-card:hover .card-img-overlay::before {
-             background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.8) 100%);
-         }
-         
-         /* Ensure text and buttons are above overlay */
+         .category-card:hover .card-img-overlay::before{ background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.55) 100%); }
+
+         /* Gentle glass effect on overlay */
          .category-card .card-img-overlay {
              z-index: 2;
+             backdrop-filter: blur(2px) saturate(1.05);
          }
+        /* Image subtle zoom like lightweight UI */
+        .category-card .card-img-overlay img{ transition: transform .45s ease; }
+        .category-card:hover .card-img-overlay img{ transform: scale(1.03); }
+         
+         /* Ensure text and buttons are above overlay */
          
          .category-card .card-img-overlay > * {
              position: relative;
              z-index: 3;
          }
+
+        /* Title styling for premium look */
+        .category-card .card-title{ margin: 0; }
+        .category-card .card-title .text-dark{ color: var(--brand-dark) !important; }
         /* Headings & muted text */
         .text-muted{ color:var(--muted)!important; }
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
+        .toolbar .btn-outline-info{ color: #198754; border-color: #198754; }
+        .toolbar .btn-outline-info:hover{ color:rgb(255, 255, 255); border-color: #198754; }
         
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
@@ -679,6 +702,9 @@ try {
                         </div>
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
+                        <button class="btn btn-outline-info ms-2" type="button" onclick="exportCategories()">
+                            <i class="fas fa-download me-1"></i>Export
+                        </button>
                     </form>
                     <a href="add.php" class="btn-animated-add noselect btn-sm">
                         <span class="text">Add Category</span>
@@ -691,18 +717,7 @@ try {
             </div>
 
                 <!-- Categories Table -->
-                <div class="content-card card p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="mb-0 small-title">All Categories</h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-secondary btn-sm" onclick="refreshTable()">
-                                <i class="fas fa-sync-alt me-1"></i>Refresh
-                            </button>
-                            <button class="btn btn-outline-info btn-sm" onclick="exportCategories()">
-                                <i class="fas fa-download me-1"></i>Export
-                            </button>
-                        </div>
-                    </div>
+                <div>
 
                     <?php if ($categories_result && $categories_result->num_rows > 0): ?>
                         <!-- Categories Cards -->

@@ -203,7 +203,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
 		/* Blog Cards */
 		.blog-card{ 
-			background:var(--card); 
 			border:1px solid var(--line); 
 			border-radius:var(--radius); 
 			overflow:hidden; 
@@ -211,21 +210,17 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			height:100%; 
 			display:flex; 
 			flex-direction:column;
-			box-shadow:0 2px 8px rgba(0,0,0,.04);
 		}
 		.blog-card:hover{ 
 			transform:translateY(-4px); 
-			box-shadow:0 8px 24px rgba(0,0,0,.12); 
-			border-color:var(--primary);
 		}
 		.blog-image-container{ 
 			position:relative; 
-			height:100%; 
+			height:160px; 
 			overflow:hidden; 
 			background:transparent;
 			margin:0;
 			padding:0;
-			flex:1;
 		}
 		.blog-image{ 
 			width:100%; 
@@ -252,33 +247,20 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			font-size:2rem; 
 			margin-bottom:0.5rem; 
 		}
-		.blog-overlay{ 
-			position:absolute; 
-			top:0; 
-			left:0; 
-			right:0; 
-			bottom:0; 
-			background:rgba(0,0,0,0.6); 
-			display:flex; 
-			align-items:center; 
-			justify-content:center; 
-			opacity:0; 
-			transition:opacity 0.3s ease;
-			z-index:2;
-		}
-		.blog-card:hover .blog-overlay{ 
-			opacity:1; 
-		}
-		.blog-content-overlay{
-			position:absolute;
-			bottom:0;
-			left:0;
-			right:0;
-			background:linear-gradient(transparent, rgba(0,0,0,0.8));
-			padding:1.25rem;
-			color:white;
-			z-index:1;
-		}
+		/* Fixed action buttons on image */
+		.blog-actions-fixed{ position:absolute; top:8px; right:8px; z-index:3; display:flex; gap:6px; }
+		.blog-actions-fixed .btn{ width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; border-radius:4px; padding:0; border:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); box-shadow:0 2px 6px rgba(0,0,0,.15); color:inherit; }
+		.blog-actions-fixed .btn:hover{ background:rgba(255,255,255,1); box-shadow:0 3px 8px rgba(0,0,0,.18); }
+		.blog-actions-fixed .btn:focus{ outline:none; box-shadow:0 0 0 0 rgba(0,0,0,0); }
+		.blog-actions-fixed .btn i{ font-size:.6rem; }
+		.blog-actions-fixed .btn:disabled, .blog-actions-fixed .btn.disabled{ background:rgba(255,255,255,0.7); cursor:not-allowed; }
+		.blog-actions-fixed .btn:disabled i, .blog-actions-fixed .btn.disabled i{ color:#6c757d !important; }
+		/* Blog body under image */
+		.blog-body{ padding:0.75rem 1rem;}
+		.blog-body .blog-title{ color:#111827; font-size:1rem; }
+		.blog-body .blog-text{ color:#111827; font-size:0.875rem; }
+
+
 		.blog-actions{ 
 			display:flex; 
 			gap:12px; 
@@ -323,30 +305,23 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			overflow:hidden;
 		}
 		.blog-preview{ 
-			color:rgba(255,255,255,0.9); 
-			font-size:0.9rem; 
+			color:rgba(0, 0, 0, 0.75); 
+			font-size:0.85rem; 
 			line-height:1.5; 
-			margin-bottom:1rem; 
+			margin-bottom:0.75rem; 
 			flex:1;
-			display:-webkit-box;
-			-webkit-line-clamp:3;
-			-webkit-box-orient:vertical;
-			overflow:hidden;
+			display:block;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+			text-align: left;
 		}
 		.blog-meta{ 
 			margin-top:auto; 
 			padding-top:0.75rem; 
 			border-top:1px solid rgba(255,255,255,0.3);
 		}
-		.blog-date{ 
-			color:rgba(255,255,255,0.8); 
-			font-size:0.85rem; 
-			display:flex; 
-			align-items:center;
-		}
-		.blog-date i{ 
-			color:var(--primary); 
-		}
+
 		/* Modal styles */
 		.modal-content{ border:0; border-radius:var(--radius); }
 		.modal-header{ border-bottom:1px solid var(--line); }
@@ -359,7 +334,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			.blog-card{ margin-bottom:1rem; }
 		}
 		@media (max-width: 768px){
-			.blog-content-overlay{ padding:1rem; }
 			.blog-title{ font-size:1rem; }
 			.blog-preview{ font-size:0.85rem; }
 		}
@@ -367,7 +341,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			.toolbar .row-top{ flex-direction:column; align-items:stretch; }
 			.blog-actions .btn{ width:40px; height:40px; }
 			.blog-actions{ gap:8px; }
-			.blog-content-overlay{ padding:0.875rem; }
 		}
 	</style>
 </head>
@@ -424,9 +397,17 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 					<!-- Blog Cards Grid -->
 					<div class="row g-4" id="blogsGrid">
 						<?php while($row = $blogs->fetch_assoc()): ?>
-						<div class="col-lg-4 col-md-6 col-sm-12" data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
+						<div class="col-lg-2 col-md-3 col-sm-6 col-12" data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 							<div class="blog-card">
 								<div class="blog-image-container">
+									<div class="blog-actions-fixed">
+										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-light btn-sm shadow-sm" title="Edit Blog" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+											<i class="fas fa-edit text-primary" style="font-size: 0.6rem;"></i>
+										</a>
+										<button class="btn btn-light btn-sm shadow-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog" style="width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; padding: 0; border: none; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+											<i class="fas fa-trash text-danger" style="font-size: 0.6rem;"></i>
+										</button>
+									</div>
 									<?php if (!empty($row['image_url'])): ?>
 										<?php 
 											$src = $row['image_url'];
@@ -442,26 +423,11 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 											<span>No Image</span>
 										</div>
 									<?php endif; ?>
-									<div class="blog-overlay">
-										<div class="blog-actions">
-											<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-light me-2" title="Edit Blog">
-												<i class="fa-solid fa-pen"></i>
-											</a>
-											<button class="btn btn-sm btn-light btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog">
-												<i class="fa-solid fa-trash"></i>
-											</button>
-										</div>
-									</div>
-									<div class="blog-content-overlay">
-										<h6 class="blog-title"><?php echo htmlspecialchars($row['title']); ?></h6>
-										<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 120)) . '...'; ?></p>
-										<div class="blog-meta">
-											<span class="blog-date">
-												<i class="fa-solid fa-calendar me-1"></i>
-												<?php echo date('M d, Y', strtotime($row['created_at'])); ?>
-											</span>
-										</div>
-									</div>
+								</div>
+								<div class="blog-body">
+									<h6 class="blog-title"><?php echo htmlspecialchars($row['title']); ?></h6>
+									<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 80)) . '...'; ?></p>
+									<div class="blog-meta"></div>
 								</div>
 							</div>
 						</div>
