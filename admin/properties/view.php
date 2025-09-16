@@ -59,22 +59,22 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         .brand{ font-weight:700; font-size:1.25rem; }
         .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
         .list-group-item i{ width:18px; }
-        .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
+        .list-group-item.active{ background:#fef2f2; color:#b91c1c; font-weight:600; }
         .list-group-item:hover{ background:#f8fafc; }
         .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
         .btn{ border-radius:12px; font-weight:500; }
-        .btn-primary{ background:#3b82f6; border-color:#3b82f6; }
-        .btn-primary:hover{ background:#2563eb; border-color:#2563eb; }
+        .btn-primary{ background:var(--primary); border-color:var(--primary); }
+        .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         .section-header{ border-bottom:2px solid var(--line); padding-bottom:1rem; margin-bottom:2rem; }
         .section-title{ color:var(--brand-dark); font-weight:600; font-size:1.1rem; }
-        .property-header{ background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white; border-radius:var(--radius); padding:2rem; margin-bottom:2rem; }
+        .property-header{ background:linear-gradient(135deg, var(--primary) 0%, var(--primary-600) 100%); color:white; border-radius:var(--radius); padding:2rem; margin-bottom:2rem; }
         .property-title{ font-size:2rem; font-weight:700; margin-bottom:0.5rem; }
         .property-subtitle{ font-size:1.1rem; opacity:0.9; margin-bottom:1rem; }
         .property-price{ font-size:1.5rem; font-weight:600; margin-bottom:0.5rem; }
         .property-location{ font-size:1rem; opacity:0.9; }
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        .badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
         .info-card{ border:1px solid var(--line); border-radius:12px; padding:1.5rem; margin-bottom:1rem; background:#fff; }
         .info-label{ color:var(--muted); font-size:0.875rem; font-weight:600; margin-bottom:0.25rem; }
         .info-value{ font-weight:600; color:#111827; }
@@ -83,8 +83,8 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         .hero-main{ width:100%; height:360px; object-fit:contain; border-radius:8px; background:#f8f9fa; border:1px solid #e9ecef; }
         .thumbs{ display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
         .thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; background:#f3f4f6; }
-        .thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
-        .thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .thumb:hover{ border-color:var(--primary); transform:scale(1.05); }
+        .thumb.active{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(225, 29, 42, 0.2); }
         .status-badge{ padding:0.5rem 1rem; border-radius:20px; font-weight:600; font-size:0.875rem; }
         .status-available{ background:#dcfce7; color:#166534; }
         .status-sold{ background:#fecaca; color:#991b1b; }
@@ -322,7 +322,7 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                                 <a href="index.php" class="btn btn-outline-secondary">
                                     <i class="fa-solid fa-list me-2"></i>View All Properties
                                 </a>
-                                <button class="btn btn-outline-info" onclick="window.print()">
+                                <button class="btn btn-outline-primary" onclick="window.print()">
                                     <i class="fa-solid fa-print me-2"></i>Print Details
                                 </button>
                             </div>
