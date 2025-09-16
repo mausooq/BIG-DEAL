@@ -82,6 +82,33 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         .status-rented{ background:#fef3c7; color:#92400e; }
         .description-text{ line-height:1.6; color:#374151; }
         .action-buttons{ display:flex; gap:1rem; flex-wrap:wrap; }
+        /* Print styles */
+        @media print{
+            @page { size: A4; margin: 12mm; }
+            html, body{ background:#fff !important; color:#000 !important; }
+            /* Hide admin chrome and interactive controls */
+            nav, aside, .sidebar, .topbar, .toolbar, .btn, button, .action-buttons, .d-grid .btn, .drawer, .drawer-backdrop{ display:none !important; }
+            /* Layout adjustments */
+            .content{ margin:0 !important; padding:0 !important; }
+            .container-fluid{ padding:0 !important; }
+            .card, .info-card{ box-shadow:none !important; border:1px solid #ddd !important; }
+            .property-header{ background:#fff !important; color:#000 !important; border:0; }
+            .property-title{ font-size:20pt; }
+            .property-subtitle, .property-location{ color:#000 !important; opacity:1; }
+            /* Images and gallery */
+            .hero{ border:0 !important; padding:0 !important; }
+            .hero-main{ height:auto !important; max-height:160mm !important; object-fit:contain !important; border:0 !important; background:#fff !important; }
+            .thumbs{ display:none !important; }
+            /* Map and iframes typically blocked on print */
+            .map-container, iframe{ display:none !important; }
+            /* Badges and status with borders for visibility */
+            .status-badge{ border:1px solid #999 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            /* Prevent awkward page breaks */
+            .card, .info-card, .section-header, .section-title{ break-inside: avoid; page-break-inside: avoid; }
+            .card{ margin-bottom:10mm; }
+            /* Links visible */
+            a{ color:#000 !important; text-decoration:underline !important; }
+        }
         /* Mobile responsiveness */
 
             .property-header{ padding:1.5rem; }
