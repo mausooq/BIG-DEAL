@@ -1072,9 +1072,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                              <button type="button" class="modern-btn delete-btn btn-delete-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteStateModal" 
-                                                                     title="Delete State"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
+                                                                     title="Delete State">
+                                                                 <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                              </button>
                                                          </div>
                                                      </div>
@@ -1172,9 +1171,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                              <button type="button" class="modern-btn delete-btn btn-delete-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteDistrictModal" 
-                                                                     title="Delete District"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
+                                                                     title="Delete District">
+                                                                 <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                              </button>
                                                          </div>
                                                      </div>
@@ -1272,9 +1270,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                              <button type="button" class="modern-btn delete-btn btn-delete-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteCityModal" 
-                                                                     title="Delete City"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
+                                                                     title="Delete City">
+                                                                 <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                              </button>
                                                          </div>
                                                      </div>
@@ -1372,9 +1369,8 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                              <button type="button" class="modern-btn delete-btn btn-delete-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteTownModal" 
-                                                                     title="Delete Town"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-                                                                 <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
+                                                                     title="Delete Town">
+                                                                 <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                              </button>
                                                          </div>
                                                      </div>
