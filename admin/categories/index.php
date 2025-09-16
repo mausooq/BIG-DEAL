@@ -475,7 +475,7 @@ try {
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         .toolbar .btn-outline-info{ color: #198754; border-color: #198754; }
-        .toolbar .btn-outline-info:hover{ color:rgb(255, 255, 255); border-color: #198754; }
+        .toolbar .btn-outline-info:hover{ color:rgb(255, 255, 255); border-color: #198754;background: #198754; }
         
         /* Buttons */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
@@ -742,11 +742,6 @@ try {
                                             <!-- Action Buttons Overlay -->
                                             <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
                                                 <div class="d-flex gap-1">
-                                                    <button class="btn btn-sm btn-view-category" 
-                                                            title="View Category"
-                                                            style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-                                                        <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-                                                    </button>
                                                     <a class="btn btn-sm" 
                                                        href="edit.php?id=<?php echo (int)$category['id']; ?>" 
                                                        title="Edit Category"

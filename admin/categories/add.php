@@ -119,6 +119,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .form-control:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(225, 29, 42, .1); }
         .image-drop{ border:2px dashed var(--line); border-radius:12px; padding:1.5rem; text-align:center; background:#fafbfc; transition:all .2s ease; }
         .image-drop.dragover{ border-color:var(--primary); background:#fef2f2; }
+        .image-drop:hover{ border-color:var(--primary); background:#fef2f2; }
+        .image-drop .btn-outline-primary{ color:var(--primary); border-color:var(--primary); }
+        .image-drop .btn-outline-primary:hover{ background-color:var(--primary); border-color:var(--primary); color:#fff; }
         .preview{ margin-top:10px; }
         .preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #e9eef5; }
         @media (max-width: 991.98px){ .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; } .sidebar.open{ left:12px; } .content{ margin-left:0; } }
@@ -148,7 +151,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="post" enctype="multipart/form-data" id="categoryForm">
                 <div class="row">
-                    <div class="col-lg-8">
+                    <div class="col-12">
                         <div class="card mb-4">
                             <div class="card-body">
                                 <div class="mb-3">
@@ -177,17 +180,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </span>
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="card">
-                            <div class="card-body">
-                                <div class="text-muted small mb-2">Tips</div>
-                                <ul class="small text-muted mb-0">
-                                    <li>Keep category names short and clear</li>
-                                    <li>Use an image that represents the category</li>
-                                </ul>
                             </div>
                         </div>
                     </div>

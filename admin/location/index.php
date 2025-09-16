@@ -814,18 +814,18 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         .toolbar .btn-primary{ background:var(--primary); border-color:var(--primary); }
         /* Cards */
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
-        .quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
         /* Location Management Cards */
         .location-card{ 
             background: transparent !important; 
             border: none !important; 
             border-radius: var(--radius); 
             text-align: center; 
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
             position: relative;
             overflow: hidden;
             min-height: 140px;
+            will-change: transform;
         }
         /* Add category-like overlay to location cards */
         .location-card .card-img-overlay::before{
@@ -835,13 +835,29 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.45) 100%);
             z-index: 1;
             pointer-events: none;
-            transition: all 0.3s ease;
+            transition: opacity 0.3s ease;
         }
-        .location-card:hover .card-img-overlay::before{ background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.55) 100%); }
-        .location-card .card-img-overlay{ z-index: 1; padding: 0 !important; pointer-events: none; }
-        .location-card .card-img-overlay img{ transition: transform .45s ease; }
-        .location-card:hover .card-img-overlay img{ transform: scale(1.03); }
-        .location-card:hover{ transform: translateY(-5px); box-shadow: 0 12px 28px rgba(0,0,0,.12); }
+        .location-card:hover .card-img-overlay::before{ 
+            opacity: 0.8;
+        }
+        .location-card .card-img-overlay{ 
+            z-index: 2; 
+            padding: 0 !important; 
+            pointer-events: none; 
+        }
+        .location-card .card-img-overlay img{ 
+            transition: transform 0.3s ease; 
+            will-change: transform;
+        }
+        .location-card:hover .card-img-overlay img{ 
+            transform: scale(1.03); 
+        }
+        
+        /* Ensure text and buttons are above overlay */
+        .location-card .card-img-overlay > * {
+            position: relative;
+            z-index: 3;
+        }
         /* Ensure bottom titles sit above overlay and are readable */
         .location-card .card-bottom{ position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; padding: .5rem .5rem; pointer-events: auto; }
         .location-card .card-bottom .card-title{ margin:0; font-size:.8rem; color:#111827; }
@@ -851,67 +867,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         .card.location-card {
             background: transparent !important;
             border: none !important;
-            box-shadow: none !important;
+            box-shadow: none;
         }
         .location-card:hover{ 
             transform: translateY(-5px); 
             box-shadow: 0 12px 28px rgba(0,0,0,.12); 
         }
         
-        .location-icon{
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1rem;
-            font-size: 1.5rem;
-            color: white;
-            transition: all 0.3s ease;
-        }
-        .location-card:hover .location-icon{
-            transform: scale(1.1);
-        }
-        .location-icon.states{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .location-icon.districts{ background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .location-icon.cities{ background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .location-icon.towns{ background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-        .location-title{
-            font-size: 1.25rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: var(--brand-dark);
-        }
-        .location-count{
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        .location-description{
-            color: var(--muted);
-            font-size: 0.875rem;
-            margin-bottom: 1rem;
-        }
-        .location-btn{
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-weight: 500;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.3s ease;
-        }
-        .location-btn:hover{
-            background: var(--primary-600);
-            color: white;
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(225, 29, 42, 0.3);
-        }
          /* Tab Navigation */
          .nav-tabs{ 
              border: 0; 
@@ -989,15 +951,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              white-space:nowrap;
              overflow:hidden;
          }
-         .actions-cell .btn{ 
-             width:28px; 
-             height:28px; 
-             display:inline-flex; 
-             align-items:center; 
-             justify-content:center; 
-             padding:0; 
-             border-radius:6px;
-         }
          .badge-soft{ background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
          
          /* Button consistency */
@@ -1012,7 +965,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              display:inline-flex; 
              align-items:center; 
              justify-content:center; 
-             padding:0; 
              border-radius:6px;
          }
          
@@ -1131,11 +1083,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-view-state" 
-                                                                     title="View State"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-                                                             </button>
                                                              <button type="button" class="btn btn-sm btn-edit-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editStateModal" 
@@ -1236,11 +1183,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-view-district" 
-                                                                     title="View District"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-                                                             </button>
                                                              <button type="button" class="btn btn-sm btn-edit-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editDistrictModal" 
@@ -1341,11 +1283,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-view-city" 
-                                                                     title="View City"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-                                                             </button>
                                                              <button type="button" class="btn btn-sm btn-edit-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editCityModal" 
@@ -1446,11 +1383,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-view-town" 
-                                                                     title="View Town"
-                                                                     style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-                                                                 <i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-                                                             </button>
                                                              <button type="button" class="btn btn-sm btn-edit-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editTownModal" 

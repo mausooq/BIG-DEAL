@@ -118,6 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
 		.image-drop{ border:2px dashed var(--line); border-radius:12px; padding:1.5rem; text-align:center; background:#fafbfc; transition:all .2s ease; }
 		.image-drop.dragover{ border-color:var(--primary); background:#fef2f2; }
+		.image-drop:hover{ border-color:var(--primary); background:#fef2f2; }
+		.image-drop .btn-outline-primary{ color:var(--primary); border-color:var(--primary); }
+		.image-drop .btn-outline-primary:hover{ background-color:var(--primary); border-color:var(--primary); color:#fff; }
 		.preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #e9eef5; }
 		@media (max-width: 991.98px){ .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; } .sidebar.open{ left:12px; } .content{ margin-left:0; } }
 	</style>
