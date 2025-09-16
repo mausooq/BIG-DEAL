@@ -146,7 +146,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         /* Actions column - fully integrated with table */
         .actions-header{ 
             position:sticky;
-            right:0;
+            right:8px;
             background:white;
             z-index:10;
             text-align:center;
@@ -156,12 +156,12 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         }
         .actions-cell{ 
             position:sticky;
-            right:0;
+            right:8px;
             background:white;
             z-index:10;
             padding:8px 8px !important; 
-            min-width:120px;
-            max-width:120px;
+            min-width:150px;
+            max-width:150px;
             text-align:center;
             vertical-align:middle;
             border-left:1px solid var(--line);
@@ -269,8 +269,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             .drawer-image{ height:200px; object-fit:contain; }
             .drawer-image-gallery{ gap:6px; }
             .drawer-image-thumb{ width:70px; height:70px; }
-            .actions-header, .actions-cell{ min-width:100px; }
-            .actions-cell .btn{ width:24px; height:24px; font-size:0.7rem; margin:0 1px; }
+            .actions-header, .actions-cell{ min-width:140px; }
+            .actions-cell .modern-btn{ width:32px; height:32px; font-size:0.7rem; margin:0 1px; }
         }
         
         /* High zoom level stability */
@@ -315,6 +315,128 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         }
         /* Button consistency */
         .btn{ border-radius:8px; font-weight:500; }
+        
+        /* Modern Animated Action Buttons */
+        .modern-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 16px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            margin: 0 2px;
+        }
+
+        .modern-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .modern-btn:hover::before {
+            left: 100%;
+        }
+
+        .modern-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 
+                0 8px 24px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .modern-btn:active {
+            transform: translateY(-1px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        /* View Button - Neutral grey */
+        .view-btn {
+            background: #f3f4f6; /* grey-100 */
+            color: #374151;      /* grey-700 */
+            border: 1px solid #e5e7eb; /* grey-200 */
+        }
+
+        .view-btn:hover {
+            background: #e5e7eb; /* grey-200 */
+            border-color: #d1d5db; /* grey-300 */
+            color: #374151;
+        }
+
+        /* Edit Button - Neutral grey */
+        .edit-btn {
+            background: #f3f4f6; /* grey-100 */
+            color: #374151;      /* grey-700 */
+            border: 1px solid #e5e7eb; /* grey-200 */
+        }
+
+        .edit-btn:hover {
+            background: #e5e7eb; /* grey-200 */
+            border-color: #d1d5db; /* grey-300 */
+            color: #374151;
+        }
+
+        /* Delete Button - Solid theme red */
+        .delete-btn {
+            background: var(--primary);
+            color: #ffffff;
+            border: 1px solid var(--primary-600);
+        }
+
+        .delete-btn:hover {
+            background: var(--primary-600);
+            border-color: var(--primary-600);
+            color: #ffffff;
+        }
+
+        /* Icon animations */
+        .modern-btn .icon {
+            transition: all 0.3s ease;
+        }
+
+        .modern-btn:hover .icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .delete-btn:hover .icon {
+            transform: scale(1.2) rotate(-5deg);
+        }
+
+        /* Ripple effect */
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-animation 0.6s linear;
+            pointer-events: none;
+        }
+
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+
+        /* Glow effect on hover */
+        .modern-btn:hover {
+            filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.3));
+        }
         .btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
         .btn-primary{ background-color: var(--primary); border-color: var(--primary); }
         .btn-primary:hover, .btn-primary:focus{ background-color: var(--primary-600); border-color: var(--primary-600); }
@@ -524,7 +646,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     <th style="min-width:150px;">Location</th>
                                     <th style="min-width:100px;">Status</th>
                                     <th style="min-width:100px;">Created</th>
-                                    <th class="actions-header" style="min-width:120px; width:120px;">Actions</th>
+                                    <th class="actions-header" style="min-width:150px; width:150px;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -565,9 +687,15 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
                                     <td class="text-end actions-cell">
-                                        <button class="btn btn-sm btn-outline-info btn-view me-1" title="View Property"><i class="fa-solid fa-eye"></i></button>
-                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm btn-outline-secondary me-1" title="Edit Property"><i class="fa-solid fa-pen"></i></a>
-                                        <button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property"><i class="fa-solid fa-trash"></i></button>
+                                        <button class="modern-btn view-btn btn-view" title="View Property" data-property-id="<?php echo (int)$row['id']; ?>">
+                                            <span class="icon"><i class="fa-solid fa-eye"></i></span>
+                                        </button>
+                                        <a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="modern-btn edit-btn" title="Edit Property">
+                                            <span class="icon"><i class="fa-solid fa-pen"></i></span>
+                                        </a>
+                                        <button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deletePropertyModal" title="Delete Property" data-property-id="<?php echo (int)$row['id']; ?>">
+                                            <span class="icon"><i class="fa-solid fa-trash"></i></span>
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
@@ -1079,6 +1207,46 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 abortController.abort();
             }
             drawerCache.clear();
+        });
+
+        // Modern Button Ripple Effect
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement('span');
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+            circle.classList.add('ripple');
+
+            const ripple = button.querySelector('.ripple');
+            if (ripple) {
+                ripple.remove();
+            }
+
+            button.appendChild(circle);
+        }
+
+        // Add event listeners for ripple effect to modern buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.modern-btn').forEach(btn => {
+                btn.addEventListener('click', createRipple);
+            });
+        });
+
+        // Enhanced button click animations
+        document.addEventListener('click', function(event) {
+            const modernBtn = event.target.closest('.modern-btn');
+            if (modernBtn) {
+                modernBtn.style.animation = 'none';
+                modernBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    modernBtn.style.animation = '';
+                    modernBtn.style.transform = '';
+                }, 150);
+            }
         });
     </script>
 </body>
