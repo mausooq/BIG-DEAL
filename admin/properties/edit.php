@@ -809,8 +809,6 @@ $pl_stmt && $pl_stmt->close();
                 try {
                     handleFiles(files);
                 } finally {
-                    // Allow re-selecting the same files immediately
-                    imageInput.value = '';
                     isHandlingSelection = false;
                 }
             });
