@@ -312,7 +312,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 										<tr>
 											<th>Name</th>
 											<th>Feedback</th>
-											<th>Rating</th>
+											<th class="text-center">Rating</th>
 											<th>Home Image</th>
 											<th>Created</th>
 											<th>Actions</th>

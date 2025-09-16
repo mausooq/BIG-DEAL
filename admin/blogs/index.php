@@ -376,9 +376,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 							<div class="blog-card">
 								<div class="blog-image-container">
 									<div class="blog-actions-fixed">
-										<button class="btn btn-sm btn-view-blog" title="View Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #3b82f6; background: white;">
-											<i class="fas fa-eye text-primary" style="font-size: 0.75rem;"></i>
-										</button>
 										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm" title="Edit Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
 											<i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
 										</a>
