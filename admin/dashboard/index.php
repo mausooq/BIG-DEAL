@@ -155,6 +155,62 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
 		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
 		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+		/* Modern Animated Action Buttons (parity with properties table) */
+		.modern-btn {
+			width: 36px;
+			height: 36px;
+			border: none;
+			border-radius: 12px;
+			cursor: pointer;
+			position: relative;
+			overflow: hidden;
+			transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+			backdrop-filter: blur(10px);
+			box-shadow: 
+				0 4px 16px rgba(0, 0, 0, 0.15),
+				inset 0 1px 0 rgba(255, 255, 255, 0.2);
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 14px;
+			margin: 0 2px;
+		}
+
+		.modern-btn::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: -100%;
+			width: 100%;
+			height: 100%;
+			background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+			transition: left 0.6s;
+		}
+
+		.modern-btn:hover::before { left: 100%; }
+		.modern-btn:hover {
+			transform: translateY(-2px) scale(1.05);
+			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+			filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.3));
+		}
+		.modern-btn:active { transform: translateY(-1px) scale(1.02); transition: all 0.1s ease; }
+		.modern-btn .icon { transition: all 0.3s ease; }
+		.modern-btn:hover .icon { transform: scale(1.2) rotate(5deg); }
+
+		/* View Button - Neutral grey (parity) */
+		.view-btn { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
+		.view-btn:hover { background: #e5e7eb; border-color: #d1d5db; color: #374151; }
+
+		/* Ripple effect */
+		.ripple {
+			position: absolute;
+			border-radius: 50%;
+			background: rgba(255, 255, 255, 0.4);
+			transform: scale(0);
+			animation: ripple-animation 0.6s linear;
+			pointer-events: none;
+		}
+		@keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
 		/* Drawer */
 		.drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
 		.drawer.open{ right:0; }
@@ -598,6 +654,35 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		}
 		// attach events
 		document.addEventListener('DOMContentLoaded', function(){
+			// Add ripple effect to modern buttons (match properties)
+			function createRipple(event) {
+				const button = event.currentTarget;
+				const circle = document.createElement('span');
+				const diameter = Math.max(button.clientWidth, button.clientHeight);
+				const radius = diameter / 2;
+				circle.style.width = circle.style.height = `${diameter}px`;
+				circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+				circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+				circle.classList.add('ripple');
+				const ripple = button.querySelector('.ripple');
+				if (ripple) ripple.remove();
+				button.appendChild(circle);
+			}
+			document.querySelectorAll('.modern-btn').forEach(btn => {
+				btn.addEventListener('click', createRipple);
+			});
+			// Enhanced button click animation
+			document.addEventListener('click', function(event) {
+				const modernBtn = event.target.closest('.modern-btn');
+				if (modernBtn) {
+					modernBtn.style.animation = 'none';
+					modernBtn.style.transform = 'scale(0.95)';
+					setTimeout(() => {
+						modernBtn.style.animation = '';
+						modernBtn.style.transform = '';
+					}, 150);
+				}
+			});
 			// Toggleable chip filters for listing type (lt) and category (cat)
 			document.querySelectorAll('.js-filter').forEach(function(chip){
 				chip.addEventListener('click', function(e){

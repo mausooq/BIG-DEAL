@@ -247,6 +247,20 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+		/* Modern Animated Action Buttons (match Properties) */
+		.modern-btn { width:36px; height:36px; border:none; border-radius:12px; cursor:pointer; position:relative; overflow:hidden; transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275); backdrop-filter: blur(10px); box-shadow: 0 4px 16px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2); display:inline-flex; align-items:center; justify-content:center; font-size:14px; margin:0 2px; }
+		.modern-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent); transition:left .6s; }
+		.modern-btn:hover::before { left:100%; }
+		.modern-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3); filter: drop-shadow(0 0 12px rgba(255,255,255,.3)); }
+		.modern-btn:active { transform: translateY(-1px) scale(1.02); transition: all .1s ease; }
+		.modern-btn .icon { transition: all .3s ease; }
+		.modern-btn:hover .icon { transform: scale(1.2) rotate(5deg); }
+		.view-btn, .edit-btn { background:#f3f4f6; color:#374151; border:1px solid #e5e7eb; }
+		.view-btn:hover, .edit-btn:hover { background:#e5e7eb; border-color:#d1d5db; color:#374151; }
+		.delete-btn { background: var(--primary); color:#fff; border:1px solid var(--primary-600); }
+		.delete-btn:hover { background: var(--primary-600); border-color: var(--primary-600); color:#fff; }
+		.ripple { position:absolute; border-radius:50%; background: rgba(255,255,255,.4); transform: scale(0); animation: ripple-animation .6s linear; pointer-events:none; }
+		@keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
 		/* Mobile responsiveness */
 
 			.table{ font-size:.9rem; }
@@ -527,6 +541,26 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
 		document.addEventListener('DOMContentLoaded', function(){
+			// Ripple + click animation for modern buttons
+			document.addEventListener('click', function(e){
+				const modernBtn = e.target.closest('.modern-btn');
+				if (modernBtn) {
+					const circle = document.createElement('span');
+					const diameter = Math.max(modernBtn.clientWidth, modernBtn.clientHeight);
+					const radius = diameter / 2;
+					const rect = modernBtn.getBoundingClientRect();
+					circle.style.width = circle.style.height = `${diameter}px`;
+					circle.style.left = `${(e.clientX - rect.left) - radius}px`;
+					circle.style.top = `${(e.clientY - rect.top) - radius}px`;
+					circle.classList.add('ripple');
+					const existing = modernBtn.querySelector('.ripple');
+					if (existing) existing.remove();
+					modernBtn.appendChild(circle);
+					modernBtn.style.animation = 'none';
+					modernBtn.style.transform = 'scale(0.95)';
+					setTimeout(() => { modernBtn.style.animation = ''; modernBtn.style.transform = ''; }, 150);
+				}
+			});
 			document.querySelectorAll('.btn-edit').forEach(btn => {
 				btn.addEventListener('click', function(){
 					const tr = this.closest('tr');
