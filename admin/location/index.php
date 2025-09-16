@@ -28,7 +28,6 @@ function logActivity(mysqli $mysqli, string $action, string $details): void {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
     $mysqli = db();
-    
 
     if ($action === 'add_state') {
         $name = trim($_POST['name'] ?? '');
@@ -780,40 +779,24 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
         /* Base */
-        :root{
-            --bg:#F1EFEC;/* page background */
-            --card:#ffffff;/* surfaces */
-            --muted:#6b7280;/* secondary text */
-            --line:#e9eef5;/* borders */
-            --brand-dark:#2f2f2f;/* logo dark */
-            --primary:#e11d2a;/* logo red accent */
-            --primary-600:#b91c1c;/* darker red hover */
-            --radius:16px;
-        }
-        body{ background:var(--bg); color:#111827; }
-        .content{ margin-left:284px; }
-        /* Sidebar */
-        .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
-        .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-        .list-group-item:hover{ background:#f8fafc; }
-        /* Topbar */
-        .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .text-primary{ color:var(--primary)!important; }
         
+        body{ background:var(--bg); color:#111827; }
+
+        /* Topbar */
+
         .input-group-text{ 
             border-color:var(--line); 
             background-color: #fff;
             border-radius: 8px 0 0 8px;
             padding: 0.5rem 0.75rem;
         }
-        .input-group .form-control{ border-color:var(--line); }
+        
         /* Toolbar */
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         .toolbar .btn-primary{ background:var(--primary); border-color:var(--primary); }
         /* Cards */
-        .card{ border:0; border-radius:var(--radius); background:var(--card); }
+        
         /* Location Management Cards */
         .location-card{ 
             background: transparent !important; 
@@ -969,10 +952,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
          }
          
          /* Mobile responsiveness */
-         @media (max-width: 991.98px){
-             .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-             .sidebar.open{ left:12px; }
-             .content{ margin-left:0; }
+
          }
          @media (max-width: 575.98px){
              .nav-tabs .nav-link{ padding: 0.75rem 1rem; font-size: 0.875rem; }
@@ -1005,7 +985,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                 </div>
                 <?php unset($_SESSION['error_message']); ?>
             <?php endif; ?>
-
 
              <!-- Tab Navigation -->
              <div class="card mb-4">
@@ -1943,28 +1922,20 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              window.location.href = '?search=' + encodeURIComponent(searchValue);
          }
 
-
          function searchDistricts() {
              const searchValue = document.getElementById('districtSearchInput').value;
              window.location.href = '?district_search=' + encodeURIComponent(searchValue);
          }
-
 
          function searchCities() {
              const searchValue = document.getElementById('citySearchInput').value;
              window.location.href = '?city_search=' + encodeURIComponent(searchValue);
          }
 
-
          function searchTowns() {
              const searchValue = document.getElementById('townSearchInput').value;
              window.location.href = '?town_search=' + encodeURIComponent(searchValue);
          }
-
-
-
-
-
 
          // Initialize Bootstrap tabs
          document.addEventListener('DOMContentLoaded', function() {

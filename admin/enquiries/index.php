@@ -60,7 +60,6 @@ $filters = [
 
 $mysqli = db();
 
-
 // Build query
 $where = [];
 $types = '';
@@ -97,18 +96,11 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root{ --bg:#F1EFEC; --card:#ffffff; --muted:#6b7280; --line:#e9eef5; --primary:#e11d2a; --primary-600:#b91c1c; --radius:16px; }
+        
         body{ background:var(--bg); color:#111827; }
-        .content{ margin-left:284px; }
+        
         /* sidebar styles matching dashboard */
-        .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
-        .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-        .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .text-primary{ color:var(--primary)!important; }
-        .input-group .form-control{ border-color:var(--line); }
-        .input-group-text{ border-color:var(--line); }
-		.card{ border:0; border-radius:var(--radius); background:var(--card); }
+
         /* Table: row-level separators to avoid gaps */
         .table{ --bs-table-bg:transparent; border-collapse:collapse; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border-bottom:1px solid var(--line); }
@@ -148,10 +140,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .badge-status-warning{ background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
         .badge-status-danger{ background:#fecaca; color:#991b1b; border:1px solid #fca5a5; }
         /* Mobile responsiveness */
-        @media (max-width: 991.98px){
-            .sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-            .sidebar.open{ left:12px; }
-            .content{ margin-left:0; }
+
             .table{ font-size:.9rem; }
         }
         @media (max-width: 575.98px){
@@ -182,7 +171,6 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
-
 
             <!-- Search toolbar -->
             <div class="toolbar mb-4">

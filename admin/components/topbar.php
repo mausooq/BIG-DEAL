@@ -3,17 +3,77 @@
  * Topbar component for Admin pages
  * Usage:
  *   require_once __DIR__ . '/topbar.php';
- *   renderAdminTopbar($username);
+ *   renderAdminTopbar($username, $title);
  */
 
 if (!function_exists('renderAdminTopbar')) {
 	function renderAdminTopbar(string $username = 'Admin', string $title = ''): void {
+		// Print topbar styles once
+		static $topbarStylesPrinted = false;
+		if (!$topbarStylesPrinted) {
+			echo '<style>
+				/* CSS Variables */
+				:root {
+					--bg: #F1EFEC; /* page background */
+					--card: #ffffff; /* surfaces */
+					--muted: #6b7280; /* secondary text */
+					--line: #e9eef5; /* borders */
+					--brand-dark: #2f2f2f; /* logo dark */
+					--primary: #e11d2a; /* brand red */
+					--primary-600: #b91c1c; /* darker red hover */
+					--primary-50: #fff1f1; /* soft card bg */
+					--radius: 16px;
+				}
+				
+				/* Topbar Styling */
+				.navbar { 
+					background: var(--card) !important; 
+					border-radius: 16px; 
+					margin: 12px; 
+					box-shadow: 0 8px 20px rgba(0,0,0,.05); 
+				}
+				
+				/* Override sticky behavior for specific pages */
+				.navbar.sticky-top { 
+					position: static; 
+				}
+				
+				/* Text colors */
+				.text-primary { 
+					color: var(--primary) !important; 
+				}
+				
+				/* Input group styling */
+				.input-group .form-control { 
+					border-color: var(--line); 
+				}
+				.input-group-text { 
+					border-color: var(--line); 
+				}
+				
+				/* Cards */
+				.card { 
+					border: 0; 
+					border-radius: var(--radius); 
+					background: var(--card); 
+				}
+				
+				/* Mobile responsiveness */
+				@media (max-width: 991.98px) {
+					.navbar { 
+						margin: 8px; 
+						border-radius: 12px; 
+					}
+				}
+			</style>';
+			$topbarStylesPrinted = true;
+		}
 		?>
 		<nav class="navbar navbar-light bg-white border-bottom sticky-top">
 			<div class="container-fluid">
 				<button class="btn btn-outline-secondary d-md-none" id="sidebarToggle" type="button" title="Toggle menu"><i class="fa-solid fa-bars"></i></button>
 				<?php if ($title !== ''): ?>
-					<div class="h5 mb-0 text-dark fw-semibold ms-3	"><?php echo htmlspecialchars($title); ?></div>
+					<div class="h5 mb-0 text-dark fw-semibold ms-3"><?php echo htmlspecialchars($title); ?></div>
 				<?php endif; ?>
 				<div class="d-flex align-items-center gap-3 ms-auto">
 					<!-- Notifications dropdown -->

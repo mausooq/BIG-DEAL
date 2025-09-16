@@ -359,31 +359,8 @@ try {
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     
     <style>
-        :root {
-            --bg:#F1EFEC;
-            --card:#ffffff;
-            --muted:#6b7280;
-            --line:#e9eef5;
-            --brand-dark:#2f2f2f;
-            --primary:#e11d2a;
-            --primary-600:#b91c1c;
-            --radius:16px;
-        }
-
         body{ background:var(--bg); color:#111827; }
-        .content{ margin-left:284px; }
-        /* Sidebar styles copied from dashboard */
-        .sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .brand{ font-weight:700; font-size:1.25rem; }
-        .list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
-        .list-group-item i{ width:18px; }
-        .list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-        /* .list-group-item:hover{ background:#f8fafc; } */
         /* Topbar */
-        .navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-        .text-primary{ color:var(--primary)!important; }
-        .input-group .form-control{ border-color:var(--line); }
-        .input-group-text{ border-color:var(--line); }
 
         /* Match FAQ search bar sizing inside toolbar */
         .toolbar .form-control{

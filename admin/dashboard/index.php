@@ -102,32 +102,8 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 	<style>
 		/* Base */
-		:root{
-			--bg:#F1EFEC;/* page background */
-			--card:#ffffff;/* surfaces */
-			--muted:#6b7280;/* secondary text */
-			--line:#e9eef5;/* borders */
-			--brand-dark:#2f2f2f;/* logo dark */
-			--primary:#e11d2a;/* logo red accent */
-			--primary-600:#b91c1c;/* darker red hover */
-			--radius:16px;
-		}
 		body{ background:var(--bg); color:#111827; }
-		.content{ margin-left:260px; }
-		/* Sidebar */
-		/* Rounded sidebar with visible radius */
-		.sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-		.content{ margin-left:284px; } /* account for sidebar margin */
-		.brand{ font-weight:700; font-size:1.25rem; }
-		.list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
-		.list-group-item i{ width:18px; }
-		.list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-		.list-group-item:hover{ background:#f8fafc; }
 		/* Topbar */
-		.navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-		.text-primary{ color:var(--primary)!important; }
-		.input-group .form-control{ border-color:var(--line); }
-		.input-group-text{ border-color:var(--line); }
 		/* Cards */
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
@@ -212,9 +188,6 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.divider{ height: 1px; background: #e5e7eb; margin: 1.5rem 0; }
 		/* Mobile responsiveness */
 		@media (max-width: 991.98px){ /* md breakpoint */
-			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-			.sidebar.open{ left:12px; }
-			.content{ margin-left:0; }
 			.table{ font-size:.9rem; }
 			.drawer{ width:100vw; right:-100vw; }
 		}

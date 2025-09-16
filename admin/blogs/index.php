@@ -88,7 +88,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	exit();
 }
 
-
 // Get blogs with search and pagination
 $mysqli = db();
 $search = $_GET['search'] ?? '';
@@ -147,34 +146,15 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 	<style>
 		/* Base */
-		:root{
-			--bg:#F1EFEC;/* page background */
-			--card:#ffffff;/* surfaces */
-			--muted:#6b7280;/* secondary text */
-			--line:#e9eef5;/* borders */
-			--brand-dark:#2f2f2f;/* logo dark */
-			--primary:#e11d2a;/* logo red accent */
-			--primary-600:#b91c1c;/* darker red hover */
-			--radius:16px;
-		}
+		
 		body{ background:var(--bg); color:#111827; }
-		.content{ margin-left:260px; }
-		/* Sidebar */
-		/* Rounded sidebar with visible radius */
-		.sidebar{ width:260px; min-height:93vh; background:var(--card); border-right:1px solid var(--line); position:fixed; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-		.content{ margin-left:284px; } /* account for sidebar margin */
-		.brand{ font-weight:700; font-size:1.25rem; }
-		.list-group-item{ border:0; padding:.75rem 1rem; border-radius:10px; margin:.15rem .25rem; color:#111827; }
-		.list-group-item i{ width:18px; }
-		.list-group-item.active{ background:#eef2ff; color:#3730a3; font-weight:600; }
-		.list-group-item:hover{ background:#f8fafc; }
+
+		 /* account for sidebar margin */
+
 		/* Topbar */
-		.navbar{ background:var(--card)!important; border-radius:16px; margin:12px; box-shadow:0 8px 20px rgba(0,0,0,.05); }
-		.text-primary{ color:var(--primary)!important; }
-		.input-group .form-control{ border-color:var(--line); }
-		.input-group-text{ border-color:var(--line); }
+
 		/* Cards */
-		.card{ border:0; border-radius:var(--radius); background:var(--card); }
+		
 		.quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
 		/* Modern toolbar */
 		.toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
@@ -260,7 +240,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.blog-body .blog-title{ color:#111827; font-size:1rem; }
 		.blog-body .blog-text{ color:#111827; font-size:0.875rem; }
 
-
 		.blog-actions{ 
 			display:flex; 
 			gap:12px; 
@@ -327,10 +306,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.modal-header{ border-bottom:1px solid var(--line); }
 		.modal-footer{ border-top:1px solid var(--line); }
 		/* Mobile responsiveness */
-		@media (max-width: 991.98px){
-			.sidebar{ left:-300px; right:auto; transition:left .25s ease; position:fixed; top:0; bottom:0; margin:12px; z-index:1050; }
-			.sidebar.open{ left:12px; }
-			.content{ margin-left:0; }
+
 			.blog-card{ margin-bottom:1rem; }
 		}
 		@media (max-width: 768px){
@@ -364,7 +340,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 				</div>
 			<?php endif; ?>
-
 
 			<!-- Search toolbar -->
 			<div class="toolbar mb-4">
@@ -473,8 +448,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		</div>
 	</div>
 
-
-
 	<!-- Delete Confirmation Modal -->
 	<div class="modal fade" id="deleteModal" tabindex="-1">
 		<div class="modal-dialog">
@@ -509,8 +482,6 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 					document.getElementById('delete_id').value = data.id;
 				});
 			});
-
-
 
 			// Form validation for edit blog
 			const editBlogModal = document.getElementById('editBlogModal');

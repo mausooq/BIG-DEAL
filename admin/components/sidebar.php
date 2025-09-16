@@ -8,15 +8,95 @@
 
 if (!function_exists('renderAdminSidebar')) {
 	function renderAdminSidebar(string $active = ''): void {
-		// Print sidebar hidden-scrollbar styles once
+		// Print sidebar styles once
 		static $sidebarStylesPrinted = false;
 		if (!$sidebarStylesPrinted) {
 			echo '<style>
-				.sidebar{ -ms-overflow-style:none; scrollbar-width:none; }
-				.sidebar::-webkit-scrollbar{ width:0; height:0; display:none; }
+				/* CSS Variables for consistent theming */
+				:root {
+					--bg: #F1EFEC; /* page background */
+					--card: #ffffff; /* surfaces */
+					--muted: #6b7280; /* secondary text */
+					--line: #e9eef5; /* borders */
+					--brand-dark: #2f2f2f; /* logo dark */
+					--primary: #e11d2a; /* logo red accent */
+					--primary-600: #b91c1c; /* darker red hover */
+					--radius: 16px;
+				}
+				
+				/* Sidebar Styles */
+				.sidebar { 
+					width: 260px; 
+					min-height: 93vh; 
+					background: var(--card); 
+					border-right: 1px solid var(--line); 
+					position: fixed; 
+					border-radius: var(--radius); 
+					margin: 12px; 
+					box-shadow: 0 8px 20px rgba(0,0,0,.05);
+					-ms-overflow-style: none; 
+					scrollbar-width: none; 
+				}
+				.sidebar::-webkit-scrollbar { 
+					width: 0; 
+					height: 0; 
+					display: none; 
+				}
+				
+				/* Content margin to account for sidebar */
+				.content { 
+					margin-left: 284px; /* account for sidebar margin */
+				}
+				
+				/* Brand styling */
+				.brand { 
+					font-weight: 700; 
+					font-size: 1.25rem; 
+				}
+				
+				/* List group items */
+				.list-group-item { 
+					border: 0; 
+					padding: .75rem 1rem; 
+					border-radius: 10px; 
+					margin: .15rem .25rem; 
+					color: #111827; 
+				}
+				.list-group-item i { 
+					width: 18px; 
+				}
+				.list-group-item.active { 
+					background: #fff1f1; 
+					color: var(--primary); 
+					font-weight: 600; 
+				}
+				.list-group-item:hover { 
+					background: #f8fafc; 
+				}
+				
+				/* Mobile responsiveness */
+				@media (max-width: 991.98px) { /* md breakpoint */
+					.sidebar { 
+						left: -300px; 
+						right: auto; 
+						transition: left .25s ease; 
+						position: fixed; 
+						top: 0; 
+						bottom: 0; 
+						margin: 12px; 
+						z-index: 1050; 
+					}
+					.sidebar.open { 
+						left: 12px; 
+					}
+					.content { 
+						margin-left: 0; 
+					}
+				}
 			</style>';
 			$sidebarStylesPrinted = true;
 		}
+		
 		$items = [
 			['key' => 'dashboard', 'icon' => 'fa-grip', 'label' => 'Dashboard', 'href' => '../dashboard/'],
 			['key' => 'sales-analytics', 'icon' => 'fa-chart-line', 'label' => 'Sales Analytics', 'href' => '../sales-analytics/'],
@@ -30,6 +110,7 @@ if (!function_exists('renderAdminSidebar')) {
 			['key' => 'faq', 'icon' => 'fa-question-circle', 'label' => 'FAQs', 'href' => '../faq/'],
 			['key' => 'social-media', 'icon' => 'fa-share-nodes', 'label' => 'Social Media', 'href' => '../social-link/'],
 			['key' => 'admin', 'icon' => 'fa-users', 'label' => 'Admin Users', 'href' => '../admin/'],
+			['key' => 'activity-logs', 'icon' => 'fa-list-check', 'label' => 'Activity Logs', 'href' => '../activity-logs/'],
 			['key' => 'logout', 'icon' => 'fa-arrow-right-from-bracket', 'label' => 'Logout', 'href' => '../logout.php'],
 		];
 		?>
