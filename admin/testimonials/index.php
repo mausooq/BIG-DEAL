@@ -342,8 +342,8 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 											</td>
 											<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
 											<td class="text-end actions-cell">
-												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editTestimonialModal" title="Edit Testimonial"><i class="fa-solid fa-pen"></i></button>
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Testimonial"><i class="fa-solid fa-trash"></i></button>
+												<button class="modern-btn edit-btn btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editTestimonialModal" title="Edit Testimonial"><span class="icon"><i class="fa-solid fa-pen"></i></span></button>
+												<button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Testimonial"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
 											</td>
 										</tr>
 										<?php endwhile; ?>

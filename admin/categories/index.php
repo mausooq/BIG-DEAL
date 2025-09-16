@@ -719,25 +719,16 @@ try {
                                             <!-- Action Buttons Overlay -->
                                             <div class="position-absolute top-0 end-0 p-2" style="z-index: 2;">
                                                 <div class="d-flex gap-1">
-                                                    <a class="btn btn-sm" 
-                                                       href="edit.php?id=<?php echo (int)$category['id']; ?>" 
-                                                       title="Edit Category"
-                                                       style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
-                                                         <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
+                                                    <a class="modern-btn edit-btn" href="edit.php?id=<?php echo (int)$category['id']; ?>" title="Edit Category">
+                                                        <span class="icon"><i class="fa-solid fa-pen"></i></span>
                                                     </a>
                                                     <?php if ($category['property_count'] == 0): ?>
-                                                        <button class="btn btn-sm" 
-                                                                onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')"
-                                                                title="Delete Category"
-                                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-                                                            <i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
+                                                        <button class="modern-btn delete-btn" onclick="deleteCategory(<?php echo $category['id']; ?>, '<?php echo htmlspecialchars($category['name']); ?>')" title="Delete Category">
+                                                            <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                         </button>
                                                     <?php else: ?>
-                                                        <button class="btn btn-sm" 
-                                                                disabled 
-                                                                title="Cannot delete - category has properties"
-                                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #d1d5db; background: white; opacity: 0.5;">
-                                                            <i class="fas fa-trash text-muted" style="font-size: 0.75rem;"></i>
+                                                        <button class="modern-btn view-btn" disabled title="Cannot delete - category has properties" style="opacity:.6;">
+                                                            <span class="icon"><i class="fa-solid fa-trash"></i></span>
                                                         </button>
                                                     <?php endif; ?>
                                                 </div>

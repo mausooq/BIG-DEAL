@@ -95,6 +95,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
     <title>Enquiries - Big Deal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
         
         body{ background:var(--bg); color:#111827; }
@@ -118,12 +119,10 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
          /* Actions cell */
          .actions-cell{ display:flex; gap:8px; justify-content:center; }
-         .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
          /* Buttons */
          .btn-primary{ background:var(--primary); border-color:var(--primary); }
          .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
-        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
-        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+        /* legacy outline primary no longer used for actions */
         /* Modal theming to match dashboard / property view */
         .modal-content{ border:1px solid var(--line); border-radius:16px; background:var(--card); box-shadow:0 12px 28px rgba(0,0,0,.12); }
         .modal-header{ border-bottom:1px solid var(--line); }
@@ -253,16 +252,8 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                     </td>
                                     <td class="text-muted"><?php echo $row['created_at']; ?></td>
                                     <td class="actions-cell">
-                                        <button type="button" class="btn btn-sm btn-outline-primary btn-view-enquiry" 
-                                                title="View Enquiry"
-                                                data-enquiry='{"id":<?php echo (int)$row['id']; ?>,"name":<?php echo json_encode($row['name']); ?>,"email":<?php echo json_encode($row['email']); ?>,"phone":<?php echo json_encode($row['phone']); ?>,"message":<?php echo json_encode($row['message']); ?>,"status":<?php echo json_encode($row['status']); ?>,"created_at":<?php echo json_encode($row['created_at']); ?>, "property_title":<?php echo json_encode($row['property_title']); ?>, "property_id":<?php echo isset($row['property_id']) ? (int)$row['property_id'] : 'null'; ?>}'>
-                                            <i class="fa-solid fa-eye"></i>
-                                        </button>
-                                        <form method="post" onsubmit="return confirm('Delete this enquiry?')">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
-                                            <button class="btn btn-sm btn-outline-danger" title="Delete Enquiry"><i class="fa-solid fa-trash"></i></button>
-                                        </form>
+                                        <button type="button" class="modern-btn view-btn btn-view-enquiry" title="View"><span class="icon"><i class="fa-solid fa-eye"></i></span></button>
+                                        <button class="modern-btn delete-btn" title="Delete Enquiry"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
@@ -318,7 +309,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                     <a id="enqPropertyBtn" href="#" class="btn btn-primary" style="display:none;">
                         <i class="fa-solid fa-home me-1"></i>View Property
                     </a>
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="modern-btn view-btn" data-bs-dismiss="modal" title="Close"><span class="icon"><i class="fa-solid fa-xmark"></i></span></button>
                 </div>
             </div>
         </div>

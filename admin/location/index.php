@@ -1062,14 +1062,14 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-edit-state" 
+                                                             <button type="button" class="modern-btn view-btn btn-edit-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editStateModal" 
                                                                      title="Edit State"
                                                                      style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
                                                                  <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button type="button" class="btn btn-sm btn-delete-state" 
+                                                             <button type="button" class="modern-btn delete-btn btn-delete-state" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteStateModal" 
                                                                      title="Delete State"
@@ -1162,14 +1162,14 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-edit-district" 
+                                                             <button type="button" class="modern-btn view-btn btn-edit-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editDistrictModal" 
                                                                      title="Edit District"
                                                                      style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
                                                                  <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button type="button" class="btn btn-sm btn-delete-district" 
+                                                             <button type="button" class="modern-btn delete-btn btn-delete-district" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteDistrictModal" 
                                                                      title="Delete District"
@@ -1262,14 +1262,14 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-edit-city" 
+                                                             <button type="button" class="modern-btn view-btn btn-edit-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editCityModal" 
                                                                      title="Edit City"
                                                                      style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
                                                                  <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button type="button" class="btn btn-sm btn-delete-city" 
+                                                             <button type="button" class="modern-btn delete-btn btn-delete-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteCityModal" 
                                                                      title="Delete City"
@@ -1362,14 +1362,14 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
                                                          <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm btn-edit-town" 
+                                                             <button type="button" class="modern-btn view-btn btn-edit-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editTownModal" 
                                                                      title="Edit Town"
                                                                      style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
                                                                  <i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
                                                              </button>
-                                                             <button type="button" class="btn btn-sm btn-delete-town" 
+                                                             <button type="button" class="modern-btn delete-btn btn-delete-town" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#deleteTownModal" 
                                                                      title="Delete Town"

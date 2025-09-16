@@ -67,13 +67,45 @@ $logs = $stmt ? $stmt->get_result() : $mysqli->query("SELECT a.id, 'System' AS a
 
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:8px 12px; display:flex; gap:8px; align-items:center; }
         .table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        .badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
         /* Make search button red and keep outline secondary for reset */
         .btn-primary{ background:var(--primary); border-color:var(--primary); }
         .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         .card{ border:0; border-radius:16px; background:var(--card); }
         .card .card-body{ padding:12px; }
         .table td, .table th{ padding:.5rem .75rem; }
+
+        /* Red themed pagination */
+        .pagination .page-link {
+            color: var(--primary);
+            border-color: var(--line);
+            background-color: var(--card);
+            border-radius: 8px;
+            margin: 0 2px;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .pagination .page-link:hover {
+            color: #fff;
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(225, 29, 42, 0.2);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(225, 29, 42, 0.3);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--muted);
+            background-color: #f8f9fa;
+            border-color: var(--line);
+            cursor: not-allowed;
+        }
 
         }
     </style>
@@ -83,11 +115,11 @@ $logs = $stmt ? $stmt->get_result() : $mysqli->query("SELECT a.id, 'System' AS a
 <body>
     <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('activity-logs'); ?>
     <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin'); ?>
+        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Activity Logs'); ?>
 
         <div class="container-fluid p-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
-                <div class="h5 mb-0">Activity Logs</div>
+                <!-- <div class="h5 mb-0">Activity Logs</div> -->
             </div>
 
             <form class="toolbar mb-3" method="get">

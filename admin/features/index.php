@@ -246,7 +246,7 @@ $totalPages = (int)ceil($totalCount / $limit);
 												<?php endif; ?>
 											</td>
 											<td class="text-start actions-cell">
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Remove Feature"><i class="fa-solid fa-trash"></i></button>
+												<button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Remove Feature"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
 											</td>
 										</tr>
 										<?php endwhile; ?>

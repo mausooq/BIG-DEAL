@@ -376,12 +376,8 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 							<div class="blog-card">
 								<div class="blog-image-container">
 									<div class="blog-actions-fixed">
-										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="btn btn-sm" title="Edit Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #6b7280; background: white;">
-											<i class="fa-solid fa-pen text-secondary" style="font-size: 0.75rem;"></i>
-										</a>
-										<button class="btn btn-sm btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog" style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; padding: 0; border: 1px solid #ef4444; background: white;">
-											<i class="fas fa-trash text-danger" style="font-size: 0.75rem;"></i>
-										</button>
+										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="modern-btn edit-btn" title="Edit Blog"><span class="icon"><i class="fa-solid fa-pen"></i></span></a>
+										<button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
 									</div>
 									<?php if (!empty($row['image_url'])): ?>
 										<?php 

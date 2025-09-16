@@ -310,7 +310,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 										<td>₹<?php echo number_format((float)$row['price']); ?></td>
 										<td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>
 										<td class="text-muted"><?php echo $row['created_at']; ?></td>
-										<td class="text-end"><button class="btn btn-sm btn-outline-secondary btn-view">View</button></td>
+										<td class="text-end"><button class="modern-btn view-btn btn-view" title="View"><span class="icon"><i class="fa-solid fa-eye"></i></span></button></td>
 									</tr>
 									<?php endwhile; ?>
 								</tbody>

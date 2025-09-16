@@ -340,11 +340,11 @@ $totalPages = (int)ceil($totalCount / $limit);
 									</td>
 									<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
 									<td class="text-end actions-cell">
-										<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><i class="fa-solid fa-pen"></i></button>
+										<button class="modern-btn edit-btn btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><span class="icon"><i class="fa-solid fa-pen"></i></span></button>
 										<?php if ($row['status'] == 'active'): ?>
-											<button class="btn btn-sm btn-outline-warning btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><i class="fa-solid fa-ban"></i></button>
+											<button class="modern-btn view-btn btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><span class="icon"><i class="fa-solid fa-ban"></i></span></button>
 										<?php else: ?>
-											<button class="btn btn-sm btn-outline-success btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><i class="fa-solid fa-check"></i></button>
+											<button class="modern-btn view-btn btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><span class="icon"><i class="fa-solid fa-check"></i></span></button>
 										<?php endif; ?>
 									</td>
 								</tr>

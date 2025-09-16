@@ -353,8 +353,8 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 												</div>
 											</td>
 											<td class="text-end actions-cell">
-												<button class="btn btn-sm btn-outline-secondary btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editFaqModal" title="Edit FAQ"><i class="fa-solid fa-pen"></i></button>
-												<button class="btn btn-sm btn-outline-danger btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete FAQ"><i class="fa-solid fa-trash"></i></button>
+												<button class="modern-btn edit-btn btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editFaqModal" title="Edit FAQ"><span class="icon"><i class="fa-solid fa-pen"></i></span></button>
+												<button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete FAQ"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
 											</td>
 										</tr>
 										<?php endwhile; ?>
