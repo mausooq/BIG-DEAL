@@ -531,7 +531,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             citySelect.innerHTML = '<option value="">Select City</option>';
             townSelect.innerHTML = '<option value="">Select Town</option>';
             if (sid) {
-                const d = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=districts&state_id=' + sid);
+                const d = await fetchJSON('hierarchy.php?action=fetch&level=districts&state_id=' + sid);
                 districtSelect.innerHTML = '<option value="">Select District</option>' + d.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add District</option>';
             } else {
                 districtSelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add District</option>');
@@ -551,7 +551,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             citySelect.innerHTML = '<option value="">Select City</option>';
             townSelect.innerHTML = '<option value="">Select Town</option>';
             if (did) {
-                const c = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=cities&district_id=' + did);
+                const c = await fetchJSON('hierarchy.php?action=fetch&level=cities&district_id=' + did);
                 citySelect.innerHTML = '<option value="">Select City</option>' + c.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add City</option>';
             } else {
                 citySelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add City</option>');
@@ -570,7 +570,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             }
             townSelect.innerHTML = '<option value="">Select Town</option>';
             if (cid) {
-                const t = await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=towns&city_id=' + cid);
+                const t = await fetchJSON('hierarchy.php?action=fetch&level=towns&city_id=' + cid);
                 townSelect.innerHTML = '<option value="">Select Town</option>' + t.map(x=>`<option value="${x.id}">${x.name}</option>`).join('') + '<option value="__add__">+ Add Town</option>';
             } else {
                 townSelect.insertAdjacentHTML('beforeend', '<option value="__add__">+ Add Town</option>');
@@ -593,7 +593,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             form.append('action', 'create');
             form.append('scope', scope);
             Object.entries(payload).forEach(([k,v])=> form.append(k, v));
-            const r = await fetch('../location-hierarchy/hierarchy.php', { method:'POST', body: form });
+            const r = await fetch('hierarchy.php', { method:'POST', body: form });
             const j = await r.json().catch(()=>({}));
             if (j && j.id) return j;
             alert(j && j.error ? j.error : 'Failed to create');
@@ -714,8 +714,6 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                 try {
                     handleFiles(files);
                 } finally {
-                    // Allow re-selecting the same files immediately
-                    imageInput.value = '';
                     isHandlingSelection = false;
                 }
             });
@@ -727,6 +725,10 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
         function handleFiles(files) {
             const maxSize = 5 * 1024 * 1024; // 5MB
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            
+            // Clear previous selections
+            selectedFiles = [];
+            imagePreview.innerHTML = '';
             
             Array.from(files).forEach(file => {
                 // Validate file type
@@ -780,6 +782,8 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                 reader.readAsDataURL(file);
             });
             
+            // Update the file input with the selected files
+            updateFileInput();
             updateImageInfo();
         }
 
@@ -790,7 +794,22 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             // Remove from DOM
             container.remove();
             
+            // Update the file input
+            updateFileInput();
             updateImageInfo();
+        }
+
+        function updateFileInput() {
+            // Create a new DataTransfer object
+            const dataTransfer = new DataTransfer();
+            
+            // Add all selected files to the DataTransfer
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            
+            // Update the file input with the new files
+            imageInput.files = dataTransfer.files;
         }
 
         function updateImageInfo() {
@@ -814,6 +833,13 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             const location = document.querySelector('input[name="location"]').value.trim();
             const price = document.querySelector('input[name="price"]').value;
             const area = document.querySelector('input[name="area"]').value;
+            
+            // Location details validation
+            const stateId = document.querySelector('select[name="state_id"]').value;
+            const districtId = document.querySelector('select[name="district_id"]').value;
+            const cityId = document.querySelector('select[name="city_id"]').value;
+            const townId = document.querySelector('select[name="town_id"]').value;
+            const pincode = document.querySelector('input[name="pincode"]').value.trim();
 
             if (!title) {
                 alert('Please enter a property title');
@@ -832,6 +858,33 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             }
             if (!area || parseFloat(area) <= 0) {
                 alert('Please enter a valid area');
+                e.preventDefault();
+                return;
+            }
+            
+            // Validate location details
+            if (!stateId || stateId === '') {
+                alert('Please select a state');
+                e.preventDefault();
+                return;
+            }
+            if (!districtId || districtId === '') {
+                alert('Please select a district');
+                e.preventDefault();
+                return;
+            }
+            if (!cityId || cityId === '') {
+                alert('Please select a city');
+                e.preventDefault();
+                return;
+            }
+            if (!townId || townId === '') {
+                alert('Please select a town');
+                e.preventDefault();
+                return;
+            }
+            if (!pincode || pincode === '') {
+                alert('Please enter a pincode');
                 e.preventDefault();
                 return;
             }

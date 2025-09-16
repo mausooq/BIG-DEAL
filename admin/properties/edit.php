@@ -616,19 +616,19 @@ $pl_stmt && $pl_stmt->close();
         }
         async function loadDistricts(){
             const sid = stateSelect.value || 0;
-            const d = sid ? await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=districts&state_id=' + sid) : [];
+            const d = sid ? await fetchJSON('hierarchy.php?action=fetch&level=districts&state_id=' + sid) : [];
             districtSelect.innerHTML = '<option value="">Select District</option>' + d.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
             if (existing.district_id) { districtSelect.value = existing.district_id; }
         }
         async function loadCities(){
             const did = districtSelect.value || 0;
-            const c = did ? await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=cities&district_id=' + did) : [];
+            const c = did ? await fetchJSON('hierarchy.php?action=fetch&level=cities&district_id=' + did) : [];
             citySelect.innerHTML = '<option value="">Select City</option>' + c.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
             if (existing.city_id) { citySelect.value = existing.city_id; }
         }
         async function loadTowns(){
             const cid = citySelect.value || 0;
-            const t = cid ? await fetchJSON('../location-hierarchy/hierarchy.php?action=fetch&level=towns&city_id=' + cid) : [];
+            const t = cid ? await fetchJSON('hierarchy.php?action=fetch&level=towns&city_id=' + cid) : [];
             townSelect.innerHTML = '<option value="">Select Town</option>' + t.map(x=>`<option value="${x.id}">${x.name}</option>`).join('');
             if (existing.town_id) { townSelect.value = existing.town_id; }
         }
@@ -680,7 +680,7 @@ $pl_stmt && $pl_stmt->close();
         async function createItem(scope, payload){
             const form = new FormData(); form.append('action','create'); form.append('scope', scope);
             Object.entries(payload).forEach(([k,v])=> form.append(k, v));
-            const r = await fetch('../location-hierarchy/hierarchy.php', { method:'POST', body: form });
+            const r = await fetch('hierarchy.php', { method:'POST', body: form });
             const j = await r.json().catch(()=>({})); if (j && j.id) return j; alert(j && j.error ? j.error : 'Failed to create'); return null;
         }
         // Inline add save/cancel
@@ -823,6 +823,10 @@ $pl_stmt && $pl_stmt->close();
             const maxSize = 5 * 1024 * 1024; // 5MB
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             
+            // Clear previous selections
+            selectedFiles = [];
+            imagePreview.innerHTML = '';
+            
             Array.from(files).forEach(file => {
                 // Validate file type
                 if (!allowedTypes.includes(file.type)) {
@@ -875,6 +879,8 @@ $pl_stmt && $pl_stmt->close();
                 reader.readAsDataURL(file);
             });
             
+            // Update the file input with the selected files
+            updateFileInput();
             updateImageInfo();
         }
 
@@ -885,7 +891,22 @@ $pl_stmt && $pl_stmt->close();
             // Remove from DOM
             container.remove();
             
+            // Update the file input
+            updateFileInput();
             updateImageInfo();
+        }
+
+        function updateFileInput() {
+            // Create a new DataTransfer object
+            const dataTransfer = new DataTransfer();
+            
+            // Add all selected files to the DataTransfer
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            
+            // Update the file input with the new files
+            imageInput.files = dataTransfer.files;
         }
 
         function updateImageInfo() {
