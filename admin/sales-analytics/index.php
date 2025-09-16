@@ -91,18 +91,54 @@ $kpis = [
 	'notifications' => fetchCount($kpiSql['notifications'], $enqTypes, $enqParams),
 ];
 
-// Chart: monthly sold properties (last 12 months within filter)
+// Chart: monthly sold properties (always count Sold regardless of selected status filter)
+// Build a WHERE that excludes the status filter to avoid conflicting conditions
+$monthlyWhere = [];
+$monthlyTypes = '';
+$monthlyParams = [];
+if ($filters['start_date'] !== '') { $monthlyWhere[] = 'p.created_at >= ?'; $monthlyTypes .= 's'; $monthlyParams[] = $filters['start_date'] . ' 00:00:00'; }
+if ($filters['end_date'] !== '') { $monthlyWhere[] = 'p.created_at <= ?'; $monthlyTypes .= 's'; $monthlyParams[] = $filters['end_date'] . ' 23:59:59'; }
+if ($filters['listing_type'] !== '') { $monthlyWhere[] = 'p.listing_type = ?'; $monthlyTypes .= 's'; $monthlyParams[] = $filters['listing_type']; }
+$monthlyBaseWhere = empty($monthlyWhere) ? ' WHERE 1=1' : ' WHERE ' . implode(' AND ', $monthlyWhere);
+
 $monthlySql = "SELECT DATE_FORMAT(p.created_at, '%Y-%m') ym, COUNT(*) cnt
-	FROM properties p $baseWhere AND p.status = 'Sold'
+	FROM properties p $monthlyBaseWhere AND p.status = 'Sold'
 	GROUP BY ym
 	ORDER BY ym ASC";
 $stmt = $mysqli->prepare($monthlySql);
-if ($stmt && $types !== '') { $stmt->bind_param($types, ...$params); }
+if ($stmt && $monthlyTypes !== '') { $stmt->bind_param($monthlyTypes, ...$monthlyParams); }
 $stmt && $stmt->execute();
 $monthly = $stmt ? $stmt->get_result() : $mysqli->query($monthlySql);
+// Map query results
+$monthlyMap = [];
+while ($r = $monthly->fetch_assoc()) { $monthlyMap[$r['ym']] = (int)$r['cnt']; }
+
+// Build month sequence: use provided date range; else last 12 months including current
 $monthlyLabels = [];
 $monthlyCounts = [];
-while ($r = $monthly->fetch_assoc()) { $monthlyLabels[] = $r['ym']; $monthlyCounts[] = (int)$r['cnt']; }
+try {
+    $endDate = null; $startDate = null;
+    if ($filters['end_date'] !== '') { $endDate = new DateTime($filters['end_date'] . ' 00:00:00'); $endDate->modify('first day of this month'); }
+    if ($filters['start_date'] !== '') { $startDate = new DateTime($filters['start_date'] . ' 00:00:00'); $startDate->modify('first day of this month'); }
+    if ($startDate && !$endDate) { $endDate = (clone $startDate); $endDate->modify('+11 months'); }
+    if ($endDate && !$startDate) { $startDate = (clone $endDate); $startDate->modify('-11 months'); }
+    if (!$startDate || !$endDate) {
+        $endDate = new DateTime('first day of this month');
+        $startDate = (clone $endDate)->modify('-11 months');
+    }
+    if ($startDate > $endDate) { $tmp = $startDate; $startDate = $endDate; $endDate = $tmp; }
+    $cursor = clone $startDate;
+    while ($cursor <= $endDate) {
+        $ym = $cursor->format('Y-m');
+        $monthlyLabels[] = $ym;
+        $monthlyCounts[] = $monthlyMap[$ym] ?? 0;
+        $cursor->modify('+1 month');
+    }
+} catch (Exception $e) {
+    // Fallback: just use whatever came back
+    $monthlyLabels = array_keys($monthlyMap);
+    $monthlyCounts = array_values($monthlyMap);
+}
 
 // Chart: category-wise available vs sold
 $catSql = "SELECT COALESCE(c.name,'Uncategorized') cat,
@@ -122,17 +158,17 @@ $catAvail = [];
 $catSold = [];
 while ($r = $cat->fetch_assoc()) { $catLabels[] = $r['cat']; $catAvail[] = (int)$r['avail_cnt']; $catSold[] = (int)$r['sold_cnt']; }
 
-// Chart: city-wise available vs sold (top 10 cities by total)
-$useHierarchy = tableColumnExists($mysqli, 'properties_location', 'city_id') && tableColumnExists($mysqli, 'cities', 'name');
-$cityJoin = $useHierarchy ? " LEFT JOIN properties_location pl ON pl.property_id = p.id LEFT JOIN cities ci ON ci.id = pl.city_id " : "";
-$cityExpr = $useHierarchy ? "COALESCE(ci.name, p.location)" : "p.location";
-$citySql = "SELECT city, SUM(avail_cnt) avail_cnt, SUM(sold_cnt) sold_cnt FROM (
-    SELECT " . $cityExpr . " AS city,
-           CASE WHEN p.status='Available' THEN 1 ELSE 0 END AS avail_cnt,
-           CASE WHEN p.status='Sold' THEN 1 ELSE 0 END AS sold_cnt
-    FROM properties p" . $cityJoin . "
+// Chart: city-wise available vs sold (top 10 cities by total) using properties_location.city_id
+$citySql = "SELECT COALESCE(ci.name, 'Unknown City') AS city,
+    SUM(CASE WHEN p.status='Available' THEN 1 ELSE 0 END) AS avail_cnt,
+    SUM(CASE WHEN p.status='Sold' THEN 1 ELSE 0 END) AS sold_cnt
+    FROM properties p
+    LEFT JOIN properties_location pl ON pl.property_id = p.id
+    LEFT JOIN cities ci ON ci.id = pl.city_id
     $baseWhere
-) t GROUP BY city ORDER BY (SUM(avail_cnt)+SUM(sold_cnt)) DESC LIMIT 10";
+    GROUP BY city
+    ORDER BY (SUM(CASE WHEN p.status='Available' THEN 1 ELSE 0 END)+SUM(CASE WHEN p.status='Sold' THEN 1 ELSE 0 END)) DESC
+    LIMIT 10";
 $stmt3 = $mysqli->prepare($citySql);
 if ($stmt3 && $types !== '') { $stmt3->bind_param($types, ...$params); }
 $stmt3 && $stmt3->execute();
@@ -247,25 +283,25 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
 						<div><div class="text-muted small">Available</div><div class="h4 mb-0"><?php echo $kpis['available']; ?></div></div>
-						<div class="text-success"><i class="fa-solid fa-circle-check fa-lg"></i></div>
+						<div style="color: var(--primary);"><i class="fa-solid fa-circle-check fa-lg"></i></div>
 					</div></div>
 				</div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
 						<div><div class="text-muted small">Sold</div><div class="h4 mb-0"><?php echo $kpis['sold']; ?></div></div>
-						<div class="text-danger"><i class="fa-solid fa-sack-dollar fa-lg"></i></div>
+						<div style="color: var(--primary);"><i class="fa-solid fa-sack-dollar fa-lg"></i></div>
 					</div></div>
 				</div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
 						<div><div class="text-muted small">New Enquiries</div><div class="h4 mb-0"><?php echo $kpis['enquiries']; ?></div></div>
-						<div class="text-warning"><i class="fa-regular fa-envelope fa-lg"></i></div>
+						<div style="color: var(--primary);"><i class="fa-regular fa-envelope fa-lg"></i></div>
 					</div></div>
 				</div>
 				<div class="col-sm-6 col-xl-3">
 					<div class="card card-stat"><div class="card-body d-flex align-items-center justify-content-between">
 						<div><div class="text-muted small">Notifications</div><div class="h4 mb-0"><?php echo $kpis['notifications']; ?></div></div>
-						<div class="text-info"><i class="fa-solid fa-bell fa-lg"></i></div>
+						<div style="color: var(--primary);"><i class="fa-solid fa-bell fa-lg"></i></div>
 					</div></div>
 				</div>
 			</div>
@@ -333,6 +369,10 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		const ticksColor = '#6b7280';
 		const titleFont = { size: 13, weight: '600' };
 		
+		// Compute a dynamic Y max rounded to next even number (min 2)
+		const monthlyMax = (monthlyCounts && monthlyCounts.length) ? Math.max(...monthlyCounts) : 0;
+		const yMaxEven = Math.max(2, Math.ceil(monthlyMax / 2) * 2);
+
 		new Chart(document.getElementById('chartMonthly'), {
 			type: 'line',
 			data: { 
@@ -354,29 +394,38 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				responsive: true,
 				scales: { 
 					x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, 
-					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } 
+					y: { beginAtZero: true, suggestedMax: yMaxEven, grid: { color: gridColor }, ticks: { color: ticksColor, stepSize: 2, precision: 0 } } 
 				}, 
 				plugins: { legend: { display: false } } 
 			}
 		});
 		
+		// Compute dynamic even Y max for city chart (based on max of both datasets)
+		const cityMax = Math.max(0, ...((cityAvail||[])), ...((citySold||[])));
+		const cityYMaxEven = Math.max(2, Math.ceil(cityMax / 2) * 2);
 		new Chart(document.getElementById('chartCity'), {
 			type: 'bar',
 			data: { labels: cityLabels, datasets: [
-				{ label: 'Available', data: cityAvail, backgroundColor: '#16a34a', borderRadius: 6, maxBarThickness: 28 },
-				{ label: 'Sold', data: citySold, backgroundColor: '#ef4444', borderRadius: 6, maxBarThickness: 28 }
+				{ label: 'Available', data: cityAvail, backgroundColor: 'rgba(220,38,38,0.25)', borderRadius: 6, maxBarThickness: 28 },
+				{ label: 'Sold', data: citySold, backgroundColor: '#dc2626', borderRadius: 6, maxBarThickness: 28 }
 			] },
 			options: { 
 				maintainAspectRatio: false,
 				responsive: true, 
 				scales: { 
 					x: { grid: { color: gridColor }, ticks: { color: ticksColor } }, 
-					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor } } 
+					y: { beginAtZero: true, suggestedMax: cityYMaxEven, grid: { color: gridColor }, ticks: { color: ticksColor, stepSize: 2, precision: 0 } } 
 				}, 
 				plugins: { legend: { position: 'bottom' } } 
 			}
 		});
 		
+		// Compute dynamic even Y max for stacked category chart (sum per category)
+		const catStackMax = (catAvail||[]).reduce((maxVal, v, i) => {
+			const total = (parseInt(v||0,10)) + (parseInt((catSold||[])[i]||0,10));
+			return Math.max(maxVal, total);
+		}, 0);
+		const catYMaxEven = Math.max(2, Math.ceil(catStackMax / 2) * 2);
 		new Chart(document.getElementById('chartCategory'), {
 			type: 'bar',
 			data: {
@@ -390,7 +439,7 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 				responsive: true,
 				scales: {
 					x: { grid: { color: gridColor }, ticks: { color: ticksColor }, stacked: true },
-					y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: ticksColor }, stacked: true }
+					y: { beginAtZero: true, suggestedMax: catYMaxEven, grid: { color: gridColor }, ticks: { color: ticksColor, stepSize: 2, precision: 0 }, stacked: true }
 				},
 				plugins: { legend: { position: 'bottom' } },
 				categoryPercentage: 0.6,
