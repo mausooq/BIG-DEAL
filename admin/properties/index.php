@@ -1275,9 +1275,20 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
                     
+                    // Inject styles once
+                    const styleEl = tempDiv.querySelector('style');
+                    if (styleEl && !document.getElementById('add-property-modal-styles')) {
+                        styleEl.id = 'add-property-modal-styles';
+                        document.head.appendChild(styleEl);
+                    }
+
                     // Extract the modal content
                     const modalContent = tempDiv.querySelector('#addPropertyModal');
                     if (modalContent) {
+                        // If an older modal exists, remove it first
+                        const existing = document.getElementById('addPropertyModal');
+                        if (existing) existing.remove();
+                        
                         // Add the modal to the page
                         document.body.appendChild(modalContent);
                         
@@ -1290,6 +1301,30 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                         
                         // Initialize Bootstrap components in the modal
                         initializeModalComponents();
+
+                        // Wire up close actions (in case inline script isn't executed yet)
+                        const closeBtn = modalContent.querySelector('.modal-close');
+                        if (closeBtn) closeBtn.onclick = () => window.closeAddPropertyModal();
+                        // Click outside to close
+                        modalContent.addEventListener('mousedown', (e) => {
+                            if (e.target === modalContent) window.closeAddPropertyModal();
+                        });
+                        // Esc to close
+                        document.addEventListener('keydown', function escHandler(e){
+                            if (e.key === 'Escape') { window.closeAddPropertyModal(); document.removeEventListener('keydown', escHandler); }
+                        });
+
+                        // Execute inline scripts from add.php so step logic works
+                        const scripts = tempDiv.querySelectorAll('script');
+                        scripts.forEach((oldScript) => {
+                            const newScript = document.createElement('script');
+                            if (oldScript.src) {
+                                newScript.src = oldScript.src;
+                            } else {
+                                newScript.textContent = oldScript.textContent;
+                            }
+                            document.body.appendChild(newScript);
+                        });
                     }
                 })
                 .catch(error => {
