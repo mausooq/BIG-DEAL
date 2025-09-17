@@ -46,10 +46,10 @@ while ($row = $monthlyResult->fetch_assoc()) {
     $monthlyCounts[] = (int)$row['count'];
 }
 
-// If no data, provide sample data
+// If no data, initialize empty arrays
 if (empty($monthlyLabels)) {
-    $monthlyLabels = ['Jan 2023', 'Feb 2023', 'Mar 2023', 'Apr 2023', 'May 2023', 'Jun 2023'];
-    $monthlyCounts = [4, 6, 8, 5, 10, 7];
+    $monthlyLabels = [];
+    $monthlyCounts = [];
 }
 
 // Chart data for Top Performing Cities
@@ -71,11 +71,11 @@ while ($row = $cityResult->fetch_assoc()) {
     $cityAvail[] = (int)$row['available'];
 }
 
-// If no data, provide sample data
+// If no data, initialize empty arrays
 if (empty($cityLabels)) {
-    $cityLabels = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'];
-    $citySold = [12, 9, 8, 7, 6];
-    $cityAvail = [5, 8, 4, 6, 9];
+    $cityLabels = [];
+    $citySold = [];
+    $cityAvail = [];
 }
 
 // Recent properties
@@ -582,8 +582,8 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 					datasets: [{
 						label: 'Properties Sold',
 						data: <?php echo json_encode($monthlyCounts); ?>,
-						backgroundColor: 'rgba(239, 68, 68, 0.1)',
-						borderColor: 'rgba(239, 68, 68, 1)',
+						backgroundColor: 'rgba(0, 0, 0, 0.1)',
+						borderColor: 'rgb(0, 0, 0)',
 						borderWidth: 2,
 						tension: 0.4,
 						fill: true,
@@ -622,7 +622,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 							display: false
 						},
 						tooltip: {
-							backgroundColor: 'rgba(255, 255, 255, 0.9)',
+							backgroundColor: 'rgba(0, 0, 0, 0.9)',
 							titleColor: '#1e293b',
 							bodyColor: '#1e293b',
 							borderColor: 'rgba(0, 0, 0, 0.1)',
@@ -649,8 +649,8 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 					datasets: [{
 						label: 'Available',
 						data: <?php echo json_encode($cityAvail); ?>,
-						backgroundColor: 'rgba(252, 165, 165, 0.8)',
-						borderColor: 'rgba(252, 165, 165, 1)',
+						backgroundColor: 'rgba(0, 0, 0, 0.1)',
+						borderColor: 'rgb(0, 0, 0)',
 						borderWidth: 0,
 						borderRadius: 4,
 						barPercentage: 0.6,
@@ -659,8 +659,8 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 					{
 						label: 'Sold',
 						data: <?php echo json_encode($citySold); ?>,
-						backgroundColor: 'rgba(220, 38, 38, 0.8)',
-						borderColor: 'rgba(220, 38, 38, 1)',
+						backgroundColor: 'rgba(0, 0, 0, 0.8)',
+						borderColor: 'rgb(0, 0, 0)',
 						borderWidth: 0,
 						borderRadius: 4,
 						barPercentage: 0.6,
@@ -707,9 +707,9 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 							}
 						},
 						tooltip: {
-							backgroundColor: 'rgba(255, 255, 255, 0.9)',
-							titleColor: '#1e293b',
-							bodyColor: '#1e293b',
+							backgroundColor: 'rgba(0, 0, 0, 0.9)',
+							titleColor: 'rgb(255, 255, 255)',
+							bodyColor: 'rgb(255, 255, 255)',
 							borderColor: 'rgba(0, 0, 0, 0.1)',
 							borderWidth: 1,
 							padding: 10,
