@@ -191,7 +191,6 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 	<style>
 		/* Base */
 		body{ background:var(--bg);color:#111827;}
-		/* Topbar */
 		/* Cards (match dashboard) */
 		.card{ border:0; border-radius:var(--radius); background:var(--card); }
 		.card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
@@ -362,8 +361,8 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		const cityAvail = <?php echo json_encode($cityAvail); ?>;
 		const citySold = <?php echo json_encode($citySold); ?>;
 
-		const brand = '#e11d2a';
-		const brand600 = '#b91c1c';
+		const brand = 'rgb(0, 0, 0)';
+		const brand600 = 'rgb(0, 0, 0)';
 
 		const gridColor = 'rgba(17,24,39,0.06)';
 		const ticksColor = '#6b7280';
@@ -381,7 +380,7 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 					label: 'Monthly Sales', 
 					data: monthlyCounts, 
 					borderColor: brand, 
-					backgroundColor: 'rgba(225,29,72,0.08)', 
+					backgroundColor: 'rgba(0, 0, 0, 0.08)', 
 					tension: 0.35, 
 					fill: true, 
 					borderWidth: 2, 
@@ -406,8 +405,8 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 		new Chart(document.getElementById('chartCity'), {
 			type: 'bar',
 			data: { labels: cityLabels, datasets: [
-				{ label: 'Available', data: cityAvail, backgroundColor: 'rgba(220,38,38,0.25)', borderRadius: 6, maxBarThickness: 28 },
-				{ label: 'Sold', data: citySold, backgroundColor: '#dc2626', borderRadius: 6, maxBarThickness: 28 }
+				{ label: 'Available', data: cityAvail, backgroundColor: 'rgba(0, 0, 0, 0.25)', borderRadius: 6, maxBarThickness: 28 },
+				{ label: 'Sold', data: citySold, backgroundColor: 'rgb(0, 0, 0)', borderRadius: 6, maxBarThickness: 28 }
 			] },
 			options: { 
 				maintainAspectRatio: false,
@@ -431,8 +430,8 @@ while ($r = $cityRes->fetch_assoc()) { $cityLabels[] = $r['city']; $cityAvail[] 
 			data: {
 				labels: catLabels,
 				datasets: [
-					{ label: 'Sold', data: catSold, backgroundColor: '#dc2626', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' },
-					{ label: 'Available', data: catAvail, backgroundColor: 'rgba(220,38,38,0.25)', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' }
+					{ label: 'Sold', data: catSold, backgroundColor: 'rgb(0, 0, 0)', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' },
+					{ label: 'Available', data: catAvail, backgroundColor: 'rgba(0, 0, 0, 0.25)', borderRadius: 0, maxBarThickness: 32, stack: 'stack1' }
 				]
 			},
 			options: {
