@@ -29,6 +29,104 @@ $totalCategories = fetchScalar("SELECT COUNT(*) FROM categories");
 $totalBlogs = fetchScalar("SELECT COUNT(*) FROM blogs");
 $totalEnquiries = fetchScalar("SELECT COUNT(*) FROM enquiries");
 
+// Chart data for Monthly Sales Trend
+$monthlyQuery = "SELECT 
+    DATE_FORMAT(created_at, '%b %Y') as month,
+    COUNT(*) as count
+FROM properties 
+WHERE status = 'sold'
+GROUP BY DATE_FORMAT(created_at, '%Y-%m')
+ORDER BY MIN(created_at) ASC
+LIMIT 12";
+$monthlyResult = db()->query($monthlyQuery);
+$monthlyLabels = [];
+$monthlyCounts = [];
+while ($row = $monthlyResult->fetch_assoc()) {
+    $monthlyLabels[] = $row['month'];
+    $monthlyCounts[] = (int)$row['count'];
+}
+
+// If no data, provide sample data
+if (empty($monthlyLabels)) {
+    $monthlyLabels = ['Jan 2023', 'Feb 2023', 'Mar 2023', 'Apr 2023', 'May 2023', 'Jun 2023'];
+    $monthlyCounts = [4, 6, 8, 5, 10, 7];
+}
+
+// Chart data for Top Performing Cities
+$cityQuery = "SELECT 
+    location,
+    COUNT(CASE WHEN status = 'Sold' THEN 1 END) as sold,
+    COUNT(CASE WHEN status != 'Sold' THEN 1 END) as available
+FROM properties
+GROUP BY location
+ORDER BY sold DESC
+LIMIT 5";
+$cityResult = db()->query($cityQuery);
+$cityLabels = [];
+$citySold = [];
+$cityAvail = [];
+while ($row = $cityResult->fetch_assoc()) {
+    $cityLabels[] = $row['location'];
+    $citySold[] = (int)$row['sold'];
+    $cityAvail[] = (int)$row['available'];
+}
+
+// If no data, provide sample data
+if (empty($cityLabels)) {
+    $cityLabels = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Miami'];
+    $citySold = [12, 9, 8, 7, 6];
+    $cityAvail = [5, 8, 4, 6, 9];
+}
+
+// Recent properties
+$monthlySql = "SELECT DATE_FORMAT(p.created_at, '%Y-%m') ym, COUNT(*) cnt
+	FROM properties p WHERE p.status = 'Sold'
+	GROUP BY ym
+	ORDER BY ym ASC";
+$monthly = $mysqli->query($monthlySql);
+// Map query results
+$monthlyMap = [];
+while ($r = $monthly->fetch_assoc()) { $monthlyMap[$r['ym']] = (int)$r['cnt']; }
+
+// Build month sequence for last 12 months
+$monthlyLabels = [];
+$monthlyCounts = [];
+try {
+    $endDate = new DateTime('first day of this month');
+    $startDate = (clone $endDate)->modify('-11 months');
+    $cursor = clone $startDate;
+    while ($cursor <= $endDate) {
+        $ym = $cursor->format('Y-m');
+        $monthlyLabels[] = $ym;
+        $monthlyCounts[] = $monthlyMap[$ym] ?? 0;
+        $cursor->modify('+1 month');
+    }
+} catch (Exception $e) {
+    // Fallback: just use whatever came back
+    $monthlyLabels = array_keys($monthlyMap);
+    $monthlyCounts = array_values($monthlyMap);
+}
+
+// Chart: city-wise available vs sold (top 10 cities by total)
+$citySql = "SELECT COALESCE(ci.name, 'Unknown City') AS city,
+    SUM(CASE WHEN p.status='Available' THEN 1 ELSE 0 END) AS avail_cnt,
+    SUM(CASE WHEN p.status='Sold' THEN 1 ELSE 0 END) AS sold_cnt
+    FROM properties p
+    LEFT JOIN properties_location pl ON pl.property_id = p.id
+    LEFT JOIN cities ci ON ci.id = pl.city_id
+    GROUP BY city
+    ORDER BY (SUM(CASE WHEN p.status='Available' THEN 1 ELSE 0 END)+SUM(CASE WHEN p.status='Sold' THEN 1 ELSE 0 END)) DESC
+    LIMIT 10";
+$cityRes = $mysqli->query($citySql);
+$cityLabels = [];
+$cityAvail = [];
+$citySold = [];
+while ($r = $cityRes->fetch_assoc()) { 
+    $cityLabels[] = $r['city']; 
+    $cityAvail[] = (int)$r['avail_cnt']; 
+    $citySold[] = (int)$r['sold_cnt']; 
+}
+
 // Recent lists
 $mysqli = db();
 $filters = [
@@ -155,6 +253,23 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
 		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
 		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+		/* Chart styles */
+		.chart-wrap {
+			height: 300px;
+			position: relative;
+		}
+		.chart-card {
+			background-color: white;
+			border-radius: 0.75rem;
+			box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+			padding: 1.25rem;
+		}
+		.chart-title {
+			font-size: 1rem;
+			font-weight: 600;
+			color: #1e293b;
+			margin-bottom: 1.25rem;
+		}
 		/* Modern Animated Action Buttons (parity with properties table) */
 		.modern-btn {
 			width: 36px;
@@ -306,6 +421,21 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				</div>
 			</div>
 
+			<div class="row g-4 mb-4">
+				<div class="col-xl-6">	
+					<div class="card chart-card">
+						<div class="chart-title">Monthly Sales Trend</div>
+						<div class="chart-wrap"><canvas id="chartMonthly"></canvas></div>
+					</div>
+				</div>
+				<div class="col-xl-6">
+					<div class="card chart-card">
+						<div class="chart-title">Top Performing Cities</div>
+						<div class="chart-wrap"><canvas id="chartCity"></canvas></div>
+					</div>
+				</div>
+			</div>
+
 			<!-- Search toolbar moved up here -->
 			<div class="toolbar mb-4">
 				<div class="row-top">
@@ -408,6 +538,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		</div>
 	</div>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 	<script>
 		// Helper functions
 		function escapeHtml(text) {
@@ -439,6 +570,156 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				default: return 'bg-light text-dark';
 			}
 		}
+		
+		// Initialize charts
+		document.addEventListener('DOMContentLoaded', function() {
+			// Monthly Sales Trend Chart
+			const monthlyCtx = document.getElementById('chartMonthly').getContext('2d');
+			const monthlyChart = new Chart(monthlyCtx, {
+				type: 'line',
+				data: {
+					labels: <?php echo json_encode($monthlyLabels); ?>,
+					datasets: [{
+						label: 'Properties Sold',
+						data: <?php echo json_encode($monthlyCounts); ?>,
+						backgroundColor: 'rgba(239, 68, 68, 0.1)',
+						borderColor: 'rgba(239, 68, 68, 1)',
+						borderWidth: 2,
+						tension: 0.4,
+						fill: true,
+						pointRadius: 0
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+								precision: 0,
+								font: {
+									size: 10
+								}
+							},
+							grid: {
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						x: {
+							grid: {
+								color: 'rgba(0, 0, 0, 0.05)'
+							},
+							ticks: {
+								font: {
+									size: 10
+								}
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							display: false
+						},
+						tooltip: {
+							backgroundColor: 'rgba(255, 255, 255, 0.9)',
+							titleColor: '#1e293b',
+							bodyColor: '#1e293b',
+							borderColor: 'rgba(0, 0, 0, 0.1)',
+							borderWidth: 1,
+							padding: 10,
+							boxPadding: 5,
+							usePointStyle: true,
+							callbacks: {
+								title: function(context) {
+									return context[0].label;
+								}
+							}
+						}
+					}
+				}
+			});
+			
+			// City-wise Available vs Sold Chart
+			const cityCtx = document.getElementById('chartCity').getContext('2d');
+			const cityChart = new Chart(cityCtx, {
+				type: 'bar',
+				data: {
+					labels: <?php echo json_encode($cityLabels); ?>,
+					datasets: [{
+						label: 'Available',
+						data: <?php echo json_encode($cityAvail); ?>,
+						backgroundColor: 'rgba(252, 165, 165, 0.8)',
+						borderColor: 'rgba(252, 165, 165, 1)',
+						borderWidth: 0,
+						borderRadius: 4,
+						barPercentage: 0.6,
+						categoryPercentage: 0.7
+					},
+					{
+						label: 'Sold',
+						data: <?php echo json_encode($citySold); ?>,
+						backgroundColor: 'rgba(220, 38, 38, 0.8)',
+						borderColor: 'rgba(220, 38, 38, 1)',
+						borderWidth: 0,
+						borderRadius: 4,
+						barPercentage: 0.6,
+						categoryPercentage: 0.7
+					}]
+				},
+				options: {
+					responsive: true,
+					maintainAspectRatio: false,
+					scales: {
+						y: {
+							beginAtZero: true,
+							ticks: {
+								precision: 0,
+								font: {
+									size: 10
+								}
+							},
+							grid: {
+								color: 'rgba(0, 0, 0, 0.05)'
+							}
+						},
+						x: {
+							grid: {
+								display: false
+							},
+							ticks: {
+								font: {
+									size: 10
+								}
+							}
+						}
+					},
+					plugins: {
+						legend: {
+							position: 'bottom',
+							labels: {
+								usePointStyle: true,
+								boxWidth: 8,
+								padding: 15,
+								font: {
+									size: 11
+								}
+							}
+						},
+						tooltip: {
+							backgroundColor: 'rgba(255, 255, 255, 0.9)',
+							titleColor: '#1e293b',
+							bodyColor: '#1e293b',
+							borderColor: 'rgba(0, 0, 0, 0.1)',
+							borderWidth: 1,
+							padding: 10,
+							boxPadding: 5,
+							usePointStyle: true
+						}
+					}
+				}
+			});
+		});
 		
 		async function openDrawer(data){
 			const drawer = document.getElementById('propDrawer');
