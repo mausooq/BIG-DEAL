@@ -162,112 +162,430 @@ $mysqli = db();
 $categoriesRes = $mysqli->query("SELECT id, name FROM categories ORDER BY name");
 $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Property - Big Deal</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
-    <style>
-        /* Base */
-        
-        body{ background:var(--bg); color:#111827; }
+<!-- Bootstrap CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
-         /* account for sidebar margin */
+<!-- Modal CSS -->
+<style>
+    /* Modal Overlay */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(2px);
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
 
-        /* Topbar */
+    /* Modal Container */
+    .modal-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        max-width: 1200px;
+        width: 100%;
+        max-height: 90vh;
+        overflow: hidden;
+        position: relative;
+        animation: modalSlideIn 0.3s ease-out;
+    }
 
-        /* Cards */
-        
-        .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
-        .quick-card{ border:1px solid #eef2f7; border-radius:var(--radius); }
-         /* Form elements */
-         .form-control, .form-select{ border-radius:12px; border:1px solid var(--line); }
-         .form-control:focus, .form-select:focus{ border-color:var(--line); box-shadow:none; }
-         .form-control::placeholder{ font-weight:300; color:#9ca3af; opacity:0.8; }
-         .form-label{ font-weight:600; color:#111827; }
-         .form-text{ color:var(--muted); font-size:0.875rem; }
-        /* Buttons */   
-        .btn{ border-radius:12px; font-weight:500; }
-        .btn-primary{ background:var(--primary); border-color:var(--primary); }
-        .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
-        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
-        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
-        .btn-outline-secondary{ color: var(--muted); border-color: var(--muted); }
-        .btn-outline-secondary:hover{ background-color: var(--muted); border-color: var(--muted); color:#fff; }
-        /* Section styling */
-        .section-header{ border-bottom:2px solid var(--line); padding-bottom:1rem; margin-bottom:2rem; }
-        .section-title{ color:var(--brand-dark); font-weight:600; font-size:1.1rem; }
-        .required{ color:var(--primary); font-weight:600; }
-        /* Image upload */
-        .image-preview{ max-width:150px; max-height:150px; object-fit:cover; border-radius:8px; margin:5px; }
-        .image-upload-area{ border:2px dashed var(--line); border-radius:12px; padding:2rem; text-align:center; background:#f8fafc; transition:all 0.3s ease; }
-        .image-upload-area:hover{ border-color:var(--primary); background:#fef2f2; }
-        .image-upload-area.dragover{ border-color:var(--primary); background:#fef2f2; }
-        /* Typography */
-        .h4, .h5, .h6{ font-weight:600; color:#111827; }
-        .text-muted{ color:var(--muted)!important; }
-        .fw-semibold{ font-weight:600; }
-        /* Alerts */
-        .alert{ border:0; border-radius:12px; }
-        .alert-success{ background:#f0f9ff; color:#1e40af; border-left:4px solid #3b82f6; }
-        .alert-danger{ background:#fef2f2; color:#dc2626; border-left:4px solid var(--primary); }
-        /* Mobile responsiveness */
-
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(-20px);
         }
-        @media (max-width: 575.98px){
-            .section-title{ font-size:1rem; }
-            .form-label{ font-size:0.9rem; }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
         }
-        /* Inline add dropdown overlays */
-        .location-grid .col-md-6, .location-grid .col-md-12, .location-grid .col-md-4 { position: relative; }
-        .inline-add { position:absolute; left:0; right:0; top: calc(100% + 6px); z-index: 5; background: var(--card); }
-        .inline-add .input-group { box-shadow: 0 6px 20px rgba(0,0,0,.12); border-radius: 8px; }
-        .location-card { padding-bottom: 64px; }
-    </style>
-</head>
-<body>
-    <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('properties'); ?>
-    <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Property'); ?>
+    }
 
-        <div class="container-fluid p-4">
-            <!-- Header -->
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h2 class="h4 mb-1 fw-semibold">Add New Property</h2>
-                    <p class="text-muted mb-0">Fill in the details to add a new property listing</p>
-                </div>
-                <a href="index.php" class="btn btn-outline-secondary">
-                    <i class="fa-solid fa-arrow-left me-2"></i>Back to Properties
-                </a>
-            </div>
+    /* Modal Header */
+    .modal-header {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #f8fafc;
+    }
 
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #111827;
+        margin: 0;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        color: #6b7280;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .modal-close:hover {
+        background: #f3f4f6;
+        color: #374151;
+    }
+
+    /* Modal Body */
+    .modal-body {
+        padding: 0;
+        max-height: calc(90vh - 140px);
+        overflow-y: auto;
+    }
+
+    /* Bootstrap Form Overrides */
+    .form-control, .form-select {
+        border-radius: 12px;
+        border: 1px solid #d1d5db;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .required {
+        color: #ef4444;
+        font-weight: 600;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 500;
+        padding: 0.75rem 1.5rem;
+    }
+
+    .btn-primary {
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .btn-primary:hover {
+        background: #b91c1c;
+        border-color: #b91c1c;
+    }
+
+    .btn-outline-primary {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #ef4444;
+        border-color: #ef4444;
+        color: #fff;
+    }
+
+    .btn-outline-secondary {
+        color: #6b7280;
+        border-color: #6b7280;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #6b7280;
+        border-color: #6b7280;
+        color: #fff;
+    }
+
+    .btn-outline-danger {
+        color: #ef4444;
+        border-color: #ef4444;
+    }
+
+    .btn-outline-danger:hover {
+        background-color: #ef4444;
+        border-color: #ef4444;
+        color: #fff;
+    }
+
+    .alert {
+        border: 0;
+        border-radius: 12px;
+        margin: 1rem;
+    }
+
+    .alert-success {
+        background: #f0f9ff;
+        color: #1e40af;
+        border-left: 4px solid #3b82f6;
+    }
+
+    .alert-danger {
+        background: #fef2f2;
+        color: #dc2626;
+        border-left: 4px solid #ef4444;
+    }
+
+    /* Progress Bar */
+    .progressbar {
+        display: flex;
+        justify-content: space-between;
+        position: relative;
+        margin-bottom: 2rem;
+        padding: 0 2rem;
+    }
+
+    .progressbar::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 2rem;
+        right: 2rem;
+        transform: translateY(-50%);
+        height: 4px;
+        background-color: #e5e7eb;
+        z-index: 1;
+        border-radius: 2px;
+    }
+
+    .progress {
+        position: absolute;
+        top: 50%;
+        left: 2rem;
+        transform: translateY(-50%);
+        height: 4px;
+        width: 0%;
+        background: linear-gradient(90deg, #ef4444, #b91c1c);
+        transition: width 0.3s ease;
+        z-index: 2;
+        border-radius: 2px;
+    }
+
+    .progress-step {
+        width: 40px;
+        height: 40px;
+        background-color: #e5e7eb;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 600;
+        color: #6b7280;
+        z-index: 3;
+        position: relative;
+        transition: all 0.3s ease;
+        border: 3px solid white;
+    }
+
+    .progress-step.active {
+        background: #ef4444;
+        color: #fff;
+        transform: scale(1.1);
+    }
+
+    .progress-step.completed {
+        background: #b91c1c;
+        color: #fff;
+    }
+
+    .step-content {
+        display: none;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .step-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 2rem;
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e5e7eb;
+        background: #f8fafc;
+    }
+
+    .step-info {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .step-buttons {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-step {
+        min-width: 120px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+    .step-indicator {
+        background: #fee2e2;
+        color: #ef4444;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
+    /* Image upload */
+    .image-preview {
+        max-width: 150px;
+        max-height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin: 5px;
+    }
+
+    .image-upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.3s ease;
+    }
+
+    .image-upload-area:hover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    .image-upload-area.dragover {
+        border-color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    /* Inline add dropdown overlays */
+    .location-grid .col-md-6, .location-grid .col-md-12, .location-grid .col-md-4 {
+        position: relative;
+    }
+
+    .inline-add {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 5;
+        background: white;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .inline-add .input-group {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        border-radius: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .modal-container {
+            margin: 10px;
+            max-height: 95vh;
+        }
+        
+        .modal-header, .step-navigation {
+            padding: 1rem;
+        }
+        
+        .progressbar {
+            padding: 0 1rem;
+        }
+        
+        .progressbar::before {
+            left: 1rem;
+            right: 1rem;
+        }
+        
+        .progress {
+            left: 1rem;
+        }
+    }
+</style>
+
+<!-- Modal HTML -->
+<div class="modal-overlay" id="addPropertyModal">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2 class="modal-title">Add New Property</h2>
+            <button class="modal-close" onclick="closeModal()">
+                <i class="fa-solid fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
             <?php if ($message): ?>
-                <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
+                <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show m-3" role="alert">
                     <i class="fa-solid fa-<?php echo $message_type === 'success' ? 'check-circle' : 'exclamation-triangle'; ?> me-2"></i>
                     <?php echo htmlspecialchars($message); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
 
-            <form method="post" enctype="multipart/form-data" id="propertyForm">
-                <div class="row">
-                    <!-- Basic Information -->
-                    <div class="col-lg-12">
-                        <div class="card mb-4 location-card">
-                            <div class="card-body">
-                                <div class="section-header">
-                                    <h5 class="section-title"><i class="fa-solid fa-info-circle me-2"></i>Basic Information</h5>
-                                </div>
+            <form method="post" enctype="multipart/form-data" id="propertyForm" class="needs-validation" novalidate>
+                <!-- Progress Bar -->
+                <div class="progressbar">
+                    <div class="progress" id="progress"></div>
+                    <div class="progress-step active" id="step1">
+                        <i class="fa-solid fa-info-circle"></i>
+                    </div>
+                    <div class="progress-step" id="step2">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="progress-step" id="step3">
+                        <i class="fa-solid fa-home"></i>
+                    </div>
+                    <div class="progress-step" id="step4">
+                        <i class="fa-solid fa-images"></i>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <div class="step-indicator" id="stepIndicator">Step 1 of 4: Basic Information</div>
+                </div>
+
+                <!-- Step 1: Basic Information -->
+                <div class="step-content active" id="content1">
+                    <div class="p-4">
+                        <h5 class="fw-semibold mb-4"><i class="fa-solid fa-info-circle me-2"></i>Basic Information</h5>
                                 
                                 <div class="row g-3">
                                     <div class="col-md-8">
                                         <label class="form-label">Property Title <span class="required">*</span></label>
                                         <input type="text" class="form-control" name="title" required placeholder="e.g., Beautiful 3BHK Apartment in Downtown">
+                                        <div class="invalid-feedback">Please provide a valid property title.</div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">Listing Type <span class="required">*</span></label>
@@ -294,16 +612,19 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                     
                                     <div class="col-md-6">
                                         <label class="form-label">Price (₹) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" name="price" step="0.01" required placeholder="0.00">
+                                        <input type="number" class="form-control" name="price" step="0.01" required placeholder="0.00" min="0">
+                                        <div class="invalid-feedback">Please provide a valid price.</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Area (sq ft) <span class="required">*</span></label>
-                                        <input type="number" class="form-control" name="area" step="0.01" required placeholder="0">
+                                        <input type="number" class="form-control" name="area" step="0.01" required placeholder="0" min="0">
+                                        <div class="invalid-feedback">Please provide a valid area.</div>
                                     </div>
                                     
                                     <div class="col-md-6">
                                         <label class="form-label">Location <span class="required">*</span></label>
                                         <input type="text" class="form-control" name="location" required placeholder="City, Area, Locality">
+                                        <div class="invalid-feedback">Please provide a valid location.</div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label">Landmark</label>
@@ -331,16 +652,27 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                             <option value="Rented">Rented</option>
                                         </select>
                                     </div>
-                                </div>
+                        </div>
+                        
+                        <!-- Step Navigation -->
+                        <div class="step-navigation">
+                            <div class="step-info">
+                                <i class="fa-solid fa-lightbulb me-1"></i>
+                                Fill in the basic property details to get started
+                            </div>
+                            <div class="step-buttons">
+                                <button type="button" class="btn btn-outline-secondary btn-step" onclick="nextStep()">
+                                    <i class="fa-solid fa-arrow-right me-1"></i>Next
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Structured Location -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="section-header">
-                                    <h5 class="section-title"><i class="fa-solid fa-location-dot me-2"></i>Location Details</h5>
-                                </div>
+                <!-- Step 2: Location Details -->
+                <div class="step-content" id="content2">
+                    <div class="p-4">
+                        <h5 class="fw-semibold mb-4"><i class="fa-solid fa-location-dot me-2"></i>Location Details</h5>
                                 <div class="row g-3 align-items-end location-grid">
                                     <div class="col-md-6">
                                         <label class="form-label">State <span class="required">*</span></label>
@@ -351,6 +683,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                             <?php endwhile; ?>
                                             <option value="__add__">+ Add State</option>
                                         </select>
+                                        <div class="invalid-feedback">Please select a state.</div>
                                         <div id="stateAddInline" class="mt-2 inline-add" style="display:none;">
                                             <div class="input-group">
                                                 <input type="text" class="form-control" id="stateAddInput" placeholder="New state name">
@@ -365,6 +698,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                             <option value="">Select District</option>
                                             <option value="__add__">+ Add District</option>
                                         </select>
+                                        <div class="invalid-feedback">Please select a district.</div>
                                         <div id="districtAddInline" class="mt-2 inline-add" style="display:none;">
                                             <div class="input-group">
                                                 <input type="text" class="form-control" id="districtAddInput" placeholder="New district name">
@@ -379,6 +713,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                             <option value="">Select City</option>
                                             <option value="__add__">+ Add City</option>
                                         </select>
+                                        <div class="invalid-feedback">Please select a city.</div>
                                         <div id="cityAddInline" class="mt-2 inline-add" style="display:none;">
                                             <div class="input-group">
                                                 <input type="text" class="form-control" id="cityAddInput" placeholder="New city name">
@@ -393,6 +728,7 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                             <option value="">Select Town</option>
                                             <option value="__add__">+ Add Town</option>
                                         </select>
+                                        <div class="invalid-feedback">Please select a town.</div>
                                         <div id="townAddInline" class="mt-2 inline-add" style="display:none;">
                                             <div class="input-group">
                                                 <input type="text" class="form-control" id="townAddInput" placeholder="New town name">
@@ -404,17 +740,32 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                     <div class="col-md-6">
                                         <label class="form-label">Pincode <span class="required">*</span></label>
                                         <input type="text" class="form-control" name="pincode" id="pincodeInput" placeholder="e.g., 560001" required>
+                                        <div class="invalid-feedback">Please enter a valid pincode.</div>
                                     </div>
-                                </div>
+                        </div>
+                        
+                        <!-- Step Navigation -->
+                        <div class="step-navigation">
+                            <div class="step-info">
+                                <i class="fa-solid fa-map-marker-alt me-1"></i>
+                                Select the complete location hierarchy for your property
+                            </div>
+                            <div class="step-buttons">
+                                <button type="button" class="btn btn-outline-secondary btn-step" onclick="prevStep()">
+                                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-step" onclick="nextStep()">
+                                    <i class="fa-solid fa-arrow-right me-1"></i>Next
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Property Details -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="section-header">
-                                    <h5 class="section-title"><i class="fa-solid fa-home me-2"></i>Property Details</h5>
-                                </div>
+                <!-- Step 3: Property Details -->
+                <div class="step-content" id="content3">
+                    <div class="p-4">
+                        <h5 class="fw-semibold mb-4"><i class="fa-solid fa-home me-2"></i>Property Details</h5>
                                 
                                 <div class="row g-3">
                                     <div class="col-md-4">
@@ -457,16 +808,30 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                         <label class="form-label">Number of Balconies</label>
                                         <input type="number" class="form-control" name="balcony" min="0" value="0">
                                     </div>
-                                </div>
+                        </div>
+                        
+                        <!-- Step Navigation -->
+                        <div class="step-navigation">
+                            <div class="step-info">
+                                <i class="fa-solid fa-cog me-1"></i>
+                                Configure additional property specifications
+                            </div>
+                            <div class="step-buttons">
+                                <button type="button" class="btn btn-outline-secondary btn-step" onclick="prevStep()">
+                                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-step" onclick="nextStep()">
+                                    <i class="fa-solid fa-arrow-right me-1"></i>Next
+                                </button>
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <!-- Image Upload -->
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="section-header">
-                                    <h5 class="section-title"><i class="fa-solid fa-images me-2"></i>Property Images</h5>
-                                </div>
+                <!-- Step 4: Images & Review -->
+                <div class="step-content" id="content4">
+                    <div class="p-4">
+                        <h5 class="fw-semibold mb-4"><i class="fa-solid fa-images me-2"></i>Property Images & Review</h5>
                                 
                                 <div class="image-upload-area" id="imageUploadArea">
                                     <i class="fa-solid fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
@@ -481,20 +846,45 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
                                 <div id="imagePreview" class="mt-3"></div>
                                 <div id="imageInfo" class="mt-2 text-muted small"></div>
                                 
-                                <!-- Form Actions inside form -->
-                                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-                                    <a href="index.php" class="btn btn-outline-secondary">
-                                        <i class="fa-solid fa-times me-2"></i>Cancel
-                                    </a>
-                                    <button type="submit" class="btn-animated-confirm noselect">
-                                        <span class="text">Add Property</span>
-                                        <span class="icon">
-                                            <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                            </svg>
-                                        </span>
-                                    </button>
+                                <!-- Review Section -->
+                                <div class="mt-4 p-3 bg-light rounded">
+                                    <h6 class="fw-semibold mb-3"><i class="fa-solid fa-clipboard-check me-2"></i>Review Your Property</h6>
+                                    <div class="row g-2">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Title:</small>
+                                            <div id="reviewTitle" class="fw-medium">-</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Price:</small>
+                                            <div id="reviewPrice" class="fw-medium">-</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Location:</small>
+                                            <div id="reviewLocation" class="fw-medium">-</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Area:</small>
+                                            <div id="reviewArea" class="fw-medium">-</div>
+                                        </div>
+                                    </div>
                                 </div>
+                                
+                        <!-- Step Navigation -->
+                        <div class="step-navigation">
+                            <div class="step-info">
+                                <i class="fa-solid fa-check-circle me-1"></i>
+                                Review your property details and add images before submitting
+                            </div>
+                            <div class="step-buttons">
+                                <button type="button" class="btn btn-outline-secondary btn-step" onclick="prevStep()">
+                                    <i class="fa-solid fa-arrow-left me-1"></i>Back
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-step" onclick="closeModal()">
+                                    <i class="fa-solid fa-times me-1"></i>Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-step">
+                                    <i class="fa-solid fa-check me-1"></i>Add Property
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -502,9 +892,255 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             </form>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+        // Multi-step form functionality
+        let currentStep = 1;
+        const totalSteps = 4;
+        const steps = document.querySelectorAll(".progress-step");
+        const contents = document.querySelectorAll(".step-content");
+        const progress = document.getElementById("progress");
+        const stepIndicator = document.getElementById("stepIndicator");
+
+        const stepTitles = [
+            "Step 1 of 4: Basic Information",
+            "Step 2 of 4: Location Details", 
+            "Step 3 of 4: Property Details",
+            "Step 4 of 4: Images & Review"
+        ];
+
+        function updateProgress() {
+            // Update progress bar
+            const progressWidth = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            progress.style.width = progressWidth + "%";
+
+            // Update step indicators
+            steps.forEach((step, index) => {
+                step.classList.remove("active", "completed");
+                if (index < currentStep - 1) {
+                    step.classList.add("completed");
+                } else if (index === currentStep - 1) {
+                    step.classList.add("active");
+                }
+            });
+
+            // Show correct content
+            contents.forEach((content, index) => {
+                if (index === currentStep - 1) {
+                    content.classList.add("active");
+                } else {
+                    content.classList.remove("active");
+                }
+            });
+
+            // Update step indicator text
+            stepIndicator.textContent = stepTitles[currentStep - 1];
+
+            // Update review section if on step 4
+            if (currentStep === 4) {
+                updateReviewSection();
+            }
+        }
+
+        function updateReviewSection() {
+            const title = document.querySelector('input[name="title"]').value || '-';
+            const price = document.querySelector('input[name="price"]').value ? 
+                '₹' + parseFloat(document.querySelector('input[name="price"]').value).toLocaleString() : '-';
+            const location = document.querySelector('input[name="location"]').value || '-';
+            const area = document.querySelector('input[name="area"]').value ? 
+                document.querySelector('input[name="area"]').value + ' sq ft' : '-';
+
+            document.getElementById('reviewTitle').textContent = title;
+            document.getElementById('reviewPrice').textContent = price;
+            document.getElementById('reviewLocation').textContent = location;
+            document.getElementById('reviewArea').textContent = area;
+        }
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateProgress();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateProgress();
+            }
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    return validateStep1();
+                case 2:
+                    return validateStep2();
+                case 3:
+                    return validateStep3();
+                case 4:
+                    return validateStep4();
+                default:
+                    return true;
+            }
+        }
+
+        function validateStep1() {
+            const title = document.querySelector('input[name="title"]');
+            const price = document.querySelector('input[name="price"]');
+            const area = document.querySelector('input[name="area"]');
+            const location = document.querySelector('input[name="location"]');
+            
+            let isValid = true;
+
+            // Clear previous validation states
+            [title, price, area, location].forEach(field => {
+                field.classList.remove('is-invalid', 'is-valid');
+            });
+
+            // Validate title
+            if (!title.value.trim()) {
+                title.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                title.classList.add('is-valid');
+            }
+
+            // Validate price
+            if (!price.value || parseFloat(price.value) <= 0) {
+                price.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                price.classList.add('is-valid');
+            }
+
+            // Validate area
+            if (!area.value || parseFloat(area.value) <= 0) {
+                area.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                area.classList.add('is-valid');
+            }
+
+            // Validate location
+            if (!location.value.trim()) {
+                location.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                location.classList.add('is-valid');
+            }
+
+            return isValid;
+        }
+
+        function validateStep2() {
+            const stateSelect = document.querySelector('select[name="state_id"]');
+            const districtSelect = document.querySelector('select[name="district_id"]');
+            const citySelect = document.querySelector('select[name="city_id"]');
+            const townSelect = document.querySelector('select[name="town_id"]');
+            const pincodeInput = document.querySelector('input[name="pincode"]');
+            
+            let isValid = true;
+
+            // Clear previous validation states
+            [stateSelect, districtSelect, citySelect, townSelect, pincodeInput].forEach(field => {
+                field.classList.remove('is-invalid', 'is-valid');
+            });
+
+            // Validate state
+            if (!stateSelect.value || stateSelect.value === '') {
+                stateSelect.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                stateSelect.classList.add('is-valid');
+            }
+
+            // Validate district
+            if (!districtSelect.value || districtSelect.value === '') {
+                districtSelect.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                districtSelect.classList.add('is-valid');
+            }
+
+            // Validate city
+            if (!citySelect.value || citySelect.value === '') {
+                citySelect.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                citySelect.classList.add('is-valid');
+            }
+
+            // Validate town
+            if (!townSelect.value || townSelect.value === '') {
+                townSelect.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                townSelect.classList.add('is-valid');
+            }
+
+            // Validate pincode
+            if (!pincodeInput.value.trim()) {
+                pincodeInput.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                pincodeInput.classList.add('is-valid');
+            }
+
+            return isValid;
+        }
+
+        function validateStep3() {
+            // Step 3 has optional fields, so no validation needed
+            return true;
+        }
+
+        function validateStep4() {
+            // Images are optional, but show confirmation if none selected
+            if (selectedFiles.length === 0) {
+                if (!confirm('No images selected. Do you want to continue without images?')) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Modal functionality
+        function closeModal() {
+            // Reset form
+            document.getElementById('propertyForm').reset();
+            currentStep = 1;
+            updateProgress();
+            
+            // Call global close function
+            if (typeof window.closeAddPropertyModal === 'function') {
+                window.closeAddPropertyModal();
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('addPropertyModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Initialize the form
+        updateProgress();
+
         // Location dependent selects and inline create
         async function fetchJSON(url, options){ const r = await fetch(url, options); if(!r.ok) return []; try { return await r.json(); } catch { return []; } }
         const stateSelect = document.getElementById('stateSelect');
@@ -827,74 +1463,30 @@ $statesRes = $mysqli->query("SELECT id, name FROM states ORDER BY name");
             }
         }
 
-        // Form validation
+        // Form validation - validate all steps before submission
         document.getElementById('propertyForm').addEventListener('submit', function(e) {
-            const title = document.querySelector('input[name="title"]').value.trim();
-            const location = document.querySelector('input[name="location"]').value.trim();
-            const price = document.querySelector('input[name="price"]').value;
-            const area = document.querySelector('input[name="area"]').value;
-            
-            // Location details validation
-            const stateId = document.querySelector('select[name="state_id"]').value;
-            const districtId = document.querySelector('select[name="district_id"]').value;
-            const cityId = document.querySelector('select[name="city_id"]').value;
-            const townId = document.querySelector('select[name="town_id"]').value;
-            const pincode = document.querySelector('input[name="pincode"]').value.trim();
-
-            if (!title) {
-                alert('Please enter a property title');
+            // Validate all steps before allowing submission
+            if (!validateStep1() || !validateStep2() || !validateStep3() || !validateStep4()) {
                 e.preventDefault();
-                return;
-            }
-            if (!location) {
-                alert('Please enter a location');
-                e.preventDefault();
-                return;
-            }
-            if (!price || parseFloat(price) <= 0) {
-                alert('Please enter a valid price');
-                e.preventDefault();
-                return;
-            }
-            if (!area || parseFloat(area) <= 0) {
-                alert('Please enter a valid area');
-                e.preventDefault();
-                return;
-            }
-            
-            // Validate location details
-            if (!stateId || stateId === '') {
-                alert('Please select a state');
-                e.preventDefault();
-                return;
-            }
-            if (!districtId || districtId === '') {
-                alert('Please select a district');
-                e.preventDefault();
-                return;
-            }
-            if (!cityId || cityId === '') {
-                alert('Please select a city');
-                e.preventDefault();
-                return;
-            }
-            if (!townId || townId === '') {
-                alert('Please select a town');
-                e.preventDefault();
-                return;
-            }
-            if (!pincode || pincode === '') {
-                alert('Please enter a pincode');
-                e.preventDefault();
-                return;
-            }
-            
-            // Validate images
-            if (selectedFiles.length === 0) {
-                if (!confirm('No images selected. Do you want to continue without images?')) {
-                    e.preventDefault();
-                    return;
+                // Go to the first step with validation error
+                if (!validateStep1()) {
+                    currentStep = 1;
+                } else if (!validateStep2()) {
+                    currentStep = 2;
+                } else if (!validateStep3()) {
+                    currentStep = 3;
+                } else if (!validateStep4()) {
+                    currentStep = 4;
                 }
+                updateProgress();
+                return;
+            }
+            
+            // If validation passes, show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i>Adding Property...';
+                submitBtn.disabled = true;
             }
         });
     </script>

@@ -132,6 +132,22 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
+        /* Modal blur effect */
+        body.modal-open {
+            overflow: hidden;
+        }
+        
+        body.modal-open .content {
+            filter: blur(1.5px);
+            transition: filter 0.3s ease;
+        }
+        
+        /* Ensure modal appears above everything */
+        #addPropertyModal {
+            z-index: 9999;
+        }
+    </style>
+    <style>
         body{ background:var(--bg); color:#111827; }
         .card{ border:0; border-radius:var(--radius); background:var(--card); }
         .card-stat{ box-shadow:0 8px 24px rgba(0,0,0,.05); }
@@ -605,13 +621,13 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2">
                         <i class="fa-solid fa-download me-1"></i>Export
                     </a>
-                    <a href="add.php" class="btn-animated-add noselect">
+                    <button onclick="openAddPropertyModal()" class="btn-animated-add noselect">
                         <span class="text">Add Property</span>
                         <span class="icon">
                             <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"></svg>
                             <span class="buttonSpan">+</span>
                         </span>
-                    </a>
+                    </button>
                 </div>
                 <div class="row-bottom">
                     <?php foreach(['Buy','Rent','PG/Co-living'] as $lt): ?>
@@ -1248,6 +1264,78 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 }, 150);
             }
         });
+
+        // Modal functionality
+        function openAddPropertyModal() {
+            // Load the modal content via AJAX
+            fetch('add.php')
+                .then(response => response.text())
+                .then(html => {
+                    // Create a temporary container to parse the HTML
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    
+                    // Extract the modal content
+                    const modalContent = tempDiv.querySelector('#addPropertyModal');
+                    if (modalContent) {
+                        // Add the modal to the page
+                        document.body.appendChild(modalContent);
+                        
+                        // Show the modal
+                        modalContent.style.display = 'flex';
+                        
+                        // Add blur effect to background
+                        document.body.style.overflow = 'hidden';
+                        document.body.classList.add('modal-open');
+                        
+                        // Initialize Bootstrap components in the modal
+                        initializeModalComponents();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading modal:', error);
+                    // Fallback to opening in new tab
+                    window.open('add.php', '_blank');
+                });
+        }
+
+        // Initialize Bootstrap components in modal
+        function initializeModalComponents() {
+            // Initialize tooltips
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            // Initialize popovers
+            const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+            popoverTriggerList.map(function (popoverTriggerEl) {
+                return new bootstrap.Popover(popoverTriggerEl);
+            });
+
+            // Initialize form validation
+            const forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }
+
+        // Function to close modal (will be called from the modal)
+        window.closeAddPropertyModal = function() {
+            const modal = document.getElementById('addPropertyModal');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.remove();
+                document.body.style.overflow = '';
+                document.body.classList.remove('modal-open');
+            }
+        };
     </script>
 </body>
 </html>
