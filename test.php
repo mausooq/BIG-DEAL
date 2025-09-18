@@ -3,7 +3,7 @@
 session_start();
 
 // Define the total number of steps
-$total_steps = 4;
+$total_steps = 5;
 
 // Determine the current step. Default to 1 if not set.
 $current_step = isset($_GET['step']) ? (int)$_GET['step'] : 1;
@@ -21,24 +21,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and save data for the submitted step
     $submitted_step = isset($_POST['step']) ? (int)$_POST['step'] : $current_step;
     foreach ($_POST as $key => $value) {
-        if ($key !== 'step') {
+        if ($key !== 'step' && $key !== 'goto_step') {
             $_SESSION['form_data'][$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
         }
     }
-    
-    // Redirect to the next step
+
+    // Determine target step: explicit goto trumps continue
+    $goto_step = isset($_POST['goto_step']) ? (int)$_POST['goto_step'] : 0;
+    if ($goto_step >= 1 && $goto_step <= $total_steps) {
+        header("Location: ?step=" . $goto_step);
+        exit();
+    }
+
+    // Default continue flow
     $next_step = $submitted_step + 1;
     if ($next_step <= $total_steps) {
         header("Location: ?step=" . $next_step);
         exit();
     } else {
-        // Optional: Handle final submission (e.g., save to database)
-        // For this example, we'll just show a success message or redirect to a final page.
-        // To restart the form, we can unset the session data.
-        // unset($_SESSION['form_data']);
-        // header("Location: ?step=1&success=1");
-        // For now, let's just stay on the last step to show it's the end.
-        $current_step = $total_steps; 
+        $current_step = $total_steps;
     }
 }
 
@@ -265,24 +266,28 @@ function get_data($field) {
 
         <div class="progress-bar">
             <?php 
-            $step_labels = ['Basic Information', 'Location Details', 'Property Details', 'Images & Review'];
+            $step_labels = ['Basic Information', 'Location Details', 'Property Details', 'Images', 'Preview'];
             for ($i = 1; $i <= $total_steps; $i++): 
                 $step_class = '';
                 if ($i == $current_step) $step_class = 'active';
                 if ($i < $current_step) $step_class = 'completed';
             ?>
-            <div class="progress-step <?php echo $step_class; ?>">
-                <div class="step-circle">
-                    <?php if ($i < $current_step): ?>
-                        &#10003; <?php else: ?>
-                        <?php echo $i; ?>
+            <form method="POST" style="display:contents;">
+                <input type="hidden" name="step" value="<?php echo $current_step; ?>">
+                <input type="hidden" name="goto_step" value="<?php echo $i; ?>">
+                <button type="submit" class="progress-step <?php echo $step_class; ?>" style="background:none;border:none;padding:0;cursor:pointer;text-align:left;">
+                    <div class="step-circle">
+                        <?php if ($i < $current_step): ?>
+                            &#10003; <?php else: ?>
+                            <?php echo $i; ?>
+                        <?php endif; ?>
+                        <span class="step-label"><?php echo $step_labels[$i-1]; ?></span>
+                    </div>
+                    <?php if ($i < $total_steps): ?>
+                        <div class="step-line"></div>
                     <?php endif; ?>
-                    <span class="step-label"><?php echo $step_labels[$i-1]; ?></span>
-                </div>
-                <?php if ($i < $total_steps): ?>
-                    <div class="step-line"></div>
-                <?php endif; ?>
-            </div>
+                </button>
+            </form>
             <?php endfor; ?>
         </div>
         
@@ -436,20 +441,108 @@ function get_data($field) {
                     <input type="file" id="images" name="images[]" multiple>
                     <small class="step-hint">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each</small>
                 </div>
-                <div style="margin-top:1rem; color:#6b7280; font-size:0.9rem;">
-                    Review your property details and add images before submitting.
+            </div>
+            <?php elseif ($current_step == 5): ?>
+            <div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <div><?php echo htmlspecialchars(get_data('title')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Listing Type</label>
+                        <div><?php echo htmlspecialchars(get_data('listing_type')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <div><?php echo htmlspecialchars(get_data('status')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Price (₹)</label>
+                        <div><?php echo htmlspecialchars(get_data('price')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Area (sq ft)</label>
+                        <div><?php echo htmlspecialchars(get_data('area')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <div><?php echo htmlspecialchars(get_data('location')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Landmark</label>
+                        <div><?php echo htmlspecialchars(get_data('landmark')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Configuration</label>
+                        <div><?php echo htmlspecialchars(get_data('configuration')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <div><?php echo htmlspecialchars(get_data('category_id')); ?></div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <div><?php echo nl2br(htmlspecialchars(get_data('description'))); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>State</label>
+                        <div><?php echo htmlspecialchars(get_data('state_id')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>District</label>
+                        <div><?php echo htmlspecialchars(get_data('district_id')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>City</label>
+                        <div><?php echo htmlspecialchars(get_data('city_id')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Town</label>
+                        <div><?php echo htmlspecialchars(get_data('town_id')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Pincode</label>
+                        <div><?php echo htmlspecialchars(get_data('pincode')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Furniture</label>
+                        <div><?php echo htmlspecialchars(get_data('furniture_status')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ownership</label>
+                        <div><?php echo htmlspecialchars(get_data('ownership_type')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Facing</label>
+                        <div><?php echo htmlspecialchars(get_data('facing')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Parking</label>
+                        <div><?php echo htmlspecialchars(get_data('parking')); ?></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Balcony</label>
+                        <div><?php echo htmlspecialchars(get_data('balcony')); ?></div>
+                    </div>
+                </div>
+                <div style="margin-top:1rem; display:flex; gap:.5rem;">
+                    <button type="submit" name="goto_step" value="1" class="btn btn-secondary">Edit</button>
+                    <button type="submit" name="goto_step" value="<?php echo $total_steps; ?>" class="btn btn-primary">Finish</button>
                 </div>
             </div>
             <?php endif; ?>
             
             <footer class="card-footer">
-                <?php if ($current_step > 1): ?>
-                    <a href="?step=<?php echo $current_step - 1; ?>" class="btn btn-secondary">&leftarrow; Back</a>
-                <?php else: ?>
-                    <div></div>
-                <?php endif; ?>
+                <div>
+                    <?php if ($current_step > 1): ?>
+                        <button type="submit" name="goto_step" value="<?php echo $current_step - 1; ?>" class="btn btn-secondary">&leftarrow; Back</button>
+                    <?php else: ?>
+                        <div></div>
+                    <?php endif; ?>
+                </div>
 
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary" name="goto_step" value="<?php echo min($total_steps, $current_step + 1); ?>">
                     <?php echo ($current_step == $total_steps) ? 'Finish' : 'Continue &rightarrow;'; ?>
                 </button>
             </footer>
