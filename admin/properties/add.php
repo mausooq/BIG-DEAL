@@ -172,12 +172,54 @@ function get_data($field) {
             --card-bg-color: #FFFFFF;
             --active-step-color: #ef4444;
             --inactive-step-color: #D1D5DB;
+            --completed-step-color: #ef4444;
         }
 
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin:0; }
+        /* Background iframe with blur effect */
+        .background-iframe { 
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+            border: none; 
+            z-index: -2; 
+        }
+        .blur-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+        width: 100%;
+            height: 100%; 
+            background: rgba(0,0,0,.4); 
+            backdrop-filter: blur(3px); 
+            z-index: -1; 
+        }
         /* Modal overlay + container to mimic dialog */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display:flex; align-items:center; justify-content:center; padding:20px; }
-        .modal-container { background: var(--card-bg-color); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:760px; max-height:90vh; overflow:auto; }
+        .modal-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: transparent; 
+            display:flex; 
+            align-items:center; 
+            justify-content:center; 
+            padding:20px; 
+            z-index: 1000;
+        }
+        .modal-container { 
+            background: var(--card-bg-color); 
+            border-radius:16px; 
+            box-shadow:0 20px 60px rgba(0,0,0,.3); 
+            width:100%; 
+            max-width:760px; 
+            max-height:90vh; 
+            overflow:auto; 
+            position: relative;
+            z-index: 1001;
+            backdrop-filter: blur(0px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
         /* Card Layout */
         .order-card { padding: 2rem; box-sizing: border-box; }
@@ -205,60 +247,99 @@ function get_data($field) {
         }
 
         /* Progress Bar */
-        .progress-bar {
+        .progressbar {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            margin-bottom: 2.5rem;
+            list-style: none;
+            counter-reset: step;
+        padding: 0;
+            margin: 20px 0;
+            width: 100%;
         }
-        .progress-step {
-            display: flex;
-            align-items: center;
-            flex-grow: 1;
+
+        .progressbar li {
+            position: relative;
+            flex: 1;
+            text-align: center;
+            counter-increment: step;
+            font-size: 14px;
+            color: #999;
+            cursor: pointer;
         }
-        .progress-step:last-child {
-            flex-grow: 0;
-        }
-        .step-circle {
+
+        .progressbar li::before {
+            content: counter(step);
             width: 32px;
             height: 32px;
+            line-height: 32px;
+            border: 2px solid #e74c3c; /* red border */
+            display: block;
+            text-align: center;
+            margin: 0 auto 10px auto;
             border-radius: 50%;
-            background-color: var(--card-bg-color);
-            border: 2px solid var(--inactive-step-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: 500;
-            color: var(--inactive-step-color);
-            position: relative;
-            z-index: 2;
+            background-color: #fff;
+            font-weight: bold;
+            color: #e74c3c;
+            transition: all 0.3s ease;
         }
-        .step-label {
+
+        .progressbar li::after {
+            content: '';
             position: absolute;
-            top: 40px;
-            white-space: nowrap;
-            color: var(--inactive-step-color);
-        font-weight: 500;
-            font-size: 0.8rem;
-        }
-        .step-line {
+            width: calc(100% - 32px);
             height: 2px;
-            background-color: var(--inactive-step-color);
-            flex-grow: 1;
+            background-color: #e74c3c;
+            top: 16px;
+            left: calc(50% + 16px);
+            z-index: -1;
+            transition: background-color 0.3s ease;
         }
-        /* Active & Completed States */
-        .progress-step.active .step-circle,
-        .progress-step.completed .step-circle {
-            background-color: var(--active-step-color);
-            border-color: var(--active-step-color);
-            color: white;
+
+        .progressbar li:last-child::after {
+            content: none;
         }
-         .progress-step.active .step-label {
-            color: var(--active-step-color);
-         }
-        .progress-step.completed .step-line {
-            background-color: var(--active-step-color);
+
+        /* Active state */
+        .progressbar li.active {
+            color: #e74c3c;
         }
+
+        .progressbar li.active::before {
+            border-color: #e74c3c;
+            background-color: #e74c3c;
+            color: #fff;
+        }
+
+        .progressbar li.active ~ li {
+            color: #999;
+        }
+
+        .progressbar li.active ~ li::before {
+            border-color: #ccc;
+            background-color: #fff;
+            color: #ccc;
+        }
+
+        .progressbar li.active ~ li::after {
+            background-color: #ccc;
+        }
+
+        /* Completed state */
+        .progressbar li.completed {
+            color: #e74c3c;
+        }
+
+        .progressbar li.completed::before {
+            border-color: #e74c3c;
+            background-color: #e74c3c;
+        color: #fff;
+            content: "✓";
+        }
+
+        .progressbar li.completed::after {
+            background-color: #e74c3c;
+        }
+
 
         /* Form Styling */
         .form-grid {
@@ -267,7 +348,7 @@ function get_data($field) {
             gap: 1.5rem;
         }
         .form-group {
-            display: flex;
+        display: flex;
             flex-direction: column;
         }
         .form-group.full-width {
@@ -301,7 +382,7 @@ function get_data($field) {
         /* Special multi-input groups */
         .multi-input-group {
         display: flex;
-            align-items: center;
+        align-items: center;
             gap: 0.5rem;
         }
         .multi-input-group input {
@@ -319,7 +400,7 @@ function get_data($field) {
             cursor: pointer;
         display: flex;
         align-items: center;
-            gap: 0.5rem;
+        gap: 0.5rem;
         }
 
         /* Footer / Navigation */
@@ -332,7 +413,7 @@ function get_data($field) {
         .btn {
             padding: 0.8rem 1.5rem;
             border: none;
-            border-radius: 8px;
+        border-radius: 8px;
             font-size: 1rem;
         font-weight: 500;
             cursor: pointer;
@@ -352,14 +433,54 @@ function get_data($field) {
     }
 
     /* Responsive */
-        @media (max-width: 600px) {
+        @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .progressbar li {
+                font-size: 12px;
+            }
+
+            .progressbar li::before {
+                width: 28px;
+                height: 28px;
+                line-height: 28px;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .progressbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .progressbar li::after {
+                display: none;
+            }
+
+            .progressbar li {
+                width: 100%;
+                text-align: left;
+                padding-left: 20px;
+            }
+
+            .progressbar li::before {
+                position: absolute;
+                left: 0;
+                top: 0;
+                margin: 0;
         }
     }
 </style>
 </head>
 <body>
+    <!-- Background iframe showing properties index page -->
+    <iframe src="index.php" class="background-iframe" title="Properties Background"></iframe>
+    
+    <!-- Blur overlay for subtle background effect -->
+    <div class="blur-overlay"></div>
 
     <div class="modal-overlay">
     <div class="modal-container">
@@ -369,32 +490,25 @@ function get_data($field) {
             <button class="close-btn" aria-label="Close">&times;</button>
         </header>
 
-        <div class="progress-bar">
-            <?php 
-            $step_labels = ['Basic Information', 'Location Details', 'Property Details', 'Images', 'Preview'];
-            for ($i = 1; $i <= $total_steps; $i++): 
+        <ul class="progressbar">
+            <?php for ($i = 1; $i <= $total_steps; $i++): 
                 $step_class = '';
-                if ($i == $current_step) $step_class = 'active';
-                if ($i < $current_step) $step_class = 'completed';
+                if ($i == $current_step) {
+                    $step_class = 'active';
+                } elseif ($i < $current_step) {
+                    $step_class = 'completed';
+                }
+                $step_labels = ['Basic Information', 'Location Details', 'Property Details', 'Images', 'Preview'];
             ?>
-            <form method="POST" style="display:contents;">
-                <input type="hidden" name="step" value="<?php echo $current_step; ?>">
-                <input type="hidden" name="goto_step" value="<?php echo $i; ?>">
-                <button type="submit" class="progress-step <?php echo $step_class; ?>" style="background:none;border:none;padding:0;cursor:pointer;text-align:left;">
-                    <div class="step-circle">
-                        <?php if ($i < $current_step): ?>
-                            &#10003; <?php else: ?>
-                            <?php echo $i; ?>
-                        <?php endif; ?>
-                        <span class="step-label"><?php echo $step_labels[$i-1]; ?></span>
-                </div>
-                    <?php if ($i < $total_steps): ?>
-                        <div class="step-line"></div>
-            <?php endif; ?>
-                </button>
-            </form>
+            <li class="<?php echo $step_class; ?>" title="Click to go to <?php echo $step_labels[$i-1]; ?>">
+                <form method="POST" style="display:contents;">
+                    <input type="hidden" name="step" value="<?php echo $current_step; ?>">
+                    <input type="hidden" name="goto_step" value="<?php echo $i; ?>">
+                    <button type="submit" style="background:none;border:none;cursor:pointer;width:100%;padding:0;margin:0;" title="Go to <?php echo $step_labels[$i-1]; ?>"><?php echo $step_labels[$i-1]; ?></button>
+                </form>
+            </li>
             <?php endfor; ?>
-                </div>
+        </ul>
 
         <form method="POST" enctype="multipart/form-data" id="wizardForm">
             <input type="hidden" name="step" value="<?php echo $current_step; ?>">
@@ -444,12 +558,12 @@ function get_data($field) {
                 <div class="form-group">
                     <label for="category_id">Category</label>
                     <select id="category_id" name="category_id">
-                        <option value="">Select Category</option>
+                                            <option value="">Select Category</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?php echo (int)$cat['id']; ?>" <?php echo get_data('category_id') == (string)$cat['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name']); ?></option>
                         <?php endforeach; ?>
-                    </select>
-                </div>
+                                        </select>
+                                    </div>
                 <div class="form-group full-width">
                     <label for="description">Description</label>
                     <textarea id="description" name="description" placeholder="Describe the property features, amenities, and unique selling points..."><?php echo get_data('description'); ?></textarea>
@@ -572,31 +686,34 @@ function get_data($field) {
                 <div class="form-group full-width">
                     <label for="images">Property Images</label>
                     <input type="file" id="images" name="images[]" accept="image/*" multiple>
-                    <small class="step-hint">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each</small>
-                </div>
+                    <small class="step-hint">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each. You can select multiple files at once or add more files later.</small>
+                            </div>
                 <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
                 <div id="liveImagesPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+                <div style="margin-top:8px;">
+                    <button type="button" id="clearAllImages" class="btn btn-secondary" style="display:none;">Clear All Images</button>
+                            </div>
                 <input type="hidden" id="images_data" name="images_data[]">
-            </div>
+                        </div>
             <?php elseif ($current_step == 5): ?>
             <div>
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Title</label>
                         <div><?php echo htmlspecialchars(get_data('title')); ?></div>
-                        </div>
+                    </div>
                     <div class="form-group">
                         <label>Listing Type</label>
                         <div><?php echo htmlspecialchars(get_data('listing_type')); ?></div>
-                    </div>
+                </div>
                     <div class="form-group">
                         <label>Status</label>
                         <div><?php echo htmlspecialchars(get_data('status')); ?></div>
-                </div>
+                                </div>
                     <div class="form-group">
                         <label>Price (₹)</label>
                         <div><?php echo htmlspecialchars(get_data('price')); ?></div>
-                                </div>
+                                        </div>
                     <div class="form-group">
                         <label>Area (sq ft)</label>
                         <div><?php echo htmlspecialchars(get_data('area')); ?></div>
@@ -612,7 +729,7 @@ function get_data($field) {
                     <div class="form-group">
                         <label>Configuration</label>
                         <div><?php echo htmlspecialchars(get_data('configuration')); ?></div>
-                                        </div>
+                                    </div>
                     <div class="form-group">
                         <label>Category</label>
                         <div>
@@ -622,28 +739,28 @@ function get_data($field) {
                                 if ($cid) { $r = $mysqli->query("SELECT name FROM categories WHERE id=".(int)$cid); if($r && $row=$r->fetch_assoc()){ $catName=$row['name']; } }
                                 echo htmlspecialchars($catName);
                             ?>
-                        </div>
-                    </div>
+                                </div>
+                            </div>
                     <div class="form-group full-width">
                         <label>Description</label>
                         <div><?php echo nl2br(htmlspecialchars(get_data('description'))); ?></div>
-                                </div>
+                            </div>
                     <div class="form-group">
                         <label>State</label>
                         <div><?php echo htmlspecialchars(get_data('state_id')); ?></div>
-                            </div>
+                        </div>
                     <div class="form-group">
                         <label>District</label>
                         <div><?php echo htmlspecialchars(get_data('district_id')); ?></div>
-                            </div>
+                    </div>
                     <div class="form-group">
                         <label>City</label>
                         <div><?php echo htmlspecialchars(get_data('city_id')); ?></div>
-                        </div>
+                </div>
                     <div class="form-group">
                         <label>Town</label>
                         <div><?php echo htmlspecialchars(get_data('town_id')); ?></div>
-                    </div>
+        </div>
                     <div class="form-group">
                         <label>Pincode</label>
                         <div><?php echo htmlspecialchars(get_data('pincode')); ?></div>
@@ -677,8 +794,8 @@ function get_data($field) {
                         <?php else: ?>
                             <em>No map provided</em>
                         <?php endif; ?>
-                    </div>
-                </div>
+    </div>
+</div>
 
                 <div class="form-group full-width">
                     <label>Images</label>
@@ -787,7 +904,7 @@ async function create(scope, payload){
   form.append('action','create');
             form.append('scope', scope);
   Object.keys(payload).forEach(k=> form.append(k, payload[k]));
-  const r = await fetch('hierarchy.php', { method:'POST', body: form });
+            const r = await fetch('hierarchy.php', { method:'POST', body: form });
   try { return await r.json(); } catch { return null; }
 }
 
@@ -838,35 +955,67 @@ const imagesInput = document.getElementById('images');
 const liveImagesPreview = document.getElementById('liveImagesPreview');
 const previewImagesGrid = document.getElementById('previewImagesGrid');
 const formEl = document.getElementById('wizardForm');
+const clearAllImagesBtn = document.getElementById('clearAllImages');
 let selectedImageDataURLs = [];
 const imageSizeWarning = document.getElementById('imageSizeWarning');
 
-function renderThumb(container, dataURL){
+function renderThumb(container, dataURL, showRemoveBtn = false){
   const wrap = document.createElement('div');
-  wrap.style.width = '90px'; wrap.style.height = '90px'; wrap.style.border = '1px solid #E0E0E0'; wrap.style.borderRadius = '8px'; wrap.style.overflow = 'hidden'; wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.justifyContent='center';
+  wrap.style.width = '90px'; wrap.style.height = '90px'; wrap.style.border = '1px solid #E0E0E0'; wrap.style.borderRadius = '8px'; wrap.style.overflow = 'hidden'; wrap.style.display='flex'; wrap.style.alignItems='center'; wrap.style.justifyContent='center'; wrap.style.position = 'relative';
   const img = document.createElement('img'); img.src = dataURL; img.style.maxWidth='100%'; img.style.maxHeight='100%'; img.style.objectFit='cover';
-  wrap.appendChild(img); container.appendChild(wrap);
+  wrap.appendChild(img);
+  
+  if (showRemoveBtn) {
+    const removeBtn = document.createElement('button');
+    removeBtn.innerHTML = '×';
+    removeBtn.style.position = 'absolute'; removeBtn.style.top = '2px'; removeBtn.style.right = '2px';
+    removeBtn.style.width = '20px'; removeBtn.style.height = '20px'; removeBtn.style.borderRadius = '50%';
+    removeBtn.style.background = '#ef4444'; removeBtn.style.color = 'white'; removeBtn.style.border = 'none';
+    removeBtn.style.cursor = 'pointer'; removeBtn.style.fontSize = '12px'; removeBtn.style.fontWeight = 'bold';
+    removeBtn.addEventListener('click', function() {
+      const index = Array.from(container.children).indexOf(wrap);
+      if (index > -1) {
+        selectedImageDataURLs.splice(index, 1);
+        wrap.remove();
+        updateClearButton();
+        try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
+      }
+    });
+    wrap.appendChild(removeBtn);
+  }
+  
+  container.appendChild(wrap);
+}
+
+function updateClearButton() {
+  if (clearAllImagesBtn) {
+    clearAllImagesBtn.style.display = selectedImageDataURLs.length > 0 ? 'block' : 'none';
+  }
 }
 
 imagesInput?.addEventListener('change', function(){
-  liveImagesPreview.innerHTML = '';
-  selectedImageDataURLs = [];
+  // Don't clear existing previews - allow multiple selections
   const files = Array.from(this.files || []);
   const maxSize = 5 * 1024 * 1024;
   let overs = [];
+  let newImagesCount = 0;
+  
   files.forEach(file => {
     if (!file.type.startsWith('image/')) return;
     if (file.size > maxSize) { overs.push(file.name); return; }
-    const reader = new FileReader();
+                const reader = new FileReader();
     reader.onload = e => {
       const url = e.target.result;
       selectedImageDataURLs.push(url);
-      renderThumb(liveImagesPreview, url);
+      renderThumb(liveImagesPreview, url, true); // Show remove button for individual images
+      newImagesCount++;
+      updateClearButton();
       // persist to sessionStorage so preview survives step navigation
       try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
-    };
-    reader.readAsDataURL(file);
-  });
+                };
+                reader.readAsDataURL(file);
+            });
+            
   if (overs.length){
     imageSizeWarning.style.display = 'block';
     imageSizeWarning.textContent = 'These files exceed 5MB and were skipped: ' + overs.join(', ');
@@ -874,6 +1023,9 @@ imagesInput?.addEventListener('change', function(){
     imageSizeWarning.style.display = 'none';
     imageSizeWarning.textContent = '';
   }
+  
+  // Clear the input so user can select more files
+  this.value = '';
 });
 
 // On submit to step 5, mirror current thumbs to preview grid so user sees them
@@ -886,6 +1038,15 @@ formEl?.addEventListener('submit', function(){
   }
 });
 
+// Clear all images functionality
+clearAllImagesBtn?.addEventListener('click', function(){
+  selectedImageDataURLs = [];
+  if (liveImagesPreview) liveImagesPreview.innerHTML = '';
+  if (previewImagesGrid) previewImagesGrid.innerHTML = '';
+  updateClearButton();
+  try { sessionStorage.removeItem('prop_images'); } catch {}
+});
+
 // Restore previews from sessionStorage on load (for both step 4 and 5)
 window.addEventListener('DOMContentLoaded', ()=>{
   try {
@@ -894,15 +1055,31 @@ window.addEventListener('DOMContentLoaded', ()=>{
       const urls = JSON.parse(saved) || [];
       if (liveImagesPreview) {
         liveImagesPreview.innerHTML = '';
-        urls.forEach(url => renderThumb(liveImagesPreview, url));
+        urls.forEach(url => renderThumb(liveImagesPreview, url, true)); // Show remove buttons
       }
       if (previewImagesGrid) {
         previewImagesGrid.innerHTML = '';
-        urls.forEach(url => renderThumb(previewImagesGrid, url));
+        urls.forEach(url => renderThumb(previewImagesGrid, url)); // No remove buttons in preview
       }
       selectedImageDataURLs = urls;
+      updateClearButton();
     }
   } catch {}
 });
+
+// Handle close button click
+document.querySelector('.close-btn')?.addEventListener('click', function(){
+  // Redirect back to properties index page
+  window.location.href = 'index.php';
+});
+
+// Prevent background iframe from capturing clicks
+document.addEventListener('click', function(e) {
+  // If click is outside modal container, redirect to index
+  if (!document.querySelector('.modal-container').contains(e.target)) {
+    window.location.href = 'index.php';
+  }
+});
+
     </script>
 </script>
