@@ -99,78 +99,93 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
-        body{ background:var(--bg); color:#111827; }
-        /* Topbar (match dashboard) */
-        .card{ border:0; border-radius:var(--radius); background:var(--card); }
+        :root {
+            --primary-color: #ef4444;
+            --bg: #F4F7FA;
+            --card: #FFFFFF;
+            --line: #E0E0E0;
+        }
+        body{ background:var(--bg); color:#111827; margin:0; }
+        /* Background iframe with blur */
+        .background-iframe {
+            position: fixed; top:0; left:0; width:100%; height:100%; border:none; z-index:-2;
+        }
+        .blur-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,.4); backdrop-filter: blur(3px); z-index:-1;
+        }
+        /* Modal overlay + container */
+        .modal-overlay { position: fixed; inset:0; background: transparent; display:flex; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+        .modal-container { background: var(--card); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:640px; max-height:90vh; overflow:auto; position:relative; z-index:1001; border:1px solid rgba(255,255,255,0.1); }
+        .order-card { padding: 2rem; box-sizing: border-box; }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+        .card-header h1 { font-size:1.25rem; font-weight:600; margin:0; }
+        .close-btn { font-size:1.5rem; color:#999; cursor:pointer; border:none; background:none; }
+        .btn-animated-confirm { background: var(--primary-color); color:#fff; border:0; padding:.8rem 1.5rem; border-radius:8px; display:inline-flex; align-items:center; gap:.5rem; }
+        .btn-outline-secondary { border-radius:8px; }
+        /* Form look */
         .form-control{ border-radius:12px; border:1px solid var(--line); }
-        .form-control:focus{ border-color:var(--primary); box-shadow:0 0 0 3px rgba(225, 29, 42, .1); }
+        .form-control:focus{ border-color:var(--primary-color); box-shadow:0 0 0 3px rgba(239,68,68,.15); }
         .image-drop{ border:2px dashed var(--line); border-radius:12px; padding:1.5rem; text-align:center; background:#fafbfc; transition:all .2s ease; }
-        .image-drop.dragover{ border-color:var(--primary); background:#fef2f2; }
-        .image-drop:hover{ border-color:var(--primary); background:#fef2f2; }
-        .image-drop .btn-outline-primary{ color:var(--primary); border-color:var(--primary); }
-        .image-drop .btn-outline-primary:hover{ background-color:var(--primary); border-color:var(--primary); color:#fff; }
+        .image-drop.dragover{ border-color:var(--primary-color); background:#fef2f2; }
+        .image-drop:hover{ border-color:var(--primary-color); background:#fef2f2; }
+        .image-drop .btn-outline-primary{ color:var(--primary-color); border-color:var(--primary-color); }
+        .image-drop .btn-outline-primary:hover{ background-color:var(--primary-color); border-color:var(--primary-color); color:#fff; }
         .preview{ margin-top:10px; }
         .preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #e9eef5; }
+        @media (max-width: 600px){ .modal-container { max-width: 95%; } }
     </style>
-    
 </head>
 <body>
-    <?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('categories'); ?>
-    <div class="content">
-        <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Category'); ?>
+    <!-- Background iframe showing categories index page -->
+    <iframe src="index.php" class="background-iframe" title="Categories Background"></iframe>
+    <div class="blur-overlay"></div>
 
-        <div class="container-fluid p-4">
-            <div class="d-flex align-items-center justify-content-between mb-4">
-                <div>
-                    <h2 class="h4 mb-1 fw-semibold">Add New Category</h2>
-                    <p class="text-muted mb-0">Create a category to organize your properties</p>
-                </div>
-                <a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Back to Categories</a>
-            </div>
+    <div class="modal-overlay">
+        <div class="modal-container">
+            <div class="order-card">
+                <header class="card-header">
+                    <h1>Add Category</h1>
+                    <button class="close-btn" aria-label="Close">&times;</button>
+                </header>
 
-            <?php if ($message): ?>
-                <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($message); ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
+                <?php if ($message): ?>
+                    <div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
+                        <i class="fa-solid fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($message); ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <?php endif; ?>
 
-            <form method="post" enctype="multipart/form-data" id="categoryForm">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label class="form-label">Category Name</label>
-                                    <input type="text" class="form-control" name="name" placeholder="e.g., Residential, Commercial" required>
-                                </div>
-                                <div>
-                                    <label class="form-label">Category Image (optional)</label>
-                                    <div id="drop" class="image-drop">
-                                        <i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-                                        <div class="mb-2">Drop image here or click to browse</div>
-                                        <input type="file" name="image" id="image" accept="image/*" class="d-none">
-                                        <button type="button" class="btn btn-outline-primary" id="chooseBtn"><i class="fa-solid fa-plus me-1"></i>Choose Image</button>
-                                        <div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
-                                    </div>
-                                    <div class="preview" id="preview" style="display:none;">
-                                        <img id="previewImg" src="" alt="Preview">
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-end gap-2 mt-3">
-                                    <a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
-                                    <button type="submit" class="btn-animated-confirm noselect">
-                                        <span class="text">Add Category</span>
-                                        <span class="icon">
-                                            <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
+                <form method="post" enctype="multipart/form-data" id="categoryForm">
+                    <div class="mb-3">
+                        <label class="form-label">Category Name</label>
+                        <input type="text" class="form-control" name="name" placeholder="e.g., Residential, Commercial" required>
+                    </div>
+                    <div>
+                        <label class="form-label">Category Image (optional)</label>
+                        <div id="drop" class="image-drop">
+                            <i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                            <div class="mb-2">Drop image here or click to browse</div>
+                            <input type="file" name="image" id="image" accept="image/*" class="d-none">
+                            <button type="button" class="btn btn-outline-primary" id="chooseBtn"><i class="fa-solid fa-plus me-1"></i>Choose Image</button>
+                            <div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
+                        </div>
+                        <div class="preview" id="preview" style="display:none;">
+                            <img id="previewImg" src="" alt="Preview">
                         </div>
                     </div>
-                </div>
-            </form>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
+                        <button type="submit" class="btn-animated-confirm noselect">
+                            <span class="text">Add Category</span>
+                            <span class="icon">
+                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -207,6 +222,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         document.getElementById('categoryForm').addEventListener('submit', function(e){
             const name = this.querySelector('input[name="name"]').value.trim();
             if (name.length < 2) { e.preventDefault(); alert('Please enter a valid category name'); }
+        });
+
+        // Close button and outside click navigates back
+        document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
+        document.addEventListener('click', function(e){
+            const modal = document.querySelector('.modal-container');
+            if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
         });
     </script>
 </body>

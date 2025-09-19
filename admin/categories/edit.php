@@ -94,124 +94,121 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Edit Category - Big Deal</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
-	<style>
-		
-		body{ background:var(--bg); color:#111827; }
-
-		/* Topbar styling to match blogs list */
-
-		.image-drop{ border:2px dashed var(--line); border-radius:12px; padding:1.5rem; text-align:center; background:#fafbfc; transition:all .2s ease; }
-		.image-drop.dragover{ border-color:var(--primary); background:#fef2f2; }
-		.image-drop:hover{ border-color:var(--primary); background:#fef2f2; }
-		.image-drop .btn-outline-primary{ color:var(--primary); border-color:var(--primary); }
-		.image-drop .btn-outline-primary:hover{ background-color:var(--primary); border-color:var(--primary); color:#fff; }
-		.preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #e9eef5; }
-		  }
-	</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Category</title>
+    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
+    <style>
+        :root { --border-color:#E0E0E0; --text:#333; --bg:#F4F7FA; --card:#fff; --primary:#ef4444; }
+        body, input, select, textarea, button { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif; }
+        body { background: var(--bg); margin:0; color: var(--text); }
+        .background-iframe { position: fixed; inset:0; width:100%; height:100%; border:none; z-index:-2; }
+        .blur-overlay { position: fixed; inset:0; background: rgba(0,0,0,.4); backdrop-filter: blur(3px); z-index:-1; }
+        .modal-overlay { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+        .modal-container { background: var(--card); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:760px; max-height:90vh; overflow:auto; position:relative; border:1px solid rgba(255,255,255,0.1); }
+        .order-card { padding:2rem; box-sizing:border-box; display:flex; flex-direction:column; }
+        .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
+        .card-header h1 { font-size:1.4rem; font-weight:600; margin:0; }
+        .close-btn { font-size:1.5rem; color:#999; cursor:pointer; border:none; background:none; }
+        label { font-size:.9rem; color:#555; font-weight:500; margin-bottom:6px; display:block; }
+        input[type="text"], input[type="file"], select, textarea { width:100%; padding:.75rem; border:1px solid var(--border-color); border-radius:8px; font-size:1rem; box-sizing:border-box; }
+        .image-drop{ border:1px dashed var(--border-color); border-radius:12px; padding:1rem; text-align:center; background:#fafafa; }
+        .preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:1px solid var(--border-color); }
+        .footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+        .btn { padding:.8rem 1.2rem; border:none; border-radius:8px; font-size:1rem; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
+        .btn-secondary { background:#ffffff; color:var(--text); border:1px solid var(--border-color); }
+        .btn-secondary:hover { background:#f5f5f5; }
+    </style>
 </head>
 <body>
-	<?php require_once __DIR__ . '/../components/sidebar.php'; renderAdminSidebar('categories'); ?>
-	<div class="content">
-		<?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Category'); ?>
+    <iframe src="index.php" class="background-iframe" title="Categories Background"></iframe>
+    <div class="blur-overlay"></div>
+    <div class="modal-overlay">
+        <div class="modal-container">
+            <div class="order-card">
+                <header class="card-header">
+                    <h1>Edit Category</h1>
+                    <button class="close-btn" aria-label="Close" onclick="window.location.href='index.php'">&times;</button>
+                </header>
 
-		<div class="container-fluid p-4">
-			<div class="d-flex align-items-center justify-content-between mb-4">
-				<div>
-					<h2 class="h4 mb-1 fw-semibold">Edit Category</h2>
-					<p class="text-muted mb-0">Update the category details</p>
-				</div>
-				<a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Back to Categories</a>
-			</div>
+                <?php if ($message): ?>
+                    <div style="background-color:#eef9f1;border:1px solid #ccead6;color:#166534;padding:10px;margin:10px 0;border-radius:6px;">
+                        <?php echo htmlspecialchars($message); ?>
+                    </div>
+                <?php endif; ?>
 
-			<?php if ($message): ?>
-				<div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
-					<i class="fa-solid fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($message); ?>
-					<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-				</div>
-			<?php endif; ?>
+                <form method="post" enctype="multipart/form-data" id="categoryForm">
+                    <div>
+                        <div class="mb-3">
+                            <label>Category Name</label>
+                            <input type="text" name="name" value="<?php echo htmlspecialchars($category['name']); ?>" required>
+                        </div>
+                        <?php $has_image = ($mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'")?->num_rows ?? 0) > 0; ?>
+                        <?php if ($has_image): ?>
+                        <div class="mb-2">
+                            <label>Category Image (optional)</label>
+                            <div class="image-drop" id="drop">
+                                <div style="margin-bottom:8px;font-weight:500;">Drop image here or click to browse</div>
+                                <input type="file" name="image" accept="image/*" id="image" style="display:none;">
+                                <div style="margin-top:8px;">
+                                    <button type="button" class="btn btn-secondary" id="chooseBtn">Choose Image</button>
+                                </div>
+                                <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
+                            </div>
+                            <div class="preview" id="preview" style="margin-top:8px;display:block;">
+                                <?php if (!empty($category['image'])): ?>
+                                    <img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" alt="Current Image">
+                                <?php else: ?>
+                                    <span class="text-muted">No current image</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
 
-			<form method="post" enctype="multipart/form-data" id="categoryForm">
-				<div class="row">
-					<div class="col-lg-12">
-						<div class="card mb-4">
-							<div class="card-body">
-								<div class="mb-3">
-									<label class="form-label">Category Name</label>
-									<input type="text" class="form-control" name="name" value="<?php echo htmlspecialchars($category['name']); ?>" required>
-								</div>
-								<?php $has_image = ($mysqli->query("SHOW COLUMNS FROM categories LIKE 'image'")?->num_rows ?? 0) > 0; ?>
-								<?php if ($has_image): ?>
-								<div>
-									<label class="form-label">Category Image (optional)</label>
-									<div class="image-drop" id="drop">
-										<i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
-										<div class="mb-2">Drop image here or click to browse</div>
-										<input type="file" name="image" accept="image/*" class="d-none" id="image">
-										<button type="button" class="btn btn-outline-primary" id="chooseBtn"><i class="fa-solid fa-plus me-1"></i>Choose Image</button>
-										<div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
-									</div>
-									<div class="preview mt-2" id="preview" style="display:block;">
-										<?php if (!empty($category['image'])): ?>
-											<img src="../../uploads/categories/<?php echo htmlspecialchars($category['image']); ?>" alt="Current Image">
-										<?php else: ?>
-											<span class="text-muted">No current image</span>
-										<?php endif; ?>
-									</div>
-								</div>
-								<?php endif; ?>
-								<div class="d-flex justify-content-end gap-2 mt-3">
-									<a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
-									<button type="submit" class="btn-animated-confirm noselect">
-										<span class="text">Update Category</span>
-										<span class="icon">
-											<svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
-										</span>
-									</button>
-								</div>
-							</div>
-						</div>
-					</div>
-			</form>
-		</div>
-	</div>
+                        <div class="footer-actions">
+                            <a href="index.php" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn-animated-confirm noselect">
+                                <span class="text">Update Category</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path></svg>
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        const drop = document.getElementById('drop');
+        const input = document.getElementById('image');
+        const chooseBtn = document.getElementById('chooseBtn');
+        const preview = document.getElementById('preview');
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<script>
-		const drop = document.getElementById('drop');
-		const input = document.getElementById('image');
-		const chooseBtn = document.getElementById('chooseBtn');
-		const preview = document.getElementById('preview');
+        if (drop) {
+            drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('dragover'); });
+            drop.addEventListener('dragleave', (e)=>{ e.preventDefault(); drop.classList.remove('dragover'); });
+            drop.addEventListener('drop', (e)=>{
+                e.preventDefault(); drop.classList.remove('dragover');
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showPreview(); }
+            });
+            drop.addEventListener('click', ()=> input && input.click());
+        }
 
-		if (drop) {
-			drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('dragover'); });
-			drop.addEventListener('dragleave', (e)=>{ e.preventDefault(); drop.classList.remove('dragover'); });
-			drop.addEventListener('drop', (e)=>{
-				e.preventDefault(); drop.classList.remove('dragover');
-				if (e.dataTransfer.files && e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showPreview(); }
-			});
-			drop.addEventListener('click', ()=> input && input.click());
-		}
+        chooseBtn && chooseBtn.addEventListener('click', function(e){ e.stopPropagation(); input && input.click(); });
+        input && input.addEventListener('change', showPreview);
 
-		chooseBtn && chooseBtn.addEventListener('click', function(e){ e.stopPropagation(); input && input.click(); });
-		input && input.addEventListener('change', showPreview);
-
-		function showPreview(){
-			const file = input && input.files && input.files[0];
-			if (!file) { return; }
-			const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
-			if (!allowed.includes(file.type)) { alert('Please select a JPG, PNG, GIF, or WebP image'); input.value=''; return; }
-			if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
-			const reader = new FileReader();
-			reader.onload = (e)=>{ preview.innerHTML = '<img src="' + e.target.result + '" style="width:140px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9eef5;">'; };
-			reader.readAsDataURL(file);
-		}
-	</script>
+        function showPreview(){
+            const file = input && input.files && input.files[0];
+            if (!file) { return; }
+            const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+            if (!allowed.includes(file.type)) { alert('Please select a JPG, PNG, GIF, or WebP image'); input.value=''; return; }
+            if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
+            const reader = new FileReader();
+            reader.onload = (e)=>{ preview.innerHTML = '<img src="' + e.target.result + '" style="width:140px;height:140px;object-fit:cover;border-radius:10px;border:1px solid #e0e0e0;">'; };
+            reader.readAsDataURL(file);
+        }
+    </script>
 </body>
 </html>
 

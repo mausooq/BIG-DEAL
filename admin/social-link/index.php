@@ -413,9 +413,21 @@ function getPlatformColor($platform) {
 		</div>
 	</div>
 
-	<!-- Add Social Link Modal -->
+    <style>
+    /* Center modals and blur backdrop; match blogs form inputs */
+    .modal-dialog.modal-dialog-centered { display:flex; align-items:center; min-height:calc(100% - 3.5rem); }
+    .modal-backdrop.show { background: rgba(0,0,0,.4); backdrop-filter: blur(3px); }
+    .modal-content { border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); border:1px solid rgba(255,255,255,0.1); }
+    .modal-body label.form-label { font-size:.9rem; color:#555; font-weight:500; margin-bottom:6px; }
+    .modal-body input[type="text"], .modal-body input[type="url"], .modal-body textarea, .modal-body select { width:100%; padding:.75rem; border:1px solid #E0E0E0; border-radius:8px; font-size:1rem; box-sizing:border-box; }
+    .modal-footer { gap:.5rem; }
+    .btn.btn-secondary { background:#fff; color:#111827; border:1px solid #E0E0E0; }
+    .btn.btn-secondary:hover { background:#f5f5f5; }
+    </style>
+
+    <!-- Add Social Link Modal -->
 	<div class="modal fade" id="addSocialLinkModal" tabindex="-1">
-		<div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add New Social Media Link</h5>
@@ -465,7 +477,7 @@ function getPlatformColor($platform) {
 
 	<!-- Edit Social Link Modal -->
 	<div class="modal fade" id="editSocialLinkModal" tabindex="-1">
-		<div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Edit Social Media Link</h5>
@@ -516,7 +528,7 @@ function getPlatformColor($platform) {
 
 	<!-- Delete Confirmation Modal -->
 	<div class="modal fade" id="deleteModal" tabindex="-1">
-		<div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Confirm Delete</h5>

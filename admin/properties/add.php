@@ -26,9 +26,72 @@ if ($current_step < 1 || $current_step > $total_steps) {
     $current_step = 1;
 }
 
+// If Plot category selected, do not allow landing on step 3
+if ($current_step === 3 && is_plot_category($mysqli)) {
+    header('Location: ?step=4');
+    exit();
+}
+
 // Initialize session data if it doesn't exist
 if (!isset($_SESSION['form_data']) || !is_array($_SESSION['form_data'])) {
     $_SESSION['form_data'] = [];
+}
+
+// Helper: is selected category a Plot? (case-insensitive match on category name)
+function is_plot_category($mysqli) {
+    $cid = isset($_SESSION['form_data']['category_id']) ? (int)$_SESSION['form_data']['category_id'] : 0;
+    if ($cid <= 0) { return false; }
+    $res = $mysqli->query("SELECT name FROM categories WHERE id=".$cid." LIMIT 1");
+    if ($res && $row = $res->fetch_assoc()) {
+        return strcasecmp(trim($row['name']), 'Plot') === 0;
+    }
+    return false;
+}
+
+// Gating helpers: validation and furthest step logic
+function _get_form_value($key) { return $_SESSION['form_data'][$key] ?? ''; }
+
+function validate_step_1(&$msg) {
+    $title = trim(_get_form_value('title'));
+    $location = trim(_get_form_value('location'));
+    $price = _get_form_value('price');
+    $area = _get_form_value('area');
+    if ($title === '') { $msg = 'Please enter Title.'; return false; }
+    if ($location === '') { $msg = 'Please enter Location.'; return false; }
+    if ($price === '' || !is_numeric($price) || (float)$price <= 0) { $msg = 'Please enter a valid Price.'; return false; }
+    if ($area === '' || !is_numeric($area) || (float)$area <= 0) { $msg = 'Please enter a valid Area.'; return false; }
+    return true;
+}
+
+function validate_step_2(&$msg) {
+    $state_id = (int)(_get_form_value('state_id') ?: 0);
+    $district_id = (int)(_get_form_value('district_id') ?: 0);
+    $city_id = (int)(_get_form_value('city_id') ?: 0);
+    $town_id = (int)(_get_form_value('town_id') ?: 0);
+    $pincode = trim(_get_form_value('pincode'));
+    if ($state_id <= 0) { $msg = 'Please select State.'; return false; }
+    if ($district_id <= 0) { $msg = 'Please select District.'; return false; }
+    if ($city_id <= 0) { $msg = 'Please select City.'; return false; }
+    if ($town_id <= 0) { $msg = 'Please select Town.'; return false; }
+    if ($pincode === '') { $msg = 'Please enter Pincode.'; return false; }
+    return true;
+}
+
+function validate_step_3(&$msg) {
+    // No required fields currently; always valid
+    return true;
+}
+
+function furthest_allowed_step($mysqli) {
+    $furthest = 1; $m = '';
+    if (!validate_step_1($m)) { return $furthest; }
+    $furthest = 2;
+    if (!validate_step_2($m)) { return $furthest; }
+    // If category is Plot, step 3 is skipped; allow reaching preview (5) after images (4)
+    if (is_plot_category($mysqli)) { return 5; }
+    if (!validate_step_3($m)) { return $furthest; }
+    // After step 3 (or if no requirements), allow reaching preview (5)
+    return 5;
 }
 
 // Debug: Log session state (remove in production)
@@ -159,7 +222,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             if (!empty($images_data) && is_array($images_data)) {
                 $upload_dir = __DIR__ . '/../../uploads/properties/';
-                if (!is_dir($upload_dir)) {
+            if (!is_dir($upload_dir)) {
                     if (!mkdir($upload_dir, 0777, true)) {
                         throw new Exception('Failed to create uploads directory');
                     }
@@ -200,22 +263,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     if (file_put_contents($file_path, $imageData)) {
                                         // Store only filename (consistent with edit.php)
                                         $image_url = $filename;
-                                        $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
+                            $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
                                         if ($img_stmt) {
-                                            $img_stmt->bind_param('is', $property_id, $image_url);
+                            $img_stmt->bind_param('is', $property_id, $image_url);
                                             if ($img_stmt->execute()) {
                                                 error_log("Successfully saved image: " . $filename);
                                             } else {
                                                 error_log("Failed to insert image record: " . $img_stmt->error);
                                             }
-                                            $img_stmt->close();
-                                        } else {
+                            $img_stmt->close();
+                        } else {
                                             error_log("Failed to prepare image statement: " . $mysqli->error);
-                                        }
-                                    } else {
+                        }
+                    } else {
                                         error_log("Failed to save image file: " . $filename);
-                                    }
-                                } else {
+                    }
+                } else {
                                     error_log("Failed to decode base64 image data for index: " . $index);
                                 }
                             } else {
@@ -239,9 +302,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $imageCount = count($images_data);
             $_SESSION['success_message'] = 'Property added successfully!' . ($imageCount > 0 ? " ($imageCount images uploaded)" : "");
             echo "<script>sessionStorage.removeItem('prop_images'); window.location.href = 'index.php?success=1';</script>";
-            exit();
-            
-        } catch (Exception $e) {
+        exit();
+        
+    } catch (Exception $e) {
             // Rollback transaction on error
             $mysqli->rollback();
             $_SESSION['form_error'] = $e->getMessage();
@@ -256,12 +319,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Determine target step: explicit goto trumps continue
     $goto_step = isset($_POST['goto_step']) ? (int)$_POST['goto_step'] : 0;
     if ($goto_step >= 1 && $goto_step <= $total_steps) {
+        // Validate current step before allowing forward jumps
+        $err = '';
+        $validCurrent = true;
+        if ($submitted_step === 1) { $validCurrent = validate_step_1($err); }
+        elseif ($submitted_step === 2) { $validCurrent = validate_step_2($err); }
+        elseif ($submitted_step === 3 && !is_plot_category($mysqli)) { $validCurrent = validate_step_3($err); }
+
+        // Compute furthest allowed based on saved data
+        $maxAllowed = furthest_allowed_step($mysqli);
+
+        // Skip step 3 for Plot category (handle forward/back)
+        if ($goto_step === 3 && is_plot_category($mysqli)) {
+            if ($submitted_step > 3) { $goto_step = 2; } else { $goto_step = 4; }
+        }
+
+        // Block jumping beyond current if current invalid
+        if (!$validCurrent && $goto_step > $submitted_step) {
+            $_SESSION['form_error'] = $err ?: 'Please complete this step before continuing.';
+            header('Location: ?step=' . $submitted_step);
+            exit();
+        }
+
+        // Clamp to furthest allowed
+        if ($goto_step > $maxAllowed) { $goto_step = $maxAllowed; }
+
         header("Location: ?step=" . $goto_step);
         exit();
     }
 
     // Default continue flow
     $next_step = $submitted_step + 1;
+    // Validate current step before continuing
+    $err = '';
+    $validCurrent = true;
+    if ($submitted_step === 1) { $validCurrent = validate_step_1($err); }
+    elseif ($submitted_step === 2) { $validCurrent = validate_step_2($err); }
+    elseif ($submitted_step === 3 && !is_plot_category($mysqli)) { $validCurrent = validate_step_3($err); }
+    if (!$validCurrent) {
+        $_SESSION['form_error'] = $err ?: 'Please complete this step before continuing.';
+        header('Location: ?step=' . $submitted_step);
+        exit();
+    }
+
+    // Skip step 3 for Plot category on continue flow
+    if ($next_step === 3 && is_plot_category($mysqli)) { $next_step = 4; }
+
+    // Clamp to allowed
+    $maxAllowed = furthest_allowed_step($mysqli);
+    if ($next_step > $maxAllowed) { $next_step = $maxAllowed; }
     if ($next_step <= $total_steps) {
         header("Location: ?step=" . $next_step);
         exit();
@@ -300,7 +406,7 @@ function get_data($field) {
             --completed-step-color: #ef4444;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin:0; }
+        body { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif; background-color: var(--bg-color); color: var(--text-color); margin:0; }
         /* Background iframe with blur effect */
         .background-iframe { 
         position: fixed;
@@ -347,8 +453,11 @@ function get_data($field) {
         }
 
         /* Card Layout */
-        .order-card { padding: 2rem; box-sizing: border-box; }
+        .order-card { padding: 2rem; box-sizing: border-box; display:flex; flex-direction:column; }
 
+        /* Step content wrapper (height set dynamically by JS) */
+        .step-content { display: block; }
+ 
         /* Header */
         .card-header {
         display: flex;
@@ -512,7 +621,7 @@ function get_data($field) {
             border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 1rem;
-            font-family: 'Inter', sans-serif;
+            font-family: inherit;
             box-sizing: border-box;
             transition: border-color 0.2s;
         }
@@ -554,7 +663,7 @@ function get_data($field) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-            margin-top: 2.5rem;
+            margin-top: auto; /* stick footer to bottom when card has a baseline height */
         }
         .btn {
             padding: 0.8rem 1.5rem;
@@ -634,7 +743,7 @@ function get_data($field) {
         <header class="card-header">
             <h1>Add Property</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button type="button" onclick="startNewProperty()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">New Property</button>
+                <button type="button" onclick="startNewProperty()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">Clear From</button>
                 <button class="close-btn" aria-label="Close">&times;</button>
         </div>
         </header>
@@ -664,6 +773,7 @@ function get_data($field) {
 
         <form method="POST" enctype="multipart/form-data" id="wizardForm">
             <input type="hidden" name="step" value="<?php echo $current_step; ?>">
+            <div class="step-content">
 
             <?php if ($current_step == 1): ?>
             <div class="form-grid">
@@ -1334,6 +1444,37 @@ function goToStep(stepNumber) {
     tempForm.submit();
   }
 }
+
+// Ensure steps 2,3,4 match the visual height of steps 1/5 without hardcoding
+document.addEventListener('DOMContentLoaded', function(){
+  try {
+    const card = document.querySelector('.order-card');
+    const content = document.querySelector('.step-content');
+    if (!card || !content) return;
+    const step = parseInt('<?php echo $current_step; ?>', 10);
+
+    // Measure baseline from step 1/5 and apply as card min-height to keep position stable
+    if (step === 1 || step === 5) {
+      // Temporarily clear to measure natural height
+      card.style.minHeight = '';
+      const base = Math.max(card.scrollHeight, card.clientHeight);
+      if (base && base > 0) {
+        try { sessionStorage.setItem('prop_card_base_h', String(base)); } catch {}
+        card.style.minHeight = base + 'px';
+      }
+      // Content can auto-size; footer is anchored bottom via CSS
+      content.style.minHeight = 'auto';
+            } else {
+      // Steps 2–4: keep card min-height fixed to baseline; let content auto-size to remove bottom whitespace
+      const saved = sessionStorage.getItem('prop_card_base_h');
+      const baseNum = parseInt(saved || '', 10);
+      if (!isNaN(baseNum) && baseNum > 0) {
+        card.style.minHeight = baseNum + 'px';
+      }
+      content.style.minHeight = 'auto';
+    }
+  } catch {}
+});
 
     </script>
 </script>

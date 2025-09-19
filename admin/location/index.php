@@ -1458,9 +1458,17 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         </div>
     </div>
 
+    <style>
+    /* Center modals vertically and blur the backdrop to match other pages */
+    .modal-dialog { margin: 1.75rem auto; }
+    .modal-dialog.modal-dialog-centered { display: flex; align-items: center; min-height: calc(100% - 3.5rem); }
+    .modal-backdrop.show { background: rgba(0,0,0,.4); backdrop-filter: blur(3px); }
+    .modal-content { border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,0.1); }
+    </style>
+
     <!-- Add State Modal -->
     <div class="modal fade" id="addStateModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New State</h5>
@@ -1476,8 +1484,10 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">State Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="add_state_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="add_state_choose">Choose Image</button>
                                 <div class="form-text">Upload an image for this state (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div id="add_state_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1499,7 +1509,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Edit State Modal -->
     <div class="modal fade" id="editStateModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit State</h5>
@@ -1517,9 +1527,11 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">State Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="edit_state_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="edit_state_choose">Choose Image</button>
                                 <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
                                 <div id="current_image_preview" class="mt-2"></div>
+                                <div id="edit_state_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1541,7 +1553,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Delete State Modal -->
     <div class="modal fade" id="deleteStateModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete State</h5>
@@ -1570,7 +1582,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Add District Modal -->
     <div class="modal fade" id="addDistrictModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New District</h5>
@@ -1595,8 +1607,10 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">District Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="add_district_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="add_district_choose">Choose Image</button>
                                 <div class="form-text">Upload an image for this district (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div id="add_district_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1618,7 +1632,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Edit District Modal -->
     <div class="modal fade" id="editDistrictModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit District</h5>
@@ -1645,9 +1659,11 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">District Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="edit_district_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="edit_district_choose">Choose Image</button>
                                 <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
                                 <div id="current_district_image_preview" class="mt-2"></div>
+                                <div id="edit_district_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1669,7 +1685,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Delete District Modal -->
     <div class="modal fade" id="deleteDistrictModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete District</h5>
@@ -1698,7 +1714,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Add City Modal -->
     <div class="modal fade" id="addCityModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New City</h5>
@@ -1723,8 +1739,10 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">City Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="add_city_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="add_city_choose">Choose Image</button>
                                 <div class="form-text">Upload an image for this city (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div id="add_city_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1744,9 +1762,39 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         </div>
     </div>
 
+    <script>
+    // Shared preview helper
+    function wirePicker(btnId, inputId, previewId){
+        const btn = document.getElementById(btnId);
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        if (!btn || !input) return;
+        btn.addEventListener('click', function(e){ e.preventDefault(); input.click(); });
+        input.addEventListener('change', function(){
+            const file = input.files && input.files[0];
+            if (!file) return;
+            const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+            if (!allowed.includes(file.type)) { alert('Please select JPG, PNG, GIF, or WebP'); input.value=''; return; }
+            if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
+            if (preview) {
+                const reader = new FileReader();
+                reader.onload = (e)=>{ preview.innerHTML = '<img src="'+e.target.result+'" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e0e0e0;">'; };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    // Wire all modals
+    wirePicker('add_state_choose','add_state_image','add_state_preview');
+    wirePicker('edit_state_choose','edit_state_image','edit_state_preview');
+    wirePicker('add_district_choose','add_district_image','add_district_preview');
+    wirePicker('edit_district_choose','edit_district_image','edit_district_preview');
+    wirePicker('add_city_choose','add_city_image','add_city_preview');
+    wirePicker('edit_city_choose','edit_city_image','edit_city_preview');
+    </script>
+
     <!-- Edit City Modal -->
     <div class="modal fade" id="editCityModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit City</h5>
@@ -1773,9 +1821,11 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             </div>
                             <div class="col-12">
                                 <label class="form-label">City Image</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
+                                <input type="file" name="image" accept="image/*" id="edit_city_image" style="display:none;">
+                                <button type="button" class="btn btn-secondary" id="edit_city_choose">Choose Image</button>
                                 <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
                                 <div id="current_city_image_preview" class="mt-2"></div>
+                                <div id="edit_city_preview" class="mt-2"></div>
                             </div>
                         </div>
                     </div>
@@ -1797,7 +1847,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
     <!-- Delete City Modal -->
     <div class="modal fade" id="deleteCityModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Delete City</h5>
