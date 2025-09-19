@@ -1,6 +1,11 @@
 <?php
+// Require authentication first
+require_once __DIR__ . '/../auth.php';
+
 // Start the session to store form data across steps
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 require_once __DIR__ . '/../../config/config.php';
 $mysqli = getMysqliConnection();
 // Load states for dropdown
@@ -22,19 +27,56 @@ if ($current_step < 1 || $current_step > $total_steps) {
 }
 
 // Initialize session data if it doesn't exist
-if (!isset($_SESSION['form_data'])) {
+if (!isset($_SESSION['form_data']) || !is_array($_SESSION['form_data'])) {
     $_SESSION['form_data'] = [];
+}
+
+// Debug: Log session state (remove in production)
+if (isset($_GET['debug']) && $_GET['debug'] == '1') {
+    error_log("Session Debug - Current Step: " . $current_step);
+    error_log("Session Debug - Form Data Keys: " . implode(', ', array_keys($_SESSION['form_data'])));
+    error_log("Session Debug - Form Data Count: " . count($_SESSION['form_data']));
+}
+
+// Handle "New Property" request - clear all form data
+if (isset($_GET['new']) && $_GET['new'] == '1') {
+    unset($_SESSION['form_data']);
+    $_SESSION['form_data'] = [];
+    $current_step = 1;
+    // Clear sessionStorage as well
+    echo "<script>sessionStorage.removeItem('prop_images');</script>";
+}
+
+// Auto-clear form data only when explicitly starting fresh (not from navigation)
+if (isset($_GET['fresh']) && $_GET['fresh'] == '1') {
+    // This is an explicit fresh start, clear any existing form data
+    unset($_SESSION['form_data']);
+    $_SESSION['form_data'] = [];
+    $current_step = 1;
 }
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Sanitize and save data for the submitted step
     $submitted_step = isset($_POST['step']) ? (int)$_POST['step'] : $current_step;
+    
+    // Ensure session data array exists
+    if (!isset($_SESSION['form_data']) || !is_array($_SESSION['form_data'])) {
+        $_SESSION['form_data'] = [];
+    }
+    
     foreach ($_POST as $key => $value) {
-        if ($key !== 'step' && $key !== 'goto_step') {
+        if ($key !== 'step' && $key !== 'goto_step' && $key !== 'final_submit') {
             if (is_array($value)) {
                 // Store arrays (e.g., images_data[])
-                $_SESSION['form_data'][$key] = array_map(function($v){ return is_string($v) ? $v : ''; }, $value);
+                $_SESSION['form_data'][$key] = array_map(function($v){ 
+                    return is_string($v) ? htmlspecialchars($v, ENT_QUOTES, 'UTF-8') : ''; 
+                }, $value);
+                
+                // Debug: Log image data when received
+                if ($key === 'images_data') {
+                    error_log("Received images_data array with " . count($value) . " items");
+                }
             } else {
                 $_SESSION['form_data'][$key] = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
             }
@@ -45,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['final_submit']) && (int)$_POST['final_submit'] === 1) {
         $mysqli = getMysqliConnection();
         try {
+            // Get form data from session
             $title = trim($_SESSION['form_data']['title'] ?? '');
             $description = trim($_SESSION['form_data']['description'] ?? '');
             $listing_type = $_SESSION['form_data']['listing_type'] ?? 'Buy';
@@ -73,61 +116,140 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $city_id = isset($_SESSION['form_data']['city_id']) && $_SESSION['form_data']['city_id'] !== '' ? (int)$_SESSION['form_data']['city_id'] : 0;
             $town_id = isset($_SESSION['form_data']['town_id']) && $_SESSION['form_data']['town_id'] !== '' ? (int)$_SESSION['form_data']['town_id'] : 0;
             $pincode = trim($_SESSION['form_data']['pincode'] ?? '');
+            
         if ($state_id <= 0 || $district_id <= 0 || $city_id <= 0 || $town_id <= 0 || $pincode === '') {
                 throw new Exception('Please complete the location hierarchy before finishing.');
         }
 
+            // Start transaction
+            $mysqli->begin_transaction();
+
         // Insert property
         $sql = "INSERT INTO properties (title, description, listing_type, price, location, landmark, area, configuration, category_id, furniture_status, ownership_type, facing, parking, balcony, status, map_embed_link, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
         $stmt = $mysqli->prepare($sql);
+            if (!$stmt) {
+                throw new Exception('Failed to prepare property statement: ' . $mysqli->error);
+            }
         $stmt->bind_param('sssdsisssssssiss', $title, $description, $listing_type, $price, $location, $landmark, $area, $configuration, $category_id, $furniture_status, $ownership_type, $facing, $parking, $balcony, $status, $map_embed_link);
-            if (!$stmt->execute()) { throw new Exception('Failed to add property: ' . $mysqli->error); }
+        if (!$stmt->execute()) { 
+            throw new Exception('Failed to add property: ' . $mysqli->error); 
+        }
         $property_id = $mysqli->insert_id;
         $stmt->close();
 
         // Insert properties_location
         $pl = $mysqli->prepare("INSERT INTO properties_location (property_id, state_id, district_id, city_id, town_id, pincode) VALUES (?, ?, ?, ?, ?, ?)");
-        if ($pl) {
+            if (!$pl) {
+                throw new Exception('Failed to prepare location statement: ' . $mysqli->error);
+            }
             $pl->bind_param('iiiiis', $property_id, $state_id, $district_id, $city_id, $town_id, $pincode);
-                if (!$pl->execute()) { throw new Exception('Failed to save property location'); }
+            if (!$pl->execute()) {
+                throw new Exception('Failed to save property location: ' . $mysqli->error); 
+            }
             $pl->close();
-        }
 
-            // Handle image uploads if provided in this request
-        if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+            // Handle image uploads from sessionStorage (base64 data)
+            $images_data = $_SESSION['form_data']['images_data'] ?? [];
+            
+            // Debug: Log image data
+            error_log("Image data count: " . count($images_data));
+            if (!empty($images_data)) {
+                error_log("First image data length: " . strlen($images_data[0] ?? ''));
+            }
+            
+            if (!empty($images_data) && is_array($images_data)) {
                 $upload_dir = __DIR__ . '/../../uploads/properties/';
-                if (!is_dir($upload_dir)) { mkdir($upload_dir, 0777, true); }
-            $image_count = count($_FILES['images']['name']);
-            for ($i = 0; $i < $image_count; $i++) {
-                if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
-                    $file_extension = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
-                    $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-                        if (!in_array($file_extension, $allowed_extensions)) { continue; }
-                        if ($_FILES['images']['size'][$i] > 5 * 1024 * 1024) { continue; }
-                        $timestamp = time();
-                        $filename = 'property_' . $property_id . '_' . $timestamp . '_' . $i . '.' . $file_extension;
-                        $file_path = $upload_dir . $filename;
-                        if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $file_path)) {
-                            // store relative web path so it serves correctly
-                            $image_url = 'uploads/properties/' . $filename;
-                            $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
-                            $img_stmt->bind_param('is', $property_id, $image_url);
-                            $img_stmt->execute();
-                            $img_stmt->close();
+                if (!is_dir($upload_dir)) {
+                    if (!mkdir($upload_dir, 0777, true)) {
+                        throw new Exception('Failed to create uploads directory');
+                    }
+                }
+                
+                // Check if directory is writable
+                if (!is_writable($upload_dir)) {
+                    throw new Exception('Uploads directory is not writable');
+                }
+
+                foreach ($images_data as $index => $imageDataUrl) {
+                    if (empty($imageDataUrl)) continue;
+                    
+                    // Extract base64 data and mime type
+                    if (strpos($imageDataUrl, 'data:') === 0) {
+                        $parts = explode(';', $imageDataUrl, 2);
+                        if (count($parts) === 2) {
+                            $type = $parts[0];
+                            $dataPart = $parts[1];
+                            
+                            $dataParts = explode(',', $dataPart, 2);
+                            if (count($dataParts) === 2) {
+                                $imageDataUrl = $dataParts[1];
+                                $imageData = base64_decode($imageDataUrl);
+                                
+                                if ($imageData !== false) {
+                                    $mime_type = str_replace('data:', '', $type);
+
+                                    // Determine file extension
+                                    $extension = 'jpg'; // Default
+                                    if (strpos($mime_type, 'png') !== false) $extension = 'png';
+                                    else if (strpos($mime_type, 'gif') !== false) $extension = 'gif';
+                                    else if (strpos($mime_type, 'webp') !== false) $extension = 'webp';
+
+                                    $filename = 'property_' . $property_id . '_' . time() . '_' . $index . '.' . $extension;
+                                    $file_path = $upload_dir . $filename;
+                                    
+                                    if (file_put_contents($file_path, $imageData)) {
+                                        // Store only filename (consistent with edit.php)
+                                        $image_url = $filename;
+                                        $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
+                                        if ($img_stmt) {
+                                            $img_stmt->bind_param('is', $property_id, $image_url);
+                                            if ($img_stmt->execute()) {
+                                                error_log("Successfully saved image: " . $filename);
+                                            } else {
+                                                error_log("Failed to insert image record: " . $img_stmt->error);
+                                            }
+                                            $img_stmt->close();
+                                        } else {
+                                            error_log("Failed to prepare image statement: " . $mysqli->error);
+                                        }
+                                    } else {
+                                        error_log("Failed to save image file: " . $filename);
+                                    }
+                                } else {
+                                    error_log("Failed to decode base64 image data for index: " . $index);
+                                }
+                            } else {
+                                error_log("Invalid base64 data format for index: " . $index);
+                            }
+                        } else {
+                            error_log("Invalid data URL format for index: " . $index);
                         }
+                    } else {
+                        error_log("Image data does not start with 'data:' for index: " . $index);
                     }
                 }
             }
 
-            // Clear session draft and redirect
+            // Commit transaction
+            $mysqli->commit();
+
+            // Clear session data and redirect
             unset($_SESSION['form_data']);
-            header('Location: index.php?success=1');
+            $_SESSION['form_data'] = []; // Ensure it's reset to empty array
+            $imageCount = count($images_data);
+            $_SESSION['success_message'] = 'Property added successfully!' . ($imageCount > 0 ? " ($imageCount images uploaded)" : "");
+            echo "<script>sessionStorage.removeItem('prop_images'); window.location.href = 'index.php?success=1';</script>";
             exit();
+            
         } catch (Exception $e) {
-            // Surface error in simple way on same page
+            // Rollback transaction on error
+            $mysqli->rollback();
             $_SESSION['form_error'] = $e->getMessage();
+            error_log("Property add error: " . $e->getMessage());
             header('Location: ?step=5&error=1');
             exit();
+        } finally {
+            $mysqli->close();
         }
     }
 
@@ -150,6 +272,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Function to get a value from session data, to pre-fill fields
 function get_data($field) {
+    if (!isset($_SESSION['form_data']) || !is_array($_SESSION['form_data'])) {
+        return '';
+    }
     return $_SESSION['form_data'][$field] ?? '';
 }
 ?>
@@ -267,8 +392,7 @@ function get_data($field) {
             cursor: pointer;
         }
 
-        .progressbar li::before {
-            content: counter(step);
+        .progressbar li .step-number {
             width: 32px;
             height: 32px;
             line-height: 32px;
@@ -281,6 +405,12 @@ function get_data($field) {
             font-weight: bold;
             color: #e74c3c;
             transition: all 0.3s ease;
+        }
+
+        .progressbar li .step-label {
+            display: block;
+            font-size: 14px;
+            color: #999;
         }
 
         .progressbar li::after {
@@ -304,20 +434,28 @@ function get_data($field) {
             color: #e74c3c;
         }
 
-        .progressbar li.active::before {
+        .progressbar li.active .step-number {
             border-color: #e74c3c;
             background-color: #e74c3c;
             color: #fff;
+        }
+
+        .progressbar li.active .step-label {
+            color: #e74c3c;
         }
 
         .progressbar li.active ~ li {
             color: #999;
         }
 
-        .progressbar li.active ~ li::before {
+        .progressbar li.active ~ li .step-number {
             border-color: #ccc;
             background-color: #fff;
             color: #ccc;
+        }
+
+        .progressbar li.active ~ li .step-label {
+            color: #999;
         }
 
         .progressbar li.active ~ li::after {
@@ -329,11 +467,19 @@ function get_data($field) {
             color: #e74c3c;
         }
 
-        .progressbar li.completed::before {
+        .progressbar li.completed .step-number {
             border-color: #e74c3c;
             background-color: #e74c3c;
         color: #fff;
             content: "✓";
+        }
+
+        .progressbar li.completed .step-number::before {
+            content: "✓";
+        }
+
+        .progressbar li.completed .step-label {
+            color: #e74c3c;
         }
 
         .progressbar li.completed::after {
@@ -487,8 +633,17 @@ function get_data($field) {
         <div class="order-card">
         <header class="card-header">
             <h1>Add Property</h1>
-            <button class="close-btn" aria-label="Close">&times;</button>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button type="button" onclick="startNewProperty()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">New Property</button>
+                <button class="close-btn" aria-label="Close">&times;</button>
+        </div>
         </header>
+
+        <?php if (isset($_SESSION['form_error'])): ?>
+            <div style="background-color: #fee; border: 1px solid #fcc; color: #c33; padding: 10px; margin: 10px 0; border-radius: 4px;">
+                <strong>Error:</strong> <?php echo htmlspecialchars($_SESSION['form_error']); unset($_SESSION['form_error']); ?>
+                </div>
+            <?php endif; ?>
 
         <ul class="progressbar">
             <?php for ($i = 1; $i <= $total_steps; $i++): 
@@ -500,12 +655,9 @@ function get_data($field) {
                 }
                 $step_labels = ['Basic Information', 'Location Details', 'Property Details', 'Images', 'Preview'];
             ?>
-            <li class="<?php echo $step_class; ?>" title="Click to go to <?php echo $step_labels[$i-1]; ?>">
-                <form method="POST" style="display:contents;">
-                    <input type="hidden" name="step" value="<?php echo $current_step; ?>">
-                    <input type="hidden" name="goto_step" value="<?php echo $i; ?>">
-                    <button type="submit" style="background:none;border:none;cursor:pointer;width:100%;padding:0;margin:0;" title="Go to <?php echo $step_labels[$i-1]; ?>"><?php echo $step_labels[$i-1]; ?></button>
-                </form>
+            <li class="<?php echo $step_class; ?>" title="Click to go to <?php echo $step_labels[$i-1]; ?>" onclick="goToStep(<?php echo $i; ?>)">
+                <span class="step-number"><?php echo $i; ?></span>
+                <span class="step-label"><?php echo $step_labels[$i-1]; ?></span>
             </li>
             <?php endfor; ?>
         </ul>
@@ -818,7 +970,7 @@ function get_data($field) {
                 </div>
 
                 <?php if ($current_step == $total_steps): ?>
-                    <button type="submit" class="btn btn-primary" name="final_submit" value="1">Finish</button>
+                    <button type="submit" class="btn btn-primary" name="final_submit" value="1" onclick="submitWithImages()">Finish</button>
                 <?php else: ?>
                     <button type="submit" class="btn btn-primary" name="goto_step" value="<?php echo min($total_steps, $current_step + 1); ?>">Continue &rightarrow;</button>
                 <?php endif; ?>
@@ -1019,13 +1171,13 @@ imagesInput?.addEventListener('change', function(){
   if (overs.length){
     imageSizeWarning.style.display = 'block';
     imageSizeWarning.textContent = 'These files exceed 5MB and were skipped: ' + overs.join(', ');
-  } else {
+            } else {
     imageSizeWarning.style.display = 'none';
     imageSizeWarning.textContent = '';
   }
   
   // Clear the input so user can select more files
-  this.value = '';
+                this.value = '';
 });
 
 // On submit to step 5, mirror current thumbs to preview grid so user sees them
@@ -1035,6 +1187,24 @@ formEl?.addEventListener('submit', function(){
   if (next === 5 && previewImagesGrid){
     previewImagesGrid.innerHTML = '';
     selectedImageDataURLs.forEach(url => renderThumb(previewImagesGrid, url));
+  }
+  
+  // Always submit image data with the form
+  if (selectedImageDataURLs.length > 0) {
+    // Clear existing hidden inputs
+    const existingInputs = formEl.querySelectorAll('input[name="images_data[]"]');
+    existingInputs.forEach(input => input.remove());
+    
+    // Add each image as a separate hidden input
+    selectedImageDataURLs.forEach((dataURL, index) => {
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'images_data[]';
+      hiddenInput.value = dataURL;
+      formEl.appendChild(hiddenInput);
+    });
+    
+    console.log('Submitting ' + selectedImageDataURLs.length + ' images with form');
   }
 });
 
@@ -1080,6 +1250,90 @@ document.addEventListener('click', function(e) {
     window.location.href = 'index.php';
   }
 });
+
+// Function to start a new property (clear all data)
+function startNewProperty() {
+  if (confirm('Are you sure you want to start a new property? All current data will be lost.')) {
+    // Clear sessionStorage
+    sessionStorage.removeItem('prop_images');
+    // Redirect to clear session data
+    window.location.href = 'add.php?fresh=1';
+  }
+}
+
+// Function to submit form with images for final submission
+function submitWithImages() {
+  const form = document.getElementById('wizardForm');
+  if (form && selectedImageDataURLs.length > 0) {
+    // Clear existing hidden inputs
+    const existingInputs = form.querySelectorAll('input[name="images_data[]"]');
+    existingInputs.forEach(input => input.remove());
+    
+    // Add each image as a separate hidden input
+    selectedImageDataURLs.forEach((dataURL, index) => {
+      const hiddenInput = document.createElement('input');
+      hiddenInput.type = 'hidden';
+      hiddenInput.name = 'images_data[]';
+      hiddenInput.value = dataURL;
+      form.appendChild(hiddenInput);
+    });
+    
+    console.log('Final submit with ' + selectedImageDataURLs.length + ' images');
+  }
+  return true; // Allow form submission to proceed
+}
+
+// Function to handle progress bar step navigation
+function goToStep(stepNumber) {
+  // First, save current form data
+  const form = document.getElementById('wizardForm');
+  if (form) {
+    // Create a temporary form to submit current data
+    const tempForm = document.createElement('form');
+    tempForm.method = 'POST';
+    tempForm.style.display = 'none';
+    
+    // Add current step
+    const stepInput = document.createElement('input');
+    stepInput.type = 'hidden';
+    stepInput.name = 'step';
+    stepInput.value = '<?php echo $current_step; ?>';
+    tempForm.appendChild(stepInput);
+    
+    // Add goto_step
+    const gotoInput = document.createElement('input');
+    gotoInput.type = 'hidden';
+    gotoInput.name = 'goto_step';
+    gotoInput.value = stepNumber;
+    tempForm.appendChild(gotoInput);
+    
+    // Collect all form data from current step
+    const formData = new FormData(form);
+    for (let [key, value] of formData.entries()) {
+      if (key !== 'step' && key !== 'goto_step') {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        tempForm.appendChild(input);
+      }
+    }
+    
+    // Add image data if available
+    if (selectedImageDataURLs.length > 0) {
+      selectedImageDataURLs.forEach((dataURL, index) => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'images_data[]';
+        hiddenInput.value = dataURL;
+        tempForm.appendChild(hiddenInput);
+      });
+    }
+    
+    document.body.appendChild(tempForm);
+    tempForm.submit();
+  }
+}
 
     </script>
 </script>

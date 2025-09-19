@@ -905,7 +905,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                  ${images.length > 0 ? `
                      <div class="property-detail">
                          <div class="label">Property Images (${images.length})</div>
-                         <img src="../../uploads/properties/${images[0].image_url}" 
+                         <img src="../../uploads/properties/${images[0].image_url.split('/').pop()}" 
                               alt="Property Image" 
                               class="drawer-image" 
                               id="mainImage"
@@ -913,10 +913,10 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                          ${images.length > 1 ? `
                              <div class="drawer-image-gallery">
                                  ${images.slice(0, 4).map((img, index) => `
-                                     <img src="../../uploads/properties/${img.image_url}" 
+                                     <img src="../../uploads/properties/${img.image_url.split('/').pop()}" 
                                           alt="Property Image ${index + 1}" 
                                           class="drawer-image-thumb ${index === 0 ? 'active' : ''}" 
-                                          data-image-url="${img.image_url}"
+                                          data-image-url="${img.image_url.split('/').pop()}"
                                           data-index="${index}"
                                           loading="lazy">
                                  `).join('')}
@@ -935,10 +935,10 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                              ${images.length > 4 ? `
                                  <div class="drawer-image-gallery remaining-images" id="remaining-images-${property.id}" style="display: none;">
                                      ${images.slice(4).map((img, index) => `
-                                         <img src="../../uploads/properties/${img.image_url}" 
+                                         <img src="../../uploads/properties/${img.image_url.split('/').pop()}" 
                                               alt="Property Image ${index + 5}" 
                                               class="drawer-image-thumb" 
-                                              data-image-url="${img.image_url}"
+                                              data-image-url="${img.image_url.split('/').pop()}"
                                               data-index="${index + 4}"
                                               loading="lazy">
                                      `).join('')}
@@ -1172,7 +1172,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                  const mainImage = document.getElementById('mainImage');
                  if (imageUrl && mainImage) {
                      // Update main image
-                     mainImage.src = `../../uploads/properties/${imageUrl}`;
+                     mainImage.src = `../../uploads/properties/${imageUrl.split('/').pop()}`;
                      
                      // Update active state
                      document.querySelectorAll('.drawer-image-thumb').forEach(t => t.classList.remove('active'));

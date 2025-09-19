@@ -210,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if ($img_result) {
                         // Delete file - construct full path since we store only filename
-                        $file_path = '../../uploads/properties/' . $img_result['image_url'];
+                        $file_path = '../../uploads/properties/' . basename($img_result['image_url']);
                         if (file_exists($file_path)) {
                             unlink($file_path);
                         }
@@ -540,7 +540,7 @@ $pl_stmt && $pl_stmt->close();
                                     <?php foreach ($existing_images as $image): ?>
                                     <div class="col-md-3 col-sm-4 col-6 mb-3">
                                         <div class="existing-image">
-                                            <img src="../../uploads/properties/<?php echo htmlspecialchars($image['image_url']); ?>" alt="Property Image" class="img-fluid">
+                                            <img src="../../uploads/properties/<?php echo htmlspecialchars(basename($image['image_url'])); ?>" alt="Property Image" class="img-fluid">
                                             <button type="button" class="image-delete-btn" onclick="deleteImage(<?php echo $image['id']; ?>)">
                                                 <i class="fa-solid fa-times"></i>
                                             </button>

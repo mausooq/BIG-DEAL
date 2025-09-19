@@ -134,14 +134,14 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
                     <?php if (!empty($property_images)): ?>
                     <div class="hero">
                         <?php $firstImage = $property_images[0]['image_url'] ?? null; ?>
-                        <img src="../../uploads/properties/<?php echo htmlspecialchars($firstImage); ?>" alt="Property Image" id="heroMainImage" class="hero-main" loading="lazy">
+                        <img src="../../uploads/properties/<?php echo htmlspecialchars(basename($firstImage)); ?>" alt="Property Image" id="heroMainImage" class="hero-main" loading="lazy">
                         <div class="thumbs">
                             <?php foreach ($property_images as $index => $image): ?>
                                 <img 
-                                    src="../../uploads/properties/<?php echo htmlspecialchars($image['image_url']); ?>" 
+                                    src="../../uploads/properties/<?php echo htmlspecialchars(basename($image['image_url'])); ?>" 
                                     alt="Thumb <?php echo $index+1; ?>" 
                                     class="thumb <?php echo $index === 0 ? 'active' : ''; ?>" 
-                                    data-image-url="<?php echo htmlspecialchars($image['image_url']); ?>"
+                                    data-image-url="<?php echo htmlspecialchars(basename($image['image_url'])); ?>"
                                     loading="lazy"
                                 >
                             <?php endforeach; ?>
