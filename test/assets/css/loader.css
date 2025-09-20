@@ -1,0 +1,233 @@
+/* Modern Video Loader Styles */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 1s ease-out, visibility 1s ease-out;
+  overflow: hidden;
+}
+
+.loader-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.loader-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(0.7) contrast(1.2);
+  z-index: 1;
+}
+
+.loader-overlay-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.2) 30%,
+    rgba(0, 0, 0, 0.6) 70%,
+    rgba(0, 0, 0, 0.8) 100%
+  );
+  z-index: 2;
+}
+
+.loader-content {
+  position: relative;
+  z-index: 3;
+  text-align: center;
+  color: white;
+  max-width: 600px;
+  padding: 0 20px;
+}
+
+.loader-text {
+  font-family: "Poppins", sans-serif;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+  letter-spacing: 2px;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 1s ease 0.5s forwards;
+}
+
+.loader-progress {
+  position: relative;
+  width: 100%;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.progress-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #ff0000, #ff4444, #ff0000);
+  width: 0%;
+  border-radius: 1px;
+  animation: progressAnimation 2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes progressAnimation {
+  0% {
+    width: 0%;
+    transform: translateX(0);
+  }
+  50% {
+    width: 70%;
+    transform: translateX(0);
+  }
+  100% {
+    width: 100%;
+    transform: translateX(0);
+  }
+}
+
+/* Video overlay effects */
+.loader-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 2;
+  animation: pulseOverlay 3s ease-in-out infinite;
+}
+
+@keyframes pulseOverlay {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .loader-text {
+    font-size: 2rem;
+    letter-spacing: 1px;
+  }
+
+  .loader-content {
+    max-width: 400px;
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loader-text {
+    font-size: 1.5rem;
+    letter-spacing: 1px;
+    margin-bottom: 1.5rem;
+  }
+
+  .loader-content {
+    max-width: 300px;
+    padding: 0 10px;
+  }
+
+  .loader-progress {
+    height: 1px;
+  }
+}
+
+@media (max-width: 360px) {
+  .loader-text {
+    font-size: 1.2rem;
+  }
+}
+
+/* Performance optimizations */
+.loader-overlay {
+  will-change: opacity, visibility;
+}
+
+.loader-video {
+  will-change: transform, filter;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .loader-video {
+    filter: none;
+  }
+
+  .loader-text {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .progress-line {
+    animation: none;
+    width: 100%;
+  }
+
+  .loader-overlay::before {
+    animation: none;
+  }
+}
+
+/* Loading state for video */
+.loader-video:not([src]) {
+  background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-video:not([src])::before {
+  content: "Loading video...";
+  color: white;
+  font-family: "Poppins", sans-serif;
+  font-size: 1.2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
