@@ -1,4 +1,4 @@
-/* Modern Video Loader Styles */
+/* Modern GIF Loader Styles */
 .loader-overlay {
   position: fixed;
   top: 0;
@@ -14,6 +14,7 @@
   visibility: visible;
   transition: opacity 1s ease-out, visibility 1s ease-out;
   overflow: hidden;
+  will-change: opacity, visibility;
 }
 
 .loader-overlay.hidden {
@@ -21,16 +22,20 @@
   visibility: hidden;
 }
 
-.loader-video {
+/* GIF Styles - Centered and Big */
+.loader-gif {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  filter: brightness(0.7) contrast(1.2);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80vw;
+  height: 80vh;
+  max-width: 800px;
+  max-height: 600px;
+  object-fit: contain;
   z-index: 1;
+  filter: brightness(0.8) contrast(1.1);
+  will-change: transform, filter;
 }
 
 .loader-overlay-gradient {
@@ -59,8 +64,8 @@
 }
 
 .loader-text {
-  font-family: "Poppins", sans-serif;
-  font-size: 2.5rem;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 3rem;
   font-weight: 700;
   margin-bottom: 2rem;
   text-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
@@ -68,6 +73,10 @@
   opacity: 0;
   transform: translateY(30px);
   animation: fadeInUp 1s ease 0.5s forwards;
+}
+
+.loader-text span {
+  color: #f2212b;
 }
 
 .loader-progress {
@@ -89,6 +98,24 @@
   border-radius: 1px;
   animation: progressAnimation 2s ease-in-out infinite;
   box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+/* GIF overlay effects */
+.loader-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    rgba(0, 0, 0, 0.3) 50%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
+  z-index: 2;
+  animation: pulseOverlay 3s ease-in-out infinite;
 }
 
 /* Animations */
@@ -118,24 +145,6 @@
   }
 }
 
-/* Video overlay effects */
-.loader-overlay::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 50%,
-    rgba(0, 0, 0, 0.7) 100%
-  );
-  z-index: 2;
-  animation: pulseOverlay 3s ease-in-out infinite;
-}
-
 @keyframes pulseOverlay {
   0%,
   100% {
@@ -146,8 +155,84 @@
   }
 }
 
-/* Responsive Design */
+/* Loading state for GIF */
+.loader-gif:not([src]) {
+  background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-gif:not([src])::before {
+  content: "Loading GIF...";
+  color: white;
+  font-family: "SF Pro Display", sans-serif;
+  font-size: 1.2rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* For large screens */
+@media (min-width: 1440px) {
+  .loader-gif {
+    width: 70vw;
+    height: 70vh;
+    max-width: 1000px;
+    max-height: 700px;
+  }
+
+  .loader-text {
+    font-size: 3.5rem;
+  }
+
+  .loader-content {
+    max-width: 800px;
+  }
+}
+
+/* For laptops and desktops */
+@media (max-width: 1280px) {
+  .loader-gif {
+    width: 75vw;
+    height: 75vh;
+    max-width: 900px;
+    max-height: 650px;
+  }
+
+  .loader-text {
+    font-size: 2.8rem;
+  }
+}
+
+/* For tablets */
+@media (max-width: 1024px) {
+  .loader-gif {
+    width: 80vw;
+    height: 75vh;
+    max-width: 800px;
+    max-height: 600px;
+  }
+
+  .loader-text {
+    font-size: 2.5rem;
+  }
+
+  .loader-content {
+    max-width: 500px;
+  }
+}
+
+/* For larger phones (landscape) */
 @media (max-width: 768px) {
+  .loader-gif {
+    width: 90vw;
+    height: 70vh;
+    max-width: 600px;
+    max-height: 400px;
+  }
+
   .loader-text {
     font-size: 2rem;
     letter-spacing: 1px;
@@ -159,7 +244,15 @@
   }
 }
 
+/* For small devices (phones, portrait) */
 @media (max-width: 480px) {
+  .loader-gif {
+    width: 95vw;
+    height: 60vh;
+    max-width: 400px;
+    max-height: 300px;
+  }
+
   .loader-text {
     font-size: 1.5rem;
     letter-spacing: 1px;
@@ -176,24 +269,28 @@
   }
 }
 
+/* For very small phones */
 @media (max-width: 360px) {
+  .loader-gif {
+    width: 98vw;
+    height: 50vh;
+    max-width: 300px;
+    max-height: 250px;
+  }
+
   .loader-text {
     font-size: 1.2rem;
   }
+
+  .loader-content {
+    max-width: 280px;
+    padding: 0 8px;
+  }
 }
 
-/* Performance optimizations */
-.loader-overlay {
-  will-change: opacity, visibility;
-}
-
-.loader-video {
-  will-change: transform, filter;
-}
-
-/* Accessibility */
+/* Accessibility - Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-  .loader-video {
+  .loader-gif {
     filter: none;
   }
 
@@ -211,23 +308,4 @@
   .loader-overlay::before {
     animation: none;
   }
-}
-
-/* Loading state for video */
-.loader-video:not([src]) {
-  background: linear-gradient(45deg, #1a1a1a, #2d2d2d);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.loader-video:not([src])::before {
-  content: "Loading video...";
-  color: white;
-  font-family: "Poppins", sans-serif;
-  font-size: 1.2rem;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
 }

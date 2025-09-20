@@ -1,14 +1,11 @@
-<!-- Modern Video Loader Component -->
+<!-- Modern GIF Loader Component -->
 <link rel="stylesheet" href="assets/css/loader.css">
 
 <div id="loader" class="loader-overlay">
-  <video autoplay muted loop playsinline class="loader-video">
-    <source src="assets/building.mp4" type="video/mp4">
-    Your browser does not support the video tag.
-  </video>
+  <img src="assets/building.gif" alt="Building animation" class="loader-gif">
   
   <div class="loader-content">
-    <div class="loader-text">Building Your Dream Home...</div>
+    <div class="loader-text ">Big<span>Deal</span>.property</div>
     <div class="loader-progress">
       <div class="progress-line"></div>
     </div>
@@ -18,28 +15,24 @@
 </div>
 
 <script>
-// Modern Video Loader functionality
+// Modern GIF Loader functionality
 document.addEventListener('DOMContentLoaded', function() {
   const loader = document.getElementById('loader');
-  const video = document.querySelector('.loader-video');
+  const gif = document.querySelector('.loader-gif');
   const progressLine = document.querySelector('.progress-line');
   
-  let isVideoLoaded = false;
+  let isGifLoaded = false;
   let progressInterval;
   
-  // Ensure video plays smoothly
-  if (video) {
-    video.addEventListener('loadstart', function() {
-      console.log('Video loading started');
+  // Ensure GIF loads properly
+  if (gif) {
+    gif.addEventListener('load', function() {
+      console.log('GIF loaded successfully');
+      isGifLoaded = true;
     });
     
-    video.addEventListener('canplay', function() {
-      console.log('Video can start playing');
-      isVideoLoaded = true;
-    });
-    
-    video.addEventListener('error', function(e) {
-      console.error('Video loading error:', e);
+    gif.addEventListener('error', function(e) {
+      console.error('GIF loading error:', e);
     });
   }
   
@@ -67,11 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('load', function() {
     setTimeout(function() {
       if (loader) {
-        // Pause video before hiding
-        if (video) {
-          video.pause();
-        }
-        
         // Clear progress animation
         if (progressInterval) {
           clearInterval(progressInterval);
@@ -94,16 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
           }, 1000);
         }, 500);
       }
-    }, 2000); // Minimum 2 seconds display time for video
+    }, 2000); // Minimum 2 seconds display time for GIF
   });
   
   // Fallback: hide loader after 8 seconds regardless
   setTimeout(function() {
     if (loader && !loader.classList.contains('hidden')) {
-      if (video) {
-        video.pause();
-      }
-      
       if (progressInterval) {
         clearInterval(progressInterval);
       }
