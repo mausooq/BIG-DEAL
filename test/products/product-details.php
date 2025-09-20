@@ -228,22 +228,7 @@
   </section>
 
  <!-- contact  -->
-    <section class="contact-section ">
-      <h2 class="blac2 col-md-6 sfpro">
-        Connect With Our Experts
-      </h2>
-      <p class="blac2-sub poppins">
-        Our team is here to help you find your perfect home.
-      </p>
-       <div class="btn-stack">
-    <button class="btn-black"></button>
-    <button class="btn-red">Contact Us Now</button>
-  </div>
-      <div class="d-flex align-items-center flex-column flex-md-row">
-        <hr class="section-divider">
-        <img class="house-img" src="../assets/images/prop/prop4.png" alt="Modern House" />
-      </div>
-    </section>
+<?php include '../components/letsconnect.php'; ?>
 
 <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/footer.php'; ?>
 

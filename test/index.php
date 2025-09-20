@@ -21,13 +21,19 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
 </head>
 <body>
+  <style>
+
+  </style>
 
   <?php $asset_path = 'assets/'; include __DIR__ . '/components/navbar.php'; ?>
    <section class=" hero-section">
     <div class="text-center  headh  figtree ">
       <h1 class="fw-bold">Find your Beautiful House</h1>
       <p class="sfpro subtitle">From breathtaking views to exquisite furnishings, our accommodations <br>redefine luxury and offer an experience beyond compare.</p>
-      <img src="assets/images/hero-image.jpg" alt="hero-image" class="hero-image">
+      <div class="hero-image-container">
+        <img src="assets/images/hero-image.jpg" alt="hero-image" class="hero-image">
+        <img src="assets/images/hero-image.jpg" alt="hero-image" class="hero-image">
+      </div>
     </div>
     </section>
     
@@ -296,9 +302,6 @@
 
 
     <!-- prime location  -->
-
- 
-       
     <div class="container">
       <div class="location-section">
                 <div class="location-title">
@@ -379,179 +382,19 @@
 
 
 
- <!-- contact  -->
-    <section class="contact-section ">
-      <h2 class="blac2 col-md-6 sfpro">
-        Connect With Our Experts
-      </h2>
-      <p class="blac2-sub poppins">
-        Our team is here to help you find your perfect home.
-      </p>
-       <div class="btn-stack">
-    <button class="btn-black"></button>
-    <button class="btn-red">Contact Us Now</button>
-  </div>
-      <div class="d-flex align-items-center flex-column flex-md-row">
-        <hr class="section-divider">
-        <img class="house-img" src="assets/images/prop/prop4.png" alt="Modern House" />
-      </div>
-    </section>
+     <!-- contact  -->
+    <?php include 'components/letsconnect.php'; ?>
 
 
     <!-- Testimonials -->
-    <section class="testimonials">
-      <div class="container">
-        <h2 class="test-head">Testimonials</h2>
-        <p class="test-sub">Stories from people who found their perfect space</p>
-        
-        <div class="testimonial-content">
-          <div class="testimg">
-            <img src="assets/images/icon/quote.svg" alt="quote" class="quote">
-            <img src="assets/images/prop/prop5.png" alt="House" class="img-fluid">
-          </div>
-
-          <div class="testimonial-carousel">
-            <div class="testimonial-slide active">
-              <div class="testimonial-author">
-                <img src="assets/images/avatar/test1.png" alt="Munazza">
-                <div class="testimonial-author-info">
-                  <h5>Munazza</h5>
-                  <p>Software Developer</p>
-                </div>
-              </div>
-
-              <p>Exquisite sophisticated iconic cutting-edge laborum deserunt esse bureaux cupidatat id minim. Sharp classic the best commodo nostrud delightful.</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="assets/images/avatar/test2.png" alt="John Doe">
-                <div class="testimonial-author-info">
-                  <h5>John Doe</h5>
-                  <p>Designer</p>
-                </div>
-              </div>
-
-              <p>Amazing experience finding my dream home. The team was professional and helped me every step of the way. Highly recommended!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="assets/images/avatar/test3.png" alt="Jane Smith">
-                <div class="testimonial-author-info">
-                  <h5>Jane Smith</h5>
-                  <p>Entrepreneur</p>
-                </div>
-              </div>
-
-              <p>Outstanding service and beautiful properties. I found the perfect office space for my business. Thank you for making it so easy!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="testimonial-nav">
-            <img src="assets/images/icon/prev.svg" alt="previous" id="testimonial-prev">
-            <img src="assets/images/icon/next.svg" alt="next" id="testimonial-next">
-          </div>
-        </div>
-    </section>
+    <?php include 'components/testimonial.php'; ?>
 
 
-  <!-- about section  -->
+    <!-- about section  -->
+    <?php include 'components/about.php'; ?>
 
-
-    <section class="container ">
-      <div class="about-section">
-  <div class="about-image">
-    <img src="assets/images/prop/bhouse2.png" alt="aboutimg" />
-  </div>
-  <div class="about-content">
-    <h1>
-      Hello City We are <br> leader in <span class="highlight">properties.</span>
-       <img src="assets/images/ARROW.png" alt="arrow" class="arrow">
-    </h1>
-     <p>
-      Your dream home isn’t just a vision — it’s a reality waiting for you. As leaders in real estate, we specialize in crafting experiences where luxury meets comfort, and investment meets trust. Explore our handpicked collection of properties designed for modern lifestyles and lasting value.
-    </p>
-    <button class="btn-arrow">
-      View More <span>→</span>
-    </button>
-    <div class="about-stats">
-       <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label">Project</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label" >Project</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
-              </div>
-    </div>
-  </div>
-  </div>
-    </section>
-
-<section class="blog-section ">
-  <div class="section-header">
-    <h2>Explore our latest blogs for<br>real estate insights</h2>
-    <button class="view-all-btn">View all <span>→</span></button>
-  </div>
-  <div class="blog-feature">
-    <div class="blog-image">
-      <img src="assets/images/prop/bhouse3.png" alt="Blogimage1">
-    </div>
-    <div class="blog-card">
-      <span class="blog-read">7 min read</span>
-      <h3>High-end properties</h3>
-      <p>
-        Experience the pinnacle of luxury living with our exclusive collection of high-end properties. Featuring elegant villas, premium apartments, and penthouses in prime locations, these homes are designed with world-class amenities and modern architecture to deliver unmatched comfort, sophistication, and lifestyle value.
-      </p>
-      <div class="blog-author">
-        <img src="assets/images/avatar/test1.png" class="author-img" alt="Admin">
-        <div>
-          <span class="author-name">Admin</span><br>
-          <span class="author-role">Software Dev</span>
-        </div>
-      </div>
-    </div>
-  </div>
-<div class="d-flex blog2">
-  <div class="blog-panel">
-    <img src="assets/images/prop/bhouse4.png" alt="Living Room">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
-  </div>
-  <div class="blog-panel">
-    <img src="assets/images/prop/bhouse5.png" alt="Modern TV Unit">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
-  </div>
-  <div class="blog-panel">
-    <img src="assets/images/prop/bhouse6.png" alt="Contemporary Kitchen">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
-  </div>
-  </div>
-
-</section>
+    <!-- blog section  -->
+    <?php include 'components/blog.php'; ?>
 
 
 

@@ -110,93 +110,12 @@
 
 
     <!-- Testimonials -->
-    <section class="testimonials">
-      <div class="container">
-        <h2 class="test-head">Testimonials</h2>
-        <p class="test-sub">Stories from people who found their perfect space</p>
-        
-        <div class="testimonial-content">
-          <div class="testimg">
-            <img src="../assets/images/icon/quote.svg" alt="quote" class="quote">
-            <img src="../assets/images/prop/prop5.png" alt="House" class="img-fluid">
-          </div>
-
-          <div class="testimonial-carousel">
-            <div class="testimonial-slide active">
-              <div class="testimonial-author">
-                <img src="../assets/images/avatar/test1.png" alt="Munazza">
-                <div class="testimonial-author-info">
-                  <h5>Munazza</h5>
-                  <p>Software Developer</p>
-                </div>
-              </div>
-
-              <p>Exquisite sophisticated iconic cutting-edge laborum deserunt esse bureaux cupidatat id minim. Sharp classic the best commodo nostrud delightful.</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="../assets/images/avatar/test2.png" alt="John Doe">
-                <div class="testimonial-author-info">
-                  <h5>John Doe</h5>
-                  <p>Designer</p>
-                </div>
-              </div>
-
-              <p>Amazing experience finding my dream home. The team was professional and helped me every step of the way. Highly recommended!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="../assets/images/avatar/test3.png" alt="Jane Smith">
-                <div class="testimonial-author-info">
-                  <h5>Jane Smith</h5>
-                  <p>Entrepreneur</p>
-                </div>
-              </div>
-
-              <p>Outstanding service and beautiful properties. I found the perfect office space for my business. Thank you for making it so easy!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="testimonial-nav">
-            <img src="../assets/images/icon/prev.svg" alt="previous" id="testimonial-prev">
-            <img src="../assets/images/icon/next.svg" alt="next" id="testimonial-next">
-          </div>
-        </div>
-    </section>
+<?php include '../components/testimonial.php'; ?>
 
 
     
  <!-- contact  -->
-    <section class="contact-section ">
-      <h2 class="blac2 col-md-6 sfpro">
-        Connect With Our Experts
-      </h2>
-      <p class="blac2-sub poppins">
-        Our team is here to help you find your perfect home.
-      </p>
-       <div class="btn-stack">
-    <button class="btn-black"><img src="../assets/images/icon/rightarrow.svg" alt="rarrow" class="rarrow"></button>
-    <button class="btn-red">Contact Us Now</button>
-  </div>
-      <div class="d-flex align-items-center flex-column flex-md-row">
-        <hr class="section-divider">
-        <img class="house-img" src="../assets/images/prop/prop4.png" alt="Modern House" />
-      </div>
-    </section>
+<?php include '../components/letsconnect.php' ?>;
 
 
     
