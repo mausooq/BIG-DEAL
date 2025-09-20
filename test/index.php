@@ -42,13 +42,13 @@
    <div class="container">
    
         <div class="row  ">
-        <div class="nav-tabs-custom mx-auto ">
+        <div class="nav-tabs-custom mx-auto d-flex justify-content-evenly flex-wrap gap-1">
           <button class="active" type="button">Buy</button>
           <button type="button">Rent</button>
+          <button type="button">Plot</button>
           <button type="button">Commercial</button>
           <button type="button">PG/Co Living</button>
           <button type="button">1BHK/Studio</button>
-          <button type="button">Plot</button>
         </div>
         </div>
 
@@ -302,54 +302,55 @@
 
 
     <!-- prime location  -->
-    <div class="container">
-      <div class="location-section">
-                <div class="location-title">
-                Prime Locations
+    <div class="container location-cont">
+            <div class="location-section">
+                      <div class="location-title">
+                      Prime Locations
+                  </div>
+                  <div class="location-subtitle">
+                    Trending areas you can’t miss    
+                  </div>
+        <div class="container">
+          <div class="location-grid">
+            <div>
+              <div class="city-card">
+                <img src="assets/images/loc/blore.png" alt="Bengaluru">
+                <div class="city-label">Bengaluru</div>
+              </div>
             </div>
-            <div class="location-subtitle">
-              Trending areas you can’t miss    
+            <div>
+              <div class="city-card">
+                <img src="assets/images/loc/mysore.png" alt="Mysuru">
+                <div class="city-label">Mysuru</div>
+              </div>
             </div>
-   <div class="container">
-    <div class="location-grid">
-      <div>
-        <div class="city-card">
-          <img src="assets/images/loc/blore.png" alt="Bengaluru">
-          <div class="city-label">Bengaluru</div>
+            <div>
+              <div class="city-card">
+                <img src="assets/images/loc/mlore.png" alt="Mangaluru">
+                <div class="city-label">Mangaluru</div>
+              </div>
+            </div>
+            <div>
+              <div class="city-card">
+                <img src="assets/images/loc/chikm.png" alt="Chikkamagaluru">
+                <div class="city-label">Chikkamagaluru</div>
+              </div>
+            </div>
+            <div>
+              <div class="city-card">
+                <img src="assets/images/loc/kgd.png" alt="Kasaragod">
+                <div class="city-label">Kasaragod</div>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div>
-        <div class="city-card">
-          <img src="assets/images/loc/mysore.png" alt="Mysuru">
-          <div class="city-label">Mysuru</div>
-        </div>
-      </div>
-      <div>
-        <div class="city-card">
-          <img src="assets/images/loc/mlore.png" alt="Mangaluru">
-          <div class="city-label">Mangaluru</div>
-        </div>
-      </div>
-      <div>
-        <div class="city-card">
-          <img src="assets/images/loc/chikm.png" alt="Chikkamagaluru">
-          <div class="city-label">Chikkamagaluru</div>
-        </div>
-      </div>
-      <div>
-        <div class="city-card">
-          <img src="assets/images/loc/kgd.png" alt="Kasaragod">
-          <div class="city-label">Kasaragod</div>
-        </div>
-      </div>
-    </div>
-   </div>
   </div>
 
     </div>
     </div>
 
 
+    
       <!-- Apartment     -->
       <div class="container  ">
 

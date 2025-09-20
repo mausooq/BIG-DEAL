@@ -7,7 +7,7 @@
   <p>Big Deal Real Estate is your trusted partner in buying, selling, and investing in properties. 
     We focus on transparency, professionalism, and making your real estate journey simple and hassle-free.</p>
 
-    <div>
+    <div class="social-links">
       <a href="https://facebook.com"><img src="https://img.icons8.com/material-rounded/25/facebook-new.png" class="social-icon"></a>
       <a href="https://instagram.com"><img src="https://img.icons8.com/material-rounded/25/instagram-new.png" class="social-icon"></a>
       <a href="https://linkedin.com"><img src="https://img.icons8.com/material-rounded/25/linkedin--v1.png" class="social-icon"></a>
