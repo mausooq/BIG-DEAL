@@ -6,9 +6,9 @@
   <p class="blac2-sub">
     Our team is here to help you find your perfect home.
   </p>
-   <div class="btn-stack">
-    <a href="#">
-    <div class="btn-black">
+   <div class="btn-stack d-flex justify-content-start">
+    <a href="#" class="text-decoration-none">
+    <div class="btn-black d-flex align-items-center">
     <div class="btn-red">
       Contact Us Now
     </div>
