@@ -1,0 +1,307 @@
+/* About Page Responsive Styles */
+
+/* For tablets */
+@media (max-width: 1024px) {
+  .about-page .container {
+    padding: 0 1.25em;
+  }
+  
+  .about-page .hero-banner {
+    padding: 3.75em 0;
+  }
+  
+  .about-page .hero-banner h1 {
+    font-size: 2.5rem;
+  }
+  
+  .about-page .hero-content1 {
+    font-size: 1.8rem;
+  }
+  
+  .about-page .hero-content2 {
+    font-size: 2.2rem;
+  }
+  
+  .about-page .about-content h3 {
+    font-size: 1.8rem;
+    line-height: 1.4;
+  }
+  
+  .about-page .about-content p {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  .about-page .about-stats {
+    margin-top: 2.5em;
+    flex-wrap: wrap;
+    gap: 1.25em;
+  }
+  
+  .about-page .stat-item {
+    flex: 1;
+    min-width: 7.5em;
+  }
+  
+  .about-page .stat-number {
+    font-size: 2rem;
+  }
+  
+  .about-page .latest-works-title {
+    font-size: 2.2rem;
+    line-height: 1.3;
+  }
+  
+  .about-page .image-grid {
+    gap: 0.9375em;
+  }
+  
+  .about-page .latest-works-description .desc {
+    font-size: 1rem;
+  }
+}
+
+/* For larger phones (landscape) and tablets */
+@media (max-width: 768px) {
+  .about-page .hero-banner {
+    padding: 2.5em 0;
+    text-align: center;
+  }
+  
+  .about-page .hero-banner h1 {
+    font-size: 2rem;
+    margin-bottom: 0.625em;
+  }
+  
+  .about-page .breadcrumbs {
+    font-size: 0.9rem;
+    margin-bottom: 1.25em;
+  }
+  
+  .about-page .hero-content1 {
+    font-size: 2rem;
+    margin-bottom: 0.3125em;
+  }
+  
+  .about-page .hero-content2 {
+    font-size: 1.8rem;
+  }
+  
+  .about-page .container .row {
+    flex-direction: column;
+  }
+  
+  .about-page .col-md-5 {
+    width: 100%;
+    margin-bottom: 1.875em;
+  }
+  
+  .about-page .about-img {
+    text-align: center;
+    margin-bottom: 1.875em;
+  }
+  
+  .about-page .about-img .img-upper,
+  .about-page .about-img .img-lower {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .about-page .about-content {
+    text-align: center;
+    padding: 0 0.9375em;
+  }
+  
+  .about-page .about-content h3 {
+    font-size: 1.6rem;
+    margin-bottom: 1.25em;
+  }
+  
+  .about-page .about-content p {
+    font-size: 0.95rem;
+    margin-bottom: 1.5625em;
+  }
+  
+  .about-page .btn-arrow {
+    padding: 0.75em 1.5em;
+    font-size: 0.9rem;
+  }
+  
+  .about-page .about-stats {
+    flex-direction: column;
+    gap: 0.9375em;
+    margin-top: 1.875em;
+  }
+  
+  .about-page .stat-item {
+    padding: 0.9375em;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5em;
+  }
+  
+  .about-page .stat-number {
+    font-size: 1.8rem;
+    display: block;
+  }
+  
+  .about-page .stat-label {
+    font-size: 0.9rem;
+  }
+  
+  .about-page .latest-works {
+    text-align: center;
+    margin: 2.5em 0;
+  }
+  
+  .about-page .latest-works-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.875em;
+  }
+  
+  .about-page .image-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.625em;
+    margin-bottom: 1.25em;
+  }
+  
+  .about-page .image-grid .div1,
+  .about-page .image-grid .div2,
+  .about-page .image-grid .div3,
+  .about-page .image-grid .div4,
+  .about-page .image-grid .div5 {
+    width: 100%;
+  }
+  
+  .about-page .image-grid img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5em;
+  }
+  
+  .about-page .latest-works-description {
+    text-align: center;
+    margin-top: 1.25em;
+  }
+  
+  .about-page .latest-works-description .desc {
+    font-size: 0.9rem;
+    margin-bottom: 0.9375em;
+  }
+  
+  .about-page .about-arrow {
+    width: 1.875em;
+    height: 1.875em;
+  }
+}
+
+/* For small devices (phones, portrait) */
+@media (max-width: 480px) {
+  .about-page .hero-banner {
+    padding: 1.875em 0;
+  }
+  
+  .about-page .hero-banner h1 {
+    font-size: 1.8rem;
+  }
+  
+  .about-page .breadcrumbs {
+    font-size: 0.8rem;
+  }
+  
+  .about-page .hero-content1 {
+    font-size: 1.3rem;
+  }
+  
+  .about-page .hero-content2 {
+    font-size: 1.5rem;
+  }
+  
+  .about-page .container {
+    padding: 0 0.9375em;
+  }
+  
+  .about-page .about-content {
+    padding: 0 0.625em;
+  }
+  
+  .about-page .about-content h3 {
+    font-size: 1.4rem;
+    line-height: 1.3;
+  }
+  
+  .about-page .about-content p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .about-page .btn-arrow {
+    padding: 0.625em 1.25em;
+    font-size: 0.85rem;
+  }
+  
+  .about-page .about-stats {
+    margin-top: 1.5625em;
+  }
+  
+  .about-page .stat-item {
+    padding: 0.75em;
+  }
+  
+  .about-page .stat-number {
+    font-size: 1.6rem;
+  }
+  
+  .about-page .stat-label {
+    font-size: 0.8rem;
+  }
+  
+  .about-page .latest-works {
+    margin: 1.875em 0;
+  }
+  
+  .about-page .latest-works-title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5625em;
+  }
+  
+  .about-page .image-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5em;
+  }
+  
+  .about-page .image-grid .div1 {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  
+  .about-page .image-grid .div2 {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  
+  .about-page .image-grid .div3 {
+    grid-column: 1;
+    grid-row: 3;
+  }
+  
+  .about-page .image-grid .div4 {
+    grid-column: 1;
+    grid-row: 4;
+  }
+  
+  .about-page .image-grid .div5 {
+    grid-column: 1;
+    grid-row: 5;
+  }
+  
+  .about-page .latest-works-description .desc {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .about-page .about-arrow {
+    width: 1.5625em;
+    height: 1.5625em;
+  }
+}
