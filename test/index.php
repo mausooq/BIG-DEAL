@@ -202,7 +202,7 @@
                         <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
@@ -218,7 +218,7 @@
                          <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
@@ -234,7 +234,7 @@
                         <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
@@ -256,7 +256,7 @@
                         <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4 BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
@@ -272,7 +272,7 @@
                          <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
@@ -288,7 +288,7 @@
                         <div class="property-attrs">
                             <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
                             <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
+                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
                             <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
                             <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
                         </div>
