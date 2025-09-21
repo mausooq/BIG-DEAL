@@ -22,6 +22,6 @@
   </div>
       <div class="d-flex align-items-center flex-column flex-md-row">
         <hr class="section-divider">
-        <img class="house-img" src="<?php echo $asset_path; ?>images/prop/prop4.png" alt="">
+        <img class="house-img" src="<?php echo $asset_path; ?>images/prop/bhouse.png" alt="">
       </div>
 </section>

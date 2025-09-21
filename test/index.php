@@ -311,14 +311,14 @@
                   </div>
         <div class="container">
           <div class="location-grid">
-            <div>
-              <div class="city-card">
+            <div >
+              <div class="city-card location-extra1">
                 <img src="assets/images/loc/blore.png" alt="Bengaluru">
                 <div class="city-label">Bengaluru</div>
               </div>
             </div>
             <div>
-              <div class="city-card">
+              <div class="city-card location-extra2">
                 <img src="assets/images/loc/mysore.png" alt="Mysuru">
                 <div class="city-label">Mysuru</div>
               </div>
