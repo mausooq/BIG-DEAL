@@ -1,0 +1,55 @@
+/* Contact page responsive styles (scoped to .contact-page) */
+
+/* Base tweaks (non-invasive) */
+.contact-page .hero-banner .centered h1 { font-size: 2.5rem; }
+.contact-page .contact-info-item { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
+.contact-page .contact-info-item img { width: 28px; height: 28px; flex: 0 0 auto; }
+.contact-page .contact-map { min-height: 360px; }
+
+/* For small devices (phones, portrait) */
+@media (max-width: 480px) {
+  /* CSS for very small phones */
+  .contact-page .hero-banner .centered h1 { font-size: 1.6rem; }
+  .contact-page .hero-banner .breadcrumbs { font-size: 0.85rem; }
+
+  .contact-page .forms { padding-left: 1rem !important; padding-right: 1rem !important; }
+  .contact-page .contact-form .form-control { font-size: 0.95rem; padding: 0.6rem 0.8rem; }
+  .contact-page .contact-form .btn { padding: 0.65rem 1rem; font-size: 0.95rem; }
+
+  .contact-page .contact-map { min-height: 260px; }
+
+  .contact-page .contact-info-item { gap: 10px; }
+  .contact-page .contact-info-item img { width: 24px; height: 24px; }
+  .contact-page .contact-info-title { font-size: 0.9rem; margin: 0; }
+  .contact-page .contact-info-detail { font-size: 0.9rem; }
+
+  /* Ensure info columns stack nicely */
+  .contact-page .contact-info-item[class*="col-"] { padding-top: 8px; padding-bottom: 8px; }
+}
+
+/* For larger phones (landscape) */
+@media (max-width: 768px) {
+  /* CSS for tablets and big phones */
+  .contact-page .hero-banner .centered h1 { font-size: 2rem; }
+  .contact-page .forms { padding-left: 2rem !important; padding-right: 2rem !important; }
+  .contact-page .contact-map { min-height: 300px; }
+
+  /* Form spacing */
+  .contact-page .contact-form .form-item { margin-top: 0.6rem; margin-bottom: 0.6rem; }
+
+  /* Contact info row spacing */
+  .contact-page .contact-info-item img { width: 26px; height: 26px; }
+}
+
+/* For tablets */
+@media (max-width: 1024px) {
+  /* CSS for iPads, small laptops */
+  .contact-page .hero-banner .centered h1 { font-size: 2.25rem; }
+  .contact-page .forms { padding-left: 3rem !important; padding-right: 3rem !important; }
+  .contact-page .contact-map { min-height: 340px; }
+
+  /* Balance columns */
+  .contact-page .col-md-7, .contact-page .col-md-5 { margin-top: 1rem; }
+}
+
+
