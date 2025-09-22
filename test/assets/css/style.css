@@ -1453,6 +1453,19 @@ body {
 
 /* For larger phones (landscape) */
 @media (max-width: 768px) {
+  .navbar{
+    position: relative;
+  }
+  .navbar-brand{
+    right: 0;
+  }
+
+  .navbar-brand img{
+    width: 4rem;
+    position: relative;
+    bottom: 4px;
+    margin-bottom: 1rem;
+  }
   /* Typography */
   .subtitle {
     font-size: 10px;
