@@ -118,9 +118,10 @@ $totalPages = (int)ceil($totalCount / $limit);
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Features - Big Deal</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <title>Features - Big Deal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 	<style>
 		/* Base */
 		
@@ -140,9 +141,34 @@ $totalPages = (int)ceil($totalCount / $limit);
 		.table thead th{ color:var(--muted); font-size:.875rem; font-weight:600; border:0; }
 		.table tbody tr{ border-top:1px solid var(--line); }
 		.table tbody tr:hover{ background:#f9fafb; }
-		/* Actions cell */
-		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; }
-		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+        /* Actions cell */
+        .actions-cell{ display:flex; gap:8px; justify-content:flex-start; }
+        .actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
+
+        /* Modern Animated Action Buttons (match Properties) */
+        .modern-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2);
+            display: inline-flex; align-items:center; justify-content:center; font-size:14px; margin:0 2px;
+        }
+        .modern-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent, rgba(255,255,255,.3), transparent); transition:left .6s; }
+        .modern-btn:hover::before { left:100%; }
+        .modern-btn:hover { transform: translateY(-2px) scale(1.05); box-shadow: 0 8px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.3); }
+        .modern-btn:active { transform: translateY(-1px) scale(1.02); transition: all .1s ease; }
+        .modern-btn .icon { transition: all .3s ease; }
+        .modern-btn:hover .icon { transform: scale(1.2) rotate(-5deg); }
+        .delete-btn { background: var(--primary); color:#fff; border:1px solid var(--primary-600); }
+        .delete-btn:hover { background: var(--primary-600); border-color: var(--primary-600); color:#fff; }
+        .ripple { position:absolute; border-radius:50%; background: rgba(255,255,255,.4); transform: scale(0); animation: ripple-animation .6s linear; pointer-events:none; }
+        @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
 		/* Badges */
 		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
 		/* Activity list */
@@ -332,11 +358,18 @@ $totalPages = (int)ceil($totalCount / $limit);
 					<p>Are you sure you want to remove this property from features? This action cannot be undone.</p>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-					<form method="POST" style="display: inline;">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <form method="POST" style="display: inline;">
 						<input type="hidden" name="action" value="delete_feature">
 						<input type="hidden" name="id" id="delete_id">
-						<button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
+                        </button>
 					</form>
 				</div>
 			</div>
@@ -345,7 +378,7 @@ $totalPages = (int)ceil($totalCount / $limit);
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
-		document.addEventListener('DOMContentLoaded', function(){
+        document.addEventListener('DOMContentLoaded', function(){
 			document.querySelectorAll('.btn-delete').forEach(btn => {
 				btn.addEventListener('click', function(){
 					const tr = this.closest('tr');
@@ -360,13 +393,43 @@ $totalPages = (int)ceil($totalCount / $limit);
 			addFeatureModal.show();
 			<?php endif; ?>
 
-			// Auto-hide alerts after 5 seconds
+            // Auto-hide alerts after 5 seconds
 			setTimeout(function(){
 				document.querySelectorAll('.alert').forEach(a => {
 					try { (new bootstrap.Alert(a)).close(); } catch(e) {}
 				});
 			}, 5000);
 		});
+
+        // Modern Button Ripple + click animation (match Properties)
+        function createRipple(event) {
+            const button = event.currentTarget;
+            const circle = document.createElement('span');
+            const diameter = Math.max(button.clientWidth, button.clientHeight);
+            const radius = diameter / 2;
+            circle.style.width = circle.style.height = `${diameter}px`;
+            circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+            circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+            circle.classList.add('ripple');
+            const ripple = button.querySelector('.ripple');
+            if (ripple) ripple.remove();
+            button.appendChild(circle);
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.modern-btn').forEach(btn => {
+                btn.addEventListener('click', createRipple);
+            });
+        });
+
+        document.addEventListener('click', function(event){
+            const modernBtn = event.target.closest('.modern-btn');
+            if (modernBtn) {
+                modernBtn.style.animation = 'none';
+                modernBtn.style.transform = 'scale(0.95)';
+                setTimeout(() => { modernBtn.style.animation = ''; modernBtn.style.transform = ''; }, 150);
+            }
+        });
 	</script>
 </body>
 </html>

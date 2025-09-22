@@ -2290,9 +2290,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 			});
 		});
      </script>
-	<button id="testEditBtn" type="button" class="btn btn-outline-secondary" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000;">
-		<i class="fa-solid fa-pen me-1"></i>Test Edit
-	</button>
 	<script>
 		(function(){
 			const testBtn = document.getElementById('testEditBtn');
