@@ -184,6 +184,10 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
         .drawer.open{ right:0; }
         .drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
+        .drawer-actions{ display:flex; gap:8px; align-items:center; }
+        .feature-toggle.btn{ width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:0; }
+        .feature-toggle.btn-outline-primary i{ color: var(--primary); }
+        .feature-toggle.btn-primary i{ color: #fff; }
         .drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
         .drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.3); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:1035; }
         .drawer-backdrop.open{ opacity:1; pointer-events:auto; }
@@ -774,7 +778,12 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             <div class="drawer" id="propertyDrawer">
                 <div class="drawer-header">
                     <h6 class="mb-0" id="drawerTitle">Property Details</h6>
-                    <button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+                    <div class="drawer-actions">
+                        <button class="btn btn-sm feature-toggle btn-outline-primary" id="featureToggleBtn" title="Toggle featured" aria-label="Toggle featured">
+                            <i class="fa-regular fa-star"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+                    </div>
                 </div>
                 <div class="drawer-body" id="drawerBody">
                     <!-- Property details will be loaded here -->
@@ -866,6 +875,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 if (data.success && currentPropertyId === propertyId) {
                     drawerCache.set(propertyId, data);
                     renderPropertyDetails(data);
+                    updateFeatureToggle(data.property);
                 } else {
                     throw new Error(data.message || 'Failed to load property details');
                 }
@@ -1068,6 +1078,8 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             `;
             
             drawerBody.innerHTML = content;
+            // After rendering details, also refresh toggle state just in case
+            updateFeatureToggle(data.property);
         }
 
         function closeDrawer() {
@@ -1085,6 +1097,33 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
             if (drawerCache.size > 15) {
                 drawerCache.clear();
             }
+        }
+
+        // Toggle featured via small POST endpoint
+        async function toggleFeatured(propertyId) {
+            try {
+                const form = new FormData();
+                form.append('property_id', propertyId);
+                const res = await fetch('toggle_feature.php', { method: 'POST', body: form, headers: { 'Accept': 'application/json' } });
+                const json = await res.json();
+                if (json && json.success) {
+                    updateFeatureToggle({ id: propertyId, is_featured: json.is_featured });
+                    // Invalidate cache so next open has fresh value
+                    drawerCache.delete(propertyId);
+                }
+            } catch (e) { console.warn('Toggle failed', e); }
+        }
+
+        function updateFeatureToggle(property){
+            const btn = document.getElementById('featureToggleBtn');
+            if (!btn || !property) return;
+            const isFeatured = !!property.is_featured;
+            btn.classList.toggle('btn-primary', isFeatured);
+            btn.classList.toggle('btn-outline-primary', !isFeatured);
+            const icon = btn.querySelector('i');
+            if (icon){ icon.className = isFeatured ? 'fa-solid fa-star' : 'fa-regular fa-star'; }
+            // (Re)bind click handler
+            btn.onclick = function(e){ e.stopPropagation(); toggleFeatured(currentPropertyId || property.id); };
         }
 
         function retryLoad(propertyId) {

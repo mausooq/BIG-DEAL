@@ -30,6 +30,13 @@ try {
         exit();
     }
     
+    // Fetch featured status
+    $f = $mysqli->prepare("SELECT id FROM features WHERE property_id = ? LIMIT 1");
+    $f->bind_param('i', $property_id);
+    $f->execute();
+    $featRow = $f->get_result()->fetch_assoc();
+    $f->close();
+
     // Fetch property images
     $images_stmt = $mysqli->prepare("SELECT id, image_url FROM property_images WHERE property_id = ? ORDER BY id");
     $images_stmt->bind_param('i', $property_id);
@@ -56,7 +63,8 @@ try {
         'balcony' => $property['balcony'],
         'status' => $property['status'],
         'category_name' => $property['category_name'],
-        'created_at' => $property['created_at']
+        'created_at' => $property['created_at'],
+        'is_featured' => (bool)$featRow
     ];
     
     echo json_encode(['success' => true, 'property' => $formatted_property, 'images' => $images]);
