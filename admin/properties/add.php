@@ -687,7 +687,33 @@ function get_data($field) {
             border: 1px solid var(--border-color);
     }
 
-    /* Responsive */
+        /* Image Drop Zone Styles (from blog design) */
+        .image-drop {
+            border: 1px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+        }
+        .image-drop:hover {
+            background: #f0f0f0;
+            border-color: var(--primary-color);
+        }
+        .image-drop.dragover {
+            background: #e8f4fd;
+            border-color: var(--primary-color);
+            border-style: solid;
+        }
+        .preview img {
+            width: 140px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
             .form-grid {
                 grid-template-columns: 1fr;
@@ -947,16 +973,22 @@ function get_data($field) {
             <div>
                 <div class="form-group full-width">
                     <label for="images">Property Images</label>
-                    <input type="file" id="images" name="images[]" accept="image/*" multiple>
-                    <small class="step-hint">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each. You can select multiple files at once or add more files later.</small>
-                            </div>
-                <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
-                <div id="liveImagesPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
-                <div style="margin-top:8px;">
-                    <button type="button" id="clearAllImages" class="btn btn-secondary" style="display:none;">Clear All Images</button>
-                            </div>
-                <input type="hidden" id="images_data" name="images_data[]">
+                    <div class="image-drop" id="drop">
+                        <div style="margin-bottom:8px;font-weight:500;">Drop images here or click to browse</div>
+                        <input type="file" id="images" name="images[]" accept="image/*" multiple style="display:none;">
+                        <div style="margin-top:8px;">
+                            <button type="button" class="btn btn-secondary" id="chooseBtn">Choose Images</button>
                         </div>
+                        <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 5MB each. You can select multiple files at once.</div>
+                    </div>
+                    <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
+                    <div id="liveImagesPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
+                    <div style="margin-top:8px;">
+                        <button type="button" id="clearAllImages" class="btn btn-secondary" style="display:none;">Clear All Images</button>
+                    </div>
+                    <input type="hidden" id="images_data" name="images_data[]">
+                </div>
+            </div>
             <?php elseif ($current_step == 5): ?>
             <div>
                 <div class="form-grid">
@@ -1218,6 +1250,8 @@ const liveImagesPreview = document.getElementById('liveImagesPreview');
 const previewImagesGrid = document.getElementById('previewImagesGrid');
 const formEl = document.getElementById('wizardForm');
 const clearAllImagesBtn = document.getElementById('clearAllImages');
+const drop = document.getElementById('drop');
+const chooseBtn = document.getElementById('chooseBtn');
 let selectedImageDataURLs = [];
 const imageSizeWarning = document.getElementById('imageSizeWarning');
 
@@ -1234,7 +1268,8 @@ function renderThumb(container, dataURL, showRemoveBtn = false){
     removeBtn.style.width = '20px'; removeBtn.style.height = '20px'; removeBtn.style.borderRadius = '50%';
     removeBtn.style.background = '#ef4444'; removeBtn.style.color = 'white'; removeBtn.style.border = 'none';
     removeBtn.style.cursor = 'pointer'; removeBtn.style.fontSize = '12px'; removeBtn.style.fontWeight = 'bold';
-    removeBtn.addEventListener('click', function() {
+    removeBtn.addEventListener('click', function(e) {
+      e.stopPropagation(); // Prevent event bubbling to avoid closing the modal
       const index = Array.from(container.children).indexOf(wrap);
       if (index > -1) {
         selectedImageDataURLs.splice(index, 1);
@@ -1246,6 +1281,11 @@ function renderThumb(container, dataURL, showRemoveBtn = false){
     wrap.appendChild(removeBtn);
   }
   
+  // Prevent clicks on the image preview from bubbling up
+  wrap.addEventListener('click', function(e) {
+    e.stopPropagation();
+  });
+  
   container.appendChild(wrap);
 }
 
@@ -1255,9 +1295,35 @@ function updateClearButton() {
   }
 }
 
-imagesInput?.addEventListener('change', function(){
-  // Don't clear existing previews - allow multiple selections
-  const files = Array.from(this.files || []);
+// Drag and drop functionality (from blog design)
+drop?.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  drop.classList.add('dragover');
+});
+
+drop?.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  drop.classList.remove('dragover');
+});
+
+drop?.addEventListener('drop', (e) => {
+  e.preventDefault();
+  drop.classList.remove('dragover');
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    handleFiles(Array.from(e.dataTransfer.files));
+  }
+});
+
+drop?.addEventListener('click', (e) => {
+  e.stopPropagation(); // Prevent event bubbling to avoid closing the modal
+  imagesInput?.click();
+});
+chooseBtn?.addEventListener('click', (e) => {
+  e.stopPropagation();
+  imagesInput?.click();
+});
+
+function handleFiles(files) {
   const maxSize = 5 * 1024 * 1024;
   let overs = [];
   let newImagesCount = 0;
@@ -1265,7 +1331,7 @@ imagesInput?.addEventListener('change', function(){
   files.forEach(file => {
     if (!file.type.startsWith('image/')) return;
     if (file.size > maxSize) { overs.push(file.name); return; }
-                const reader = new FileReader();
+    const reader = new FileReader();
     reader.onload = e => {
       const url = e.target.result;
       selectedImageDataURLs.push(url);
@@ -1274,20 +1340,26 @@ imagesInput?.addEventListener('change', function(){
       updateClearButton();
       // persist to sessionStorage so preview survives step navigation
       try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
-                };
-                reader.readAsDataURL(file);
-            });
+    };
+    reader.readAsDataURL(file);
+  });
             
   if (overs.length){
     imageSizeWarning.style.display = 'block';
     imageSizeWarning.textContent = 'These files exceed 5MB and were skipped: ' + overs.join(', ');
-            } else {
+  } else {
     imageSizeWarning.style.display = 'none';
     imageSizeWarning.textContent = '';
   }
+}
+
+imagesInput?.addEventListener('change', function(){
+  // Don't clear existing previews - allow multiple selections
+  const files = Array.from(this.files || []);
+  handleFiles(files);
   
   // Clear the input so user can select more files
-                this.value = '';
+  this.value = '';
 });
 
 // On submit to step 5, mirror current thumbs to preview grid so user sees them
@@ -1319,7 +1391,8 @@ formEl?.addEventListener('submit', function(){
 });
 
 // Clear all images functionality
-clearAllImagesBtn?.addEventListener('click', function(){
+clearAllImagesBtn?.addEventListener('click', function(e){
+  e.stopPropagation(); // Prevent event bubbling to avoid closing the modal
   selectedImageDataURLs = [];
   if (liveImagesPreview) liveImagesPreview.innerHTML = '';
   if (previewImagesGrid) previewImagesGrid.innerHTML = '';

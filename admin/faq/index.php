@@ -422,7 +422,6 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
     .modal-dialog.modal-dialog-centered { display:flex; align-items:center; min-height:calc(100% - 3.5rem); }
     .modal-backdrop.show { background: rgba(0,0,0,.4); backdrop-filter: blur(3px); }
     .modal-content { border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); border:1px solid rgba(255,255,255,0.1); }
-    .btn { padding:.8rem 1.2rem; border-radius:8px; font-weight:500; }
     .btn.btn-secondary { background:#fff; color:#111827; border:1px solid #E0E0E0; }
     .btn.btn-secondary:hover { background:#f5f5f5; }
     /* Match blogs add/edit form controls */
