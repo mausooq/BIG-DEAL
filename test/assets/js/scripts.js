@@ -193,3 +193,35 @@ function setupDoubleRange(minRangeId, maxRangeId, sliderRangeId, minLabelId, max
 
   setupDoubleRange('minRange1', 'maxRange1', 'sliderRange1', 'minLabel1', 'maxLabel1');
   setupDoubleRange('minRange2', 'maxRange2', 'sliderRange2', 'minLabel2', 'maxLabel2');
+
+  // Mobile Filters toggle
+  const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+  const filterSidebar = document.getElementById('filterSidebar');
+  const filterBackdrop = document.querySelector('.filter-backdrop');
+  const filterCloseBtn = document.querySelector('.filter-close-btn');
+
+  function openFilters() {
+    if (!filterSidebar) return;
+    filterSidebar.classList.add('open');
+    if (filterBackdrop) filterBackdrop.hidden = false;
+    if (filterToggleBtn) filterToggleBtn.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeFilters() {
+    if (!filterSidebar) return;
+    filterSidebar.classList.remove('open');
+    if (filterBackdrop) filterBackdrop.hidden = true;
+    if (filterToggleBtn) filterToggleBtn.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+
+  if (filterToggleBtn) {
+    filterToggleBtn.addEventListener('click', openFilters);
+  }
+  if (filterCloseBtn) {
+    filterCloseBtn.addEventListener('click', closeFilters);
+  }
+  if (filterBackdrop) {
+    filterBackdrop.addEventListener('click', closeFilters);
+  }
