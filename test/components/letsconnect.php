@@ -23,11 +23,11 @@
 /* Responsive */
 @media (max-width: 1024px) {
   .blog-section { padding: 2em; }
-  .contact-section .house-img { width: 48%; margin-right: 15px; }
+  .contact-section .house-img { width: 40%; margin-right: 15px; }
   .contact-section .section-divider { margin-bottom: 82px; }
   .contact-section .blac2-sub { font-size: 1.125rem; }
   .contact-section .blac2 { font-size: 2em !important; }
-  .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 1%; }
+  .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 1%; margin-bottom: -5em; }
   .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 170px; height: 40px; border-radius: 25px; background: #000; display: block; padding: 0; }
   .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 135px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
   .contact-section .btn-red .contact-btn-title { white-space: nowrap; margin: 0; }
@@ -36,6 +36,9 @@
   .section-divider { margin: 0 18px; }
   .contact-section h2 { font-size: 1.8rem; }
   .contact-section p { font-size: 0.95rem; }
+  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; display: flex !important; }
+  section.contact-section > .d-flex.align-items-center.flex-column.flex-md-row > .section-divider { flex: 0 0 60% !important; width: 60% !important; min-width: 0 !important; box-sizing: border-box; position: static; margin-left: 0 !important; margin-right: 0 !important; align-self: center !important; margin-top: 9.5em !important; }
+  section.contact-section > .d-flex.align-items-center.flex-column.flex-md-row > .house-img { flex: 0 0 35% !important; width: 35% !important; min-width: 0 !important; max-width: none !important; height: auto !important; margin: 0 0 0 auto !important; position: static !important; display: block !important; align-self: center !important; object-fit: contain !important; margin-right: 2em !important; }
 }
 @media (max-width: 768px) {
   .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 0; }
@@ -44,26 +47,26 @@
   .contact-section .btn-red .contact-btn-title { font-size: 0.85em !important; white-space: nowrap; margin: 0; }
   .contact-section .btn-black .arrow-btn { padding: 0 0.7em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
   .contact-section .btn-black .arrow-btn img { width: 1.05em; }
-  .contact-section .blac2 { width: 100%; margin: 0 0 0.75rem 0; }
-  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row; justify-content: space-between; align-items: center; }
+  .contact-section .blac2 {margin: 0 0 0.75rem 0; width: 80%; font-size: 1.5em !important; }
+  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: column; justify-content: initial; align-items: stretch; }
   .contact-section .section-divider { width: 60% !important; margin-left: 0 !important; margin-right: 0; align-self: flex-start; }
-  .contact-section .house-img { width: 60% !important; max-width: 520px; margin: 0 0 0 auto; display: block; position: static; margin-left: auto; margin-right: 0; }
+  .contact-section .house-img { width: 40% !important; max-width: 520px; margin: 0 0 0 auto; display: block; position: static; margin-left: auto; margin-right: 0; }
   .contact-section h2 { font-size: 1.4rem; }
   .contact-section p { font-size: 0.85rem; margin-bottom: 20px; }
 }
 @media (max-width: 480px) {
   .btn-black, .btn-red { width: auto; height: 40px; font-size: 1rem; }
   .btn-stack { position: relative; display: inline-block; height: 48px; flex-direction: row; gap: 0; }
-  .blac2 { font-size: 1.75rem; padding: 15px; margin: 0; width: 100%; }
-  .blac2-sub { font-size: 0.75rem; padding: 0.625rem 0.9375rem; }
+  .blac2 { font-size: 0.9rem; padding: 15px; margin: 0; width: 100%; }
+  .blac2-sub { font-size: 0.9rem; padding: 0.625rem 0.9375rem; }
   .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 160px; height: 40px; border-radius: 25px; background: #000; display: block; margin: 0; padding: 0; }
   .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 125px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; }
   .contact-section .btn-red .contact-btn-title { font-size: 0.75em !important; white-space: nowrap; padding: 0; margin: 0; }
   .contact-section .btn-black .arrow-btn { position: static; padding: 0 5.5em; height: 40px; display: flex; align-items: center; justify-content: center; }
   .contact-section .btn-black .arrow-btn img { width: 0.95em; margin-right: -8em; }
-  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row; align-items: center; }
-  .section-divider { flex: 0 0 60%; width: 60%; position: static; margin-left: 0 !important; margin-right: 0; align-self: auto; margin-top: 0.75rem; }
-  .contact-section .house-img { flex: 0 0 auto; width: 100%; max-width: 320px; margin: 0 0 0 auto !important; position: static; display: block; align-self: auto; }
+  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; display: flex !important; }
+  section.contact-section > .d-flex.align-items-center.flex-column.flex-md-row > .section-divider { flex: 0 0 60% !important; width: 60% !important; min-width: 0 !important; box-sizing: border-box; position: static; margin-left: 0 !important; margin-right: 0 !important; align-self: center !important; margin-top: 9.5em !important; }
+  section.contact-section > .d-flex.align-items-center.flex-column.flex-md-row > .house-img { flex: 0 0 35% !important; width: 35% !important; min-width: 0 !important; max-width: none !important; height: auto !important; margin: 0 0 0 auto !important; position: static !important; display: block !important; align-self: center !important; object-fit: contain !important; margin-right: 3em !important; }
   .contact-section h2 { font-size: 1.2rem; }
   .contact-section p { font-size: 0.8rem; margin-bottom: 15px; }
 }
