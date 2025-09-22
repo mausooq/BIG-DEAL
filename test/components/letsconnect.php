@@ -1,205 +1,4 @@
 <style>
-/* Contact Section Styles */
-.contact-section {
-  padding: 80px 0;
-}
-
-.blac2 {
-  font-size: 3rem;
-  font-weight: 700;
-  color: #333;
-  line-height: 1.2;
-  margin-bottom: 20px;
-}
-
-.blac2-sub {
-  font-size: 1.2rem;
-  color: #666;
-  margin-bottom: 40px;
-  line-height: 1.6;
-}
-
-.btn-stack {
-  margin-left: 1%;
-  margin-bottom: 60px;
-}
-
-.btn-black {
-  display: flex;
-  align-items: center;
-  background: #333;
-  border-radius: 15px;
-  padding: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  color: inherit;
-}
-
-.btn-black:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  text-decoration: none;
-  color: inherit;
-}
-
-.btn-red {
-  background: #e14c4c;
-  padding: 20px 30px;
-  border-radius: 15px 0 0 15px;
-  transition: all 0.3s ease;
-}
-
-.btn-red:hover {
-  filter: brightness(1.1);
-}
-
-.contact-btn-title {
-  color: white;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1.2;
-}
-
-.arrow-btn {
-  padding: 20px 25px;
-  background: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 0 15px 15px 0;
-  transition: all 0.3s ease;
-}
-
-.arrow-btn img {
-  width: 24px;
-  height: 24px;
-  filter: brightness(0) invert(1);
-  transition: transform 0.3s ease;
-}
-
-.btn-black:hover .arrow-btn img {
-  transform: translateX(3px);
-}
-
-.section-divider {
-  border: none;
-  height: 1px;
-  background: #ddd;
-  margin: 0 20px;
-  flex: 1;
-}
-
-.house-img {
-  width: 48%;
-  height: auto;
-  margin-right: 15px;
-  border-radius: 15px;
-  object-fit: cover;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .contact-section {
-    padding: 60px 0;
-  }
-  
-  .blac2 {
-    font-size: 2.5rem;
-  }
-  
-  .blac2-sub {
-    font-size: 1.1rem;
-  }
-  
-  .btn-stack {
-    margin-left: 0;
-  }
-  
-  .house-img {
-    width: 45%;
-  }
-}
-
-@media (max-width: 768px) {
-  .contact-section {
-    padding: 50px 0;
-  }
-  
-  .blac2 {
-    font-size: 2rem;
-  }
-  
-  .blac2-sub {
-    font-size: 1rem;
-  }
-  
-  .btn-black {
-    flex-direction: column;
-  }
-  
-  .btn-red {
-    border-radius: 15px 15px 0 0;
-    width: 100%;
-    text-align: center;
-  }
-  
-  .arrow-btn {
-    border-radius: 0 0 15px 15px;
-    width: 100%;
-  }
-  
-  .contact-btn-title {
-    font-size: 1.1rem;
-  }
-  
-  .house-img {
-    width: 100%;
-    margin-right: 0;
-    margin-top: 20px;
-  }
-  
-  .section-divider {
-    margin: 0 10px;
-  }
-}
-
-@media (max-width: 480px) {
-  .contact-section {
-    padding: 40px 0;
-  }
-  
-  .blac2 {
-    font-size: 1.8rem;
-  }
-  
-  .blac2-sub {
-    font-size: 0.95rem;
-  }
-  
-  .btn-red {
-    padding: 15px 20px;
-  }
-  
-  .arrow-btn {
-    padding: 15px 20px;
-  }
-  
-  .contact-btn-title {
-    font-size: 1rem;
-  }
-  
-  .arrow-btn img {
-    width: 20px;
-    height: 20px;
-  }
-  
-  .house-img {
-    margin-top: 15px;
-  }
-}
-</style>
 
 <!-- Connect With Our Experts Section -->
 <style>
@@ -214,12 +13,12 @@
 .section-divider { border: none; border-bottom: 2px solid #222; margin-right: 10px; width: 100%; }
 .house-img { max-height: 100%; width: auto; margin-right: 0; margin-top: -245px; z-index: 0; }
 .contact-section { margin-top: 35px; }
-.contact-section .contact-btn-title { font-size: 1em; display: inline-block; white-space: nowrap; justify-content: center; align-items: center; padding: 0 5em; text-align: center; width: auto; }
+.contact-section .contact-btn-title { font-size: 1em; display: inline-block; white-space: nowrap; justify-content: center; align-items: center; padding: 0 5em; text-align: center; width: auto;margin: 0; }
 .btn-stack { margin-left: 1%; }
 .btn-black { padding-left: 11.5em; display: flex; justify-content: end; }
 .btn-red { padding-left: -10em; width: 140px; }
 .btn-black .arrow-btn { display: flex; justify-content: center; }
-.btn-black .arrow-btn img { width: 1.4em; margin-right: -90%; border: none; }
+.btn-black .arrow-btn img { width: 1.4em; margin-right: 0.6em; border: none; }
 
 /* Responsive */
 @media (max-width: 1024px) {
@@ -230,9 +29,9 @@
   .contact-section .blac2 { font-size: 2em !important; }
   .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 1%; }
   .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 170px; height: 40px; border-radius: 25px; background: #000; display: block; padding: 0; }
-  .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 200px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 135px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
   .contact-section .btn-red .contact-btn-title { white-space: nowrap; margin: 0; }
-  .contact-section .btn-black .arrow-btn { padding: 0 1.25em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
+  .contact-section .btn-black .arrow-btn { padding: 0 0.8em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
   .contact-section .btn-black .arrow-btn img { width: 1.1em; margin: 0; }
   .section-divider { margin: 0 18px; }
   .contact-section h2 { font-size: 1.8rem; }
@@ -243,26 +42,28 @@
   .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 160px; height: 40px; border-radius: 25px; background: #000; display: block; padding: 0; }
   .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 125px !important; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
   .contact-section .btn-red .contact-btn-title { font-size: 0.85em !important; white-space: nowrap; margin: 0; }
-  .contact-section .btn-black .arrow-btn { padding: 0 1.125em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
+  .contact-section .btn-black .arrow-btn { padding: 0 0.7em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
   .contact-section .btn-black .arrow-btn img { width: 1.05em; }
-  .blac2{ width: 65%; }
-  .house-img { width: 34% !important; margin-left: 28rem; }
-  .section-divider{ width: 60% !important; margin: 5rem 0; margin-right: 15rem !important; }
+  .contact-section .blac2 { width: 100%; margin: 0 0 0.75rem 0; }
+  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row; justify-content: space-between; align-items: center; }
+  .contact-section .section-divider { width: 60% !important; margin-left: 0 !important; margin-right: 0; align-self: flex-start; }
+  .contact-section .house-img { width: 60% !important; max-width: 520px; margin: 0 0 0 auto; display: block; position: static; margin-left: auto; margin-right: 0; }
   .contact-section h2 { font-size: 1.4rem; }
   .contact-section p { font-size: 0.85rem; margin-bottom: 20px; }
 }
 @media (max-width: 480px) {
   .btn-black, .btn-red { width: auto; height: 40px; font-size: 1rem; }
   .btn-stack { position: relative; display: inline-block; height: 48px; flex-direction: row; gap: 0; }
-  .blac2 { font-size: 1.75rem; padding: 15px; margin: 0; width: 20em; }
+  .blac2 { font-size: 1.75rem; padding: 15px; margin: 0; width: 100%; }
   .blac2-sub { font-size: 0.75rem; padding: 0.625rem 0.9375rem; }
   .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 160px; height: 40px; border-radius: 25px; background: #000; display: block; margin: 0; padding: 0; }
   .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 125px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; }
   .contact-section .btn-red .contact-btn-title { font-size: 0.75em !important; white-space: nowrap; padding: 0; margin: 0; }
-  .contact-section .btn-black .arrow-btn { position: static; padding: 0 1em; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .contact-section .btn-black .arrow-btn { position: static; padding: 0 5.5em; height: 40px; display: flex; align-items: center; justify-content: center; }
   .contact-section .btn-black .arrow-btn img { width: 0.95em; margin-right: -8em; }
-  .house-img { width: 250px; max-width: 250px; align-self: flex-end; margin-top: -4em; z-index: 2; position: relative; }
-  .section-divider { margin: -1em 10px 0 10px; z-index: 1; position: relative; top: 8em; }
+  .contact-section .d-flex.align-items-center.flex-column.flex-md-row { flex-direction: row; align-items: center; }
+  .section-divider { flex: 0 0 60%; width: 60%; position: static; margin-left: 0 !important; margin-right: 0; align-self: auto; margin-top: 0.75rem; }
+  .contact-section .house-img { flex: 0 0 auto; width: 100%; max-width: 320px; margin: 0 0 0 auto !important; position: static; display: block; align-self: auto; }
   .contact-section h2 { font-size: 1.2rem; }
   .contact-section p { font-size: 0.8rem; margin-bottom: 15px; }
 }
