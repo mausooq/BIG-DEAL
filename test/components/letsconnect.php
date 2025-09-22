@@ -228,22 +228,23 @@
   .contact-section .section-divider { margin-bottom: 82px; }
   .contact-section .blac2-sub { font-size: 1.125rem; }
   .contact-section .blac2 { font-size: 2em !important; }
-  .btn-stack { margin-left: 1%; }
-  .btn-black { display: flex; justify-content: end; }
-  .btn-red { width: 100px; padding: 0 4em; }
-  .btn-red .contact-btn-title { font-size: 0.8em !important; padding: 4em 0; margin: -20%; }
-  .btn-black .arrow-btn { display: flex; justify-content: center; align-items: center; }
-  .btn-black .arrow-btn img { width: 1.3em; margin-right: 85%; }
+  .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 1%; }
+  .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 170px; height: 40px; border-radius: 25px; background: #000; display: block; padding: 0; }
+  .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 200px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .contact-section .btn-red .contact-btn-title { white-space: nowrap; margin: 0; }
+  .contact-section .btn-black .arrow-btn { padding: 0 1.25em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
+  .contact-section .btn-black .arrow-btn img { width: 1.1em; margin: 0; }
   .section-divider { margin: 0 18px; }
   .contact-section h2 { font-size: 1.8rem; }
   .contact-section p { font-size: 0.95rem; }
 }
 @media (max-width: 768px) {
-  .btn-stack { margin-left: 0; }
-  .btn-black { display: flex; justify-content: start; width: 100%; }
-  .btn-red { width: 130px; padding: 0 3em; }
-  .btn-red .contact-btn-title { font-size: 0.75em !important; padding: 3em 0; margin: -18%; white-space: nowrap; }
-  .btn-black .arrow-btn img { width: 1.1em; }
+  .btn-stack { position: relative; display: inline-block; height: 48px; margin-left: 0; }
+  .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 160px; height: 40px; border-radius: 25px; background: #000; display: block; padding: 0; }
+  .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 125px !important; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .contact-section .btn-red .contact-btn-title { font-size: 0.85em !important; white-space: nowrap; margin: 0; }
+  .contact-section .btn-black .arrow-btn { padding: 0 1.125em; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 0 25px 25px 0; }
+  .contact-section .btn-black .arrow-btn img { width: 1.05em; }
   .blac2{ width: 65%; }
   .house-img { width: 34% !important; margin-left: 28rem; }
   .section-divider{ width: 60% !important; margin: 5rem 0; margin-right: 15rem !important; }
@@ -251,15 +252,15 @@
   .contact-section p { font-size: 0.85rem; margin-bottom: 20px; }
 }
 @media (max-width: 480px) {
-  .btn-black, .btn-red { width: 50%; height: 50%; font-size: 1rem; justify-content: center; }
-  .btn-stack { flex-direction: column; gap: 10px; }
+  .btn-black, .btn-red { width: auto; height: 40px; font-size: 1rem; }
+  .btn-stack { position: relative; display: inline-block; height: 48px; flex-direction: row; gap: 0; }
   .blac2 { font-size: 1.75rem; padding: 15px; margin: 0; width: 20em; }
   .blac2-sub { font-size: 0.75rem; padding: 0.625rem 0.9375rem; }
-  .btn-black { display: flex; justify-content: start; width: 100px; position: relative; margin: -8px; padding: 0 5em; }
-  .btn-red { width: 120px; padding: 0 2em; margin: 0; }
-  .btn-red .contact-btn-title { font-size: 0.7em !important; padding: 2.5em 0; margin: -15%; white-space: nowrap; }
-  .btn-black .arrow-btn { position: absolute; right: 10%; top: 50%; transform: translateY(-50%); }
-  .btn-black .arrow-btn img { width: 1em; margin-right: 0; }
+  .contact-section .btn-black { position: absolute; top: 0; left: 25px; width: 160px; height: 40px; border-radius: 25px; background: #000; display: block; margin: 0; padding: 0; }
+  .contact-section .btn-red { position: absolute; top: 0; left: 0; width: 125px; height: 40px; border-radius: 25px; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0; }
+  .contact-section .btn-red .contact-btn-title { font-size: 0.75em !important; white-space: nowrap; padding: 0; margin: 0; }
+  .contact-section .btn-black .arrow-btn { position: static; padding: 0 1em; height: 40px; display: flex; align-items: center; justify-content: center; }
+  .contact-section .btn-black .arrow-btn img { width: 0.95em; margin-right: -8em; }
   .house-img { width: 250px; max-width: 250px; align-self: flex-end; margin-top: -4em; z-index: 2; position: relative; }
   .section-divider { margin: -1em 10px 0 10px; z-index: 1; position: relative; top: 8em; }
   .contact-section h2 { font-size: 1.2rem; }
