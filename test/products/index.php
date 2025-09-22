@@ -19,6 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/product.css" />
 </head>
 <body class="article-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
@@ -46,6 +47,13 @@
           <option value="miami">Miami</option>
         </select>
       </div>
+
+  <!-- Mobile Filters toggle button -->
+  <div class="container d-md-none">
+    <div class="d-flex justify-content-end">
+      <button type="button" class="filter-toggle-btn" aria-controls="filterSidebar" aria-expanded="false">Filters</button>
+    </div>
+  </div>
     </div>
   
 
@@ -57,7 +65,8 @@
       <!-- Sidebar Filters -->
       <div class="col-lg-4 col-md-5">
        
-        <aside class="filter-sidebar" aria-label="Property filters">
+        <aside class="filter-sidebar" id="filterSidebar" aria-label="Property filters">
+    <button type="button" class="filter-close-btn d-md-none" aria-label="Close filters">✕</button>
 
     <!-- Applied Filters + Clear All -->
     <div class="filter-header">
@@ -300,6 +309,9 @@
     </div>
     
   </section>
+
+  <!-- Backdrop for mobile filters -->
+  <div class="filter-backdrop d-md-none" hidden></div>
 
   
 

@@ -1,3 +1,70 @@
+<style>
+/* Navbar (scoped to this component) */
+.navbar-brand {
+  opacity: 1;
+  top: 15px;
+  padding-left: 50px;
+  z-index: 1;
+  position: absolute;
+}
+
+.navbar-nav {
+  margin-top: 30px;
+  padding-right: 30px;
+  margin-bottom: 10px;
+  padding-bottom: 20px;
+  z-index: 2;
+}
+
+.nav-link {
+  font-weight: 500;
+  font-style: Medium;
+  line-height: 100%;
+  letter-spacing: 0%;
+  vertical-align: middle;
+}
+
+.nav-link.active {
+  background-color: #f0dede;
+  border-radius: 10px;
+  font-weight: 600;
+  color: black !important;
+  padding: 0.375rem 1rem;
+}
+
+/* Utility wrapper used by navbar */
+.nav1 {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+/* Optional pill link variant used across nav */
+.navbar-link {
+  background-color: #eee;
+  padding: 0.375rem 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .navbar-brand {
+    position: relative;
+    z-index: -1;
+    margin-top: 0;
+  }
+
+  .navbar-nav {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .nav-link {
+    padding: 10px 0;
+    font-size: 0.875rem;
+  }
+}
+</style>
+
 <?php
   // Derive site base path from asset path so links work from any directory
   if (!isset($asset_path)) {
