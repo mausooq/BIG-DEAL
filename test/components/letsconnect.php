@@ -2,7 +2,6 @@
 /* Contact Section Styles */
 .contact-section {
   padding: 80px 0;
-  background: #f8f9fa;
 }
 
 .blac2 {
@@ -210,17 +209,17 @@
 .btn-stack { position: relative; display: inline-block; height: 48px; }
 .btn-black { position: absolute; top: 0px; left: 25px; width: 170px; height: 40px; border-radius: 25px; background: #000; z-index: 0; border: none; display: block; }
 .btn-black .rarrow { z-index: 0; text-align: right; }
-.btn-red { position: absolute; top: 0; left: 0; width: 170px; height: 40px; border-radius: 25px; background: #ef1515; color: #fff; font-weight: 600; font-size: 1rem; border: none; z-index: 1; cursor: pointer; transition: filter 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; justify-content: center; align-items: center; }
+.btn-red { position: absolute; top: 0; left: 0; width: 200px; height: 40px; border-radius: 25px; background: #ef1515; color: #fff; font-weight: 600; font-size: 1rem; border: none; z-index: 1; cursor: pointer; transition: filter 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; justify-content: center; align-items: center; }
 .btn-red:hover { filter: brightness(1.1); }
 .section-divider { border: none; border-bottom: 2px solid #222; margin-right: 10px; width: 100%; }
-.house-img { max-height: 100%; width: auto; margin-right: 0; margin-top: -245px; z-index: -1; }
+.house-img { max-height: 100%; width: auto; margin-right: 0; margin-top: -245px; z-index: 0; }
 .contact-section { margin-top: 35px; }
-.contact-section .contact-btn-title { font-size: 1em; display: flex; justify-content: center; align-items: center; padding: 5em 0; margin: -20%; text-align: center; width: 100%; }
+.contact-section .contact-btn-title { font-size: 1em; display: inline-block; white-space: nowrap; justify-content: center; align-items: center; padding: 0 5em; text-align: center; width: auto; }
 .btn-stack { margin-left: 1%; }
 .btn-black { padding-left: 11.5em; display: flex; justify-content: end; }
 .btn-red { padding-left: -10em; width: 140px; }
 .btn-black .arrow-btn { display: flex; justify-content: center; }
-.btn-black .arrow-btn img { width: 1.4em; margin-right: 90%; border: none; }
+.btn-black .arrow-btn img { width: 1.4em; margin-right: -90%; border: none; }
 
 /* Responsive */
 @media (max-width: 1024px) {
