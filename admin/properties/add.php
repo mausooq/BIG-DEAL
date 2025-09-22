@@ -1041,19 +1041,47 @@ function get_data($field) {
                             </div>
                     <div class="form-group">
                         <label>State</label>
-                        <div><?php echo htmlspecialchars(get_data('state_id')); ?></div>
+                        <div>
+                            <?php 
+                                $stateName = '';
+                                $sid = get_data('state_id');
+                                if ($sid) { $r = $mysqli->query("SELECT name FROM states WHERE id=".(int)$sid); if($r && $row=$r->fetch_assoc()){ $stateName=$row['name']; } }
+                                echo htmlspecialchars($stateName);
+                            ?>
+                        </div>
                         </div>
                     <div class="form-group">
                         <label>District</label>
-                        <div><?php echo htmlspecialchars(get_data('district_id')); ?></div>
+                        <div>
+                            <?php 
+                                $districtName = '';
+                                $did = get_data('district_id');
+                                if ($did) { $r = $mysqli->query("SELECT name FROM districts WHERE id=".(int)$did); if($r && $row=$r->fetch_assoc()){ $districtName=$row['name']; } }
+                                echo htmlspecialchars($districtName);
+                            ?>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>City</label>
-                        <div><?php echo htmlspecialchars(get_data('city_id')); ?></div>
+                        <div>
+                            <?php 
+                                $cityName = '';
+                                $cidLoc = get_data('city_id');
+                                if ($cidLoc) { $r = $mysqli->query("SELECT name FROM cities WHERE id=".(int)$cidLoc); if($r && $row=$r->fetch_assoc()){ $cityName=$row['name']; } }
+                                echo htmlspecialchars($cityName);
+                            ?>
+                        </div>
                 </div>
                     <div class="form-group">
                         <label>Town</label>
-                        <div><?php echo htmlspecialchars(get_data('town_id')); ?></div>
+                        <div>
+                            <?php 
+                                $townName = '';
+                                $tid = get_data('town_id');
+                                if ($tid) { $r = $mysqli->query("SELECT name FROM towns WHERE id=".(int)$tid); if($r && $row=$r->fetch_assoc()){ $townName=$row['name']; } }
+                                echo htmlspecialchars($townName);
+                            ?>
+                        </div>
         </div>
                     <div class="form-group">
                         <label>Pincode</label>

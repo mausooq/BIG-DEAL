@@ -16,8 +16,32 @@ if ($property_id <= 0) {
     exit();
 }
 
-// Fetch property data
+// Handle feature toggle
 $mysqli = db();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_feature'])) {
+    $existsStmt = $mysqli->prepare("SELECT id FROM features WHERE property_id = ? LIMIT 1");
+    $existsStmt->bind_param('i', $property_id);
+    $existsStmt->execute();
+    $existsRes = $existsStmt->get_result();
+    $existing = $existsRes ? $existsRes->fetch_assoc() : null;
+    $existsStmt->close();
+
+    if ($existing) {
+        $del = $mysqli->prepare("DELETE FROM features WHERE id = ?");
+        $del && $del->bind_param('i', $existing['id']);
+        $del && $del->execute();
+        $del && $del->close();
+    } else {
+        $ins = $mysqli->prepare("INSERT INTO features (property_id) VALUES (?)");
+        $ins && $ins->bind_param('i', $property_id);
+        $ins && $ins->execute();
+        $ins && $ins->close();
+    }
+    header('Location: view.php?id=' . $property_id);
+    exit();
+}
+
+// Fetch property data
 $stmt = $mysqli->prepare("SELECT p.*, c.name AS category_name FROM properties p LEFT JOIN categories c ON c.id = p.category_id WHERE p.id = ?");
 $stmt->bind_param('i', $property_id);
 $stmt->execute();
@@ -41,6 +65,14 @@ $formatted_price = $property['price'] ? '₹' . number_format((float)$property['
 $formatted_area = $property['area'] ? number_format((float)$property['area']) . ' sqft' : 'Not specified';
 $formatted_balcony = $property['balcony'] ? $property['balcony'] . ' balcony' . ($property['balcony'] > 1 ? 's' : '') : 'No balconies';
 $formatted_created = date('M d, Y', strtotime($property['created_at']));
+
+// Check if featured
+$featStmt = $mysqli->prepare("SELECT id FROM features WHERE property_id = ? LIMIT 1");
+$featStmt->bind_param('i', $property_id);
+$featStmt->execute();
+$featureRow = $featStmt->get_result()->fetch_assoc();
+$featStmt->close();
+$is_featured = $featureRow ? true : false;
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -128,6 +160,19 @@ $formatted_created = date('M d, Y', strtotime($property['created_at']));
         <?php require_once __DIR__ . '/../components/topbar.php'; renderAdminTopbar($_SESSION['admin_username'] ?? 'Admin', 'Property'); ?>
 
         <div class="container-fluid p-4">
+            <!-- Header row with title and actions -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-2"></i>Close</a>
+                </div>
+                <form method="post" class="d-flex align-items-center gap-2">
+                    <input type="hidden" name="toggle_feature" value="1">
+                    <button type="submit" class="btn <?php echo $is_featured ? 'btn-warning' : 'btn-outline-warning'; ?>" title="<?php echo $is_featured ? 'Unmark Featured' : 'Mark as Featured'; ?>">
+                        <i class="fa-<?php echo $is_featured ? 'solid' : 'regular'; ?> fa-star me-2"></i><?php echo $is_featured ? 'Featured' : 'Add to Featured'; ?>
+                    </button>
+                </form>
+            </div>
+
             <!-- Top row: Hero (left) and Quick Info (right) -->
             <div class="row g-4 mb-3">
                 <div class="col-lg-8">
