@@ -1,17 +1,32 @@
-# Allow image file uploads
-<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
-    Order Allow,Deny
-    Allow from all
-</FilesMatch>
+<IfModule mod_authz_core.c>
+    # Apache 2.4+
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+        Require all granted
+    </FilesMatch>
 
-# Deny access to PHP files
-<FilesMatch "\.php$">
-    Order Deny,Allow
-    Deny from all
-</FilesMatch>
+    <FilesMatch "\.php$">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule !mod_authz_core.c>
+    # Apache 2.2 fallback
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+        Order Allow,Deny
+        Allow from all
+    </FilesMatch>
+
+    <FilesMatch "\.php$">
+        Order Deny,Allow
+        Deny from all
+    </FilesMatch>
+</IfModule>
 
 # Set proper MIME types
 AddType image/jpeg .jpg .jpeg
 AddType image/png .png
 AddType image/gif .gif
 AddType image/webp .webp
+
+# Prevent execution of scripts with image extensions
+RemoveType .php .phtml .php5 .php7 .php8
