@@ -31,12 +31,22 @@
 
 /* Full-page overlay for route changes */
 .page-loader-overlay{
-	position: fixed;
-	inset: 0;
-	background: rgba(255,255,255,.65);
-	z-index: 2050; /* above navbar and drawers */
-	display: none;
-	place-items: center;
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,.65);
+    z-index: 2050; /* above navbar and drawers */
+    display: none;
+    /* Center with flex as fallback */
+    align-items: center;
+    justify-content: center;
+    /* Prefer grid centering when shown */
+}
+
+/* When visible, ensure proper centering in all browsers */
+.page-loader-overlay[style*="display: grid"],
+.page-loader-overlay.is-visible{
+    display: grid !important;
+    place-items: center;
 }
 
 
