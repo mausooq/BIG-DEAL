@@ -141,12 +141,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Handle image uploads
         if (isset($_FILES['images']) && !empty($_FILES['images']['name'][0])) {
+            // Server-side limits
+            $max_files_allowed = 12; // adjust as needed
+            $max_total_size_bytes = 50 * 1024 * 1024; // 50MB total cap per submission
+
             $upload_dir = '../../uploads/properties/';
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
 
             $image_count = count($_FILES['images']['name']);
+
+            // Count actual selected files (exclude empty names) and compute total size
+            $selected_files = 0;
+            $total_size = 0;
+            for ($i = 0; $i < $image_count; $i++) {
+                if (!empty($_FILES['images']['name'][$i]) && $_FILES['images']['error'][$i] !== UPLOAD_ERR_NO_FILE) {
+                    $selected_files++;
+                    $total_size += (int)($_FILES['images']['size'][$i] ?? 0);
+                }
+            }
+            if ($selected_files > $max_files_allowed) {
+                throw new Exception('You can upload up to ' . $max_files_allowed . ' images at once.');
+            }
+            if ($total_size > $max_total_size_bytes) {
+                throw new Exception('Total images size exceeds ' . round($max_total_size_bytes / (1024*1024)) . 'MB. Reduce number or size of files.');
+            }
             
             for ($i = 0; $i < $image_count; $i++) {
                 if ($_FILES['images']['error'][$i] === UPLOAD_ERR_OK) {
@@ -173,7 +193,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $img_stmt->execute();
                             $img_stmt->close();
                         } else {
-                            throw new Exception('Failed to upload image ' . ($i + 1));
+                            // Provide a clearer message when server forbids move (permissions/ACL/mod_security)
+                            throw new Exception('Failed to save image ' . ($i + 1) . '. Please check folder permissions and server limits.');
                         }
                     } else {
                         throw new Exception('Invalid file type for image ' . ($i + 1) . '. Allowed types: JPG, PNG, GIF, WebP');
@@ -815,7 +836,9 @@ $pl_stmt && $pl_stmt->close();
         imageInput.addEventListener('input', onFilesSelected, { passive: true });
 
         function handleFiles(files) {
-            const maxSize = 10 * 1024 * 1024; // 10MB
+            const maxSize = 10 * 1024 * 1024; // 10MB per image
+            const maxFiles = 12; // max images per submission
+            const maxTotal = 50 * 1024 * 1024; // 50MB total per submission
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             
             // Don't clear previous selections - add to existing ones
@@ -861,6 +884,39 @@ $pl_stmt && $pl_stmt->close();
                 reader.readAsDataURL(file);
             });
             
+            // Enforce max files and total size after adding
+            if (selectedFiles.length > maxFiles) {
+                alert(`You can upload up to ${maxFiles} images at once.`);
+                // Trim extras
+                selectedFiles = selectedFiles.slice(0, maxFiles);
+                // Re-render previews to reflect trimmed list
+                imagePreview.innerHTML = '';
+                selectedFiles.forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const previewContainer = document.createElement('div');
+                        previewContainer.className = 'image-preview-container';
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.title = file.name;
+                        const removeBtn = document.createElement('button');
+                        removeBtn.type = 'button';
+                        removeBtn.className = 'image-remove-btn';
+                        removeBtn.textContent = '×';
+                        removeBtn.onclick = () => removeImage(previewContainer, file);
+                        previewContainer.appendChild(img);
+                        previewContainer.appendChild(removeBtn);
+                        imagePreview.appendChild(previewContainer);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            const totalSize = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+            if (totalSize > maxTotal) {
+                alert(`Total images size exceeds ${(maxTotal / (1024*1024)).toFixed(0)}MB. Remove some files or choose smaller ones.`);
+            }
+
             // Update the file input with the selected files
             updateFileInput();
             updateImageInfo();
@@ -920,6 +976,9 @@ $pl_stmt && $pl_stmt->close();
             const location = document.querySelector('input[name="location"]').value.trim();
             const price = document.querySelector('input[name="price"]').value;
             const area = document.querySelector('input[name="area"]').value;
+            const totalSize = selectedFiles.reduce((sum, f) => sum + f.size, 0);
+            const maxFiles = 12;
+            const maxTotal = 50 * 1024 * 1024;
 
             if (!title) {
                 alert('Please enter a property title');
@@ -938,6 +997,17 @@ $pl_stmt && $pl_stmt->close();
             }
             if (!area || parseFloat(area) <= 0) {
                 alert('Please enter a valid area');
+                e.preventDefault();
+                return;
+            }
+
+            if (selectedFiles.length > maxFiles) {
+                alert(`You can upload up to ${maxFiles} images at once.`);
+                e.preventDefault();
+                return;
+            }
+            if (totalSize > maxTotal) {
+                alert(`Total images size exceeds ${(maxTotal / (1024*1024)).toFixed(0)}MB. Remove some files or choose smaller ones.`);
                 e.preventDefault();
                 return;
             }
