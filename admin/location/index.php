@@ -52,8 +52,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -110,8 +110,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'state_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -194,8 +194,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'district_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -252,8 +252,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'district_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -335,8 +335,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'city_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -393,8 +393,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'city_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -476,8 +476,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'town_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -534,8 +534,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $image_filename = 'town_' . $timestamp . '_' . uniqid() . '.' . $file_extension;
                     $file_path = $upload_dir . $image_filename;
                     
-                    if ($_FILES['image']['size'] > 5 * 1024 * 1024) {
-                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 5MB.';
+                    if ($_FILES['image']['size'] > 10 * 1024 * 1024) {
+                        $_SESSION['error_message'] = 'Image is too large. Maximum size is 10MB.';
                     } elseif (move_uploaded_file($_FILES['image']['tmp_name'], $file_path)) {
                         // Image uploaded successfully
                     } else {
@@ -939,6 +939,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
          /* Button consistency */
          .btn{ border-radius:8px; font-weight:500; }
          .btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
+         .btn-animated-delete{ padding:0.5rem 1rem; font-size:0.875rem; }
          
          /* Action buttons */
          .actions-cell .btn{ 
@@ -1486,7 +1487,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">State Image</label>
                                 <input type="file" name="image" accept="image/*" id="add_state_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="add_state_choose">Choose Image</button>
-                                <div class="form-text">Upload an image for this state (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload an image for this state (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="add_state_preview" class="mt-2"></div>
                             </div>
                         </div>
@@ -1529,7 +1530,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">State Image</label>
                                 <input type="file" name="image" accept="image/*" id="edit_state_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="edit_state_choose">Choose Image</button>
-                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="current_image_preview" class="mt-2"></div>
                                 <div id="edit_state_preview" class="mt-2"></div>
                             </div>
@@ -1571,8 +1572,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash me-1"></i>Delete State
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete State</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -1609,7 +1615,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">District Image</label>
                                 <input type="file" name="image" accept="image/*" id="add_district_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="add_district_choose">Choose Image</button>
-                                <div class="form-text">Upload an image for this district (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload an image for this district (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="add_district_preview" class="mt-2"></div>
                             </div>
                         </div>
@@ -1661,7 +1667,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">District Image</label>
                                 <input type="file" name="image" accept="image/*" id="edit_district_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="edit_district_choose">Choose Image</button>
-                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="current_district_image_preview" class="mt-2"></div>
                                 <div id="edit_district_preview" class="mt-2"></div>
                             </div>
@@ -1703,8 +1709,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash me-1"></i>Delete District
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete District</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -1741,7 +1752,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">City Image</label>
                                 <input type="file" name="image" accept="image/*" id="add_city_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="add_city_choose">Choose Image</button>
-                                <div class="form-text">Upload an image for this city (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload an image for this city (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="add_city_preview" class="mt-2"></div>
                             </div>
                         </div>
@@ -1775,7 +1786,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             if (!file) return;
             const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
             if (!allowed.includes(file.type)) { alert('Please select JPG, PNG, GIF, or WebP'); input.value=''; return; }
-            if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
+            if (file.size > 10*1024*1024) { alert('Image too large (max 10MB)'); input.value=''; return; }
             if (preview) {
                 const reader = new FileReader();
                 reader.onload = (e)=>{ preview.innerHTML = '<img src="'+e.target.result+'" style="width:120px;height:120px;object-fit:cover;border-radius:8px;border:1px solid #e0e0e0;">'; };
@@ -1823,7 +1834,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                 <label class="form-label">City Image</label>
                                 <input type="file" name="image" accept="image/*" id="edit_city_image" style="display:none;">
                                 <button type="button" class="btn btn-secondary" id="edit_city_choose">Choose Image</button>
-                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="current_city_image_preview" class="mt-2"></div>
                                 <div id="edit_city_preview" class="mt-2"></div>
                             </div>
@@ -1865,8 +1876,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash me-1"></i>Delete City
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete City</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </form>
@@ -1902,7 +1918,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             <div class="col-12">
                                 <label class="form-label">Town Image</label>
                                 <input type="file" class="form-control" name="image" accept="image/*">
-                                <div class="form-text">Upload an image for this town (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload an image for this town (JPG, PNG, GIF, WebP - Max 10MB)</div>
                             </div>
                         </div>
                     </div>
@@ -1952,7 +1968,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                             <div class="col-12">
                                 <label class="form-label">Town Image</label>
                                 <input type="file" class="form-control" name="image" accept="image/*">
-                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 5MB)</div>
+                                <div class="form-text">Upload a new image to replace the current one (JPG, PNG, GIF, WebP - Max 10MB)</div>
                                 <div id="current_town_image_preview" class="mt-2"></div>
                             </div>
                         </div>
@@ -1993,8 +2009,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fa-solid fa-trash me-1"></i>Delete Town
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete Town</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </form>

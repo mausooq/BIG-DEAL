@@ -261,6 +261,11 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+		
+		/* Button consistency */
+		.btn{ border-radius:8px; font-weight:500; }
+		.btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
+		.btn-animated-delete{ padding:0.5rem 1rem; font-size:0.875rem; }
 		/* Modern Animated Action Buttons (match Properties) */
 		.modern-btn { width:36px; height:36px; border:none; border-radius:12px; cursor:pointer; position:relative; overflow:hidden; transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275); backdrop-filter: blur(10px); box-shadow: 0 4px 16px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2); display:inline-flex; align-items:center; justify-content:center; font-size:14px; margin:0 2px; }
 		.modern-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent); transition:left .6s; }
@@ -522,7 +527,14 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 					<form method="POST" style="display: inline;">
 						<input type="hidden" name="action" value="delete_faq">
 						<input type="hidden" name="id" id="delete_id">
-						<button type="submit" class="btn btn-danger">Delete</button>
+						<button type="submit" class="btn-animated-delete noselect">
+							<span class="text">Delete</span>
+							<span class="icon">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+									<path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+								</svg>
+							</span>
+						</button>
 					</form>
 				</div>
 			</div>

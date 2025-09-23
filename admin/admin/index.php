@@ -253,6 +253,12 @@ $totalPages = (int)ceil($totalCount / $limit);
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-start; align-items:center; }
 		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; flex-shrink:0; }
 		.actions-cell .btn:disabled{ opacity:0.5; cursor:not-allowed; }
+		
+		/* Button consistency */
+		.btn{ border-radius:8px; font-weight:500; }
+		.btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
+		.btn-animated-suspend{ padding:0.5rem 1rem; font-size:0.875rem; background:#f59e0b; color:#fff; border:1px solid #d97706; border-radius:8px; display:inline-flex; align-items:center; gap:.5rem; transition: all 0.2s ease; }
+		.btn-animated-suspend:hover{ background:#d97706; border-color:#b45309; transform: translateY(-1px); box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2); }
 		/* Modern Animated Action Buttons (match Properties) */
 		.modern-btn { width:36px; height:36px; border:none; border-radius:12px; cursor:pointer; position:relative; overflow:hidden; transition: all .4s cubic-bezier(0.175,0.885,0.32,1.275); backdrop-filter: blur(10px); box-shadow: 0 4px 16px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2); display:inline-flex; align-items:center; justify-content:center; font-size:14px; margin:0 2px; }
 		.modern-btn::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.3), transparent); transition:left .6s; }
@@ -480,7 +486,14 @@ $totalPages = (int)ceil($totalCount / $limit);
 					<form method="POST" style="display: inline;">
 						<input type="hidden" name="action" value="suspend_admin">
 						<input type="hidden" name="id" id="suspend_id">
-						<button type="submit" class="btn btn-warning">Suspend</button>
+						<button type="submit" class="btn-animated-suspend noselect">
+							<span class="text">Suspend</span>
+							<span class="icon">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+									<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+								</svg>
+							</span>
+						</button>
 					</form>
 				</div>
 			</div>
@@ -533,6 +546,39 @@ $totalPages = (int)ceil($totalCount / $limit);
 					setTimeout(() => { modernBtn.style.animation = ''; modernBtn.style.transform = ''; }, 150);
 				}
 			});
+
+			// Ripple + click animation for animated buttons
+			document.addEventListener('click', function(e){
+				const animatedBtn = e.target.closest('.btn-animated-suspend');
+				if (animatedBtn) {
+					const rect = animatedBtn.getBoundingClientRect();
+					const radius = Math.max(rect.width, rect.height) / 2;
+					const diameter = radius * 2;
+
+					const circle = document.createElement('span');
+					circle.style.position = 'absolute';
+					circle.style.borderRadius = '50%';
+					circle.style.background = 'rgba(255, 255, 255, 0.4)';
+					circle.style.transform = 'scale(0)';
+					circle.style.animation = 'ripple-animation 0.6s linear';
+					circle.style.pointerEvents = 'none';
+					circle.style.width = circle.style.height = `${diameter}px`;
+					circle.style.left = `${(e.clientX - rect.left) - radius}px`;
+					circle.style.top = `${(e.clientY - rect.top) - radius}px`;
+
+					const existing = animatedBtn.querySelector('.ripple');
+					if (existing) existing.remove();
+					animatedBtn.appendChild(circle);
+
+					animatedBtn.style.animation = 'none';
+					animatedBtn.style.transform = 'scale(0.95)';
+					setTimeout(() => {
+						animatedBtn.style.animation = '';
+						animatedBtn.style.transform = '';
+					}, 150);
+				}
+			});
+
 			// If edit_id is present in URL, pre-open edit modal for that admin
 			(function(){
 				const params = new URLSearchParams(window.location.search);

@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
             $allowed = ['jpg','jpeg','png','gif','webp'];
             if (!in_array($ext, $allowed)) { throw new Exception('Invalid image type'); }
-            if ($_FILES['image']['size'] > 5*1024*1024) { throw new Exception('Image too large (max 5MB)'); }
+            if ($_FILES['image']['size'] > 10*1024*1024) { throw new Exception('Image too large (max 10MB)'); }
             $imageFile = 'category_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
             if (!move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageFile)) {
                 throw new Exception('Failed to upload image');
@@ -104,6 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             --bg: #F4F7FA;
             --card: #FFFFFF;
             --line: #E0E0E0;
+            --border-color: #E0E0E0;
+            --text: #333;
         }
         body{ background:var(--bg); color:#111827; margin:0; }
         /* Background iframe with blur */
@@ -123,6 +125,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .close-btn { font-size:1.5rem; color:#999; cursor:pointer; border:none; background:none; }
         .btn-animated-confirm { background: var(--primary-color); color:#fff; border:0; padding:.8rem 1.5rem; border-radius:8px; display:inline-flex; align-items:center; gap:.5rem; }
         .btn-outline-secondary { border-radius:8px; }
+        .footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+        .btn { padding:.5rem 1rem; border:none; border-radius:8px; font-size:.875rem; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
+        .btn-secondary { background:#ffffff; color:var(--text); border:1px solid var(--border-color); }
+        .btn-secondary:hover { background:#f5f5f5; }
+        .btn-animated-confirm { padding:.5rem 1rem; font-size:.875rem; }
         /* Form look */
         .form-control{ border-radius:12px; border:1px solid var(--line); }
         .form-control:focus{ border-color:var(--primary-color); box-shadow:0 0 0 3px rgba(239,68,68,.15); }
@@ -168,15 +175,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="mb-2">Drop image here or click to browse</div>
                             <input type="file" name="image" id="image" accept="image/*" class="d-none">
                             <button type="button" class="btn btn-outline-primary" id="chooseBtn"><i class="fa-solid fa-plus me-1"></i>Choose Image</button>
-                            <div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
+                            <div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 10MB</div>
                         </div>
                         <div class="preview" id="preview" style="display:none;">
                             <img id="previewImg" src="" alt="Preview">
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-3">
-                        <a href="index.php" class="btn btn-outline-secondary"><i class="fa-solid fa-times me-2"></i>Cancel</a>
+                    <div class="footer-actions">
+                        <a href="index.php" class="btn btn-secondary">Cancel</a>
                         <button type="submit" class="btn-animated-confirm noselect">
                             <span class="text">Add Category</span>
                             <span class="icon">
@@ -212,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!file) { preview.style.display='none'; return; }
             const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
             if (!allowed.includes(file.type)) { alert('Please select a JPG, PNG, GIF, or WebP image'); input.value=''; return; }
-            if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
+            if (file.size > 10*1024*1024) { alert('Image too large (max 10MB)'); input.value=''; return; }
             const reader = new FileReader();
             reader.onload = (e)=>{ previewImg.src = e.target.result; preview.style.display='block'; };
             reader.readAsDataURL(file);

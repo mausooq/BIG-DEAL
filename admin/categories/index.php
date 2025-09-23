@@ -851,7 +851,7 @@ try {
                                     <i class="fas fa-cloud-upload-alt"></i>
                                 </div>
                                 <div class="image-upload-text">Click to upload or drag and drop</div>
-                                <div class="image-upload-subtext">JPG, PNG, GIF, or WebP (max 5MB)</div>
+                                <div class="image-upload-subtext">JPG, PNG, GIF, or WebP (max 10MB)</div>
                                 <div class="file-input-wrapper">
                                     <input type="file" class="file-input" id="categoryImage" name="image" 
                                            accept="image/*" onchange="previewImage(this, 'addImagePreview')">
@@ -1162,9 +1162,9 @@ try {
         function validateAndPreviewFile(input) {
             const file = input.files[0];
             if (file) {
-                const maxSize = 5 * 1024 * 1024; // 5MB
+                const maxSize = 10 * 1024 * 1024; // 10MB
                 if (file.size > maxSize) {
-                    showAlert('File size must be less than 5MB', 'warning');
+                    showAlert('File size must be less than 10MB', 'warning');
                     input.value = '';
                     return;
                 }

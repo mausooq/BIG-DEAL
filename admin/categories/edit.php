@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$ext = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
 			$allowed = ['jpg','jpeg','png','gif','webp'];
 			if (!in_array($ext, $allowed)) { throw new Exception('Invalid image type'); }
-			if ($_FILES['image']['size'] > 5*1024*1024) { throw new Exception('Image too large (max 5MB)'); }
+			if ($_FILES['image']['size'] > 10*1024*1024) { throw new Exception('Image too large (max 10MB)'); }
 			$newName = 'category_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 			if (!move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $newName)) {
 				throw new Exception('Failed to upload image');
@@ -115,9 +115,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .image-drop{ border:1px dashed var(--border-color); border-radius:12px; padding:1rem; text-align:center; background:#fafafa; }
         .preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:1px solid var(--border-color); }
         .footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
-        .btn { padding:.8rem 1.2rem; border:none; border-radius:8px; font-size:1rem; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
+        .btn { padding:.5rem 1rem; border:none; border-radius:8px; font-size:.875rem; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
         .btn-secondary { background:#ffffff; color:var(--text); border:1px solid var(--border-color); }
         .btn-secondary:hover { background:#f5f5f5; }
+        .btn-animated-confirm { padding:.5rem 1rem; font-size:.875rem; }
     </style>
 </head>
 <body>
@@ -153,7 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <div style="margin-top:8px;">
                                     <button type="button" class="btn btn-secondary" id="chooseBtn">Choose Image</button>
                                 </div>
-                                <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 5MB</div>
+                                <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB</div>
                             </div>
                             <div class="preview" id="preview" style="margin-top:8px;display:block;">
                                 <?php if (!empty($category['image'])): ?>
@@ -203,7 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!file) { return; }
             const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
             if (!allowed.includes(file.type)) { alert('Please select a JPG, PNG, GIF, or WebP image'); input.value=''; return; }
-            if (file.size > 5*1024*1024) { alert('Image too large (max 5MB)'); input.value=''; return; }
+            if (file.size > 10*1024*1024) { alert('Image too large (max 10MB)'); input.value=''; return; }
             const reader = new FileReader();
             reader.onload = (e)=>{ preview.innerHTML = '<img src="' + e.target.result + '" style="width:140px;height:140px;object-fit:cover;border-radius:10px;border:1px solid #e0e0e0;">'; };
             reader.readAsDataURL(file);

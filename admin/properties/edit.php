@@ -159,9 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $filename = 'property_' . $property_id . '_' . $timestamp . '_' . $i . '.' . $file_extension;
                         $file_path = $upload_dir . $filename;
                         
-                        // Check file size (max 5MB per image)
-                        if ($_FILES['images']['size'][$i] > 5 * 1024 * 1024) {
-                            throw new Exception('Image ' . ($i + 1) . ' is too large. Maximum size is 5MB.');
+                        // Check file size (max 10MB per image)
+                        if ($_FILES['images']['size'][$i] > 10 * 1024 * 1024) {
+                            throw new Exception('Image ' . ($i + 1) . ' is too large. Maximum size is 10MB.');
                         }
                         
                         if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $file_path)) {
@@ -284,10 +284,29 @@ $pl_stmt && $pl_stmt->close();
         .existing-image img { max-width:150px; max-height:150px; object-fit:cover; border-radius:8px; border:1px solid var(--border-color); }
         .image-delete-btn { position:absolute; top:-6px; right:-6px; width:22px; height:22px; border-radius:50%; background:#dc2626; color:#fff; border:none; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; }
         .image-upload-box { border:1px dashed var(--border-color); border-radius:12px; padding:1rem; text-align:center; background:#fafafa; }
-        .btn { padding: .75rem 1.25rem; border-radius:8px; border:1px solid var(--border-color); background:#fff; cursor:pointer; font-weight:500; text-decoration:none; display:inline-block; }
+        .btn { padding: .5rem 1rem; border-radius:8px; border:1px solid var(--border-color); background:#fff; cursor:pointer; font-weight:500; text-decoration:none; display:inline-block; font-size: .875rem; }
         .btn-primary { background: var(--primary-color); color:#fff; border:none; }
-        .btn-secondary { background:#fff; color: var(--text-color); }
-        .btn-secondary:hover { background:#f5f5f5; }
+        .btn-secondary {
+            background: #6b7280;
+            color: #ffffff;
+            border: 1px solid #6b7280;
+            border-radius: 8px;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: .5rem 1rem;
+            font-size: .875rem;
+        }
+        .btn-secondary:hover {
+            background: #4b5563;
+            border-color: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        .btn-animated-confirm {
+            padding: .5rem 1rem;
+            font-size: .875rem;
+        }
         .footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
         /* New images preview grid */
         #imagePreview { display:flex; flex-wrap:wrap; gap:8px; }
@@ -391,7 +410,14 @@ $pl_stmt && $pl_stmt->close();
                                 <div id="stateAddInline" class="inline-add" style="display:none;">
                                     <div style="display:flex; gap:6px;">
                                         <input type="text" id="stateAddInput" placeholder="New state name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                                        <button type="button" class="btn btn-primary" id="stateAddSave">Save</button>
+                                        <button type="button" class="btn-animated-confirm noselect" id="stateAddSave">
+                                            <span class="text">Save</span>
+                                            <span class="icon">
+                                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                                </svg>
+                                            </span>
+                                        </button>
                                         <button type="button" class="btn btn-secondary" id="stateAddCancel">Cancel</button>
                                     </div>
                                 </div>
@@ -405,7 +431,14 @@ $pl_stmt && $pl_stmt->close();
                                 <div id="districtAddInline" class="inline-add" style="display:none;">
                                     <div style="display:flex; gap:6px;">
                                         <input type="text" id="districtAddInput" placeholder="New district name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                                        <button type="button" class="btn btn-primary" id="districtAddSave">Save</button>
+                                        <button type="button" class="btn-animated-confirm noselect" id="districtAddSave">
+                                            <span class="text">Save</span>
+                                            <span class="icon">
+                                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                                </svg>
+                                            </span>
+                                        </button>
                                         <button type="button" class="btn btn-secondary" id="districtAddCancel">Cancel</button>
                                     </div>
                                 </div>
@@ -419,7 +452,14 @@ $pl_stmt && $pl_stmt->close();
                                 <div id="cityAddInline" class="inline-add" style="display:none;">
                                     <div style="display:flex; gap:6px;">
                                         <input type="text" id="cityAddInput" placeholder="New city name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                                        <button type="button" class="btn btn-primary" id="cityAddSave">Save</button>
+                                        <button type="button" class="btn-animated-confirm noselect" id="cityAddSave">
+                                            <span class="text">Save</span>
+                                            <span class="icon">
+                                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                                </svg>
+                                            </span>
+                                        </button>
                                         <button type="button" class="btn btn-secondary" id="cityAddCancel">Cancel</button>
                                     </div>
                                 </div>
@@ -433,7 +473,14 @@ $pl_stmt && $pl_stmt->close();
                                 <div id="townAddInline" class="inline-add" style="display:none;">
                                     <div style="display:flex; gap:6px;">
                                         <input type="text" id="townAddInput" placeholder="New town name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                                        <button type="button" class="btn btn-primary" id="townAddSave">Save</button>
+                                        <button type="button" class="btn-animated-confirm noselect" id="townAddSave">
+                                            <span class="text">Save</span>
+                                            <span class="icon">
+                                                <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                                </svg>
+                                            </span>
+                                        </button>
                                         <button type="button" class="btn btn-secondary" id="townAddCancel">Cancel</button>
                                     </div>
                                 </div>
@@ -503,7 +550,7 @@ $pl_stmt && $pl_stmt->close();
                         <div class="section-title">Add New Images</div>
                         <div class="image-upload-box" id="imageUploadArea">
                             <div style="margin-bottom:8px;font-weight:500;">Drop images here or click to browse</div>
-                            <div style="color:#6b7280; font-size:.9rem;">Upload multiple images (JPG, PNG, GIF, WebP) - Max 5MB each</div>
+                            <div style="color:#6b7280; font-size:.9rem;">Upload multiple images (JPG, PNG, GIF, WebP) - Max 10MB each</div>
                             <input type="file" name="images[]" id="imageInput" multiple accept="image/*" style="display:none;">
                             <div style="margin-top:10px;">
                                 <button type="button" class="btn btn-secondary" onclick="document.getElementById('imageInput').click()">Choose Images</button>
@@ -766,7 +813,7 @@ $pl_stmt && $pl_stmt->close();
         imageInput.addEventListener('input', onFilesSelected, { passive: true });
 
         function handleFiles(files) {
-            const maxSize = 5 * 1024 * 1024; // 5MB
+            const maxSize = 10 * 1024 * 1024; // 10MB
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             
             // Clear previous selections
@@ -782,7 +829,7 @@ $pl_stmt && $pl_stmt->close();
                 
                 // Validate file size
                 if (file.size > maxSize) {
-                    alert(`File "${file.name}" is too large. Maximum size is 5MB.`);
+                    alert(`File "${file.name}" is too large. Maximum size is 10MB.`);
                     return;
                 }
                 
@@ -893,6 +940,50 @@ $pl_stmt && $pl_stmt->close();
                 return;
             }
         });
+
+        // Animated button effects (ripple animation)
+        document.addEventListener('DOMContentLoaded', function(){
+            document.addEventListener('click', function(e){
+                // Ripple + click animation for animated buttons
+                const animatedBtn = e.target.closest('.btn-animated-confirm, .btn-animated-add, .btn-animated-delete');
+                if (animatedBtn) {
+                    const rect = animatedBtn.getBoundingClientRect();
+                    const radius = Math.max(rect.width, rect.height) / 2;
+                    const diameter = radius * 2;
+                    
+                    const circle = document.createElement('span');
+                    circle.style.position = 'absolute';
+                    circle.style.borderRadius = '50%';
+                    circle.style.background = 'rgba(255, 255, 255, 0.4)';
+                    circle.style.transform = 'scale(0)';
+                    circle.style.animation = 'ripple-animation 0.6s linear';
+                    circle.style.pointerEvents = 'none';
+                    circle.style.width = circle.style.height = `${diameter}px`;
+                    circle.style.left = `${(e.clientX - rect.left) - radius}px`;
+                    circle.style.top = `${(e.clientY - rect.top) - radius}px`;
+                    
+                    const existing = animatedBtn.querySelector('.ripple');
+                    if (existing) existing.remove();
+                    animatedBtn.appendChild(circle);
+                    
+                    animatedBtn.style.animation = 'none';
+                    animatedBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => { 
+                        animatedBtn.style.animation = ''; 
+                        animatedBtn.style.transform = ''; 
+                    }, 150);
+                }
+            });
+        });
     </script>
+    <style>
+        /* Ripple animation keyframes */
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
 </body>
 </html>

@@ -152,6 +152,11 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .delete-btn:hover { background: var(--primary-600); border-color: var(--primary-600); color:#fff; }
         .ripple { position:absolute; border-radius:50%; background: rgba(255,255,255,.4); transform: scale(0); animation: ripple-animation .6s linear; pointer-events:none; }
         @keyframes ripple-animation { to { transform: scale(4); opacity: 0; } }
+        
+        /* Button consistency */
+        .btn{ border-radius:8px; font-weight:500; }
+        .btn-sm{ padding:0.5rem 1rem; font-size:0.875rem; }
+        .btn-animated-delete{ padding:0.5rem 1rem; font-size:0.875rem; }
         /* Mobile responsiveness */
 
             .table{ font-size:.9rem; }
@@ -283,13 +288,14 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                                         <button type="button" class="modern-btn view-btn btn-view-enquiry" data-enquiry='<?php echo $enqJson; ?>' title="View">
                                             <span class="icon"><i class="fa-solid fa-eye"></i></span>
                                         </button>
-                                        <form method="post" class="d-inline">
-                                            <input type="hidden" name="action" value="delete">
-                                            <input type="hidden" name="id" value="<?php echo (int)$row['id']; ?>">
-                                            <button type="submit" class="modern-btn delete-btn" title="Delete Enquiry" onclick="return confirm('Delete this enquiry?');">
-                                                <span class="icon"><i class="fa-solid fa-trash"></i></span>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="modern-btn delete-btn btn-delete-enquiry" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#deleteEnquiryModal" 
+                                                data-enquiry-id="<?php echo (int)$row['id']; ?>"
+                                                data-enquiry-name="<?php echo htmlspecialchars($row['name']); ?>"
+                                                title="Delete Enquiry">
+                                            <span class="icon"><i class="fa-solid fa-trash"></i></span>
+                                        </button>
                                     </td>
                                 </tr>
                                 <?php endwhile; ?>
@@ -350,6 +356,41 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
             </div>
         </div>
     </div>
+
+    <!-- Delete Enquiry Modal -->
+    <div class="modal fade" id="deleteEnquiryModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Enquiry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="id" id="delete_enquiry_id">
+                        <p>Are you sure you want to delete the enquiry from <span id="delete_enquiry_name" class="fw-semibold">this person</span>?</p>
+                        <div class="alert alert-warning">
+                            <i class="fa-solid fa-exclamation-triangle me-2"></i>
+                            <strong>Warning:</strong> This action cannot be undone.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-animated-delete noselect">
+                            <span class="text">Delete Enquiry</span>
+                            <span class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path d="M24 20.188l-8.315-8.209 8.2-8.282-3.697-3.697-8.212 8.318-8.31-8.203-3.666 3.666 8.321 8.24-8.206 8.313 3.666 3.666 8.237-8.318 8.285 8.203z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
     document.addEventListener('DOMContentLoaded', function(){
@@ -422,6 +463,17 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                     const modal = new bootstrap.Modal(document.getElementById('viewEnquiryModal'));
                     modal.show();
                 }catch(e){ console.error(e); }
+            });
+        });
+
+        // Handle delete enquiry modal
+        document.querySelectorAll('.btn-delete-enquiry').forEach(button => {
+            button.addEventListener('click', function() {
+                const enquiryId = this.getAttribute('data-enquiry-id');
+                const enquiryName = this.getAttribute('data-enquiry-name');
+                
+                document.getElementById('delete_enquiry_id').value = enquiryId;
+                document.getElementById('delete_enquiry_name').textContent = enquiryName;
             });
         });
     });

@@ -682,10 +682,20 @@ function get_data($field) {
         }
         .btn-primary:hover { background-color: #b91c1c; }
         .btn-secondary {
-            background-color: var(--card-bg-color);
-            color: var(--text-color);
-            border: 1px solid var(--border-color);
-    }
+            background: #6b7280; 
+            color: #ffffff; 
+            border: 1px solid #6b7280; 
+            border-radius: 8px;
+            box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.15);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover { 
+            background: #4b5563; 
+            border-color: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
+        }
 
         /* Image Drop Zone Styles (from blog design) */
         .image-drop {
@@ -875,7 +885,14 @@ function get_data($field) {
                     <div id="inlineAddState" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineStateName" placeholder="New state name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineStateSave" class="btn btn-primary">Save</button>
+                            <button type="button" id="inlineStateSave" class="btn-animated-confirm noselect">
+                                <span class="text">Save</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                    </svg>
+                                </span>
+                            </button>
                             <button type="button" id="inlineStateCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -889,7 +906,14 @@ function get_data($field) {
                     <div id="inlineAddDistrict" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineDistrictName" placeholder="New district name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineDistrictSave" class="btn btn-primary">Save</button>
+                            <button type="button" id="inlineDistrictSave" class="btn-animated-confirm noselect">
+                                <span class="text">Save</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                    </svg>
+                                </span>
+                            </button>
                             <button type="button" id="inlineDistrictCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -903,7 +927,14 @@ function get_data($field) {
                     <div id="inlineAddCity" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineCityName" placeholder="New city name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineCitySave" class="btn btn-primary">Save</button>
+                            <button type="button" id="inlineCitySave" class="btn-animated-confirm noselect">
+                                <span class="text">Save</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                    </svg>
+                                </span>
+                            </button>
                             <button type="button" id="inlineCityCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -917,7 +948,14 @@ function get_data($field) {
                     <div id="inlineAddTown" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineTownName" placeholder="New town name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineTownSave" class="btn btn-primary">Save</button>
+                            <button type="button" id="inlineTownSave" class="btn-animated-confirm noselect">
+                                <span class="text">Save</span>
+                                <span class="icon">
+                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
+                                    </svg>
+                                </span>
+                            </button>
                             <button type="button" id="inlineTownCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -979,7 +1017,7 @@ function get_data($field) {
                         <div style="margin-top:8px;">
                             <button type="button" class="btn btn-secondary" id="chooseBtn">Choose Images</button>
                         </div>
-                        <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 5MB each. You can select multiple files at once.</div>
+                        <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB each. You can select multiple files at once.</div>
                     </div>
                     <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
                     <div id="liveImagesPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
@@ -1352,7 +1390,7 @@ chooseBtn?.addEventListener('click', (e) => {
 });
 
 function handleFiles(files) {
-  const maxSize = 5 * 1024 * 1024;
+  const maxSize = 10 * 1024 * 1024;
   let overs = [];
   let newImagesCount = 0;
   
@@ -1374,7 +1412,7 @@ function handleFiles(files) {
             
   if (overs.length){
     imageSizeWarning.style.display = 'block';
-    imageSizeWarning.textContent = 'These files exceed 5MB and were skipped: ' + overs.join(', ');
+    imageSizeWarning.textContent = 'These files exceed 10MB and were skipped: ' + overs.join(', ');
   } else {
     imageSizeWarning.style.display = 'none';
     imageSizeWarning.textContent = '';
@@ -1577,5 +1615,49 @@ document.addEventListener('DOMContentLoaded', function(){
   } catch {}
 });
 
+        // Animated button effects (ripple animation)
+        document.addEventListener('DOMContentLoaded', function(){
+            document.addEventListener('click', function(e){
+                // Ripple + click animation for animated buttons
+                const animatedBtn = e.target.closest('.btn-animated-confirm, .btn-animated-add, .btn-animated-delete');
+                if (animatedBtn) {
+                    const rect = animatedBtn.getBoundingClientRect();
+                    const radius = Math.max(rect.width, rect.height) / 2;
+                    const diameter = radius * 2;
+                    
+                    const circle = document.createElement('span');
+                    circle.style.position = 'absolute';
+                    circle.style.borderRadius = '50%';
+                    circle.style.background = 'rgba(255, 255, 255, 0.4)';
+                    circle.style.transform = 'scale(0)';
+                    circle.style.animation = 'ripple-animation 0.6s linear';
+                    circle.style.pointerEvents = 'none';
+                    circle.style.width = circle.style.height = `${diameter}px`;
+                    circle.style.left = `${(e.clientX - rect.left) - radius}px`;
+                    circle.style.top = `${(e.clientY - rect.top) - radius}px`;
+                    
+                    const existing = animatedBtn.querySelector('.ripple');
+                    if (existing) existing.remove();
+                    animatedBtn.appendChild(circle);
+                    
+                    animatedBtn.style.animation = 'none';
+                    animatedBtn.style.transform = 'scale(0.95)';
+                    setTimeout(() => { 
+                        animatedBtn.style.animation = ''; 
+                        animatedBtn.style.transform = ''; 
+                    }, 150);
+                }
+            });
+        });
+
     </script>
+    <style>
+        /* Ripple animation keyframes */
+        @keyframes ripple-animation {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    </style>
 </script>
