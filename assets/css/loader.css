@@ -29,4 +29,14 @@
 	}
 }
 
+/* Full-page overlay for route changes */
+.page-loader-overlay{
+	position: fixed;
+	inset: 0;
+	background: rgba(255,255,255,.65);
+	z-index: 2050; /* above navbar and drawers */
+	display: none;
+	place-items: center;
+}
+
 

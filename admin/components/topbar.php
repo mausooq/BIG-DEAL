@@ -107,6 +107,10 @@ if (!function_exists('renderAdminTopbar')) {
 				</div>
 			</div>
 		</nav>
+		<!-- Global page loader overlay -->
+		<div class="page-loader-overlay" id="pageLoader" aria-hidden="true">
+			<div class="custom-loader"></div>
+		</div>
 		<script>
 		document.addEventListener('DOMContentLoaded', function(){
 			var btn = document.getElementById('sidebarToggle');
@@ -143,6 +147,27 @@ if (!function_exists('renderAdminTopbar')) {
 				mb.style.transform = 'scale(0.95)';
 				setTimeout(function(){ mb.style.animation = ''; mb.style.transform = ''; }, 150);
 			});
+
+			// Show loader on navigation and form submits
+			var pageLoader = document.getElementById('pageLoader');
+			function showLoader(){ if(pageLoader){ pageLoader.style.display = 'grid'; } }
+			function hideLoader(){ if(pageLoader){ pageLoader.style.display = 'none'; } }
+
+			// Intercept normal link clicks (same tab, not hashes, not JS void)
+			document.addEventListener('click', function(e){
+				var a = e.target.closest('a');
+				if(!a) return;
+				var href = a.getAttribute('href');
+				var target = a.getAttribute('target');
+				if(!href || href.startsWith('#') || href.startsWith('javascript:') || target === '_blank') return;
+				showLoader();
+			});
+
+			// Show loader on form submit
+			document.addEventListener('submit', function(){ showLoader(); }, true);
+
+			// Hide loader on page load complete
+			window.addEventListener('pageshow', function(){ hideLoader(); });
 		});
 		</script>
 		<?php
