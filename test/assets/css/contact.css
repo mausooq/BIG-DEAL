@@ -1,55 +1,111 @@
-/* Contact page responsive styles (scoped to .contact-page) */
-
-/* Base tweaks (non-invasive) */
-.contact-page .hero-banner .centered h1 { font-size: 2.5rem; }
-.contact-page .contact-info-item { display: flex; gap: 12px; align-items: center; margin: 12px 0; }
-.contact-page .contact-info-item img { width: 28px; height: 28px; flex: 0 0 auto; }
-.contact-page .contact-map { min-height: 360px; }
+/* Base (desktop-first tweaks) */
+.contact-page .hero-banner .centered h1 { font-size: 2.2em; }
+.contact-page .breadcrumbs { font-size: 0.95em; }
+.contact-page .forms { padding-left: 3em; padding-right: 3em; }
+.contact-page .contact-form .form-control { font-size: 1em; padding: 0.8em 1em; }
+.contact-page .contact-form .btn { padding: 0.8em 1.2em; font-size: 1em; }
+.contact-page .contact-map { min-height: 22em; }
+.contact-page .contact-info-item { display: flex; gap: 0.75em; align-items: center; margin: 0.75em 0; }
+.contact-page .contact-info-item img { width: 1.75em; height: 1.75em; flex: 0 0 auto; }
+.contact-page .contact-info-title { font-size: 1em; margin: 0; }
+.contact-page .contact-info-detail { font-size: 1em; }
 
 /* For small devices (phones, portrait) */
 @media (max-width: 480px) {
   /* CSS for very small phones */
-  .contact-page .hero-banner .centered h1 { font-size: 1.6rem; }
-  .contact-page .hero-banner .breadcrumbs { font-size: 0.85rem; }
+  .contact-page .hero-banner .centered h1 { font-size: 1.6em; }
+  .contact-page .hero-banner .breadcrumbs { font-size: 0.9em; }
 
-  .contact-page .forms { padding-left: 1rem !important; padding-right: 1rem !important; }
-  .contact-page .contact-form .form-control { font-size: 0.95rem; padding: 0.6rem 0.8rem; }
-  .contact-page .contact-form .btn { padding: 0.65rem 1rem; font-size: 0.95rem; }
+  .contact-page .forms { padding-left: 1em !important; padding-right: 1em !important; }
+  .contact-page .contact-form .form-control { font-size: 0.95em; padding: 0.6em 0.8em; }
+  .contact-page .contact-form .btn { padding: 0.65em 1em; font-size: 0.95em; }
 
-  .contact-page .contact-map { min-height: 260px; }
+  .contact-page .contact-map { min-height: 16.25em; }
 
-  .contact-page .contact-info-item { gap: 10px; }
-  .contact-page .contact-info-item img { width: 24px; height: 24px; }
-  .contact-page .contact-info-title { font-size: 0.9rem; margin: 0; }
-  .contact-page .contact-info-detail { font-size: 0.9rem; }
+  .contact-page .contact-info-item { gap: 0.625em; }
+  .contact-page .contact-info-item img { width: 1.5em; height: 1.5em; }
+  .contact-page .contact-info-title { font-size: 0.95em; }
+  .contact-page .contact-info-detail { font-size: 0.95em; }
+
+  /* Center the whole form on mobile */
+  .contact-page .forms .row { justify-content: center; }
+  .contact-page .contact-form { max-width: 28em; margin-left: auto; margin-right: auto; }
+  .contact-page .col-md-7 { flex: 0 0 100%; max-width: 100%; }
+
+  /* Contact form: ensure uniform full-width fields on mobile */
+  .contact-page .contact-form .row > [class^="col-"],
+  .contact-page .contact-form .row > [class*=" col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* Align fields to the same left start: remove gutters */
+  .contact-page .contact-form .row { margin-left: 0; margin-right: 0; }
+  .contact-page .contact-form .row > [class^="col-"],
+  .contact-page .contact-form .row > [class*=" col-"] { padding-left: 0; padding-right: 0; }
+  .contact-page .contact-form .form-control {
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
+  }
+  /* Center the form itself */
+  .contact-page .contact-form { max-width: 28em; margin-left: auto; margin-right: auto; }
+  /* Ensure all fields/buttons are exactly same width */
+  .contact-page .contact-form .form-item,
+  .contact-page .contact-form .form-control,
+  .contact-page .contact-form textarea,
+  .contact-page .contact-form .btn {
+    width: 100%;
+    max-width: 100%;
+    align-self: stretch;
+  }
 
   /* Ensure info columns stack nicely */
-  .contact-page .contact-info-item[class*="col-"] { padding-top: 8px; padding-bottom: 8px; }
+  .contact-page .contact-info-item[class*="col-"] {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  /* Center container and row on mobile */
+  .contact-page .container { margin-left: auto; margin-right: auto; }
+  .contact-page .row { justify-content: center; }
+  /* Force one item per row on mobile */
+  .contact-page .contact-info-item { width: 100%; }
+  /* Keep icon and text inline in a single row */
+  .contact-page .contact-info-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75em;
+    flex-wrap: nowrap;
+  }
+  .contact-page .contact-info-item img { flex: 0 0 auto; }
+  .contact-page .contact-info-text { flex: 1 1 auto; display: flex; flex-direction: column; }
 }
 
 /* For larger phones (landscape) */
 @media (max-width: 768px) {
   /* CSS for tablets and big phones */
-  .contact-page .hero-banner .centered h1 { font-size: 2rem; }
-  .contact-page .forms { padding-left: 2rem !important; padding-right: 2rem !important; }
-  .contact-page .contact-map { min-height: 300px; }
+  .contact-page .hero-banner .centered h1 { font-size: 1.8em; }
+  .contact-page .forms { padding-left: 2em !important; padding-right: 2em !important; }
+  .contact-page .contact-map { min-height: 18.75em; }
 
   /* Form spacing */
-  .contact-page .contact-form .form-item { margin-top: 0.6rem; margin-bottom: 0.6rem; }
+  .contact-page .contact-form .form-item { margin-top: 0.6em; margin-bottom: 0.6em; }
 
   /* Contact info row spacing */
-  .contact-page .contact-info-item img { width: 26px; height: 26px; }
+  .contact-page .contact-info-item img { width: 1.625em; height: 1.625em; color: red; }
 }
 
 /* For tablets */
 @media (max-width: 1024px) {
   /* CSS for iPads, small laptops */
-  .contact-page .hero-banner .centered h1 { font-size: 2.25rem; }
-  .contact-page .forms { padding-left: 3rem !important; padding-right: 3rem !important; }
-  .contact-page .contact-map { min-height: 340px; }
+  .contact-page .hero-banner .centered h1 { font-size: 2em; }
+  .contact-page .forms { padding:0 !important; }
+  .contact-page .contact-map { min-height: 21.25em; }
 
   /* Balance columns */
-  .contact-page .col-md-7, .contact-page .col-md-5 { margin-top: 1rem; }
+  .contact-page .col-md-7, .contact-page .col-md-5 { margin-top: 1em; }
 }
 
 

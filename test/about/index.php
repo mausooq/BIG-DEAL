@@ -36,8 +36,8 @@
 
 
       <div class="welcome-text">
-        <h2 class="hero-content1">WELCOME TO</h2>
-        <h2 class="gugi hero-content2">Real Estate</h2>
+        <h2 class="hero-content1 about-hero-content1">WELCOME TO</h2>
+        <h2 class="gugi hero-content2 about-hero-content2">Real Estate</h2>
       </div>
     </div>
 </section>

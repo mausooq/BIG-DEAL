@@ -1,24 +1,8 @@
 /* About Page Responsive Styles */
 
-/* Override global styles for about page hero banner - mobile/tablet only */
-@media (max-width: 768px) {
-  body.about-page .hero-banner {
-    margin-top: 2em !important;
-    padding-top: 1em !important;
-    height: auto !important;
-  }
-  
-  body.about-page .hero-banner h1 {
-    margin-top: 0.5em !important;
-    padding-top: 0 !important;
-  }
-  
-  body.about-page .hero-banner::before {
-    display: none !important;
-  }
-}
-
-/* For tablets */
+/* ===========================================
+   TABLETS (max-width: 1024px)
+   =========================================== */
 @media (max-width: 1024px) {
   .about-page .container {
     padding: 0 1.25em;
@@ -33,12 +17,12 @@
     font-size: 2.5rem;
   }
   
-  .about-page .hero-content1 {
-    font-size: 1.8rem;
+  .about-page .about-hero-content1 {
+    font-size: 1.2rem !important;
   }
   
-  .about-page .hero-content2 {
-    font-size: 2.2rem;
+  .about-page .about-hero-content2 {
+    font-size: 1.6rem !important;
   }
   
   .about-page .about-content h3 {
@@ -67,8 +51,9 @@
   }
   
   .about-page .latest-works-title {
-    font-size: 2.2rem;
+    font-size: 1.8rem;
     line-height: 1.3;
+    text-align: left;
   }
   
   .about-page .image-grid {
@@ -80,15 +65,26 @@
   }
 }
 
-/* For larger phones (landscape) and tablets */
+/* ===========================================
+   LARGER PHONES & TABLETS (max-width: 768px)
+   =========================================== */
 @media (max-width: 768px) {
-  .about-page .hero-banner {
+  /* Hero Banner Overrides */
+  body.about-page .hero-banner {
+    margin-top: 2em !important;
     padding: 2em 0 !important;
     text-align: center;
+    height: auto !important;
   }
   
-  .about-page .hero-banner h1 {
+  body.about-page .hero-banner h1 {
     font-size: 2rem !important;
+    margin-top: 0.5em !important;
+    padding-top: 0 !important;
+  }
+  
+  body.about-page .hero-banner::before {
+    display: none !important;
   }
   
   .about-page .breadcrumbs {
@@ -96,15 +92,15 @@
     margin-bottom: 0;
   }
   
-  /* .about-page .hero-content1 {
-    font-size: 2em;
-    margin-top: 0.5em;
+  .about-page .about-hero-content1 {
+    font-size: 1rem !important;
   }
   
-  .about-page .hero-content2 {
-    font-size: 3.8em;
-  } */
+  .about-page .about-hero-content2 {
+    font-size: 1.4rem !important;
+  }
   
+  /* About Section Layout */
   .about-page .container .row {
     flex-direction: column;
   }
@@ -147,15 +143,16 @@
   
   .about-page .about-content p {
     font-size: 0.95rem;
-    /* margin: 1em 0; */
+    line-height: 1.5;
   }
   
   .about-page .btn-arrow {
     padding: 0.75em 1.5em;
     font-size: 0.9rem;
-    margin: -20em 0;
+    margin-top: 1em;
   }
   
+  /* Statistics Section */
   .about-page .about-stats {
     flex-direction: row;
     flex-wrap: wrap;
@@ -169,66 +166,75 @@
     padding: 0.9375em;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 0.5em;
+    text-align: center;
   }
   
   .about-page .stat-number {
     font-size: 1.8rem;
     display: block;
+    font-weight: 600;
   }
   
   .about-page .stat-label {
     font-size: 0.9rem;
+    margin-top: 0.25em;
   }
   
+  /* Latest Works Section */
   .about-page .latest-works {
-    text-align: center;
+    text-align: left;
     margin: 2.5em 0;
   }
   
   .about-page .latest-works-title {
-    font-size: 1.8rem;
+    font-size: 1rem;
     margin-bottom: 1.875em;
+    text-align: left;
   }
   
   .about-page .image-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.625em;
     margin-bottom: 1.25em;
   }
   
-  .about-page .image-grid .div1,
-  .about-page .image-grid .div2,
-  .about-page .image-grid .div3,
-  .about-page .image-grid .div4,
-  .about-page .image-grid .div5 {
+  .about-page .image-grid > div {
     width: 100%;
   }
   
   .about-page .image-grid img {
     width: 100%;
     height: auto;
-    border-radius: 0.5em;
+    border-radius: 0em;
+    object-fit: cover;
   }
   
   .about-page .latest-works-description {
     text-align: center;
-    margin-top: 1.25em;
+    margin-top: -10em;
+    padding-bottom: 2em;
   }
   
   .about-page .latest-works-description .desc {
-    font-size: 0.9rem;
-    margin-bottom: 0.9375em;
+    font-size: 1.5rem;
+    padding-right: 6em;
+    line-height: 1.4;
+    text-align: left;
   }
   
   .about-page .about-arrow {
     width: 1.875em;
     height: 1.875em;
+    margin-left: 11em;
+    margin-top: -3.5em;
   }
 }
 
-/* For small devices (phones, portrait) */
+/* ===========================================
+   SMALL DEVICES (max-width: 480px)
+   =========================================== */
 @media (max-width: 480px) {
+  /* Hero Banner */
   .about-page .hero-banner {
     padding: 1.5em 0 !important;
   }
@@ -243,14 +249,15 @@
     font-size: 0.8rem;
   }
   
-  .about-page .hero-content1 {
-    font-size: 1.8rem;
+  .about-page .about-hero-content1 {
+    font-size: 1.5em !important;
   }
   
-  .about-page .hero-content2 {
-    font-size: 2.2rem;
+  .about-page .about-hero-content2 {
+    font-size: 2.5em !important;
   }
   
+  /* Container & Layout */
   .about-page .container {
     padding: 0 0.9375em;
   }
@@ -262,6 +269,7 @@
   .about-page .about-content h3 {
     font-size: 1.4rem;
     line-height: 1.3;
+    margin-bottom: 1em;
   }
   
   .about-page .about-content p {
@@ -272,14 +280,27 @@
   .about-page .btn-arrow {
     padding: 0.625em 1.25em;
     font-size: 0.85rem;
+    margin-top: 0.75em;
   }
   
+  /* About Images */
+  .about-page .about-img .img-upper {
+    width: 150px;
+  }
+
+  .about-page .about-img .img-lower {
+    width: 200px;
+  }
+  
+  /* Statistics Section */
   .about-page .about-stats {
     margin-top: 1.5625em;
+    gap: 0.75em;
   }
   
   .about-page .stat-item {
-    padding: 0.75em;
+    padding: 0.75em 0.5em;
+    min-width: calc(50% - 0.375em);
   }
   
   .about-page .stat-number {
@@ -290,29 +311,33 @@
     font-size: 0.8rem;
   }
   
+  /* Latest Works Section */
   .about-page .latest-works {
     margin: 1.5em 0;
+    text-align: left;
   }
   
   .about-page .latest-works-title {
-    font-size: 1.4rem;
+    font-size: 2em !important;
     margin-bottom: 1.2em;
+    line-height: 1.2;
+    text-align: left;
+  }
+  .about-page .latest-works-highlight {
+    font-size: 1.2em !important;
+    padding: 0 !important;
   }
   
   .about-page .image-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: auto auto auto auto auto;
-    gap: 0;
+    grid-template-rows: auto auto auto auto;
+    gap: 0em;
     margin-bottom: 1em;
     align-items: start;
   }
   
-  .about-page .image-grid .div1,
-  .about-page .image-grid .div2,
-  .about-page .image-grid .div3,
-  .about-page .image-grid .div4,
-  .about-page .image-grid .div5 {
+  .about-page .image-grid > div {
     width: 100%;
     height: 120px;
     overflow: hidden;
@@ -320,43 +345,28 @@
   
   .about-page .image-grid .div1 {
     grid-column: 1;
-    grid-row: 2;
+    grid-row: 1;
   }
   
   .about-page .image-grid .div2 {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 1;
   }
   
   .about-page .image-grid .div3 {
     grid-column: 1;
-    grid-row: 3;
+    grid-row: 2;
   }
   
   .about-page .image-grid .div4 {
     grid-column: 2;
-    grid-row: 3;
+    grid-row: 2;
   }
   
   .about-page .image-grid .div5 {
     grid-column: 1 / -1;
-    grid-row: 4;
+    grid-row: 3;
     height: 100px;
-  }
-  
-  .about-page .latest-works-title {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    text-align: center;
-    margin-bottom: 0.5em;
-    font-size: 1.2rem;
-  }
-  
-  .about-page .latest-works-description {
-    grid-column: 1 / -1;
-    grid-row: 5;
-    text-align: center;
-    margin-top: 0.5em;
   }
   
   .about-page .image-grid img {
@@ -366,14 +376,103 @@
     display: block;
   }
   
+  .about-page .latest-works-description {
+    margin-top: 0;
+    display: flex;
+    align-items: center;
+    padding-bottom: 2em;
+    margin-top: -3em;
+  }
   
   .about-page .latest-works-description .desc {
-    font-size: 0.75rem;
-    line-height: 1.3;
+    font-size: 0.55em;
+    line-height: 1.6;
+    text-align: left;
+    flex: 1 1 auto;
+    margin-right: 0.75em;
+    padding-right: 5em !important;
   }
   
   .about-page .about-arrow {
     width: 1.5625em;
     height: 1.5625em;
+    flex: 0 0 auto;
+    margin-left: 8.8em;
+    display: inline-block;
+    margin-top: -3em;
+  }
+}
+
+/* ===========================================
+   EXTRA SMALL DEVICES (max-width: 360px)
+   =========================================== */
+@media (max-width: 360px) {
+  .about-page .container {
+    padding: 0 0.75em;
+  }
+  
+  .about-page .hero-banner h1 {
+    font-size: 1.6rem !important;
+  }
+  
+  .about-page .about-hero-content1 {
+    font-size: 0.8rem !important;
+  }
+  
+  .about-page .about-hero-content2 {
+    font-size: 1rem !important;
+  }
+  
+  .about-page .about-content h3 {
+    font-size: 1.2rem;
+  }
+  
+  .about-page .about-content p {
+    font-size: 0.85rem;
+  }
+  
+  .about-page .about-img .img-upper {
+    width: 120px;
+  }
+
+  .about-page .about-img .img-lower {
+    width: 160px;
+  }
+  
+  .about-page .stat-item {
+    padding: 0.5em 0.25em;
+  }
+  
+  .about-page .stat-number {
+    font-size: 1.4rem;
+  }
+  
+  .about-page .stat-label {
+    font-size: 0.75rem;
+  }
+  
+  .about-page .latest-works-title {
+    font-size: 1rem;
+    text-align: left;
+  }
+  
+  .about-page .image-grid > div {
+    height: 100px;
+  }
+  
+  .about-page .image-grid .div5 {
+    height: 80px;
+  }
+  .about-page .latest-works-description {
+    margin-top: -3.5em;
+    padding-bottom: 2em;
+  }
+  
+  .about-page .latest-works-description .desc {
+    font-size: 0.5em;
+  }
+  .about-page .about-arrow {
+    margin-top: -3.8em !important;
+    margin-left: 6.9em !important;
   }
 }
