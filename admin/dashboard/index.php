@@ -21,7 +21,7 @@ function getPropertyImages($propertyId) {
 		$images[] = $row;
 	}
 	return $images;
-}
+}	
 
 // Stats
 $totalProperties = fetchScalar("SELECT COUNT(*) FROM properties");
@@ -746,7 +746,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
     async function openDrawer(data){
 		const propertyId = data.id;
 		if (isDrawerOpening || currentPropertyId === propertyId) return;
-		if (abortController) { abortController.abort(); }
+		if (abortController) { try { abortController.abort(); } catch(e){} }
 		isDrawerOpening = true;
 		currentPropertyId = propertyId;
 			
@@ -757,7 +757,8 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 			backdrop.classList.add('open');
 			
 		try {
-			const response = await fetch(`../properties/get_property_details.php?id=${propertyId}`);
+			abortController = new AbortController();
+			const response = await fetch(`../properties/get_property_details.php?id=${propertyId}`, { signal: abortController.signal });
 			const result = await response.json();
 			const images = result.images || [];
 				
@@ -983,10 +984,16 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 					</div>
 				`;
 			}
+		} finally {
+			isDrawerOpening = false;
 		}
         function closeDrawer(){
             drawer.classList.remove('open');
             backdrop.classList.remove('open');
+            // reset state so next open works
+            isDrawerOpening = false;
+            currentPropertyId = null;
+            if (abortController) { try { abortController.abort(); } catch(e){} abortController = null; }
         }
 		// attach events
 		document.addEventListener('DOMContentLoaded', function(){

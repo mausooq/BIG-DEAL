@@ -211,7 +211,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $pl->close();
 
-            // Handle image uploads from sessionStorage (base64 data)
+            // Prefer server-side uploaded files stored in session; fallback to base64 data
+            $uploaded_files = $_SESSION['uploaded_images'] ?? [];
             $images_data = $_SESSION['form_data']['images_data'] ?? [];
             
             // Debug: Log image data
@@ -219,76 +220,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!empty($images_data)) {
                 error_log("First image data length: " . strlen($images_data[0] ?? ''));
             }
-            
-            if (!empty($images_data) && is_array($images_data)) {
-                $upload_dir = __DIR__ . '/../../uploads/properties/';
+
+            $upload_dir = __DIR__ . '/../../uploads/properties/';
             if (!is_dir($upload_dir)) {
-                    if (!mkdir($upload_dir, 0777, true)) {
-                        throw new Exception('Failed to create uploads directory');
+                if (!mkdir($upload_dir, 0777, true)) {
+                    throw new Exception('Failed to create uploads directory');
+                }
+            }
+            if (!is_writable($upload_dir)) {
+                throw new Exception('Uploads directory is not writable');
+            }
+
+            // Case 1: Use files uploaded via AJAX (recommended)
+            if (!empty($uploaded_files) && is_array($uploaded_files)) {
+                $tmpDir = __DIR__ . '/../../uploads/properties/tmp/';
+                foreach ($uploaded_files as $index => $tmpName) {
+                    $src = $tmpDir . basename($tmpName);
+                    if (!is_file($src)) { continue; }
+                    // Build final filename
+                    $ext = pathinfo($src, PATHINFO_EXTENSION) ?: 'jpg';
+                    $filename = 'property_' . $property_id . '_' . time() . '_' . $index . '.' . $ext;
+                    $dest = $upload_dir . $filename;
+                    if (@rename($src, $dest)) {
+                        $image_url = $filename;
+                        $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
+                        if ($img_stmt) {
+                            $img_stmt->bind_param('is', $property_id, $image_url);
+                            $img_stmt->execute();
+                            $img_stmt->close();
+                        }
+                    } else {
+                        error_log('Failed to move temp image: ' . $src);
                     }
                 }
-                
-                // Check if directory is writable
-                if (!is_writable($upload_dir)) {
-                    throw new Exception('Uploads directory is not writable');
-                }
-
+            }
+            // Case 2: Fallback to base64 images posted with form (legacy)
+            elseif (!empty($images_data) && is_array($images_data)) {
                 foreach ($images_data as $index => $imageDataUrl) {
                     if (empty($imageDataUrl)) continue;
-                    
-                    // Extract base64 data and mime type
                     if (strpos($imageDataUrl, 'data:') === 0) {
                         $parts = explode(';', $imageDataUrl, 2);
                         if (count($parts) === 2) {
                             $type = $parts[0];
                             $dataPart = $parts[1];
-                            
                             $dataParts = explode(',', $dataPart, 2);
                             if (count($dataParts) === 2) {
                                 $imageDataUrl = $dataParts[1];
                                 $imageData = base64_decode($imageDataUrl);
-                                
                                 if ($imageData !== false) {
                                     $mime_type = str_replace('data:', '', $type);
-
-                                    // Determine file extension
-                                    $extension = 'jpg'; // Default
+                                    $extension = 'jpg';
                                     if (strpos($mime_type, 'png') !== false) $extension = 'png';
                                     else if (strpos($mime_type, 'gif') !== false) $extension = 'gif';
                                     else if (strpos($mime_type, 'webp') !== false) $extension = 'webp';
-
                                     $filename = 'property_' . $property_id . '_' . time() . '_' . $index . '.' . $extension;
                                     $file_path = $upload_dir . $filename;
-                                    
                                     if (file_put_contents($file_path, $imageData)) {
-                                        // Store only filename (consistent with edit.php)
                                         $image_url = $filename;
-                            $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
+                                        $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
                                         if ($img_stmt) {
-                            $img_stmt->bind_param('is', $property_id, $image_url);
-                                            if ($img_stmt->execute()) {
-                                                error_log("Successfully saved image: " . $filename);
-                                            } else {
-                                                error_log("Failed to insert image record: " . $img_stmt->error);
-                                            }
-                            $img_stmt->close();
-                        } else {
-                                            error_log("Failed to prepare image statement: " . $mysqli->error);
-                        }
-                    } else {
-                                        error_log("Failed to save image file: " . $filename);
-                    }
-                } else {
-                                    error_log("Failed to decode base64 image data for index: " . $index);
+                                            $img_stmt->bind_param('is', $property_id, $image_url);
+                                            $img_stmt->execute();
+                                            $img_stmt->close();
+                                        }
+                                    }
                                 }
-                            } else {
-                                error_log("Invalid base64 data format for index: " . $index);
                             }
-                        } else {
-                            error_log("Invalid data URL format for index: " . $index);
                         }
-                    } else {
-                        error_log("Image data does not start with 'data:' for index: " . $index);
                     }
                 }
             }
@@ -299,7 +297,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Clear session data and redirect
             unset($_SESSION['form_data']);
             $_SESSION['form_data'] = []; // Ensure it's reset to empty array
-            $imageCount = count($images_data);
+            // Cleanup temp session image state
+            $imageCount = 0;
+            if (!empty($uploaded_files)) { $imageCount = count($uploaded_files); }
+            elseif (!empty($images_data)) { $imageCount = count($images_data); }
+            unset($_SESSION['uploaded_images']);
+            unset($_SESSION['uploaded_images_bytes']);
             $_SESSION['success_message'] = 'Property added successfully!' . ($imageCount > 0 ? " ($imageCount images uploaded)" : "");
             echo "<script>sessionStorage.removeItem('prop_images'); window.location.href = 'index.php?success=1';</script>";
         exit();
@@ -316,7 +319,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Determine target step: explicit goto trumps continue
+            // If AJAX uploaded filenames are sent, persist them in session for server-side save on finish
+            if (!empty($_POST['uploaded_filenames']) && is_array($_POST['uploaded_filenames'])) {
+                $_SESSION['uploaded_images'] = array_values(array_filter(array_map(function($v){ return basename($v); }, $_POST['uploaded_filenames'])));
+            }
+
+            // Determine target step: explicit goto trumps continue
     $goto_step = isset($_POST['goto_step']) ? (int)$_POST['goto_step'] : 0;
     if ($goto_step >= 1 && $goto_step <= $total_steps) {
         // Validate current step before allowing forward jumps
@@ -390,6 +398,7 @@ function get_data($field) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Property</title>
+    <link href="../../assets/css/loader.css" rel="stylesheet">
 <style>
         /* General Styling */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -664,7 +673,13 @@ function get_data($field) {
         justify-content: space-between;
         align-items: center;
             margin-top: auto; /* stick footer to bottom when card has a baseline height */
+            gap: 10px; /* add a little space between children */
+            flex-wrap: wrap; /* avoid overlap on smaller screens */
+            row-gap: 10px;
+            padding-top: 12px; /* breathing room above buttons */
         }
+        /* Ensure buttons never collide visually */
+        .card-footer .btn { margin: 6px; }
         .btn {
             padding: 0.8rem 1.5rem;
             border: none;
@@ -768,6 +783,7 @@ function get_data($field) {
 </head>
 <body>
     <!-- Background iframe showing properties index page -->
+    <div class="page-loader-overlay" id="pageLoader"><div class="custom-loader"></div></div>
     <iframe src="index.php" class="background-iframe" title="Properties Background"></iframe>
     
     <!-- Blur overlay for subtle background effect -->
@@ -1020,6 +1036,11 @@ function get_data($field) {
                         <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB each. You can select multiple files at once.</div>
                     </div>
                     <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
+                    <div id="imageTotalWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
+                    <div id="uploadLoader" style="display:none; margin-top:8px;">
+                        <span style="display:inline-block; width:18px; height:18px; border:2px solid #eee; border-top-color:#ef4444; border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle;"></span>
+                        <span style="margin-left:8px; color:#555;">Uploading images...</span>
+                    </div>
                     <div id="liveImagesPreview" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;"></div>
                     <div style="margin-top:8px;">
                         <button type="button" id="clearAllImages" class="btn btn-secondary" style="display:none;">Clear All Images</button>
@@ -1319,7 +1340,37 @@ const clearAllImagesBtn = document.getElementById('clearAllImages');
 const drop = document.getElementById('drop');
 const chooseBtn = document.getElementById('chooseBtn');
 let selectedImageDataURLs = [];
-const imageSizeWarning = document.getElementById('imageSizeWarning');
+            const imageSizeWarning = document.getElementById('imageSizeWarning');
+const imageTotalWarning = document.getElementById('imageTotalWarning');
+const uploadLoader = document.getElementById('uploadLoader');
+const pageLoader = document.getElementById('pageLoader');
+let pageLoadingCount = 0;
+let uploadedServerFiles = []; // filenames returned by server
+let uploadingCount = 0;
+
+async function getLimits(){
+  try {
+    const r = await fetch('upload_property_images.php?action=limits');
+    if (!r.ok) return null; return await r.json();
+  } catch { return null; }
+}
+
+function setLoader(on){ if (uploadLoader) uploadLoader.style.display = on ? 'block' : 'none'; }
+function showPageLoader(){ if (!pageLoader) return; pageLoadingCount++; pageLoader.classList.add('is-visible'); }
+function hidePageLoader(){ if (!pageLoader) return; pageLoadingCount = Math.max(0, pageLoadingCount-1); if (pageLoadingCount === 0) pageLoader.classList.remove('is-visible'); }
+
+async function uploadFileToServer(file){
+  const form = new FormData();
+  form.append('action','upload');
+  form.append('file', file);
+  const res = await fetch('upload_property_images.php', { method:'POST', body: form });
+  const data = await res.json().catch(()=>null);
+  if (!res.ok || !data || !data.ok) {
+    const msg = (data && data.error) ? data.error : 'Upload failed';
+    throw new Error(msg);
+  }
+  return data;
+}
 
 function renderThumb(container, dataURL, showRemoveBtn = false){
   const wrap = document.createElement('div');
@@ -1389,34 +1440,54 @@ chooseBtn?.addEventListener('click', (e) => {
   imagesInput?.click();
 });
 
-function handleFiles(files) {
+async function handleFiles(files) {
   const maxSize = 10 * 1024 * 1024;
   let overs = [];
-  let newImagesCount = 0;
-  
-  files.forEach(file => {
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > maxSize) { overs.push(file.name); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      const url = e.target.result;
+  let totalErr = '';
+  const images = files.filter(f => f && f.type && f.type.startsWith('image/'));
+  if (images.length === 0) return;
+  setLoader(true);
+  showPageLoader();
+  uploadingCount += images.length;
+  for (const file of images) {
+    try {
+      if (file.size > maxSize) { overs.push(file.name); continue; }
+      const data = await uploadFileToServer(file);
+      // Successful upload -> store server filename, render local preview
+      uploadedServerFiles.push(data.filename);
+      const url = URL.createObjectURL(file);
       selectedImageDataURLs.push(url);
-      renderThumb(liveImagesPreview, url, true); // Show remove button for individual images
-      newImagesCount++;
+      renderThumb(liveImagesPreview, url, true);
       updateClearButton();
-      // persist to sessionStorage so preview survives step navigation
-      try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
-    };
-    reader.readAsDataURL(file);
-  });
-            
+    } catch (e) {
+      const msg = (e && e.message) ? e.message : 'Upload failed';
+      if (msg.toLowerCase().includes('maximum upload size')) {
+        totalErr = 'Maximum upload size reached';
+        break; // stop uploading more
+      }
+      // show per-file error inline
+      overs.push(file.name + ' (' + msg + ')');
+    }
+  }
+  uploadingCount -= images.length;
+  if (uploadingCount <= 0) { setLoader(false); hidePageLoader(); }
+
   if (overs.length){
     imageSizeWarning.style.display = 'block';
-    imageSizeWarning.textContent = 'These files exceed 10MB and were skipped: ' + overs.join(', ');
+    imageSizeWarning.textContent = 'These files could not be uploaded: ' + overs.join(', ');
   } else {
     imageSizeWarning.style.display = 'none';
     imageSizeWarning.textContent = '';
   }
+  if (totalErr){
+    imageTotalWarning.style.display = 'block';
+    imageTotalWarning.textContent = totalErr;
+  } else {
+    imageTotalWarning.style.display = 'none';
+    imageTotalWarning.textContent = '';
+  }
+  try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
+  try { sessionStorage.setItem('prop_server_files', JSON.stringify(uploadedServerFiles)); } catch {}
 }
 
 imagesInput?.addEventListener('change', function(){
@@ -1440,17 +1511,27 @@ formEl?.addEventListener('submit', function(){
   // Always submit image data with the form
   if (selectedImageDataURLs.length > 0) {
     // Clear existing hidden inputs
-    const existingInputs = formEl.querySelectorAll('input[name="images_data[]"]');
+    const existingInputs = formEl.querySelectorAll('input[name="images_data[]"], input[name="uploaded_filenames[]"]');
     existingInputs.forEach(input => input.remove());
     
-    // Add each image as a separate hidden input
-    selectedImageDataURLs.forEach((dataURL, index) => {
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.name = 'images_data[]';
-      hiddenInput.value = dataURL;
-      formEl.appendChild(hiddenInput);
-    });
+    // Prefer server filenames; if present, send them. Else send base64 as legacy.
+    if (uploadedServerFiles.length > 0) {
+      uploadedServerFiles.forEach(fn => {
+        const i = document.createElement('input');
+        i.type = 'hidden';
+        i.name = 'uploaded_filenames[]';
+        i.value = fn;
+        formEl.appendChild(i);
+      });
+    } else {
+      selectedImageDataURLs.forEach((dataURL) => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'images_data[]';
+        hiddenInput.value = dataURL;
+        formEl.appendChild(hiddenInput);
+      });
+    }
     
     console.log('Submitting ' + selectedImageDataURLs.length + ' images with form');
   }
@@ -1460,10 +1541,14 @@ formEl?.addEventListener('submit', function(){
 clearAllImagesBtn?.addEventListener('click', function(e){
   e.stopPropagation(); // Prevent event bubbling to avoid closing the modal
   selectedImageDataURLs = [];
+  uploadedServerFiles = [];
   if (liveImagesPreview) liveImagesPreview.innerHTML = '';
   if (previewImagesGrid) previewImagesGrid.innerHTML = '';
   updateClearButton();
   try { sessionStorage.removeItem('prop_images'); } catch {}
+  try { sessionStorage.removeItem('prop_server_files'); } catch {}
+  // ask server to clear temp files as well
+  fetch('upload_property_images.php', { method:'POST', body: new URLSearchParams({ action:'clear_all' }) });
 });
 
 // Restore previews from sessionStorage on load (for both step 4 and 5)
@@ -1481,6 +1566,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
         urls.forEach(url => renderThumb(previewImagesGrid, url)); // No remove buttons in preview
       }
       selectedImageDataURLs = urls;
+      try { const serverSaved = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]'); uploadedServerFiles = Array.isArray(serverSaved) ? serverSaved : []; } catch {}
       updateClearButton();
     }
   } catch {}
@@ -1518,17 +1604,29 @@ function submitWithImages() {
     const existingInputs = form.querySelectorAll('input[name="images_data[]"]');
     existingInputs.forEach(input => input.remove());
     
-    // Add each image as a separate hidden input
-    selectedImageDataURLs.forEach((dataURL, index) => {
-      const hiddenInput = document.createElement('input');
-      hiddenInput.type = 'hidden';
-      hiddenInput.name = 'images_data[]';
-      hiddenInput.value = dataURL;
-      form.appendChild(hiddenInput);
-    });
+    // Prefer server filenames
+    if (uploadedServerFiles.length > 0) {
+      uploadedServerFiles.forEach((fn) => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'uploaded_filenames[]';
+        hiddenInput.value = fn;
+        form.appendChild(hiddenInput);
+      });
+    } else {
+      selectedImageDataURLs.forEach((dataURL) => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'images_data[]';
+        hiddenInput.value = dataURL;
+        form.appendChild(hiddenInput);
+      });
+    }
     
     console.log('Final submit with ' + selectedImageDataURLs.length + ' images');
   }
+  // show page loader during final submit navigation
+  showPageLoader();
   return true; // Allow form submission to proceed
 }
 

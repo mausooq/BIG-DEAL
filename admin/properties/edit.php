@@ -274,6 +274,7 @@ $pl_stmt && $pl_stmt->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Property</title>
+    <link href="../../assets/css/loader.css" rel="stylesheet">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
         :root {
@@ -338,6 +339,7 @@ $pl_stmt && $pl_stmt->close();
     </style>
 </head>
 <body>
+    <div class="page-loader-overlay" id="pageLoader"><div class="custom-loader"></div></div>
     <iframe src="index.php" class="background-iframe" title="Properties Background"></iframe>
     <div class="blur-overlay"></div>
     <div class="modal-overlay">
@@ -780,6 +782,10 @@ $pl_stmt && $pl_stmt->close();
         const imagePreview = document.getElementById('imagePreview');
         const imageInfo = document.getElementById('imageInfo');
         let selectedFiles = [];
+        const pageLoader = document.getElementById('pageLoader');
+        let pageLoadingCount = 0;
+        function showPageLoader(){ if (!pageLoader) return; pageLoadingCount++; pageLoader.classList.add('is-visible'); }
+        function hidePageLoader(){ if (!pageLoader) return; pageLoadingCount = Math.max(0, pageLoadingCount-1); if (pageLoadingCount===0) pageLoader.classList.remove('is-visible'); }
 
         // Drag and drop functionality
         imageUploadArea.addEventListener('dragover', (e) => {
@@ -836,6 +842,7 @@ $pl_stmt && $pl_stmt->close();
         imageInput.addEventListener('input', onFilesSelected, { passive: true });
 
         function handleFiles(files) {
+            showPageLoader();
             const maxSize = 10 * 1024 * 1024; // 10MB per image
             const maxFiles = 12; // max images per submission
             const maxTotal = 50 * 1024 * 1024; // 50MB total per submission
@@ -920,6 +927,7 @@ $pl_stmt && $pl_stmt->close();
             // Update the file input with the selected files
             updateFileInput();
             updateImageInfo();
+            hidePageLoader();
         }
 
         function removeImage(container, file) {
@@ -962,16 +970,18 @@ $pl_stmt && $pl_stmt->close();
             }
         }
 
-        // Delete existing image
+        // Delete existing image (instant, no confirmation)
         function deleteImage(imageId) {
-            if (confirm('Are you sure you want to delete this image?')) {
-                document.getElementById('delete_' + imageId).value = imageId;
-                document.querySelector('[onclick="deleteImage(' + imageId + ')"]').closest('.existing-image').style.display = 'none';
-            }
+            const hidden = document.getElementById('delete_' + imageId);
+            if (hidden) { hidden.value = imageId; }
+            const btn = document.querySelector('[onclick="deleteImage(' + imageId + ')"]');
+            const card = btn ? btn.closest('.existing-image') : null;
+            if (card) { card.style.display = 'none'; }
         }
 
         // Form validation
         document.getElementById('propertyForm').addEventListener('submit', function(e) {
+            showPageLoader();
             const title = document.querySelector('input[name="title"]').value.trim();
             const location = document.querySelector('input[name="location"]').value.trim();
             const price = document.querySelector('input[name="price"]').value;
@@ -982,33 +992,33 @@ $pl_stmt && $pl_stmt->close();
 
             if (!title) {
                 alert('Please enter a property title');
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
             if (!location) {
                 alert('Please enter a location');
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
             if (!price || parseFloat(price) <= 0) {
                 alert('Please enter a valid price');
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
             if (!area || parseFloat(area) <= 0) {
                 alert('Please enter a valid area');
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
 
             if (selectedFiles.length > maxFiles) {
                 alert(`You can upload up to ${maxFiles} images at once.`);
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
             if (totalSize > maxTotal) {
                 alert(`Total images size exceeds ${(maxTotal / (1024*1024)).toFixed(0)}MB. Remove some files or choose smaller ones.`);
-                e.preventDefault();
+                e.preventDefault(); hidePageLoader();
                 return;
             }
         });
