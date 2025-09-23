@@ -330,24 +330,31 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 		.drawer{ position:fixed; top:0; right:-500px; width:500px; height:100vh; background:#fff; box-shadow:-12px 0 24px rgba(0,0,0,.08); transition:right .3s cubic-bezier(0.4, 0.0, 0.2, 1); z-index:1040; }
 		.drawer.open{ right:0; }
 		.drawer-header{ padding:16px; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:center; }
-		.drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
+		.drawer-body{ padding:16px 20px 16px 16px; overflow:auto; height:calc(100vh - 64px); }
 		.drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.2); opacity:0; pointer-events:none; transition:opacity .2s ease; z-index:1035; }
 		.drawer-backdrop.open{ opacity:1; pointer-events:auto; }
 		/* Image gallery styles */
 		.drawer-image{ width:100%; height:250px; object-fit:contain; border-radius:8px; margin-bottom:1rem; background:#f8f9fa; border:1px solid #e9ecef; cursor:pointer; transition:transform 0.2s ease; }
 		.drawer-image:hover{ transform:scale(1.02); }
-		.drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; }
+		.drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; flex-wrap:wrap; }
 		.drawer-image-thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; }
-		.drawer-image-thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
-		.drawer-image-thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
+		.drawer-image-thumb:hover{ border-color:var(--primary); transform:scale(1.05); }
+		.drawer-image-thumb.active{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(239, 68, 68, 0.2); }
 		.more-images-btn{ 
-			background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+			background: linear-gradient(135deg, #ef4444, #dc2626); 
+			border:2px solid var(--primary);
 			color: white; 
 			display: flex; 
 			align-items: center; 
 			justify-content: center; 
 			font-size: 0.8rem; 
 			font-weight: 600;
+			width:88px; height:88px; /* pull slightly inward so it doesn't touch edges */
+			box-shadow: 0 4px 10px rgba(239,68,68,0.18);
+		}
+		.more-images-btn:hover{
+			background: linear-gradient(135deg, #dc2626, #b91c1c);
+			box-shadow: 0 6px 14px rgba(239,68,68,0.28);
 		}
 		.more-images-content{ text-align: center; }
 		.more-count{ font-size: 0.7rem; }
@@ -525,11 +532,16 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 					</div>
 				</div>
 
-				<!-- Drawer for property details and backdrop -->
-				<div class="drawer" id="propDrawer">
+				<!-- Drawer for property details and backdrop (identical to properties) -->
+				<div class="drawer" id="propertyDrawer">
 					<div class="drawer-header">
-						<h6 class="mb-0" id="drawerTitle">Property</h6>
-						<button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+						<h6 class="mb-0" id="drawerTitle">Property Details</h6>
+						<div class="drawer-actions">
+							<button class="btn btn-sm feature-toggle btn-outline-primary" id="featureToggleBtn" title="Toggle featured" aria-label="Toggle featured">
+								<i class="fa-regular fa-star"></i>
+							</button>
+							<button class="btn btn-sm btn-outline-secondary" onclick="closeDrawer()">Close</button>
+						</div>
 					</div>
 					<div class="drawer-body" id="drawerBody"></div>
 				</div>
@@ -721,23 +733,33 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 			});
 		});
 		
-		async function openDrawer(data){
-			const drawer = document.getElementById('propDrawer');
-			const backdrop = document.getElementById('drawerBackdrop');
-			document.getElementById('drawerTitle').textContent = data.title || 'Property';
-			const body = document.getElementById('drawerBody');
+	// Begin: identical drawer logic from properties page
+	let drawerCache = new Map();
+	let isDrawerOpening = false;
+	let currentPropertyId = null;
+	let abortController = null;
+	const drawer = document.getElementById('propertyDrawer');
+	const backdrop = document.getElementById('drawerBackdrop');
+	const body = document.getElementById('drawerBody');
+	const titleEl = document.getElementById('drawerTitle');
+
+    async function openDrawer(data){
+		const propertyId = data.id;
+		if (isDrawerOpening || currentPropertyId === propertyId) return;
+		if (abortController) { abortController.abort(); }
+		isDrawerOpening = true;
+		currentPropertyId = propertyId;
 			
-			// Show loading state
-			body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading images...</p></div>';
+		// Show loading state
+		body.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2 text-muted">Loading...</p></div>';
 			
 			drawer.classList.add('open');
 			backdrop.classList.add('open');
 			
-			try {
-				// Fetch property images
-				const response = await fetch(`../properties/get_property_details.php?id=${data.id}`);
-				const result = await response.json();
-				const images = result.images || [];
+		try {
+			const response = await fetch(`../properties/get_property_details.php?id=${propertyId}`);
+			const result = await response.json();
+			const images = result.images || [];
 				
 				// Build enhanced content
 				const content = `
@@ -749,28 +771,40 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 								 class="drawer-image" 
 								 id="mainImage"
 								 loading="lazy">
-							${images.length > 1 ? `
-								<div class="drawer-image-gallery">
-									${images.slice(0, 4).map((img, index) => `
-										<img src="../../uploads/properties/${img.image_url}" 
-											 alt="Property Image ${index + 1}" 
-											 class="drawer-image-thumb ${index === 0 ? 'active' : ''}" 
-											 data-image-url="${img.image_url}"
-											 data-index="${index}"
-											 loading="lazy">
-									`).join('')}
-									${images.length > 4 ? `
-										<div class="drawer-image-thumb more-images-btn" 
-											 data-total="${images.length}" 
-											 data-remaining="${images.length - 4}">
-											<div class="more-images-content">
-												<i class="fa-solid fa-plus"></i>
-												<span class="more-count">+${images.length - 4}</span>
-											</div>
-										</div>
-									` : ''}
-								</div>
-							` : ''}
+                    ${images.length > 1 ? `
+                                <div class="drawer-image-gallery">
+                                    ${images.slice(0, 4).map((img, index) => `
+                                        <img src="../../uploads/properties/${img.image_url}" 
+                                             alt="Property Image ${index + 1}" 
+                                             class="drawer-image-thumb ${index === 0 ? 'active' : ''}" 
+                                             data-image-url="${img.image_url}"
+                                             data-index="${index}"
+                                             loading="lazy">
+                                    `).join('')}
+                                    ${images.length > 4 ? `
+                                        <div class="drawer-image-thumb more-images-btn" 
+                                             data-total="${images.length}" 
+                                             data-remaining="${images.length - 4}" onclick="showMoreImages(${propertyId})">
+                                            <div class="more-images-content">
+                                                <i class="fa-solid fa-plus"></i>
+                                                <span class="more-count">+${images.length - 4}</span>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                                ${images.length > 4 ? `
+                                    <div class="drawer-image-gallery remaining-images" id="remaining-images-${propertyId}" style="display: none;">
+                                        ${images.slice(4).map((img, index) => `
+                                            <img src="../../uploads/properties/${img.image_url}" 
+                                                 alt="Property Image ${index + 5}" 
+                                                 class="drawer-image-thumb" 
+                                                 data-image-url="${img.image_url}"
+                                                 data-index="${index + 4}"
+                                                 loading="lazy">
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            ` : ''}
 						</div>
 						<div class="divider"></div>
 					` : ''}
@@ -801,6 +835,10 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 						</div>
 					</div>
 					<div class="divider"></div>
+					<div class="property-detail">
+						<div class="label">Created</div>
+						<div class="value">${formatDate(data.created_at)}</div>
+					</div>
 					<div class="two-col">
 						<div class="property-detail">
 							<div class="label">Config</div>
@@ -905,6 +943,23 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 							this.classList.add('active');
 						});
 					});
+
+                    // Match properties behavior: toggle remaining gallery block (2nd row)
+                    const moreBtn = document.querySelector('.drawer-image-thumb.more-images-btn');
+                    if (moreBtn) {
+                        moreBtn.addEventListener('click', function(e){
+                            e.preventDefault();
+                            const remainingDiv = document.getElementById(`remaining-images-${data.id}`);
+                            if (!remainingDiv) return;
+                            if (remainingDiv.style.display === 'none') {
+                                remainingDiv.style.display = 'flex';
+                                this.querySelector('.more-images-content').innerHTML = '<i class="fa-solid fa-minus"></i><span class="more-count">Less</span>';
+                            } else {
+                                remainingDiv.style.display = 'none';
+                                this.querySelector('.more-images-content').innerHTML = `<i class="fa-solid fa-plus"></i><span class="more-count">+${images.length - 4}</span>`;
+                            }
+                        });
+                    }
 				}
 				
 			} catch (error) {
@@ -929,10 +984,10 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 				`;
 			}
 		}
-		function closeDrawer(){
-			document.getElementById('propDrawer').classList.remove('open');
-			document.getElementById('drawerBackdrop').classList.remove('open');
-		}
+        function closeDrawer(){
+            drawer.classList.remove('open');
+            backdrop.classList.remove('open');
+        }
 		// attach events
 		document.addEventListener('DOMContentLoaded', function(){
 			// Add ripple effect to modern buttons (match properties)

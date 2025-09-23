@@ -188,31 +188,31 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
         .feature-toggle.btn{ width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:0; }
         .feature-toggle.btn-outline-primary i{ color: var(--primary); }
         .feature-toggle.btn-primary i{ color: #fff; }
-        .drawer-body{ padding:16px; overflow:auto; height:calc(100vh - 64px); }
+		.drawer-body{ padding:16px 20px 16px 16px; overflow:auto; height:calc(100vh - 64px); }
         .drawer-backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.3); opacity:0; pointer-events:none; transition:opacity .3s ease; z-index:1035; }
         .drawer-backdrop.open{ opacity:1; pointer-events:auto; }
         .drawer-image{ width:100%; height:250px; object-fit:contain; border-radius:8px; margin-bottom:1rem; background:#f8f9fa; border:1px solid #e9ecef; }
-        .drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; }
+		.drawer-image-gallery{ display:flex; gap:8px; margin-top:1rem; flex-wrap:wrap; }
         .drawer-image-thumb{ width:90px; height:90px; object-fit:cover; border-radius:6px; cursor:pointer; border:2px solid transparent; transition:all 0.2s ease; flex-shrink:0; }
-        .drawer-image-thumb:hover{ border-color:#3b82f6; transform:scale(1.05); }
-        .drawer-image-thumb.active{ border-color:#3b82f6; box-shadow:0 0 0 2px rgba(59, 130, 246, 0.2); }
+        .drawer-image-thumb:hover{ border-color:var(--primary); transform:scale(1.05); }
+        .drawer-image-thumb.active{ border-color:var(--primary); box-shadow:0 0 0 2px rgba(239, 68, 68, 0.2); }
         .drawer-image{ cursor:pointer; transition:transform 0.2s ease; }
         .drawer-image:hover{ transform:scale(1.02); }
         /* More images button styles */
         .more-images-btn{ 
-            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            background: linear-gradient(135deg, var(--primary), #dc2626); 
             color: white; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             cursor: pointer; 
             transition: all 0.2s ease;
-            border: 2px solid #3b82f6;
+            border: 2px solid var(--primary);
         }
         .more-images-btn:hover{ 
-            background: linear-gradient(135deg, #1d4ed8, #1e40af); 
+            background: linear-gradient(135deg, #dc2626, #b91c1c); 
             transform: scale(1.05); 
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
         .more-images-content{ 
             display: flex; 

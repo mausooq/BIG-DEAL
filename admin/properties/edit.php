@@ -587,6 +587,8 @@ $pl_stmt && $pl_stmt->close();
                 clearBtn.addEventListener('click', function(){
                     // Reset file input
                     imageInput.value = '';
+                    // Clear selected files array
+                    selectedFiles = [];
                     // Clear previews/info if present
                     if (imagePreview) imagePreview.innerHTML = '';
                     if (imageInfo) imageInfo.innerHTML = '';
@@ -816,9 +818,9 @@ $pl_stmt && $pl_stmt->close();
             const maxSize = 10 * 1024 * 1024; // 10MB
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
             
-            // Clear previous selections
-            selectedFiles = [];
-            imagePreview.innerHTML = '';
+            // Don't clear previous selections - add to existing ones
+            // selectedFiles = []; // Removed this line
+            // imagePreview.innerHTML = ''; // Removed this line
             
             Array.from(files).forEach(file => {
                 // Validate file type

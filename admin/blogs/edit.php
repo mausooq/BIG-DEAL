@@ -124,28 +124,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Edit Blog</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 	<style>
-		:root { --border-color:#E0E0E0; --text:#333; --bg:#F4F7FA; --card:#fff; --primary:#ef4444; }
-		body, input, select, textarea, button { font-family: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji", sans-serif; }
-		body { background: var(--bg); margin:0; color: var(--text); }
-		.background-iframe { position: fixed; inset:0; width:100%; height:100%; border:none; z-index:-2; }
-		.blur-overlay { position: fixed; inset:0; background: rgba(0,0,0,.4); backdrop-filter: blur(3px); z-index:-1; }
-		.modal-overlay { position: fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:20px; z-index:1000; }
-		.modal-container { background: var(--card); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:900px; max-height:90vh; overflow:auto; position:relative; border:1px solid rgba(255,255,255,0.1); }
-		.order-card { padding:2rem; box-sizing:border-box; display:flex; flex-direction:column; }
-		.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; }
-		.card-header h1 { font-size:1.4rem; font-weight:600; margin:0; }
+		:root {
+			--primary-color: #ef4444;
+			--bg: #F4F7FA;
+			--card: #FFFFFF;
+			--line: #E0E0E0;
+			--border-color: #E0E0E0;
+			--text: #333;
+		}
+		body{ background:var(--bg); color:#111827; margin:0; }
+		/* Background iframe with blur */
+		.background-iframe {
+			position: fixed; top:0; left:0; width:100%; height:100%; border:none; z-index:-2;
+		}
+		.blur-overlay {
+			position: fixed; top:0; left:0; width:100%; height:100%;
+			background: rgba(0,0,0,.4); backdrop-filter: blur(3px); z-index:-1;
+		}
+		/* Modal overlay + container */
+		.modal-overlay { position: fixed; inset:0; background: transparent; display:flex; align-items:center; justify-content:center; padding:20px; z-index:1000; }
+		.modal-container { background: var(--card); border-radius:16px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:900px; max-height:90vh; overflow:auto; position:relative; z-index:1001; border:1px solid rgba(255,255,255,0.1); }
+		.order-card { padding: 2rem; box-sizing: border-box; }
+		.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; }
+		.card-header h1 { font-size:1.25rem; font-weight:600; margin:0; }
 		.close-btn { font-size:1.5rem; color:#999; cursor:pointer; border:none; background:none; }
-		label { font-size:.9rem; color:#555; font-weight:500; margin-bottom:6px; display:block; }
-		input[type="text"], input[type="file"], textarea { width:100%; padding:.75rem; border:1px solid var(--border-color); border-radius:8px; font-size:1rem; box-sizing:border-box; }
-		.image-drop{ border:1px dashed var(--border-color); border-radius:12px; padding:1rem; text-align:center; background:#fafafa; }
-		.preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:1px solid var(--border-color); }
+		.btn-animated-confirm { background: var(--primary-color); color:#fff; border:0; padding:.8rem 1.5rem; border-radius:8px; display:inline-flex; align-items:center; gap:.5rem; }
+		.btn-outline-secondary { border-radius:8px; }
+		.footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
 		.btn { padding:.5rem 1rem; border:none; border-radius:8px; font-size:.875rem; font-weight:500; cursor:pointer; text-decoration:none; display:inline-block; }
 		.btn-secondary { background:#ffffff; color:var(--text); border:1px solid var(--border-color); }
 		.btn-secondary:hover { background:#f5f5f5; }
 		.btn-animated-confirm { padding:.5rem 1rem; font-size:.875rem; }
-		.footer-actions { display:flex; justify-content:flex-end; gap:.5rem; margin-top:1rem; }
+		/* Form look */
+		.form-control{ border-radius:12px; border:1px solid var(--line); }
+		.form-control:focus{ border-color:var(--primary-color); box-shadow:0 0 0 3px rgba(239,68,68,.15); }
+		.image-drop{ border:2px dashed var(--line); border-radius:12px; padding:1.5rem; text-align:center; background:#fafbfc; transition:all .2s ease; }
+		.image-drop.dragover{ border-color:var(--primary-color); background:#fef2f2; }
+		.image-drop:hover{ border-color:var(--primary-color); background:#fef2f2; }
+		.image-drop .btn-outline-primary{ color:var(--primary-color); border-color:var(--primary-color); }
+		.image-drop .btn-outline-primary:hover{ background-color:var(--primary-color); border-color:var(--primary-color); color:#fff; }
+		.preview{ margin-top:10px; }
+		.preview img{ width:140px; height:140px; object-fit:cover; border-radius:10px; border:2px solid #e9eef5; }
+		@media (max-width: 600px){ .modal-container { max-width: 95%; } }
 	</style>
 </head>
 <body>
@@ -160,33 +184,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				</header>
 
 				<?php if ($message): ?>
-					<div style="background-color:#eef9f1;border:1px solid #ccead6;color:#166534;padding:10px;margin:10px 0;border-radius:6px;">
-						<?php echo htmlspecialchars($message); ?>
+					<div class="alert alert-<?php echo $message_type; ?> alert-dismissible fade show" role="alert">
+						<i class="fa-solid fa-exclamation-triangle me-2"></i><?php echo htmlspecialchars($message); ?>
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 					</div>
 				<?php endif; ?>
 
 				<form method="post" enctype="multipart/form-data" id="blogForm">
 					<div class="mb-3">
 						<label class="form-label">Title</label>
-						<input type="text" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
+						<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
 					</div>
 					<div class="mb-3">
 						<label class="form-label">Replace Cover-Image (optional)</label>
-						<div class="image-drop" id="drop">
-							<div style="margin-bottom:8px;font-weight:500;">Drop image here or click to browse</div>
-							<input type="file" name="image" accept="image/*" id="image" style="display:none;">
-							<div style="margin-top:8px;">
-								<button type="button" class="btn btn-secondary" id="chooseBtn">Choose Image</button>
-							</div>
-							<div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB</div>
+						<div id="drop" class="image-drop">
+							<i class="fa-solid fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+							<div class="mb-2">Drop image here or click to browse</div>
+							<input type="file" name="image" id="image" accept="image/*" class="d-none">
+							<button type="button" class="btn btn-outline-primary" id="chooseBtn"><i class="fa-solid fa-plus me-1"></i>Choose Image</button>
+							<div class="text-muted small mt-2">Supported: JPG, PNG, GIF, WebP. Max 10MB</div>
 						</div>
-						<div class="preview" id="preview" style="margin-top:8px;">
+						<div class="preview" id="preview">
 							<?php if (!empty($blog['image_url'])): ?>
 								<?php 
 									$src = $blog['image_url']; 
 									if (strpos($src,'http://')!==0 && strpos($src,'https://')!==0) { $src = '../../uploads/blogs/' . $src; } 
 								?>
-								<img src="<?php echo htmlspecialchars($src); ?>" alt="Current Cover Image" style="width:140px;height:140px;object-fit:cover;border-radius:10px;border:1px solid #e0e0e0;">
+								<img src="<?php echo htmlspecialchars($src); ?>" alt="Current Cover Image">
 							<?php else: ?>
 								<span class="text-muted">No current image</span>
 							<?php endif; ?>
@@ -194,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					</div>
 					<div class="mb-3">
 						<label class="form-label">Content</label>
-						<textarea name="content" rows="8" required><?php echo htmlspecialchars($blog['content']); ?></textarea>
+						<textarea class="form-control" name="content" rows="8" required><?php echo htmlspecialchars($blog['content']); ?></textarea>
 					</div>
 					<div class="mb-3">
 						<div class="d-flex align-items-center justify-content-between mb-2">
@@ -255,35 +279,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		</div>
 	</div>
 
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
 		const drop = document.getElementById('drop');
 		const input = document.getElementById('image');
 		const chooseBtn = document.getElementById('chooseBtn');
 		const preview = document.getElementById('preview');
 
-		if (drop) {
-			drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('dragover'); });
-			drop.addEventListener('dragleave', (e)=>{ e.preventDefault(); drop.classList.remove('dragover'); });
-			drop.addEventListener('drop', (e)=>{
-				e.preventDefault(); drop.classList.remove('dragover');
-				if (e.dataTransfer.files && e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showPreview(); }
-			});
-			drop.addEventListener('click', ()=> input && input.click());
-		}
-
-        chooseBtn && chooseBtn.addEventListener('click', function(e){ e.stopPropagation(); input && input.click(); });
-		input && input.addEventListener('change', showPreview);
+		drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('dragover'); });
+		drop.addEventListener('dragleave', (e)=>{ e.preventDefault(); drop.classList.remove('dragover'); });
+		drop.addEventListener('drop', (e)=>{
+			e.preventDefault(); drop.classList.remove('dragover');
+			if (e.dataTransfer.files && e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; showPreview(); }
+		});
+		drop.addEventListener('click', ()=> input.click());
+		chooseBtn.addEventListener('click', (e)=>{ e.stopPropagation(); input.click(); });
+		input.addEventListener('change', showPreview);
 
 		function showPreview(){
-			const file = input && input.files && input.files[0];
-			if (!file) { return; }
+			const file = input.files && input.files[0];
+			if (!file) { preview.style.display='none'; return; }
 			const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
 			if (!allowed.includes(file.type)) { alert('Please select a JPG, PNG, GIF, or WebP image'); input.value=''; return; }
 			if (file.size > 10*1024*1024) { alert('Image too large (max 10MB)'); input.value=''; return; }
 			const reader = new FileReader();
-			reader.onload = (e)=>{ preview.innerHTML = '<img src="' + e.target.result + '" style="width:140px;height:140px;object-fit:cover;border-radius:10px;border:2px solid #e9eef5;">'; };
+			reader.onload = (e)=>{ preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">'; preview.style.display='block'; };
 			reader.readAsDataURL(file);
 		}
+
+		// Simple validation
+		document.getElementById('blogForm').addEventListener('submit', function(e){
+			const title = this.querySelector('input[name="title"]').value.trim();
+			const content = this.querySelector('textarea[name="content"]').value.trim();
+			if (title.length < 2 || content.length < 10) { e.preventDefault(); alert('Please enter a valid title and content'); }
+		});
 
 		// Subtitles builder
 		(function(){
@@ -337,6 +366,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				if (card) card.remove();
 			});
 		})();
+
+		// Ripple animation for animated buttons
+		document.addEventListener('click', function(e) {
+			const btn = e.target.closest('.btn-animated-confirm, .btn-animated-add, .btn-animated-delete');
+			if (!btn) return;
+			
+			const ripple = document.createElement('span');
+			const rect = btn.getBoundingClientRect();
+			const size = Math.max(rect.width, rect.height);
+			const x = e.clientX - rect.left - size / 2;
+			const y = e.clientY - rect.top - size / 2;
+			
+			ripple.style.cssText = `
+				position: absolute;
+				width: ${size}px;
+				height: ${size}px;
+				left: ${x}px;
+				top: ${y}px;
+				background: rgba(255, 255, 255, 0.3);
+				border-radius: 50%;
+				transform: scale(0);
+				animation: ripple 0.6s linear;
+				pointer-events: none;
+			`;
+			
+			btn.style.position = 'relative';
+			btn.style.overflow = 'hidden';
+			btn.appendChild(ripple);
+			
+			setTimeout(() => ripple.remove(), 600);
+		});
+
+		// Add ripple animation CSS
+		const style = document.createElement('style');
+		style.textContent = `
+			@keyframes ripple {
+				to {
+					transform: scale(4);
+					opacity: 0;
+				}
+			}
+		`;
+		document.head.appendChild(style);
+
+		// Close button and outside click navigates back
+		document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
+		document.addEventListener('click', function(e){
+			const modal = document.querySelector('.modal-container');
+			if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
+		});
 	</script>
 </body>
 </html>

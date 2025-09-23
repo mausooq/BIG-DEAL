@@ -68,16 +68,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $mysqli->prepare('INSERT INTO states (name, image_url) VALUES (?, ?)');
                 if ($stmt) {
                     $stmt->bind_param('ss', $name, $image_filename);
-                    if ($stmt->execute()) {
-                        $state_id = $mysqli->insert_id;
-                        logActivity($mysqli, 'Added state', 'Name: ' . $name . ', ID: ' . $state_id);
-                        $_SESSION['success_message'] = 'State added successfully!';
-                    } else {
-                        // Check for duplicate key error
-                        if ($mysqli->errno == 1062) {
+                    try {
+                        if ($stmt->execute()) {
+                            $state_id = $mysqli->insert_id;
+                            logActivity($mysqli, 'Added state', 'Name: ' . $name . ', ID: ' . $state_id);
+                            $_SESSION['success_message'] = 'State added successfully!';
+                        }
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
                             $_SESSION['error_message'] = 'A state with this name already exists.';
                         } else {
-                            $_SESSION['error_message'] = 'Failed to add state: ' . $mysqli->error;
+                            $_SESSION['error_message'] = 'Failed to add state: ' . $e->getMessage();
                         }
                     }
                     $stmt->close();
@@ -127,15 +128,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('ssi', $name, $image_filename, $id);
                 
                 if ($stmt) {
-                    if ($stmt->execute()) {
-                        if ($stmt->affected_rows > 0) {
-                            logActivity($mysqli, 'Updated state', 'Name: ' . $name . ', ID: ' . $id);
-                            $_SESSION['success_message'] = 'State updated successfully!';
-                        } else {
-                            $_SESSION['error_message'] = 'No changes made or state not found.';
+                    try {
+                        if ($stmt->execute()) {
+                            if ($stmt->affected_rows > 0) {
+                                logActivity($mysqli, 'Updated state', 'Name: ' . $name . ', ID: ' . $id);
+                                $_SESSION['success_message'] = 'State updated successfully!';
+                            } else {
+                                $_SESSION['error_message'] = 'No changes made or state not found.';
+                            }
                         }
-                    } else {
-                        $_SESSION['error_message'] = 'Failed to update state: ' . $mysqli->error;
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
+                            $_SESSION['error_message'] = 'A state with this name already exists.';
+                        } else {
+                            $_SESSION['error_message'] = 'Failed to update state: ' . $e->getMessage();
+                        }
                     }
                     $stmt->close();
                 } else {
@@ -210,16 +217,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $mysqli->prepare('INSERT INTO districts (name, state_id, image_url) VALUES (?, ?, ?)');
                 if ($stmt) {
                     $stmt->bind_param('sis', $name, $state_id, $image_filename);
-                    if ($stmt->execute()) {
-                        $district_id = $mysqli->insert_id;
-                        logActivity($mysqli, 'Added district', 'Name: ' . $name . ', ID: ' . $district_id);
-                        $_SESSION['success_message'] = 'District added successfully!';
-                    } else {
-                        // Check for duplicate key error
-                        if ($mysqli->errno == 1062) {
+                    try {
+                        if ($stmt->execute()) {
+                            $district_id = $mysqli->insert_id;
+                            logActivity($mysqli, 'Added district', 'Name: ' . $name . ', ID: ' . $district_id);
+                            $_SESSION['success_message'] = 'District added successfully!';
+                        }
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
                             $_SESSION['error_message'] = 'A district with this name already exists in the selected state.';
                         } else {
-                            $_SESSION['error_message'] = 'Failed to add district: ' . $mysqli->error;
+                            $_SESSION['error_message'] = 'Failed to add district: ' . $e->getMessage();
                         }
                     }
                     $stmt->close();
@@ -269,15 +277,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('sisi', $name, $state_id, $image_filename, $id);
                 
                 if ($stmt) {
-                    if ($stmt->execute()) {
-                        if ($stmt->affected_rows > 0) {
-                            logActivity($mysqli, 'Updated district', 'Name: ' . $name . ', ID: ' . $id);
-                            $_SESSION['success_message'] = 'District updated successfully!';
-                        } else {
-                            $_SESSION['error_message'] = 'No changes made or district not found.';
+                    try {
+                        if ($stmt->execute()) {
+                            if ($stmt->affected_rows > 0) {
+                                logActivity($mysqli, 'Updated district', 'Name: ' . $name . ', ID: ' . $id);
+                                $_SESSION['success_message'] = 'District updated successfully!';
+                            } else {
+                                $_SESSION['error_message'] = 'No changes made or district not found.';
+                            }
                         }
-                    } else {
-                        $_SESSION['error_message'] = 'Failed to update district: ' . $mysqli->error;
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
+                            $_SESSION['error_message'] = 'A district with this name already exists in the selected state.';
+                        } else {
+                            $_SESSION['error_message'] = 'Failed to update district: ' . $e->getMessage();
+                        }
                     }
                     $stmt->close();
                 } else {
@@ -351,16 +365,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $mysqli->prepare('INSERT INTO cities (name, district_id, image_url) VALUES (?, ?, ?)');
                 if ($stmt) {
                     $stmt->bind_param('sis', $name, $district_id, $image_filename);
-                    if ($stmt->execute()) {
-                        $city_id = $mysqli->insert_id;
-                        logActivity($mysqli, 'Added city', 'Name: ' . $name . ', ID: ' . $city_id);
-                        $_SESSION['success_message'] = 'City added successfully!';
-                    } else {
-                        // Check for duplicate key error
-                        if ($mysqli->errno == 1062) {
+                    try {
+                        if ($stmt->execute()) {
+                            $city_id = $mysqli->insert_id;
+                            logActivity($mysqli, 'Added city', 'Name: ' . $name . ', ID: ' . $city_id);
+                            $_SESSION['success_message'] = 'City added successfully!';
+                        }
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
                             $_SESSION['error_message'] = 'A city with this name already exists in the selected district.';
                         } else {
-                            $_SESSION['error_message'] = 'Failed to add city: ' . $mysqli->error;
+                            $_SESSION['error_message'] = 'Failed to add city: ' . $e->getMessage();
                         }
                     }
                     $stmt->close();
@@ -410,15 +425,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('sisi', $name, $district_id, $image_filename, $id);
                 
                 if ($stmt) {
-                    if ($stmt->execute()) {
-                        if ($stmt->affected_rows > 0) {
-                            logActivity($mysqli, 'Updated city', 'Name: ' . $name . ', ID: ' . $id);
-                            $_SESSION['success_message'] = 'City updated successfully!';
-                        } else {
-                            $_SESSION['error_message'] = 'No changes made or city not found.';
+                    try {
+                        if ($stmt->execute()) {
+                            if ($stmt->affected_rows > 0) {
+                                logActivity($mysqli, 'Updated city', 'Name: ' . $name . ', ID: ' . $id);
+                                $_SESSION['success_message'] = 'City updated successfully!';
+                            } else {
+                                $_SESSION['error_message'] = 'No changes made or city not found.';
+                            }
                         }
-                    } else {
-                        $_SESSION['error_message'] = 'Failed to update city: ' . $mysqli->error;
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
+                            $_SESSION['error_message'] = 'A city with this name already exists in the selected district.';
+                        } else {
+                            $_SESSION['error_message'] = 'Failed to update city: ' . $e->getMessage();
+                        }
                     }
                     $stmt->close();
                 } else {
@@ -492,16 +513,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $mysqli->prepare('INSERT INTO towns (name, city_id, image_url) VALUES (?, ?, ?)');
                 if ($stmt) {
                     $stmt->bind_param('sis', $name, $city_id, $image_filename);
-                    if ($stmt->execute()) {
-                        $town_id = $mysqli->insert_id;
-                        logActivity($mysqli, 'Added town', 'Name: ' . $name . ', ID: ' . $town_id);
-                        $_SESSION['success_message'] = 'Town added successfully!';
-                    } else {
-                        // Check for duplicate key error
-                        if ($mysqli->errno == 1062) {
+                    try {
+                        if ($stmt->execute()) {
+                            $town_id = $mysqli->insert_id;
+                            logActivity($mysqli, 'Added town', 'Name: ' . $name . ', ID: ' . $town_id);
+                            $_SESSION['success_message'] = 'Town added successfully!';
+                        }
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
                             $_SESSION['error_message'] = 'A town with this name already exists in the selected city.';
                         } else {
-                            $_SESSION['error_message'] = 'Failed to add town: ' . $mysqli->error;
+                            $_SESSION['error_message'] = 'Failed to add town: ' . $e->getMessage();
                         }
                     }
                     $stmt->close();
@@ -551,15 +573,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt->bind_param('sisi', $name, $city_id, $image_filename, $id);
                 
                 if ($stmt) {
-                    if ($stmt->execute()) {
-                        if ($stmt->affected_rows > 0) {
-                            logActivity($mysqli, 'Updated town', 'Name: ' . $name . ', ID: ' . $id);
-                            $_SESSION['success_message'] = 'Town updated successfully!';
-                        } else {
-                            $_SESSION['error_message'] = 'No changes made or town not found.';
+                    try {
+                        if ($stmt->execute()) {
+                            if ($stmt->affected_rows > 0) {
+                                logActivity($mysqli, 'Updated town', 'Name: ' . $name . ', ID: ' . $id);
+                                $_SESSION['success_message'] = 'Town updated successfully!';
+                            } else {
+                                $_SESSION['error_message'] = 'No changes made or town not found.';
+                            }
                         }
-                    } else {
-                        $_SESSION['error_message'] = 'Failed to update town: ' . $mysqli->error;
+                    } catch (mysqli_sql_exception $e) {
+                        if ((int)$e->getCode() === 1062) {
+                            $_SESSION['error_message'] = 'A town with this name already exists in the selected city.';
+                        } else {
+                            $_SESSION['error_message'] = 'Failed to update town: ' . $e->getMessage();
+                        }
                     }
                     $stmt->close();
                 } else {
@@ -1794,13 +1822,15 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             }
         });
     }
-    // Wire all modals
-    wirePicker('add_state_choose','add_state_image','add_state_preview');
-    wirePicker('edit_state_choose','edit_state_image','edit_state_preview');
-    wirePicker('add_district_choose','add_district_image','add_district_preview');
-    wirePicker('edit_district_choose','edit_district_image','edit_district_preview');
-    wirePicker('add_city_choose','add_city_image','add_city_preview');
-    wirePicker('edit_city_choose','edit_city_image','edit_city_preview');
+    // Wire all modals after DOM is ready
+    document.addEventListener('DOMContentLoaded', function(){
+        wirePicker('add_state_choose','add_state_image','add_state_preview');
+        wirePicker('edit_state_choose','edit_state_image','edit_state_preview');
+        wirePicker('add_district_choose','add_district_image','add_district_preview');
+        wirePicker('edit_district_choose','edit_district_image','edit_district_preview');
+        wirePicker('add_city_choose','add_city_image','add_city_preview');
+        wirePicker('edit_city_choose','edit_city_image','edit_city_preview');
+    });
     </script>
 
     <!-- Edit City Modal -->
