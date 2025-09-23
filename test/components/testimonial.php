@@ -3,7 +3,10 @@
 .testimonials { padding: 20px 0; width: 100%; }
 .test-head { font-size: 48px; font-weight: 700; font-style: Bold; margin-top: -80px; letter-spacing: 1%; }
 .test-sub { font-weight: 400; font-style: Regular; font-size: 16px; letter-spacing: 1px; }
-.quote { justify-items: center; margin-top: -200px; margin-right: 15px; }
+/* Desktop-only quote positioning to avoid conflicts on mobile/tablet */
+@media (min-width: 1025px) {
+  .quote { justify-items: center; margin-top: -200px; margin-right: 15px; }
+}
 .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; gap: 10px; z-index: 1; margin-right: 70px; }
 .testimonial-content { position: relative; margin-top: 80px; }
 .testimonial-carousel {
@@ -25,30 +28,66 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .testimonial-nav { bottom: 21px !important; right: 0px !important; height: 3em !important; }
-  .test-head { font-size: 22px; margin-top: 10px; padding-top: 20px; }
-  .test-sub { font-size: 0.625rem; }
-  .testimonial-content { flex-direction: column; align-items: center; }
-  .testimg { margin-right: 5px; margin-bottom: 0.9375rem; position: absolute; right: 10px; left: auto; }
-  .quote { display: none; }
-  .testimonial-carousel { max-width: 90%; margin-left: 0; padding: 10px; font-size: 0.625rem; text-align: justify; }
-  .testimonial-author img { width: 50px; height: 50px; }
-  .testimonial-author-info h5 { font-size: 0.875rem; }
-  .testimonial-author-info p { font-size: 5px; }
-  .stars { font-size: 5px; }
-  .testimonial-nav { position: static; bottom: auto; right: auto; margin-top: 20px; justify-content: center; }
-  .testimonial-slide { padding: 10px; }
-  .testimonial-nav img { width: 25px; height: 25px; margin: 30px 5px; }
+  /* Mirror 768px styling */
+  .test-head { font-size: 1.75em; margin-top: -1.25em; }
+  .test-sub { font-size: 0.8125em; }
+  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 1em; margin-top: 10em; }
+  /* Quote positioning like 768px */
+  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
+  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 2.5em; flex: 0 0 28% !important; overflow: visible; }
+  .testimg img.img-fluid { position: absolute; right: 2em; width: 15em; max-width: none; height: auto; margin-left: 0; margin-top: -8em; z-index: 3; }
+  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -9.625em !important; margin: 0 !important; z-index: 2 !important; transform: none !important; width: 5em !important; height: auto !important; }
+  .testimonial-carousel { width: 72% !important; max-width: none; margin-left: 1.875em; margin-top: -2em; padding: 0.75em; flex: 0 0 62% !important; z-index: 0; }
+  .testimonial-author img { width: 3em; height: 3em; }
+  .testimonial-author-info h5 { font-size: 1.125em; }
+  .testimonial-author-info p { font-size: 0.75em; }
+  .testimonial-author { margin-bottom: 0.5em !important; }
+  .testimonial-slide p { margin: 0.375em 0 0.5em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+  .stars { font-size: 0.875em; margin: 0 0 0.375em !important; }
+  .testimonial-nav { position: absolute; bottom: 3.125em; right: 3.125em; top: 2.5em; }
+  .testimonial-slide { padding: 0; }
+  .testimonial-nav img { width: 1.5em; height: 1.5em; }
+}
+@media (max-width: 768px) {
+  /* Keep desktop structure on small tablets */
+  .test-head { font-size: 1.75em; margin-top: -1.25em; }
+  .test-sub { font-size: 0.8125em; }
+  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 1em; margin-top: 10em; }
+  /* Hide distracting quote on small tablets */
+  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
+  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 2.5em; flex: 0 0 28% !important; overflow: visible; }
+  .testimg img.img-fluid { position: absolute; right: -1em; width: 15em; max-width: none; height: auto; margin-left: 0; margin-top: -8em; z-index: 3; }
+  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -9.625em !important; margin: 0 !important; z-index: 2 !important; transform: none !important;width: 5em !important; height: auto !important; }
+  .testimonial-carousel { width: 72% !important; max-width: none; margin-left: 1.875em; margin-top: -2em; padding: 0.75em; flex: 0 0 50% !important; z-index: 0; }
+  .testimonial-author img { width: 3em; height: 3em; }
+  .testimonial-author-info h5 { font-size: 1.125em; }
+  .testimonial-author-info p { font-size: 0.75em; }
+  .testimonial-author { margin-bottom: 0.5em !important; }
+  .testimonial-slide p { margin: 0.375em 0 0.5em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
+  .stars { font-size: 0.875em; margin: 0 0 0.375em !important; }
+  .testimonial-nav { position: absolute; bottom: 3.125em; right: 3.125em; top: 2.5em; }
+  .testimonial-nav img { width: 1.5em; height: 1.5em; }
 }
 @media (max-width: 480px) {
-  .about-page .test-head { margin-top: 20px; font-size: 1.75rem; }
-  .test-sub { line-height: 2; }
-  .about-page .test-sub { font-size: 0.75rem; }
-  .testimonial-carousel { padding: 10px; }
-  .testimonial-author img { width: 40px; height: 40px; }
-  .testimonial-author-info h5 { font-size: 0.875rem; }
-  .testimonial-author-info p { font-size: 11px; }
-  .testimonial-nav img { width: 18px; height: 18px; }
+  /* Keep desktop structure on mobile (scaled) */
+  .test-head { margin-top: 0; font-size: 1.5em;}
+  .test-sub { font-size: 0.75em; line-height: 1.5; }
+  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 0.75em; margin-top: 3em;margin-left: 4em;}
+  /* Hide distracting quote on mobile */
+  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 12px; flex: 1 1 38%; overflow: visible; }
+  .testimg img.img-fluid { width: 12em !important; max-width: none !important; height: auto; margin-left: auto; position: relative; left: -2em; z-index: 10; margin-top: -2em; }
+  /* Smaller quote pinned to start */
+  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2.5em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
+  .testimonial-carousel { width: 62%; max-width: none; margin-left: 0.625em; margin-top: -1.25em; padding: 0.625em; flex: 1 1 50%; z-index: 0; }
+  .testimonial-author img { width: 2.25em; height: 2.25em; }
+  .testimonial-author-info h5 { font-size: 0.9375em; }
+  .testimonial-author-info p { font-size: 0.6875em; }
+  .testimonial-carousel { padding: 0.5em !important;margin-top: 6em; }
+  .testimonial-author { margin-bottom: 0.375em !important; }
+  .testimonial-slide p { margin: 0.25em 0 0.375em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
+  .stars { font-size: 0.8125em; margin: 0 0 0.375em !important; }
+  .testimonial-nav { position: absolute; bottom: 1.875em; right: 1.875em; top: 8em; }
+  .testimonial-nav img { width: 1.25em; height: 1.25em; }
 }
 </style>
 <section class="testimonials">

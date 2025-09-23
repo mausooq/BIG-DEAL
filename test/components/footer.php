@@ -38,7 +38,6 @@
       }
       #search-wrapper {
         display: flex;
-        gap: 0.5em;
         width: 100%;
         max-width: 100%;
         justify-content: flex-start;
@@ -57,7 +56,6 @@
         justify-content: center;
         padding: 0.625em 0.75em;
         border: none;
-        border-radius: 0.375em;
       }
       #search-button img {
         width: 1.125em;
