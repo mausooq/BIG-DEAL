@@ -1,3 +1,7 @@
+<?php
+require_once __DIR__ . '/config/config.php';
+$mysqli = getMysqliConnection();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -181,7 +185,7 @@
 
 
 
-    <div class="container">
+    <div class="container" id="latest-properties">
         <!-- Title Section -->
         <div class="property-title-section text-left">
             <div class="property-title">
@@ -192,111 +196,108 @@
             </div>
         </div>
         <!-- Properties Grid -->
+        <?php
+          $properties = [];
+          $showAllProps = isset($_GET['more']) && $_GET['more'] == '1';
+          $propsLimit = $showAllProps ? 1000 : 6;
+          $totalProps = 0;
+          try {
+            // Total count
+            $sqlPropsCount = "SELECT COUNT(*) AS cnt FROM properties WHERE status = 'Available'";
+            if (isset($mysqli) && ($resCnt = $mysqli->query($sqlPropsCount))) {
+              if ($rowCnt = $resCnt->fetch_assoc()) { $totalProps = (int)$rowCnt['cnt']; }
+              $resCnt->free();
+            }
+            $sqlProps = "
+              SELECT 
+                p.id,
+                p.title,
+                p.description,
+                p.configuration,
+                p.parking,
+                p.area,
+                p.furniture_status,
+                (
+                  SELECT pi.image_url 
+                  FROM property_images pi 
+                  WHERE pi.property_id = p.id 
+                  ORDER BY pi.id ASC 
+                  LIMIT 1
+                ) AS cover_image_url
+              FROM properties p
+              WHERE p.status = 'Available'
+              ORDER BY p.created_at DESC, p.id DESC
+              LIMIT " . (int)$propsLimit . "
+            ";
+            if (isset($mysqli) && $result = $mysqli->query($sqlProps)) {
+              while ($row = $result->fetch_assoc()) { $properties[] = $row; }
+              $result->free();
+            }
+          } catch (Throwable $e) { error_log('Properties load error: ' . $e->getMessage()); }
+          // No image fallback; use first property image as cover when available
+        ?>
         <div class="row g-4">
-            <!-- Property Card 1 -->
-            <div class="col-md-4">
+          <?php if (!empty($properties)): ?>
+            <?php foreach ($properties as $i => $p): ?>
+              <div class="col-md-4">
                 <div class="card property-card h-100">
-                    <img  src="assets/images/prop/prop1.png" alt="Modern Family Villa" class="propimg">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
+                  <?php
+                    $img = trim((string)($p['cover_image_url'] ?? ''));
+                    if ($img !== '') {
+                      $isAbsolute = str_starts_with($img, 'http://') || str_starts_with($img, 'https://') || str_starts_with($img, '/');
+                      if ($isAbsolute) {
+                        // leave as-is
+                      } else {
+                        // If it's just a filename, try to resolve against known folders
+                        $hasSlash = strpos($img, '/') !== false;
+                        $resolved = '';
+                        if (!$hasSlash) {
+                          $name = basename($img);
+                          $root = dirname(__DIR__); // project root
+                          $candidates = [
+                            'uploads/properties/' . $name,
+                            'uploads/' . $name,
+                            'assets/images/prop/' . $name,
+                          ];
+                          foreach ($candidates as $relPath) {
+                            if (file_exists($root . '/' . $relPath)) {
+                              $resolved = '../' . $relPath; // from test/index.php to root
+                              break;
+                            }
+                          }
+                          $img = $resolved !== '' ? $resolved : '';
+                        } else {
+                          // relative path provided; make it work from /test/
+                          $img = '../' . ltrim($img, './');
+                        }
+                      }
+                    }
+                  ?>
+                  <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="propimg">
+                  <div class="card-body">
+                    <div class="card-title"><?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?></div>
+                    <div class="property-attrs">
+                      <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > <?php echo htmlspecialchars($p['configuration'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></div>
+                      <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > <?php echo ($p['parking'] ?? '') === 'Yes' ? '1' : '0'; ?></div>
+                      <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > <?php echo htmlspecialchars((string)($p['area'] ?? '—')); ?> sq. ft.</div>
+                      <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > —</div>
+                      <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > <?php echo htmlspecialchars($p['furniture_status'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></div>
                     </div>
+                  </div>
                 </div>
-            </div>
-            <!-- Property Card 2 -->
-            <div class="col-md-4">
-                <div class="card property-card h-100">
-                    <img src="assets/images/prop/prop2.png" alt="Modern Family Villa">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                         <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Property Card 3 -->
-            <div class="col-md-4">
-                <div class="card property-card h-100">
-                    <img src="assets/images/prop/prop3.png" alt="Luxury City Apartment">
-                    <div class="card-body">
-                        <div class="card-title">Luxury City Apartment</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+              </div>
+            <?php endforeach; ?>
+          <?php endif; ?>
         </div>
+        <?php if (!$showAllProps && $totalProps > $propsLimit): ?>
+          <div class="text-center" style="margin: 20px 0;">
+            <a href="?more=1#latest-properties" class="view-all-btn">View More →</a>
+          </div>
+        <?php endif; ?>
    
         
 
-     <!-- Properties Grid -->
-        <div class="row g-4">
-            <!-- Property Card 1 -->
-            <div class="col-md-4">
-                <div class="card property-card h-100">
-                    <img  src="assets/images/prop/prop1.png" alt="Modern Family Villa" class="propimg">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4 BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Property Card 2 -->
-            <div class="col-md-4">
-                <div class="card property-card h-100">
-                    <img src="assets/images/prop/prop2.png" alt="Modern Family Villa">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                         <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Property Card 3 -->
-            <div class="col-md-4">
-                <div class="card property-card h-100">
-                    <img src="assets/images/prop/prop3.png" alt="Luxury City Apartment">
-                    <div class="card-body">
-                        <div class="card-title">Luxury City Apartment</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr attr-extra"><img src="assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
         
 
 
@@ -309,38 +310,88 @@
                   <div class="location-subtitle">
                     Trending areas you can’t miss    
                   </div>
+        <?php
+          // Load cities from DB; fall back to static if none
+          $cities = [];
+          try {
+            $sqlCities = "SELECT id, name, image_url FROM cities ORDER BY id ASC LIMIT 5";
+            if (isset($mysqli) && $result = $mysqli->query($sqlCities)) {
+              while ($row = $result->fetch_assoc()) { $cities[] = $row; }
+              $result->free();
+            }
+          } catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
+        ?>
         <div class="container">
           <div class="location-grid">
-            <div >
-              <div class="city-card location-extra1">
-                <img src="assets/images/loc/blore.png" alt="Bengaluru">
-                <div class="city-label">Bengaluru</div>
+            <?php if (!empty($cities)): ?>
+              <?php foreach ($cities as $idx => $city): ?>
+                <div>
+                  <div class="city-card<?php echo $idx === 0 ? ' location-extra1' : ($idx === 1 ? ' location-extra2' : ''); ?>">
+                    <?php
+                      $cimg = trim((string)($city['image_url'] ?? ''));
+                      if ($cimg !== '') {
+                        $isAbs = str_starts_with($cimg, 'http://') || str_starts_with($cimg, 'https://') || str_starts_with($cimg, '/');
+                        if ($isAbs) {
+                          // leave as-is
+                        } else {
+                          $hasSlash = strpos($cimg, '/') !== false;
+                          $resolved = '';
+                          if (!$hasSlash) {
+                            $name = basename($cimg);
+                            $root = dirname(__DIR__);
+                            $candidates = [
+                              'uploads/locations/' . $name,
+                              'uploads/' . $name,
+                              'assets/images/loc/' . $name,
+                            ];
+                            foreach ($candidates as $rel) {
+                              if (file_exists($root . '/' . $rel)) { $resolved = '../' . $rel; break; }
+                            }
+                            $cimg = $resolved !== '' ? $resolved : '';
+                          } else {
+                            $cimg = '../' . ltrim($cimg, './');
+                          }
+                        }
+                      }
+                      if ($cimg === '') { $cimg = 'assets/images/loc/black_hero.png'; }
+                    ?>
+                    <img src="<?php echo htmlspecialchars($cimg, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?>">
+                    <div class="city-label"><?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?></div>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div>
+                <div class="city-card location-extra1">
+                  <img src="assets/images/loc/blore.png" alt="Bengaluru">
+                  <div class="city-label">Bengaluru</div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="city-card location-extra2">
-                <img src="assets/images/loc/mysore.png" alt="Mysuru">
-                <div class="city-label">Mysuru</div>
+              <div>
+                <div class="city-card location-extra2">
+                  <img src="assets/images/loc/mysore.png" alt="Mysuru">
+                  <div class="city-label">Mysuru</div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="city-card">
-                <img src="assets/images/loc/mlore.png" alt="Mangaluru">
-                <div class="city-label">Mangaluru</div>
+              <div>
+                <div class="city-card">
+                  <img src="assets/images/loc/mlore.png" alt="Mangaluru">
+                  <div class="city-label">Mangaluru</div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="city-card">
-                <img src="assets/images/loc/chikm.png" alt="Chikkamagaluru">
-                <div class="city-label">Chikkamagaluru</div>
+              <div>
+                <div class="city-card">
+                  <img src="assets/images/loc/chikm.png" alt="Chikkamagaluru">
+                  <div class="city-label">Chikkamagaluru</div>
+                </div>
               </div>
-            </div>
-            <div>
-              <div class="city-card">
-                <img src="assets/images/loc/kgd.png" alt="Kasaragod">
-                <div class="city-label">Kasaragod</div>
+              <div>
+                <div class="city-card">
+                  <img src="assets/images/loc/kgd.png" alt="Kasaragod">
+                  <div class="city-label">Kasaragod</div>
+                </div>
               </div>
-            </div>
+            <?php endif; ?>
           </div>
         </div>
   </div>
@@ -399,7 +450,23 @@
 
 
 
-<!-- Faq  -->
+  <!-- Faq  -->
+<?php
+  // Load FAQs from database (reuse connection from top)
+  $faqs = [];
+  try {
+    $sql = "SELECT id, question, answer FROM faqs ORDER BY COALESCE(order_id, 1000000), id";
+    if (isset($mysqli) && $result = $mysqli->query($sql)) {
+      while ($row = $result->fetch_assoc()) {
+        $faqs[] = $row;
+      }
+      $result->free();
+    }
+  } catch (Throwable $e) {
+    // Fail silently in UI; optionally log
+    error_log('FAQ load error: ' . $e->getMessage());
+  }
+?>
 <section class="container-fluid faq">
   <div class="row">
 
@@ -422,44 +489,29 @@
     <div class="col-md-7">
       
       <div class="FaqQ">
-        <div class="FaqQ-item ">
-          <div class="FaqQ-title">
-            <span>Lorem ipsum dolor sit amet, consectetur ?</span>
-            <img src="assets/images/icon/arrowdown.svg" alt="arrow down" class="farrow down">
+        <?php if (!empty($faqs)): ?>
+          <?php foreach ($faqs as $index => $faq): ?>
+            <div class="FaqQ-item<?php echo $index === 0 ? ' ' : ''; ?>">
+              <div class="FaqQ-title">
+                <span><?php echo htmlspecialchars($faq['question'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+                <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
+              </div>
+              <div class="FaqQ-content">
+                <span><?php echo htmlspecialchars($faq['answer'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
+              </div>
+            </div>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <div class="FaqQ-item">
+            <div class="FaqQ-title">
+              <span>No FAQs available right now.</span>
+              <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
+            </div>
+            <div class="FaqQ-content">
+              <span>Please check back later.</span>
+            </div>
           </div>
-          <div class="FaqQ-content">
-            <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt</span>
-          </div>
-        </div>
-        <div class="FaqQ-item">
-          <div class="FaqQ-title">
-            <span>Lorem ipsum dolor sit amet, consectetur ?</span>
-            <img src="assets/images/icon/arrowdown.svg" alt="arrow up" class="farrow down">
-          </div>
-
-          <div class="FaqQ-content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
-          </div>
-        </div>
-
-        <div class="FaqQ-item">
-          <div class="FaqQ-title">
-            <span>Lorem ipsum dolor sit amet, consectetur ?</span>
-          <img src="assets/images/icon/arrowdown.svg" alt="arrow up" class="farrow down">
-          </div>
-          <div class="FaqQ-content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
-          </div>
-        </div>
-        <div class="FaqQ-item">
-          <div class="FaqQ-title">
-            <span>Lorem ipsum dolor sit amet, consectetur ?</span>
-          <img src="assets/images/icon/arrowdown.svg" alt="arrow up" class="farrow down">
-          </div>
-          <div class="FaqQ-content">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt
-          </div>
-        </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
