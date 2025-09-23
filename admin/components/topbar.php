@@ -11,6 +11,7 @@ if (!function_exists('renderAdminTopbar')) {
 		// Print topbar styles once
 		static $topbarStylesPrinted = false;
 		if (!$topbarStylesPrinted) {
+			echo '<link rel="stylesheet" href="../../assets/css/loader.css">';
 			echo '<style>
 				/* CSS Variables */
 				:root {

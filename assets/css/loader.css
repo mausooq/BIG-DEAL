@@ -1,0 +1,32 @@
+.custom-loader {
+	width: 25px;
+	height: 25px;
+	display: grid;
+	border: 2px solid #0000;
+	border-radius: 50%;
+	border-right-color: #E11D2A; /* brand red */
+	animation: s5 1s infinite linear;
+}
+
+.custom-loader::before,
+.custom-loader::after {
+	content: "";
+	grid-area: 1/1;
+	margin: 1px;
+	border: inherit;
+	border-radius: 50%;
+	animation: s5 2s infinite;
+}
+
+.custom-loader::after {
+	margin: 4px;
+	animation-duration: 3s;
+}
+
+@keyframes s5 {
+	100% {
+		transform: rotate(1turn)
+	}
+}
+
+
