@@ -20,11 +20,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$content = trim($_POST['content'] ?? '');
 		$image_url = trim($_POST['image_url'] ?? '');
 		
-		if ($title && $content) {
-			$stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url) VALUES (?, ?, ?)");
-			if ($stmt) {
-				$stmt->bind_param("sss", $title, $content, $image_url);
-				if ($stmt->execute()) {
+        if ($title && $content) {
+            $has_admin_id = ($mysqli->query("SHOW COLUMNS FROM blogs LIKE 'admin_id'")?->num_rows ?? 0) > 0;
+            if ($has_admin_id) {
+                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url, admin_id) VALUES (?, ?, ?, ?)");
+                if ($stmt) {
+                    $adminId = isset($_SESSION['admin_id']) ? (int)$_SESSION['admin_id'] : null;
+                    $stmt->bind_param("sssi", $title, $content, $image_url, $adminId);
+                }
+            } else {
+                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url) VALUES (?, ?, ?)");
+                if ($stmt) {
+                    $stmt->bind_param("sss", $title, $content, $image_url);
+                }
+            }
+            if ($stmt) {
+                if ($stmt->execute()) {
 					$_SESSION['success_message'] = 'Blog post added successfully!';
 				} else {
 					$_SESSION['error_message'] = 'Failed to add blog post: ' . $mysqli->error;
