@@ -28,7 +28,7 @@ function logActivity(mysqli $mysqli, string $action, string $details): void {
 $mysqli = db();
 
 // Fetch existing blog
-$stmt = $mysqli->prepare('SELECT id, title, content, image_url, created_at FROM blogs WHERE id = ?');
+$stmt = $mysqli->prepare('SELECT id, title, content, image_url, created_at, admin_id FROM blogs WHERE id = ?');
 $stmt && $stmt->bind_param('i', $id) && $stmt->execute();
 $blog = $stmt ? $stmt->get_result()->fetch_assoc() : null;
 $stmt && $stmt->close();

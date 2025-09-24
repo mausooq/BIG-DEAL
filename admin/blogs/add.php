@@ -50,13 +50,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$image_url = $filename; // Store only filename, not full path
 		}
 
-		// Insert blog
+		// Insert blog with admin_id if available
+		$adminId = isset($_SESSION['admin_id']) ? (int)$_SESSION['admin_id'] : null;
+		$has_admin_id = ($mysqli->query("SHOW COLUMNS FROM blogs LIKE 'admin_id'")?->num_rows ?? 0) > 0;
 		if ($has_created_at) {
-			$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, created_at) VALUES (?, ?, ?, NOW())');
-			$stmt && $stmt->bind_param('sss', $title, $content, $image_url);
+			if ($has_admin_id) {
+				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, admin_id, created_at) VALUES (?, ?, ?, ?, NOW())');
+				if ($stmt) {
+					// Use i for admin_id when not null; pass null safely via PHP by binding as null using set null variable
+					$adminParam = $adminId !== null ? $adminId : null;
+					// For NULL with mysqli bind, use 'i' and pass null — mysqli will send NULL for null variables
+					$stmt->bind_param('sssi', $title, $content, $image_url, $adminParam);
+				}
+			} else {
+				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, created_at) VALUES (?, ?, ?, NOW())');
+				$stmt && $stmt->bind_param('sss', $title, $content, $image_url);
+			}
 		} else {
-			$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url) VALUES (?, ?, ?)');
-			$stmt && $stmt->bind_param('sss', $title, $content, $image_url);
+			if ($has_admin_id) {
+				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, admin_id) VALUES (?, ?, ?, ?)');
+				if ($stmt) {
+					$adminParam = $adminId !== null ? $adminId : null;
+					$stmt->bind_param('sssi', $title, $content, $image_url, $adminParam);
+				}
+			} else {
+				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url) VALUES (?, ?, ?)');
+				$stmt && $stmt->bind_param('sss', $title, $content, $image_url);
+			}
 		}
 
 		if (!$stmt || !$stmt->execute()) { throw new Exception('Failed to add blog post'); }
