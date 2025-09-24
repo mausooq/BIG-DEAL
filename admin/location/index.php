@@ -823,18 +823,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         .toolbar{ background:var(--card); border:1px solid var(--line); border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; }
         .toolbar .row-top{ display:flex; gap:12px; align-items:center; }
         .toolbar .btn-primary{ background:var(--primary); border-color:var(--primary); }
-        /* Feature toggle button theme (match Properties) */
-        .feature-toggle.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
-        .feature-toggle.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
-        .feature-toggle.btn-primary{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
-        .feature-toggle.btn-primary:hover{ background-color: var(--primary-600); border-color: var(--primary-600); }
-        /* Themed dialog */
-        .theme-modal .modal-backdrop.show{ background: rgba(0,0,0,.4); backdrop-filter: blur(3px); }
-        .theme-modal .modal-content{ border-radius:16px; border:1px solid var(--line); box-shadow:0 20px 60px rgba(0,0,0,.3); }
-        .theme-modal .modal-header{ border-bottom:1px solid var(--line); }
-        .theme-modal .modal-footer{ border-top:1px solid var(--line); }
-        .theme-modal .btn-primary{ background:var(--primary); border-color:var(--primary); }
-        .theme-modal .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
         /* Cards */
         
         /* Location Management Cards */
@@ -1076,6 +1064,13 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
              .nav-tabs .nav-link{ padding: 0.75rem 1rem; font-size: 0.875rem; }
              .toolbar .row-top{ flex-direction:column; align-items:stretch; }
          }
+                /* Featured star button (match property drawer) */
+                .btn-feature-city{ width:32px; height:32px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; padding:0; position:relative; overflow:hidden; }
+                .btn-feature-city.btn-primary{ background:var(--primary); border-color:var(--primary); color:#fff; }
+                .btn-feature-city.btn-outline-primary{ border-color:var(--primary); color:var(--primary); background:#fff; }
+                .btn-feature-city.btn-outline-primary i{ color: var(--primary); }
+                .btn-feature-city.btn-primary i{ color: #fff; }
+                .btn-feature-city::before, .btn-feature-city::after{ content: none !important; }
     </style>
 </head>
 <body>
@@ -1105,10 +1100,10 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
             <?php endif; ?>
 
              <!-- Tab Navigation -->
-            <div class="card mb-4">
-                <div class="card-body p-0">
-                    <div class="d-flex justify-content-between align-items-center px-2 py-1">
-                    <ul class="nav nav-tabs nav-fill" id="locationTabs" role="tablist">
+             <div class="card mb-4">
+                 <div class="card-body p-0">
+                     <div class="d-flex justify-content-between align-items-center px-2 py-1">
+                     <ul class="nav nav-tabs nav-fill" id="locationTabs" role="tablist">
                          <li class="nav-item" role="presentation">
                              <button class="nav-link active" id="states-tab" data-bs-toggle="tab" data-bs-target="#states" type="button" role="tab">
                                  <i class="fa-solid fa-map me-2"></i>States (<?php echo $totalStates; ?>)
@@ -1129,11 +1124,11 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  <i class="fa-solid fa-map-marker-alt me-2"></i>Towns (<?php echo $totalTowns; ?>)
                              </button>
                          </li>
-                    </ul>
-                    <a href="featured.php" class="btn btn-sm feature-toggle btn-outline-primary" title="Featured Locations">
-                        <i class="fa-solid fa-star me-1"></i><span class="d-none d-sm-inline">Featured</span>
-                    </a>
-                    </div>
+                     </ul>
+                     <a href="featured.php" class="btn btn-sm" title="Featured Locations" style="display:inline-flex;align-items:center;gap:6px;border:1px solid var(--primary);color:var(--primary);border-radius:8px;padding:.35rem .6rem;">
+                         <i class="fa-solid fa-star" style="color: var(--primary);"></i><span class="d-none d-sm-inline">Featured</span>
+                     </a>
+                     </div>
                  </div>
              </div>
 
@@ -1360,10 +1355,10 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                                     
                                                      <!-- Action Buttons Overlay -->
                                                      <div class="position-absolute top-0 end-0 p-2" style="z-index: 5; pointer-events: auto;">
-                                                         <div class="d-flex gap-1">
-                                                             <button type="button" class="btn btn-sm feature-toggle btn-outline-primary btn-feature-city" title="Toggle featured" data-city-id="<?php echo (int)$city['id']; ?>">
-                                                                 <i class="fa-regular fa-star"></i>
-                                                             </button>
+                                                        <div class="d-flex gap-1">
+                                                            <button type="button" class="btn btn-sm btn-outline-primary btn-feature-city" title="Toggle featured" aria-label="Toggle featured" data-city-id="<?php echo (int)$city['id']; ?>">
+                                                                <i class="fa-regular fa-star"></i>
+                                                            </button>
                                                              <button type="button" class="modern-btn edit-btn btn-edit-city" 
                                                                      data-bs-toggle="modal" 
                                                                      data-bs-target="#editCityModal" 
@@ -1495,25 +1490,6 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                 </div>
              </div>
 
-        </div>
-    </div>
-
-    <!-- Limit Modal -->
-    <div class="modal fade theme-modal" id="limitModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fa-solid fa-star text-danger me-2"></i>Featured Limit Reached</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    You can only feature up to 5 cities. Please remove one from <a href="featured.php">Featured Locations</a> to add another.
-                </div>
-                <div class="modal-footer">
-                    <a href="featured.php" class="btn btn-primary">Manage Featured</a>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -2083,8 +2059,82 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
         </div>
     </div>
 
+    <!-- Featured Limit Modal -->
+    <div class="modal fade" id="featuredLimitModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="border-radius:12px; border:1px solid var(--line);">
+                <div class="modal-header" style="border-bottom:1px solid var(--line);">
+                    <h5 class="modal-title" style="display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="color: var(--primary);"></i>
+                        Featured Limit Reached
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    You can feature up to <span class="badge badge-soft">5</span> cities. Remove one to add another.
+                </div>
+                <div class="modal-footer" style="border-top:1px solid var(--line);">
+                    <a href="featured.php" class="btn btn-primary"><i class="fa-solid fa-star me-1"></i>Manage Featured</a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
      <script>
+        // Featured Cities: mirror property drawer star toggle
+        function setFeatureButtonState(button, isFeatured){
+            if (!button) return;
+            button.classList.toggle('btn-primary', !!isFeatured);
+            button.classList.toggle('btn-outline-primary', !isFeatured);
+            const icon = button.querySelector('i');
+            if (icon){ icon.className = isFeatured ? 'fa-solid fa-star' : 'fa-regular fa-star'; }
+        }
+
+        async function loadFeaturedCities(){
+            try{
+                const res = await fetch('featured.php?action=list', { headers: { 'Accept':'application/json' } });
+                const json = await res.json();
+                if (!json || !json.success) return;
+                const featuredSet = new Set((json.city_ids || []).map(id => parseInt(id)));
+                document.querySelectorAll('.btn-feature-city').forEach(btn => {
+                    const cityId = parseInt(btn.getAttribute('data-city-id'));
+                    setFeatureButtonState(btn, featuredSet.has(cityId));
+                });
+            } catch(e){ /* noop */ }
+        }
+
+        async function toggleFeaturedCity(cityId, button){
+            try{
+                const form = new FormData();
+                form.append('action','toggle');
+                form.append('city_id', String(cityId));
+                const res = await fetch('featured.php', { method:'POST', body: form, headers: { 'Accept':'application/json' } });
+                const json = await res.json();
+                if (json && json.success){
+                    setFeatureButtonState(button, !!json.is_featured);
+                } else if (json && json.error === 'limit_reached'){
+                    const modalEl = document.getElementById('featuredLimitModal');
+                    if (modalEl){ const m = new bootstrap.Modal(modalEl); m.show(); }
+                }
+            } catch(e){ /* noop */ }
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            // Initial sync of star state
+            loadFeaturedCities();
+            // Bind clicks
+            document.querySelectorAll('.btn-feature-city').forEach(btn => {
+                btn.addEventListener('click', function(e){
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const cid = parseInt(this.getAttribute('data-city-id'));
+                    if (cid > 0){ toggleFeaturedCity(cid, this); }
+                });
+            });
+        });
+
 
          function searchStates() {
              const searchValue = document.getElementById('searchInput').value;
@@ -2387,44 +2437,5 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 			});
 		})();
 	</script>
-    <script>
-// ... existing code ...
-             // Initialize featured city toggles
-             (async function initFeatured(){
-                 try {
-                     const r = await fetch('featured.php?action=list', { headers:{ 'Accept':'application/json' } });
-                     const j = await r.json();
-                     const featuredIds = new Set((j && j.city_ids) ? j.city_ids.map(String) : []);
-                     document.querySelectorAll('.btn-feature-city[data-city-id]').forEach(btn => {
-                         const id = btn.getAttribute('data-city-id');
-                         const icon = btn.querySelector('i');
-                         const isOn = featuredIds.has(String(id));
-                         icon.className = isOn ? 'fa-solid fa-star' : 'fa-regular fa-star';
-                         btn.classList.toggle('btn-primary', isOn);
-                         btn.classList.toggle('btn-outline-primary', !isOn);
-                     });
-                 } catch {}
-             })();
-
-             // Toggle featured via click
-             document.addEventListener('click', async function(e){
-                 const btn = e.target.closest('.btn-feature-city');
-                 if (!btn) return;
-                 const id = btn.getAttribute('data-city-id');
-                 const form = new FormData(); form.append('action','toggle'); form.append('city_id', id);
-                 const r = await fetch('featured.php', { method:'POST', body: form });
-                 const j = await r.json().catch(()=>null);
-                 if (!j || !j.success){
-                     if (j && j.error === 'limit_reached') { new bootstrap.Modal(document.getElementById('limitModal')).show(); }
-                     return;
-                 }
-                 const icon = btn.querySelector('i');
-                 const isOn = !!j.is_featured;
-                 icon.className = isOn ? 'fa-solid fa-star' : 'fa-regular fa-star';
-                 btn.classList.toggle('btn-primary', isOn);
-                 btn.classList.toggle('btn-outline-primary', !isOn);
-             });
-// ... existing code ...
-     </script>
 </body>
 </html>
