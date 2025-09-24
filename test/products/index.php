@@ -1,12 +1,21 @@
 <?php
 require_once '../config/config.php';
 
-// Get selected category from URL parameter
+// Get selected filters from URL parameters
 $mysqli = getMysqliConnection();
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
-$selectedCity = isset($_GET['city']) ? $_GET['city'] : ($selectedCity ?? '');
-$isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
 $selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
+$isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
+
+// Get additional filter parameters
+$selectedPropertyType = isset($_GET['propertyType']) ? $_GET['propertyType'] : '';
+$selectedBedrooms = isset($_GET['bedrooms']) ? $_GET['bedrooms'] : '';
+$selectedConstructionStatus = isset($_GET['constructionStatus']) ? $_GET['constructionStatus'] : '';
+$selectedLocalities = isset($_GET['localities']) ? $_GET['localities'] : '';
+$minPrice = isset($_GET['minPrice']) ? (float)$_GET['minPrice'] : 0;
+$maxPrice = isset($_GET['maxPrice']) ? (float)$_GET['maxPrice'] : 0;
+$minArea = isset($_GET['minArea']) ? (float)$_GET['minArea'] : 0;
+$maxArea = isset($_GET['maxArea']) ? (float)$_GET['maxArea'] : 0;
 
 // Load cities for the city select
 $cities = [];
@@ -17,6 +26,66 @@ try {
         $resCity->free();
     }
 } catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
+
+// Load categories for Types of Property filter
+$categories = [];
+try {
+    $categorySql = "SELECT id, name FROM categories ORDER BY name";
+    if ($resCategory = $mysqli->query($categorySql)) {
+        while ($row = $resCategory->fetch_assoc()) { $categories[] = $row; }
+        $resCategory->free();
+    }
+} catch (Throwable $e) { error_log('Categories load error: ' . $e->getMessage()); }
+
+// Load bedroom configurations for No of Bedrooms filter
+$configurations = [];
+try {
+    $configSql = "SELECT DISTINCT configuration FROM properties WHERE configuration IS NOT NULL AND configuration != '' ORDER BY configuration";
+    if ($resConfig = $mysqli->query($configSql)) {
+        while ($row = $resConfig->fetch_assoc()) { $configurations[] = $row['configuration']; }
+        $resConfig->free();
+    }
+} catch (Throwable $e) { error_log('Configurations load error: ' . $e->getMessage()); }
+
+// Load localities (towns) for Localities filter
+$localities = [];
+try {
+    $localitySql = "SELECT t.id, t.name, c.name as city_name FROM towns t 
+                    JOIN cities c ON t.city_id = c.id 
+                    ORDER BY c.name, t.name";
+    if ($resLocality = $mysqli->query($localitySql)) {
+        while ($row = $resLocality->fetch_assoc()) { $localities[] = $row; }
+        $resLocality->free();
+    }
+} catch (Throwable $e) { error_log('Localities load error: ' . $e->getMessage()); }
+
+// Get dynamic price range from database
+$priceRange = ['min' => 0, 'max' => 10000000];
+try {
+    $priceSql = "SELECT MIN(price) as min_price, MAX(price) as max_price FROM properties WHERE price > 0";
+    if ($resPrice = $mysqli->query($priceSql)) {
+        $priceData = $resPrice->fetch_assoc();
+        if ($priceData && $priceData['min_price'] && $priceData['max_price']) {
+            $priceRange['min'] = (int)$priceData['min_price'];
+            $priceRange['max'] = (int)$priceData['max_price'];
+        }
+        $resPrice->free();
+    }
+} catch (Throwable $e) { error_log('Price range load error: ' . $e->getMessage()); }
+
+// Get dynamic area range from database
+$areaRange = ['min' => 0, 'max' => 10000];
+try {
+    $areaSql = "SELECT MIN(area) as min_area, MAX(area) as max_area FROM properties WHERE area > 0";
+    if ($resArea = $mysqli->query($areaSql)) {
+        $areaData = $resArea->fetch_assoc();
+        if ($areaData && $areaData['min_area'] && $areaData['max_area']) {
+            $areaRange['min'] = (int)$areaData['min_area'];
+            $areaRange['max'] = (int)$areaData['max_area'];
+        }
+        $resArea->free();
+    }
+} catch (Throwable $e) { error_log('Area range load error: ' . $e->getMessage()); }
 
 // Fetch properties with their images
 $properties = [];
@@ -37,6 +106,43 @@ if (!empty($selectedCategory)) {
 if (!empty($selectedCity)) {
     $city = $mysqli->real_escape_string($selectedCity);
     $query .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
+}
+
+// Add property type filter (category-based)
+if (!empty($selectedPropertyType)) {
+    $query .= " AND c.name = '" . $mysqli->real_escape_string($selectedPropertyType) . "'";
+}
+
+// Add bedroom configuration filter
+if (!empty($selectedBedrooms)) {
+    $query .= " AND p.configuration = '" . $mysqli->real_escape_string($selectedBedrooms) . "'";
+}
+
+// Add construction status filter (using furniture_status as proxy)
+if (!empty($selectedConstructionStatus)) {
+    $query .= " AND p.furniture_status = '" . $mysqli->real_escape_string($selectedConstructionStatus) . "'";
+}
+
+// Add locality filter (match against location and landmark)
+if (!empty($selectedLocalities)) {
+    $locality = $mysqli->real_escape_string($selectedLocalities);
+    $query .= " AND (p.location LIKE '%" . $locality . "%' OR p.landmark LIKE '%" . $locality . "%')";
+}
+
+// Add price range filter
+if ($minPrice > 0) {
+    $query .= " AND p.price >= " . $minPrice;
+}
+if ($maxPrice > 0) {
+    $query .= " AND p.price <= " . $maxPrice;
+}
+
+// Add area range filter
+if ($minArea > 0) {
+    $query .= " AND p.area >= " . $minArea;
+}
+if ($maxArea > 0) {
+    $query .= " AND p.area <= " . $maxArea;
 }
 
 // Add featured-only filter if requested
@@ -95,7 +201,96 @@ function timeAgo($datetime) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/product.css" />
+  <link rel="stylesheet" href="../assets/css/product.css" />
+  
+  <style>
+    /* Enhanced dropdown interactions */
+    .filter-section-header {
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .filter-section-header:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .filter-section-header.active {
+      background-color: #e9ecef;
+    }
+    
+    .caret {
+      transition: transform 0.3s ease;
+      display: inline-block;
+      margin-left: auto;
+    }
+    
+    .filter-section-content {
+      transition: all 0.3s ease;
+    }
+    
+    /* Mobile filter sidebar */
+    .filter-sidebar.show {
+      transform: translateX(0);
+    }
+    
+    .filter-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1040;
+    }
+    
+    /* Applied filter tags */
+    .applied-filter-tag {
+      display: inline-block;
+      background-color: #007bff;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin: 2px;
+      font-size: 12px;
+    }
+    
+    .applied-filter-tag button {
+      background: none;
+      border: none;
+      color: white;
+      margin-left: 5px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .applied-filter-tag button:hover {
+      color: #ffc107;
+    }
+    
+    /* Range slider enhancements */
+    .range-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+    
+    /* Tag interactions */
+    .tag {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .tag:hover {
+      background-color: #007bff;
+      color: white;
+    }
+    
+    .tag.active {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
 </head>
 <body class="article-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
@@ -151,7 +346,49 @@ function timeAgo($datetime) {
     </div>
 
     <!-- Applied filters tags container -->
-    <div class="applied-filters" id="appliedFiltersContainer"></div>
+    <div class="applied-filters" id="appliedFiltersContainer">
+      <?php if (!empty($selectedPropertyType)): ?>
+        <span class="applied-filter-tag">
+          Property Type: <?php echo htmlspecialchars($selectedPropertyType); ?>
+          <button onclick="removeFilter('propertyType', '<?php echo htmlspecialchars($selectedPropertyType); ?>')">×</button>
+        </span>
+      <?php endif; ?>
+      
+      <?php if (!empty($selectedBedrooms)): ?>
+        <span class="applied-filter-tag">
+          Bedrooms: <?php echo htmlspecialchars($selectedBedrooms); ?>
+          <button onclick="removeFilter('bedrooms', '<?php echo htmlspecialchars($selectedBedrooms); ?>')">×</button>
+        </span>
+      <?php endif; ?>
+      
+      <?php if (!empty($selectedConstructionStatus)): ?>
+        <span class="applied-filter-tag">
+          Status: <?php echo htmlspecialchars($selectedConstructionStatus); ?>
+          <button onclick="removeFilter('constructionStatus', '<?php echo htmlspecialchars($selectedConstructionStatus); ?>')">×</button>
+        </span>
+      <?php endif; ?>
+      
+      <?php if (!empty($selectedLocalities)): ?>
+        <span class="applied-filter-tag">
+          Locality: <?php echo htmlspecialchars($selectedLocalities); ?>
+          <button onclick="removeFilter('localities', '<?php echo htmlspecialchars($selectedLocalities); ?>')">×</button>
+        </span>
+      <?php endif; ?>
+      
+      <?php if ($minPrice > 0 || $maxPrice > 0): ?>
+        <span class="applied-filter-tag">
+          Budget: ₹<?php echo $minPrice > 0 ? number_format($minPrice) : '0'; ?> - ₹<?php echo $maxPrice > 0 ? number_format($maxPrice) : '∞'; ?>
+          <button onclick="clearRangeFilter('price')">×</button>
+        </span>
+      <?php endif; ?>
+      
+      <?php if ($minArea > 0 || $maxArea > 0): ?>
+        <span class="applied-filter-tag">
+          Area: <?php echo $minArea > 0 ? number_format($minArea) : '0'; ?> - <?php echo $maxArea > 0 ? number_format($maxArea) : '∞'; ?> sq.ft
+          <button onclick="clearRangeFilter('area')">×</button>
+        </span>
+      <?php endif; ?>
+    </div>
 
     <!-- Budget Section -->
     <section class="filter-section" id="budgetSection">
@@ -161,14 +398,13 @@ function timeAgo($datetime) {
       </div>
       <div class="filter-section-content">
           <div class="double-range" id="doubleRange1">
-    <input type="range" id="minRange1" min="0" max="5000" step="50" value="500" />
-    <input type="range" id="maxRange1" min="0" max="5000" step="50" value="4000" />
-    <div class="slider-track"></div>
+    <input type="range" id="minRange1" min="<?php echo $priceRange['min']; ?>" max="<?php echo $priceRange['max']; ?>" step="10000" value="<?php echo $minPrice > 0 ? $minPrice : $priceRange['min']; ?>" />
+    <input type="range" id="maxRange1" min="<?php echo $priceRange['min']; ?>" max="<?php echo $priceRange['max']; ?>" step="10000" value="<?php echo $maxPrice > 0 ? $maxPrice : $priceRange['max']; ?>" />
     <div class="slider-range" id="sliderRange1"></div>
   </div>
   <div class="range-labels" id="rangeLabels1">
-    <span id="minLabel1">500</span>
-    <span id="maxLabel1">4000</span>
+    <span id="minLabel1">₹<?php echo number_format($minPrice > 0 ? $minPrice : $priceRange['min']); ?></span>
+    <span id="maxLabel1">₹<?php echo number_format($maxPrice > 0 ? $maxPrice : $priceRange['max']); ?></span>
   </div>
 
 
@@ -183,11 +419,11 @@ function timeAgo($datetime) {
       </div>
       <div class="filter-section-content">
         <div class="tag-list" id="propertyTypeTags">
-          <div class="tag" data-filter="propertyType" data-value="Residential Apartment">Residential Apartment   <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="propertyType" data-value="Residential Land">Residential Land <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="propertyType" data-value="Incorporated House/Villa">Incorporated House/Villa <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="propertyType" data-value="Residential Lands">Residential Lands <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="propertyType" data-value="Independent/Duplex Floor">Independent/Duplex Floor <span class="add-icon">+</span></div>
+          <?php foreach ($categories as $category): ?>
+            <div class="tag" data-filter="propertyType" data-value="<?php echo htmlspecialchars($category['name']); ?>">
+              <?php echo htmlspecialchars($category['name']); ?> <span class="add-icon">+</span>
+            </div>
+          <?php endforeach; ?>
         </div>
       </div>
     </section>
@@ -200,9 +436,11 @@ function timeAgo($datetime) {
       </div>
       <div class="filter-section-content">
         <div class="tag-list bedroom-tags" id="bedroomTags">
-          <div class="tag" data-filter="bedrooms" data-value="1 RK/1 BHK"><span class="add-icon">+</span> 1 RK/1 BHK </div>
-          <div class="tag" data-filter="bedrooms" data-value="2 BHK"><span class="add-icon">+</span> 2 BHK </div>
-          <div class="tag" data-filter="bedrooms" data-value="3 BHK"><span class="add-icon">+</span> 3 BHK </div>
+          <?php foreach ($configurations as $config): ?>
+            <div class="tag" data-filter="bedrooms" data-value="<?php echo htmlspecialchars($config); ?>">
+              <span class="add-icon">+</span> <?php echo htmlspecialchars($config); ?>
+            </div>
+          <?php endforeach; ?>
         </div>
       </div>
     </section>
@@ -230,14 +468,14 @@ function timeAgo($datetime) {
       </div>
        <div class="filter-section-content">
           <div class="double-range" id="doubleRange2">
-    <input type="range" id="minRange2" min="0" max="5000" step="50" value="500" />
-    <input type="range" id="maxRange2" min="0" max="5000" step="50" value="4000" />
+    <input type="range" id="minRange2" min="<?php echo $areaRange['min']; ?>" max="<?php echo $areaRange['max']; ?>" step="50" value="<?php echo $minArea > 0 ? $minArea : $areaRange['min']; ?>" />
+    <input type="range" id="maxRange2" min="<?php echo $areaRange['min']; ?>" max="<?php echo $areaRange['max']; ?>" step="50" value="<?php echo $maxArea > 0 ? $maxArea : $areaRange['max']; ?>" />
     <div class="slider-track"></div>
     <div class="slider-range" id="sliderRange2"></div>
   </div>
   <div class="range-labels" id="rangeLabels2">
-    <span id="minLabel2">500</span>
-    <span id="maxLabel2">4000</span>
+    <span id="minLabel2"><?php echo number_format($minArea > 0 ? $minArea : $areaRange['min']); ?> sq.ft</span>
+    <span id="maxLabel2"><?php echo number_format($maxArea > 0 ? $maxArea : $areaRange['max']); ?> sq.ft</span>
   </div>
 
 
@@ -252,19 +490,31 @@ function timeAgo($datetime) {
       </div>
       <div class="filter-section-content">
         <div class="locality-list" id="localitiesList">
-          <label><input type="checkbox" data-filter="localities" value="Kadri" /> Kadri</label>
-          <label><input type="checkbox" data-filter="localities" value="Bejai" /> Bejai</label>
-          <label><input type="checkbox" data-filter="localities" value="Surathkal" /> Surathkal</label>
-          <label><input type="checkbox" data-filter="localities" value="Ujire" /> Ujire</label>
-          <label><input type="checkbox" data-filter="localities" value="Mangalore" /> Mangalore</label>
+          <?php 
+          $displayCount = 5; // Show first 5 localities
+          $totalLocalities = count($localities);
+          for ($i = 0; $i < min($displayCount, $totalLocalities); $i++): 
+            $locality = $localities[$i];
+          ?>
+            <label>
+              <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" /> 
+              <?php echo htmlspecialchars($locality['name']); ?>
+            </label>
+          <?php endfor; ?>
         </div>
-        <div class="more-localities" id="toggleMoreLocalities">+ More Localities</div>
-        <div class="locality-list" id="extraLocalities" style="display:none; margin-top: 12px;">
-          <label><input type="checkbox" data-filter="localities" value="Puttur" /> Puttur</label>
-          <label><input type="checkbox" data-filter="localities" value="Moodbidri" /> Moodbidri</label>
-          <label><input type="checkbox" data-filter="localities" value="Kankanady" /> Kankanady</label>
-          <label><input type="checkbox" data-filter="localities" value="Deralakatte" /> Deralakatte</label>
-        </div>
+        <?php if ($totalLocalities > $displayCount): ?>
+          <div class="more-localities" id="toggleMoreLocalities">+ More Localities</div>
+          <div class="locality-list" id="extraLocalities" style="display:none; margin-top: 12px;">
+            <?php for ($i = $displayCount; $i < $totalLocalities; $i++): 
+              $locality = $localities[$i];
+            ?>
+              <label>
+                <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" /> 
+                <?php echo htmlspecialchars($locality['name']); ?>
+              </label>
+            <?php endfor; ?>
+          </div>
+        <?php endif; ?>
       </div>
     </section>
   </aside>  
@@ -405,6 +655,231 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.add('active');
         });
     });
+
+    // Initialize filter functionality
+    initializeFilters();
+    
+    // Initialize dropdown interactions
+    initializeDropdowns();
+});
+
+// Filter functionality
+function initializeFilters() {
+    // Handle property type filter tags
+    const propertyTypeTags = document.querySelectorAll('[data-filter="propertyType"]');
+    propertyTypeTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            applyFilter('propertyType', value);
+        });
+    });
+
+    // Handle bedroom filter tags
+    const bedroomTags = document.querySelectorAll('[data-filter="bedrooms"]');
+    bedroomTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            applyFilter('bedrooms', value);
+        });
+    });
+
+    // Handle construction status filter tags
+    const constructionStatusTags = document.querySelectorAll('[data-filter="constructionStatus"]');
+    constructionStatusTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            const value = this.getAttribute('data-value');
+            applyFilter('constructionStatus', value);
+        });
+    });
+
+    // Handle locality checkboxes
+    const localityCheckboxes = document.querySelectorAll('[data-filter="localities"]');
+    localityCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const value = this.value;
+            if (this.checked) {
+                applyFilter('localities', value);
+            } else {
+                removeFilter('localities', value);
+            }
+        });
+    });
+
+    // Handle range sliders
+    initializeRangeSliders();
+}
+
+function applyFilter(filterType, value) {
+    const url = new URL(window.location);
+    url.searchParams.set(filterType, value);
+    window.location.href = url.toString();
+}
+
+function removeFilter(filterType, value) {
+    const url = new URL(window.location);
+    url.searchParams.delete(filterType);
+    window.location.href = url.toString();
+}
+
+function initializeRangeSliders() {
+    // Budget range slider
+    const minRange1 = document.getElementById('minRange1');
+    const maxRange1 = document.getElementById('maxRange1');
+    const minLabel1 = document.getElementById('minLabel1');
+    const maxLabel1 = document.getElementById('maxLabel1');
+
+    if (minRange1 && maxRange1) {
+        minRange1.addEventListener('input', function() {
+            if (parseInt(this.value) >= parseInt(maxRange1.value)) {
+                this.value = maxRange1.value;
+            }
+            minLabel1.textContent = '₹' + parseInt(this.value).toLocaleString();
+            applyRangeFilter('minPrice', this.value);
+        });
+
+        maxRange1.addEventListener('input', function() {
+            if (parseInt(this.value) <= parseInt(minRange1.value)) {
+                this.value = minRange1.value;
+            }
+            maxLabel1.textContent = '₹' + parseInt(this.value).toLocaleString();
+            applyRangeFilter('maxPrice', this.value);
+        });
+    }
+
+    // Area range slider
+    const minRange2 = document.getElementById('minRange2');
+    const maxRange2 = document.getElementById('maxRange2');
+    const minLabel2 = document.getElementById('minLabel2');
+    const maxLabel2 = document.getElementById('maxLabel2');
+
+    if (minRange2 && maxRange2) {
+        minRange2.addEventListener('input', function() {
+            if (parseInt(this.value) >= parseInt(maxRange2.value)) {
+                this.value = maxRange2.value;
+            }
+            minLabel2.textContent = parseInt(this.value).toLocaleString() + ' sq.ft';
+            applyRangeFilter('minArea', this.value);
+        });
+
+        maxRange2.addEventListener('input', function() {
+            if (parseInt(this.value) <= parseInt(minRange2.value)) {
+                this.value = minRange2.value;
+            }
+            maxLabel2.textContent = parseInt(this.value).toLocaleString() + ' sq.ft';
+            applyRangeFilter('maxArea', this.value);
+        });
+    }
+}
+
+function applyRangeFilter(filterType, value) {
+    const url = new URL(window.location);
+    url.searchParams.set(filterType, value);
+    window.location.href = url.toString();
+}
+
+// Initialize dropdown interactions
+function initializeDropdowns() {
+    // Handle filter section toggles
+    const filterHeaders = document.querySelectorAll('.filter-section-header');
+    filterHeaders.forEach(header => {
+        header.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-toggle-target');
+            const content = document.getElementById(targetId).querySelector('.filter-section-content');
+            const caret = this.querySelector('.caret');
+            
+            // Toggle content visibility
+            if (content.style.display === 'none' || content.style.display === '') {
+                content.style.display = 'block';
+                caret.style.transform = 'rotate(180deg)';
+                this.classList.add('active');
+            } else {
+                content.style.display = 'none';
+                caret.style.transform = 'rotate(0deg)';
+                this.classList.remove('active');
+            }
+        });
+    });
+    
+    // Handle "More Localities" toggle
+    const moreLocalitiesBtn = document.getElementById('toggleMoreLocalities');
+    const extraLocalities = document.getElementById('extraLocalities');
+    
+    if (moreLocalitiesBtn && extraLocalities) {
+        moreLocalitiesBtn.addEventListener('click', function() {
+            if (extraLocalities.style.display === 'none' || extraLocalities.style.display === '') {
+                extraLocalities.style.display = 'block';
+                this.textContent = '- Less Localities';
+            } else {
+                extraLocalities.style.display = 'none';
+                this.textContent = '+ More Localities';
+            }
+        });
+    }
+    
+    // Initialize mobile filter toggle
+    const filterToggleBtn = document.querySelector('.filter-toggle-btn');
+    const filterSidebar = document.getElementById('filterSidebar');
+    const filterCloseBtn = document.querySelector('.filter-close-btn');
+    const filterBackdrop = document.querySelector('.filter-backdrop');
+    
+    if (filterToggleBtn && filterSidebar) {
+        filterToggleBtn.addEventListener('click', function() {
+            filterSidebar.classList.add('show');
+            filterBackdrop.hidden = false;
+            document.body.style.overflow = 'hidden';
+        });
+    }
+    
+    if (filterCloseBtn && filterSidebar) {
+        filterCloseBtn.addEventListener('click', function() {
+            filterSidebar.classList.remove('show');
+            filterBackdrop.hidden = true;
+            document.body.style.overflow = '';
+        });
+    }
+    
+    if (filterBackdrop) {
+        filterBackdrop.addEventListener('click', function() {
+            filterSidebar.classList.remove('show');
+            filterBackdrop.hidden = true;
+            document.body.style.overflow = '';
+        });
+    }
+}
+
+function clearRangeFilter(type) {
+    const url = new URL(window.location);
+    if (type === 'price') {
+        url.searchParams.delete('minPrice');
+        url.searchParams.delete('maxPrice');
+    } else if (type === 'area') {
+        url.searchParams.delete('minArea');
+        url.searchParams.delete('maxArea');
+    }
+    window.location.href = url.toString();
+}
+
+function clearAllFilters() {
+    const url = new URL(window.location);
+    // Keep only essential parameters
+    const keepParams = ['category', 'city', 'featured'];
+    const newUrl = new URL(window.location.pathname, window.location.origin);
+    
+    keepParams.forEach(param => {
+        if (url.searchParams.has(param)) {
+            newUrl.searchParams.set(param, url.searchParams.get(param));
+        }
+    });
+    
+    window.location.href = newUrl.toString();
+}
+
+// Clear all button functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const clearAllBtn = document.getElementById('clearAllBtn');
+    if (clearAllBtn) {
+        clearAllBtn.addEventListener('click', clearAllFilters);
+    }
 });
 </script>
 </body>
