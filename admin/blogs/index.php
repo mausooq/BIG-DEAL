@@ -405,7 +405,8 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 						<div class="col-lg-2 col-md-3 col-sm-6 col-12" data-blog='<?php echo json_encode($row, JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>'>
 							<div class="blog-card">
 								<div class="blog-image-container">
-									<div class="blog-actions-fixed">
+								<div class="blog-actions-fixed">
+									<a href="#" class="modern-btn view-btn" title="View Blog"><span class="icon"><i class="fa-solid fa-eye"></i></span></a>
 										<a href="edit.php?id=<?php echo (int)$row['id']; ?>" class="modern-btn edit-btn" title="Edit Blog"><span class="icon"><i class="fa-solid fa-pen"></i></span></a>
 										<button class="modern-btn delete-btn btn-delete" data-bs-toggle="modal" data-bs-target="#deleteModal" title="Delete Blog"><span class="icon"><i class="fa-solid fa-trash"></i></span></button>
 									</div>
@@ -503,6 +504,32 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 	<script>
+		// Drawer elements
+		function openBlogDrawer(blog){
+			const drawer = document.getElementById('blogDrawer');
+			const backdrop = document.getElementById('blogDrawerBackdrop');
+			const body = document.getElementById('blogDrawerBody');
+			const titleEl = document.getElementById('blogDrawerTitle');
+			if (!drawer || !backdrop || !body || !titleEl) return;
+			titleEl.textContent = blog.title || 'Blog';
+			const imgSrc = (blog.image_url && !/^https?:\/\//i.test(blog.image_url)) ? ('../../uploads/blogs/' + blog.image_url) : (blog.image_url || '');
+			body.innerHTML = `
+				${imgSrc ? `<img src="${imgSrc}" alt="Cover" class="img-fluid mb-3" style=\"border-radius:12px; border:1px solid var(--line);\">` : ''}
+				<div class="text-muted small mb-2"><i class="fa-regular fa-calendar me-1"></i>${blog.created_at || ''}</div>
+				<div style="white-space:pre-wrap; line-height:1.6;">${(blog.content || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+				<div class=\"d-flex gap-2 mt-3\"> 
+					<a href=\"edit.php?id=${blog.id || ''}\" class=\"btn btn-primary btn-sm\" target=\"_blank\" rel=\"noopener\"> 
+						<i class=\"fa-solid fa-pen me-1\"></i>Edit 
+					</a> 
+				</div>
+			`;
+			drawer.classList.add('open');
+			backdrop.classList.add('open');
+		}
+		function closeBlogDrawer(){
+			document.getElementById('blogDrawer')?.classList.remove('open');
+			document.getElementById('blogDrawerBackdrop')?.classList.remove('open');
+		}
 		// Handle delete button clicks
 		document.addEventListener('DOMContentLoaded', function(){
 			// Ripple + click animation for modern buttons
@@ -530,6 +557,17 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 					const card = this.closest('[data-blog]');
 					const data = JSON.parse(card.getAttribute('data-blog'));
 					document.getElementById('delete_id').value = data.id;
+				});
+			});
+
+			// View drawer
+			document.querySelectorAll('.blog-card .view-btn').forEach(btn => {
+				btn.addEventListener('click', function(e){
+					e.preventDefault();
+					const wrap = this.closest('[data-blog]');
+					if (!wrap) return;
+					const data = JSON.parse(wrap.getAttribute('data-blog'));
+					openBlogDrawer(data);
 				});
 			});
 
@@ -563,3 +601,12 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 	</script>
 </body>
 </html>
+	<!-- Blog View Drawer -->
+	<div class="drawer" id="blogDrawer">
+		<div class="drawer-header">
+			<h6 class="mb-0" id="blogDrawerTitle">Blog</h6>
+			<button class="btn btn-sm btn-outline-secondary" onclick="closeBlogDrawer()">Close</button>
+		</div>
+		<div class="drawer-body" id="blogDrawerBody"></div>
+	</div>
+	<div class="drawer-backdrop" id="blogDrawerBackdrop" onclick="closeBlogDrawer()"></div>
