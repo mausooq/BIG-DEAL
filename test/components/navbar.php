@@ -16,7 +16,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse justify-content-end " id="navbarNav">
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav ms-auto" style="gap: 1.25rem;">
           <li class="nav-item">
             <a class="nav-link <?php echo strpos($current_full_path, '/products/') !== false && (($_GET['category'] ?? '') === 'Rent') ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>products/?category=Rent">For rent</a>
           </li>
