@@ -736,9 +736,7 @@ try {
                         </div>
                         <button class="btn btn-primary ms-2" type="submit">Search</button>
                         <a class="btn btn-outline-secondary ms-2" href="index.php">Reset</a>
-                        <button class="btn btn-outline-info ms-2" type="button" onclick="exportCategories()">
-                            <i class="fas fa-download me-1"></i>Export
-                        </button>
+                        
                     </form>
                     <a href="add.php" class="btn-animated-add noselect btn-sm">
                         <span class="text">Add Category</span>
@@ -1000,32 +998,7 @@ try {
             location.reload();
         }
 
-        // Export categories function
-        function exportCategories() {
-            const table = document.getElementById('categoriesTable');
-            if (!table) return;
-            
-            let csv = 'ID,Category Name,Properties,Created Date\n';
-            const rows = table.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const id = cells[0].textContent.replace('#', '');
-                const name = cells[1].textContent.trim();
-                const properties = cells[2].textContent.trim();
-                const createdDate = cells[3].textContent.trim();
-                
-                csv += `"${id}","${name}","${properties}","${createdDate}"\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'categories_export.csv';
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
+        
 
         // Clear search function (now redirects to reset URL)
         function clearSearch() {

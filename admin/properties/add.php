@@ -53,11 +53,9 @@ function _get_form_value($key) { return $_SESSION['form_data'][$key] ?? ''; }
 
 function validate_step_1(&$msg) {
     $title = trim(_get_form_value('title'));
-    $location = trim(_get_form_value('location'));
     $price = _get_form_value('price');
     $area = _get_form_value('area');
     if ($title === '') { $msg = 'Please enter Title.'; return false; }
-    if ($location === '') { $msg = 'Please enter Location.'; return false; }
     if ($price === '' || !is_numeric($price) || (float)$price <= 0) { $msg = 'Please enter a valid Price.'; return false; }
     if ($area === '' || !is_numeric($area) || (float)$area <= 0) { $msg = 'Please enter a valid Area.'; return false; }
     return true;
@@ -155,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $description = trim($_SESSION['form_data']['description'] ?? '');
             $listing_type = $_SESSION['form_data']['listing_type'] ?? 'Buy';
             $price = $_SESSION['form_data']['price'] !== '' ? (float)$_SESSION['form_data']['price'] : null;
-            $location = trim($_SESSION['form_data']['location'] ?? '');
+            $location = '';
             $landmark = trim($_SESSION['form_data']['landmark'] ?? '');
             $area = $_SESSION['form_data']['area'] !== '' ? (float)$_SESSION['form_data']['area'] : null;
             $configuration = trim($_SESSION['form_data']['configuration'] ?? '');
@@ -169,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $map_embed_link = trim($_SESSION['form_data']['map_embed_link'] ?? '');
 
         // Validation
-            if ($title === '' || $location === '' || $price === null || $price <= 0 || $area === null || $area <= 0) {
+            if ($title === '' || $price === null || $price <= 0 || $area === null || $area <= 0) {
                 throw new Exception('Please complete required fields before finishing.');
             }
 
@@ -857,10 +855,7 @@ function get_data($field) {
                     <label for="area">Area (sq ft)</label>
                     <input type="number" step="0.01" id="area" name="area" value="<?php echo get_data('area'); ?>" placeholder="0">
                                     </div>
-                <div class="form-group">
-                    <label for="location">Location</label>
-                    <input type="text" id="location" name="location" value="<?php echo get_data('location'); ?>" placeholder="City, Area, Locality">
-                                    </div>
+            
                 <div class="form-group">
                     <label for="landmark">Landmark</label>
                     <input type="text" id="landmark" name="landmark" value="<?php echo get_data('landmark'); ?>" placeholder="Nearby landmark or reference point">

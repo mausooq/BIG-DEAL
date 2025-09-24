@@ -45,8 +45,16 @@
 /* When visible, ensure proper centering in all browsers */
 .page-loader-overlay[style*="display: grid"],
 .page-loader-overlay.is-visible{
+    /* Prefer grid centering when visible */
     display: grid !important;
     place-items: center;
+}
+
+/* Fallback: if JS sets display:block inline (some deployments), center with flex */
+.page-loader-overlay[style*="display: block"]{
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
 }
 
 

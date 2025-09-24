@@ -86,7 +86,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = trim($_POST['description'] ?? '');
         $listing_type = $_POST['listing_type'] ?? 'Buy';
         $price = $_POST['price'] !== '' ? (float)$_POST['price'] : null;
-        $location = trim($_POST['location'] ?? '');
+        // Free-text location removed; keep existing DB value if not provided
+        $location = isset($_POST['location']) ? trim($_POST['location']) : ($property['location'] ?? '');
         $landmark = trim($_POST['landmark'] ?? '');
         $area = $_POST['area'] !== '' ? (float)$_POST['area'] : null;
         $configuration = trim($_POST['configuration'] ?? '');
@@ -101,7 +102,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Validation
         if ($title === '') { throw new Exception('Title is required'); }
-        if ($location === '') { throw new Exception('Location is required'); }
         if ($price === null || $price <= 0) { throw new Exception('Valid price is required'); }
         if ($area === null || $area <= 0) { throw new Exception('Valid area is required'); }
 
@@ -411,10 +411,7 @@ $pl_stmt && $pl_stmt->close();
                                 <label>Area (sq ft)<span style="color:#dc2626"> *</span></label>
                                 <input type="number" step="0.01" name="area" required value="<?php echo htmlspecialchars($property['area'] ?? ''); ?>" placeholder="0">
                             </div>
-                            <div>
-                                <label>Location<span style="color:#dc2626"> *</span></label>
-                                <input type="text" name="location" required value="<?php echo htmlspecialchars($property['location'] ?? ''); ?>" placeholder="City, Area, Locality">
-                            </div>
+                            
                             <div>
                                 <label>Landmark</label>
                                 <input type="text" name="landmark" value="<?php echo htmlspecialchars($property['landmark'] ?? ''); ?>" placeholder="Nearby landmark or reference point">
@@ -865,6 +862,50 @@ $pl_stmt && $pl_stmt->close();
         imageInput.addEventListener('change', onFilesSelected, { passive: true });
         imageInput.addEventListener('input', onFilesSelected, { passive: true });
 
+        function getFileKey(file){ return [file.name || '', file.size || 0, file.lastModified || 0].join('|'); }
+
+        function enableNewImagesSorting(){
+            const container = document.getElementById('imagePreview');
+            if (!container) return;
+            let dragSrc = null;
+            function handleDragStart(e){ dragSrc = this; this.style.opacity = '0.6'; try { e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain',''); } catch{} }
+            function handleDragOver(e){ if (e.preventDefault) e.preventDefault(); return false; }
+            function handleDragEnter(){ this.classList.add('over'); }
+            function handleDragLeave(){ this.classList.remove('over'); }
+            function handleDrop(e){ if (e.stopPropagation) e.stopPropagation(); if (dragSrc && dragSrc !== this){ const nodes = Array.from(container.children); const srcIndex = nodes.indexOf(dragSrc); const tgtIndex = nodes.indexOf(this); if (srcIndex > -1 && tgtIndex > -1){ if (srcIndex < tgtIndex) { container.insertBefore(dragSrc, this.nextSibling); } else { container.insertBefore(dragSrc, this); } reorderSelectedFilesToMatchDOM(); } } return false; }
+            function handleDragEnd(){ this.style.opacity = '1'; Array.from(container.children).forEach(el=> el.classList.remove('over')); }
+            Array.from(container.querySelectorAll('.image-preview-container')).forEach(el=>{
+                el.setAttribute('draggable','true');
+                el.removeEventListener('dragstart', handleDragStart, false);
+                el.removeEventListener('dragenter', handleDragEnter, false);
+                el.removeEventListener('dragover', handleDragOver, false);
+                el.removeEventListener('dragleave', handleDragLeave, false);
+                el.removeEventListener('drop', handleDrop, false);
+                el.removeEventListener('dragend', handleDragEnd, false);
+                el.addEventListener('dragstart', handleDragStart, false);
+                el.addEventListener('dragenter', handleDragEnter, false);
+                el.addEventListener('dragover', handleDragOver, false);
+                el.addEventListener('dragleave', handleDragLeave, false);
+                el.addEventListener('drop', handleDrop, false);
+                el.addEventListener('dragend', handleDragEnd, false);
+            });
+        }
+
+        function reorderSelectedFilesToMatchDOM(){
+            const container = document.getElementById('imagePreview');
+            if (!container) return;
+            const orderKeys = Array.from(container.querySelectorAll('.image-preview-container')).map(el=> el.dataset.key).filter(Boolean);
+            if (orderKeys.length === 0) return;
+            const map = new Map(selectedFiles.map(f=>[getFileKey(f), f]));
+            const newOrder = [];
+            orderKeys.forEach(k=>{ const f = map.get(k); if (f) newOrder.push(f); });
+            // Append any files that might not be in DOM (shouldn't happen, but safe)
+            selectedFiles.forEach(f=>{ const k = getFileKey(f); if (!orderKeys.includes(k)) newOrder.push(f); });
+            selectedFiles = newOrder;
+            updateFileInput();
+            updateImageInfo();
+        }
+
         function handleFiles(files) {
             showPageLoader();
             const maxSize = 10 * 1024 * 1024; // 10MB per image
@@ -897,6 +938,7 @@ $pl_stmt && $pl_stmt->close();
                 reader.onload = (e) => {
                     const previewContainer = document.createElement('div');
                     previewContainer.className = 'image-preview-container';
+                    previewContainer.dataset.key = getFileKey(file);
 
                     const img = document.createElement('img');
                     img.src = e.target.result;
@@ -911,6 +953,7 @@ $pl_stmt && $pl_stmt->close();
                     previewContainer.appendChild(img);
                     previewContainer.appendChild(removeBtn);
                     imagePreview.appendChild(previewContainer);
+                    enableNewImagesSorting();
                 };
                 reader.readAsDataURL(file);
             });
@@ -927,6 +970,7 @@ $pl_stmt && $pl_stmt->close();
                     reader.onload = (e) => {
                         const previewContainer = document.createElement('div');
                         previewContainer.className = 'image-preview-container';
+                        previewContainer.dataset.key = getFileKey(file);
                         const img = document.createElement('img');
                         img.src = e.target.result;
                         img.title = file.name;
@@ -938,6 +982,7 @@ $pl_stmt && $pl_stmt->close();
                         previewContainer.appendChild(img);
                         previewContainer.appendChild(removeBtn);
                         imagePreview.appendChild(previewContainer);
+                        enableNewImagesSorting();
                     };
                     reader.readAsDataURL(file);
                 });
@@ -952,6 +997,7 @@ $pl_stmt && $pl_stmt->close();
             updateFileInput();
             updateImageInfo();
             hidePageLoader();
+            enableNewImagesSorting();
         }
 
         function removeImage(container, file) {

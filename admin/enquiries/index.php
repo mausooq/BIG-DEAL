@@ -212,7 +212,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                     }
                     $exportUrl = 'export.php' . (!empty($exportParams) ? '?' . http_build_query($exportParams) : '');
                     ?>
-                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2">
+                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2" target="_blank" rel="noopener">
                         <i class="fa-solid fa-download me-1"></i>Export
                     </a>
                 </div>
@@ -431,6 +431,13 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
                 url.search = params.toString();
                 window.location.href = url.toString();
             });
+        });
+        // Hide any page loader overlay if Export is clicked (download opens new tab)
+        document.addEventListener('click', function(e){
+            const exportLink = e.target.closest('a[href$="export.php"], a[href*="export.php?"]');
+            if (exportLink) {
+                try { document.getElementById('pageLoader')?.classList.remove('is-visible'); } catch {}
+            }
         });
         document.querySelectorAll('.btn-view-enquiry').forEach(function(btn){
             btn.addEventListener('click', function(){

@@ -351,11 +351,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		`;
 		document.head.appendChild(style);
 
-		// Close button and outside click navigates back
+		// Close button and outside click navigates back (overlay-only to avoid accidental closes)
 		document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
-		document.addEventListener('click', function(e){
-			const modal = document.querySelector('.modal-container');
-			if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
+		const overlay = document.querySelector('.modal-overlay');
+		overlay?.addEventListener('click', function(e){
+			if (e.target === overlay) { window.location.href = 'index.php'; }
 		});
 	</script>
 </body>

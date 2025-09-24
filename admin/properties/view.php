@@ -178,18 +178,27 @@ $is_featured = $featureRow ? true : false;
                 <div class="col-lg-8">
                     <?php if (!empty($property_images)): ?>
                     <div class="hero">
-                        <?php $firstImage = $property_images[0]['image_url'] ?? null; ?>
+                        <?php 
+                            $firstImage = $property_images[0]['image_url'] ?? null; 
+                            $totalImages = count($property_images);
+                            $visibleThumbs = 5; // show first 5; rest are behind a +N more tile
+                        ?>
                         <img src="../../uploads/properties/<?php echo htmlspecialchars(basename($firstImage)); ?>" alt="Property Image" id="heroMainImage" class="hero-main" loading="lazy">
-                        <div class="thumbs">
-                            <?php foreach ($property_images as $index => $image): ?>
+                        <div class="thumbs" id="thumbsContainer">
+                            <?php for ($i = 0; $i < min($totalImages, $visibleThumbs); $i++): $image = $property_images[$i]; ?>
                                 <img 
                                     src="../../uploads/properties/<?php echo htmlspecialchars(basename($image['image_url'])); ?>" 
-                                    alt="Thumb <?php echo $index+1; ?>" 
-                                    class="thumb <?php echo $index === 0 ? 'active' : ''; ?>" 
+                                    alt="Thumb <?php echo $i+1; ?>" 
+                                    class="thumb <?php echo $i === 0 ? 'active' : ''; ?>" 
                                     data-image-url="<?php echo htmlspecialchars(basename($image['image_url'])); ?>"
                                     loading="lazy"
                                 >
-                            <?php endforeach; ?>
+                            <?php endfor; ?>
+                            <?php if ($totalImages > $visibleThumbs): $remaining = $totalImages - $visibleThumbs; ?>
+                                <div class="thumb" id="moreThumbTile" style="display:flex;align-items:center;justify-content:center;background:#f3f4f6;border:1px dashed #d1d5db;color:#374151;font-weight:600;">
+                                    +<?php echo (int)$remaining; ?> more
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>
@@ -395,19 +404,65 @@ $is_featured = $featureRow ? true : false;
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Hero thumbnails swap main image
+        // Hero thumbnails swap main image + "+N more" behavior
         document.addEventListener('DOMContentLoaded', function() {
             const hero = document.getElementById('heroMainImage');
-            if (!hero) return;
-            document.querySelectorAll('.thumb').forEach(t => {
-                t.addEventListener('click', function(){
+            const thumbsContainer = document.getElementById('thumbsContainer');
+            if (!hero || !thumbsContainer) return;
+
+            // Prepare arrays of all image filenames from PHP side
+            const allImages = <?php echo json_encode(array_map(function($im){ return basename($im['image_url']); }, $property_images)); ?>;
+            const visibleLimit = 5;
+            let visibleCount = Math.min(allImages.length, visibleLimit);
+
+            function wireThumb(el){
+                if (!el) return;
+                el.addEventListener('click', function(){
                     const url = this.getAttribute('data-image-url');
                     if (!url) return;
                     hero.src = `../../uploads/properties/${url}`;
-                    document.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
+                    thumbsContainer.querySelectorAll('.thumb').forEach(x => x.classList.remove('active'));
                     this.classList.add('active');
                 });
-            });
+            }
+
+            thumbsContainer.querySelectorAll('.thumb[data-image-url]').forEach(wireThumb);
+
+            const moreTile = document.getElementById('moreThumbTile');
+            function updateMoreTile(){
+                const remaining = allImages.length - visibleCount;
+                if (moreTile) {
+                    if (remaining > 0) {
+                        moreTile.style.display = '';
+                        moreTile.textContent = `+${remaining} more`;
+                    } else {
+                        moreTile.style.display = 'none';
+                    }
+                }
+            }
+
+            if (moreTile) {
+                moreTile.addEventListener('click', function(){
+                    const remaining = allImages.length - visibleCount;
+                    if (remaining <= 0) return;
+                    // Insert ALL remaining hidden images in place of the more tile
+                    for (let idx = visibleCount; idx < allImages.length; idx++) {
+                        const file = allImages[idx];
+                        const img = document.createElement('img');
+                        img.src = `../../uploads/properties/${file}`;
+                        img.alt = `Thumb ${idx+1}`;
+                        img.className = 'thumb';
+                        img.setAttribute('data-image-url', file);
+                        img.loading = 'lazy';
+                        thumbsContainer.insertBefore(img, moreTile);
+                        wireThumb(img);
+                    }
+                    visibleCount = allImages.length;
+                    // Hide/remove the more tile permanently (no "Less" feature)
+                    moreTile.remove();
+                });
+                updateMoreTile();
+            }
         });
     </script>
 </body>

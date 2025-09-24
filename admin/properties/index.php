@@ -90,7 +90,11 @@ $offset = ($page - 1) * $perPage;
 
 // Total count for pagination
 $countSql = "SELECT COUNT(*)
-            FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
+            FROM properties p 
+            LEFT JOIN categories c ON c.id = p.category_id
+            LEFT JOIN properties_location pl ON pl.property_id = p.id
+            LEFT JOIN cities ci ON ci.id = pl.city_id
+            LEFT JOIN towns tw ON tw.id = pl.town_id";
 if (!empty($where)) { $countSql .= ' WHERE ' . implode(' AND ', $where); }
 $countStmt = $mysqli->prepare($countSql);
 if ($countStmt && $types !== '') { $countStmt->bind_param($types, ...$params); }
@@ -106,10 +110,15 @@ $totalPages = max(1, (int)ceil($totalRows / $perPage));
 if ($page > $totalPages) { $page = $totalPages; $offset = ($page - 1) * $perPage; }
 
 // Data query with pagination
-$sql = "SELECT p.id, p.title, p.price, p.location, p.landmark, p.area, p.configuration, p.listing_type, p.status, p.category_id,
+$sql = "SELECT p.id, p.title, p.price, p.landmark, p.area, p.configuration, p.listing_type, p.status, p.category_id,
                 DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at,
-                c.name AS category_name
-         FROM properties p LEFT JOIN categories c ON c.id = p.category_id";
+                c.name AS category_name,
+                COALESCE(NULLIF(CONCAT_WS(', ', ci.name, tw.name, pl.pincode), ''), '') AS structured_location
+         FROM properties p 
+         LEFT JOIN categories c ON c.id = p.category_id
+         LEFT JOIN properties_location pl ON pl.property_id = p.id
+         LEFT JOIN cities ci ON ci.id = pl.city_id
+         LEFT JOIN towns tw ON tw.id = pl.town_id";
 if (!empty($where)) { $sql .= ' WHERE ' . implode(' AND ', $where); }
 $sql .= ' ORDER BY p.created_at DESC LIMIT ?, ?';
 
@@ -120,7 +129,7 @@ $bindParams[] = $offset;
 $bindParams[] = $perPage;
 if ($stmt) { $stmt->bind_param($bindTypes, ...$bindParams); }
 $stmt && $stmt->execute();
-$properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title, p.price, p.location, p.landmark, p.area, p.configuration, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 10 OFFSET 0");
+$properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title, p.price, p.landmark, p.area, p.configuration, p.listing_type, p.status, DATE_FORMAT(p.created_at,'%b %d, %Y') as created_at, NULL AS category_name FROM properties p ORDER BY p.created_at DESC LIMIT 10 OFFSET 0");
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -606,7 +615,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                     }
                     $exportUrl = 'export.php' . (!empty($exportParams) ? '?' . http_build_query($exportParams) : '');
                     ?>
-                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2">
+                    <a href="<?php echo $exportUrl; ?>" class="btn btn-outline-success me-2" target="_blank" rel="noopener">
                         <i class="fa-solid fa-download me-1"></i>Export
                     </a>
                     <a href="add.php" class="btn-animated-add noselect">
@@ -662,7 +671,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     data-category-id="<?php echo (int)($row['category_id'] ?? 0); ?>"
                                     data-listing="<?php echo htmlspecialchars($row['listing_type'], ENT_QUOTES); ?>"
                                     data-price="<?php echo htmlspecialchars((string)$row['price'], ENT_QUOTES); ?>"
-                                    data-location="<?php echo htmlspecialchars($row['location'], ENT_QUOTES); ?>"
+                                    data-location="<?php echo htmlspecialchars($row['structured_location'] ?? '', ENT_QUOTES); ?>"
                                     data-area="<?php echo htmlspecialchars((string)$row['area'], ENT_QUOTES); ?>"
                                     data-config="<?php echo htmlspecialchars($row['configuration'], ENT_QUOTES); ?>"
                                     data-status="<?php echo htmlspecialchars($row['status'], ENT_QUOTES); ?>"
@@ -679,7 +688,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                     </td>
                                     <td><span class="badge badge-soft"><?php echo htmlspecialchars($row['listing_type']); ?></span></td>
                                     <td>₹<?php echo number_format((float)$row['price']); ?></td>
-                                    <td class="text-muted"><?php echo htmlspecialchars($row['location']); ?></td>
+                                    <td class="text-muted"><?php echo htmlspecialchars($row['structured_location'] ?: '—'); ?></td>
                                     <td>
                                         <?php if ($row['status']==='Available'): ?>
                                             <span class="badge bg-success-subtle text-success border">Available</span>
@@ -921,7 +930,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                               id="mainImage"
                               loading="lazy">
                          ${images.length > 1 ? `
-                             <div class="drawer-image-gallery">
+                             <div class="drawer-image-gallery" id="gallery-${property.id}">
                                  ${images.slice(0, 4).map((img, index) => `
                                      <img src="../../uploads/properties/${img.image_url.split('/').pop()}" 
                                           alt="Property Image ${index + 1}" 
@@ -932,8 +941,10 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                  `).join('')}
                                  ${images.length > 4 ? `
                                      <div class="drawer-image-thumb more-images-btn" 
+                                          id="more-tile-${property.id}"
+                                          data-prop-id="${property.id}"
                                           data-total="${images.length}" 
-                                          data-remaining="${images.length - 4}"
+                                          data-visible="4"
                                           onclick="showMoreImages(${property.id})">
                                          <div class="more-images-content">
                                              <i class="fa-solid fa-plus"></i>
@@ -942,18 +953,7 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                                      </div>
                                  ` : ''}
                              </div>
-                             ${images.length > 4 ? `
-                                 <div class="drawer-image-gallery remaining-images" id="remaining-images-${property.id}" style="display: none;">
-                                     ${images.slice(4).map((img, index) => `
-                                         <img src="../../uploads/properties/${img.image_url.split('/').pop()}" 
-                                              alt="Property Image ${index + 5}" 
-                                              class="drawer-image-thumb" 
-                                              data-image-url="${img.image_url.split('/').pop()}"
-                                              data-index="${index + 4}"
-                                              loading="lazy">
-                                     `).join('')}
-                                 </div>
-                             ` : ''}
+ 
                          ` : ''}
                      </div>
                      <div class="divider"></div>
@@ -1163,31 +1163,41 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
              }
          }
 
-         // Function to show more images
+         // Progressive "+more" reveal: add one hidden image each click, no Less
          function showMoreImages(propertyId) {
-             const remainingImagesDiv = document.getElementById(`remaining-images-${propertyId}`);
-             const moreBtn = document.querySelector(`[data-total][onclick="showMoreImages(${propertyId})"]`);
-             
-             if (remainingImagesDiv && moreBtn) {
-                 if (remainingImagesDiv.style.display === 'none') {
-                     remainingImagesDiv.style.display = 'flex';
-                     moreBtn.innerHTML = '<div class="more-images-content"><i class="fa-solid fa-minus"></i><span class="more-count">Less</span></div>';
-                     moreBtn.setAttribute('onclick', `hideMoreImages(${propertyId})`);
-                 }
-             }
-         }
+             try {
+                 const gallery = document.getElementById(`gallery-${propertyId}`);
+                 const moreTile = document.getElementById(`more-tile-${propertyId}`);
+                 if (!gallery || !moreTile) return;
+                 const total = parseInt(moreTile.getAttribute('data-total') || '0', 10);
+                 let visible = parseInt(moreTile.getAttribute('data-visible') || '0', 10);
+                 if (visible >= total) { moreTile.remove(); return; }
 
-         // Function to hide more images
-         function hideMoreImages(propertyId) {
-             const remainingImagesDiv = document.getElementById(`remaining-images-${propertyId}`);
-             const moreBtn = document.querySelector(`[data-total][onclick="hideMoreImages(${propertyId})"]`);
-             
-             if (remainingImagesDiv && moreBtn) {
-                 remainingImagesDiv.style.display = 'none';
-                 const remainingCount = moreBtn.getAttribute('data-remaining');
-                 moreBtn.innerHTML = `<div class="more-images-content"><i class="fa-solid fa-plus"></i><span class="more-count">+${remainingCount}</span></div>`;
-                 moreBtn.setAttribute('onclick', `showMoreImages(${propertyId})`);
-             }
+                 const data = drawerCache.get(propertyId);
+                 const images = (data && data.images) ? data.images : [];
+                 if (!images || images.length <= visible) { moreTile.remove(); return; }
+
+                 for (let i = visible; i < total; i++) {
+                     const file = (images[i].image_url || '').split('/').pop();
+                     const img = document.createElement('img');
+                     img.src = `../../uploads/properties/${file}`;
+                     img.alt = `Property Image ${i + 1}`;
+                     img.className = 'drawer-image-thumb';
+                     img.setAttribute('data-image-url', file);
+                     img.setAttribute('data-index', String(i));
+                     img.loading = 'lazy';
+                     gallery.insertBefore(img, moreTile);
+                     img.addEventListener('click', function(){
+                         const mainImage = document.getElementById('mainImage');
+                         if (mainImage) {
+                             mainImage.src = `../../uploads/properties/${file}`;
+                             document.querySelectorAll('.drawer-image-thumb').forEach(t => t.classList.remove('active'));
+                             img.classList.add('active');
+                         }
+                     }, { passive: true });
+                 }
+                 moreTile.remove();
+             } catch {}
          }
 
 
@@ -1203,7 +1213,13 @@ $properties = $stmt ? $stmt->get_result() : $mysqli->query("SELECT p.id, p.title
                 }
                 return;
             }
-            
+            // Hide page loader if Export link is clicked (download opens in new tab)
+            const exportLink = event.target.closest('a[href$="export.php"], a[href*="export.php?"]');
+            if (exportLink) {
+                try { document.getElementById('pageLoader')?.classList.remove('is-visible'); } catch {}
+                return; // allow default navigation in new tab
+            }
+ 
              // Handle image thumbnail clicks
              const thumb = event.target.closest('.drawer-image-thumb');
              if (thumb && !thumb.classList.contains('more-images-btn')) {
