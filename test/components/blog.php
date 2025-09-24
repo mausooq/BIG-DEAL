@@ -151,10 +151,17 @@
     } catch (Throwable $e) { /* silent in UI */ }
   }
 
+  // Derive site paths so returned URLs work from any depth using the provided $asset_path from parent page
+  if (!isset($asset_path)) { $asset_path = 'assets/'; }
+  $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
+  $dotdotCount = substr_count($asset_path, '../');
+  $uploads_prefix = str_repeat('../', $dotdotCount + 1);
+
   // Helper to resolve image path; prefer uploads/blogs when a filename only is stored
   function resolveBlogImageSrc($raw) {
+    global $asset_path, $site_base_path, $uploads_prefix;
     $raw = trim((string)($raw ?? ''));
-    if ($raw === '') { return 'assets/images/prop/bhouse3.png'; }
+    if ($raw === '') { return $asset_path . 'images/prop/bhouse3.png'; }
     $isAbs = (stripos($raw, 'http://') === 0) || (stripos($raw, 'https://') === 0) || (strpos($raw, '/') === 0);
     if ($isAbs) { return $raw; }
     $name = basename($raw);
@@ -168,9 +175,12 @@
     ];
     foreach ($projCandidates as $abs) {
       if (file_exists($abs)) {
-        // Return path relative to /test/ pages
+        // Return URL to project uploads from current page depth
+        if (strpos($abs, $projectRoot . '/uploads/blogs/') === 0) {
+          return $uploads_prefix . 'uploads/blogs/' . $name;
+        }
         if (strpos($abs, $projectRoot . '/uploads/') === 0) {
-          return '../' . ltrim(str_replace($projectRoot . '/', '', $abs), '/');
+          return $uploads_prefix . 'uploads/' . $name;
         }
       }
     }
@@ -181,11 +191,11 @@
     ];
     foreach ($testCandidates as $abs) {
       if (file_exists($abs)) {
-        return 'assets/images/prop/' . $name;
+        return $asset_path . 'images/prop/' . $name;
       }
     }
 
-    return 'assets/images/prop/bhouse3.png';
+    return $asset_path . 'images/prop/bhouse3.png';
   }
 
   $b0 = $blogs[0] ?? null;
@@ -199,7 +209,7 @@
     <h2>Explore our latest blogs for<br>real estate insights</h2>
     <button class="view-all-btn">View all <span>→</span></button>
   </div>
-  <div class="blog-feature">
+  <div class="blog-feature" <?php if ($b0) { echo 'onclick="goToBlog(' . (int)$b0['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
     <div class="blog-image">
       <img src="<?php echo htmlspecialchars($b0 ? resolveBlogImageSrc($b0['image_url']) : 'assets/images/prop/bhouse3.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Blogimage1">
     </div>
@@ -218,7 +228,7 @@
         ?>
       </p>
       <div class="blog-author">
-        <img src="assets/images/avatar/test1.png" class="author-img" alt="Admin">
+        <img src="<?php echo htmlspecialchars($asset_path . 'images/avatar/test1.png', ENT_QUOTES, 'UTF-8'); ?>" class="author-img" alt="Admin">
         <div>
           <span class="author-name">Admin</span><br>
           <span class="author-role">Software Dev</span>
@@ -227,21 +237,27 @@
     </div>
   </div>
 <div class="d-flex blog2">
-  <div class="blog-panel">
-    <img src="<?php echo htmlspecialchars($b1 ? resolveBlogImageSrc($b1['image_url']) : 'assets/images/prop/bhouse4.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Living Room">
+  <div class="blog-panel" <?php if ($b1) { echo 'onclick="goToBlog(' . (int)$b1['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
+    <img src="<?php echo htmlspecialchars($b1 ? resolveBlogImageSrc($b1['image_url']) : ($asset_path . 'images/prop/bhouse4.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Living Room">
     <div class="caption"><?php echo htmlspecialchars($b1['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
     <div class="date"><?php echo htmlspecialchars(isset($b1['created_at']) ? date('F j, Y', strtotime($b1['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
-  <div class="blog-panel">
-    <img src="<?php echo htmlspecialchars($b2 ? resolveBlogImageSrc($b2['image_url']) : 'assets/images/prop/bhouse5.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Modern TV Unit">
+  <div class="blog-panel" <?php if ($b2) { echo 'onclick="goToBlog(' . (int)$b2['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
+    <img src="<?php echo htmlspecialchars($b2 ? resolveBlogImageSrc($b2['image_url']) : ($asset_path . 'images/prop/bhouse5.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Modern TV Unit">
     <div class="caption"><?php echo htmlspecialchars($b2['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
     <div class="date"><?php echo htmlspecialchars(isset($b2['created_at']) ? date('F j, Y', strtotime($b2['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
-  <div class="blog-panel">
-    <img src="<?php echo htmlspecialchars($b3 ? resolveBlogImageSrc($b3['image_url']) : 'assets/images/prop/bhouse6.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Contemporary Kitchen">
+  <div class="blog-panel" <?php if ($b3) { echo 'onclick="goToBlog(' . (int)$b3['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
+    <img src="<?php echo htmlspecialchars($b3 ? resolveBlogImageSrc($b3['image_url']) : ($asset_path . 'images/prop/bhouse6.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Contemporary Kitchen">
     <div class="caption"><?php echo htmlspecialchars($b3['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
     <div class="date"><?php echo htmlspecialchars(isset($b3['created_at']) ? date('F j, Y', strtotime($b3['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
   </div>
 
 </section>
+<script>
+function goToBlog(id){
+  if(!id) return;
+  window.location.href = '<?php echo $site_base_path; ?>blog/blog-details.php?id=' + id;
+}
+</script>
