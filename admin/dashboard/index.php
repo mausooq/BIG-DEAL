@@ -751,7 +751,7 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 								 id="mainImage"
 								 loading="lazy">
 							${images.length > 1 ? `
-								<div class="drawer-image-gallery">
+								<div class="drawer-image-gallery" id="gallery-${data.id}">
 									${images.slice(0, 4).map((img, index) => `
 										<img src="../../uploads/properties/${img.image_url}" 
 											 alt="Property Image ${index + 1}" 
@@ -762,8 +762,9 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 									`).join('')}
 									${images.length > 4 ? `
 										<div class="drawer-image-thumb more-images-btn" 
+											 id="more-tile-${data.id}"
 											 data-total="${images.length}" 
-											 data-remaining="${images.length - 4}">
+											 data-visible="4">
 											<div class="more-images-content">
 												<i class="fa-solid fa-plus"></i>
 												<span class="more-count">+${images.length - 4}</span>
@@ -771,18 +772,6 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 										</div>
 									` : ''}
 								</div>
-								${images.length > 4 ? `
-									<div class="drawer-image-gallery remaining-images" id="remaining-images-${data.id}" style="display: none;">
-										${images.slice(4).map((img, index) => `
-											<img src="../../uploads/properties/${img.image_url}" 
-												 alt="Property Image ${index + 5}" 
-												 class="drawer-image-thumb" 
-												 data-image-url="${img.image_url}"
-												 data-index="${index + 4}"
-												 loading="lazy">
-										`).join('')}
-									</div>
-								` : ''}
 							` : ''}
 						</div>
 						<div class="divider"></div>
@@ -919,21 +908,35 @@ $pillCategories = $mysqli->query("SELECT id, name FROM categories ORDER BY name 
 						});
 					});
 
-					// Toggle remaining gallery block
-					const moreBtn = document.querySelector('.drawer-image-thumb.more-images-btn');
-					if (moreBtn) {
-						moreBtn.addEventListener('click', function(e){
+					// Reveal remaining images on plus and remove the tile (no Less)
+					const moreTile = document.getElementById(`more-tile-${data.id}`);
+					if (moreTile) {
+						moreTile.addEventListener('click', function(e){
 							e.preventDefault();
-							const remainingDiv = document.getElementById(`remaining-images-${data.id}`);
-							if (!remainingDiv) return;
-							if (remainingDiv.style.display === 'none') {
-								remainingDiv.style.display = 'flex';
-								this.querySelector('.more-images-content').innerHTML = '<i class="fa-solid fa-minus"></i><span class="more-count">Less</span>';
-							} else {
-								remainingDiv.style.display = 'none';
-								const remaining = Math.max(0, (images.length - 4));
-								this.querySelector('.more-images-content').innerHTML = `<i class="fa-solid fa-plus"></i><span class="more-count">+${remaining}</span>`;
+							const gallery = document.getElementById(`gallery-${data.id}`);
+							const total = parseInt(this.getAttribute('data-total') || '0', 10);
+							let visible = parseInt(this.getAttribute('data-visible') || '4', 10);
+							for (let i = visible; i < total; i++) {
+								const imgData = images[i];
+								if (!imgData || !imgData.image_url) continue;
+								const img = document.createElement('img');
+								img.src = `../../uploads/properties/${imgData.image_url}`;
+								img.alt = `Property Image ${i + 1}`;
+								img.className = 'drawer-image-thumb';
+								img.setAttribute('data-image-url', imgData.image_url);
+								img.setAttribute('data-index', String(i));
+								img.loading = 'lazy';
+								gallery.insertBefore(img, this);
+								img.addEventListener('click', function(){
+									const mainImage = document.getElementById('mainImage');
+									if (mainImage) {
+										mainImage.src = img.src;
+										document.querySelectorAll('.drawer-image-thumb').forEach(t => t.classList.remove('active'));
+										img.classList.add('active');
+									}
+								}, { passive: true });
 							}
+							this.remove();
 						});
 					}
 				}
