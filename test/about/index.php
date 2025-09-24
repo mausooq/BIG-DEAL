@@ -20,6 +20,25 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  /* Match about component view-all button styling */
+  .view-all-btn {
+    background: #111;
+    color: #fff;
+    border: none;
+    font-family: DM Sans, sans-serif;
+    font-weight: 600;
+    border-radius: 15px;
+    height: 44px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+  }
+  .view-all-btn:hover { background: #333; color: #fff; }
+  .view-all-btn span { margin-left: 8px; display: inline-block; }
+</style>
 </head>
 
 
@@ -56,14 +75,14 @@
             We Create Best Architect Around The World With Inspiration
           </h3>
 
-          <p>
+          <p style="text-align: justify;">
           Your dream home isn’t just a vision — it’s a reality waiting for you. As leaders in real estate,
            we specialize in crafting experiences where luxury meets comfort, and investment meets trust.
            Explore our handpicked collection of properties designed for modern lifestyles and lasting value.
           </p>
-          <button class="btn-arrow">
+          <a href="#" class="view-all-btn">
             View More <span>→</span>
-          </button>
+          </a>
 
    
 
@@ -72,20 +91,20 @@
     </div>
             <div class="about-stats d-flex justify-content-between text-center ">
               <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label">Project</span>
+                <span class="stat-number">1000+</span><br>
+                <span class="stat-label">Sold</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">30+</span><br>
+                <span class="stat-label">Ongoing</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">10+</span><br>
+                <span class="stat-label">Years</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">95%</span><br>
+                <span class="stat-label">Satisfaction</span>
               </div>
             </div>
 </div>
@@ -105,7 +124,7 @@
 
 <div class="latest-works-description row">
   <p class=" col-md-10 desc">A modern villa that blends elegant design with spacious comfort, offering a perfect balance of luxury and convenience.</p>
-  <img src="../assets/images/icon/next.svg" alt="" class="about-arrow col-md-2" >
+  <img src="../assets/images/icon/next.svg" alt="" class="about-arrow col-md-2" onclick="window.location.assign('../products/index.php')" style="cursor: pointer; position: relative; z-index: 10; pointer-events: auto;" role="link" tabindex="0">
 </div>
 </div>
 
@@ -122,7 +141,22 @@
     
 <?php include '../components/footer.php'; ?>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/scripts.js" defer></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var arrow = document.querySelector('.about-arrow');
+    if (arrow) {
+      arrow.style.cursor = 'pointer';
+      arrow.setAttribute('role', 'link');
+      arrow.setAttribute('tabindex', '0');
+      var go = function(){ window.location.href = '../products/index.php'; };
+      arrow.addEventListener('click', go);
+      arrow.addEventListener('keydown', function(e){
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); }
+      });
+    }
+  });
+ </script>
 </body>
 </html>

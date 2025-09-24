@@ -10,7 +10,7 @@
   margin: 60px auto;
   border-radius: 30px;
   position: relative;
-  width: 80%;
+  width: 82.5%;
 }
 .about-image {
   position: relative;
@@ -57,6 +57,7 @@
   font-size: 1rem;
   line-height: 1.7;
   font-weight: 400;
+  text-align: justify;
 }
 .btn-arrow {
   display: inline-flex;
@@ -75,6 +76,31 @@
 .btn-arrow:hover {
   background: #222;
   color: #fff;
+}
+/* Match blog section "View All" button style */
+.view-all-btn {
+  background: #111;
+  color: #fff;
+  border: none;
+  font-family: DM Sans, sans-serif;
+  font-weight: 600;
+  border-radius: 15px;
+  height: 44px;
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.view-all-btn:hover {
+  background: #333;
+  color: #fff;
+}
+/* Space before arrow icon inside buttons */
+.btn-arrow span,
+.view-all-btn span {
+  margin-left: 8px;
+  display: inline-block;
 }
 .about-stats {
   display: flex;
@@ -132,7 +158,7 @@
     font-size: 1rem;
     line-height: 1.6;
     margin-bottom: 25px;
-    text-align: left;
+    text-align: justify;
   }
   .btn-arrow {
     font-size: 0.9rem;
@@ -171,30 +197,32 @@
   <div class="about-content">
     <h1>
       Hello City We are <br> leader in <span class="highlight">properties.</span>
-       <img src="<?php echo $asset_path; ?>images/ARROW.png" alt="arrow" class="arrow">
+       <a href="about/index.php" style="display: inline-block;">
+         <img src="<?php echo $asset_path; ?>images/ARROW.png" alt="arrow" class="arrow">
+       </a>
     </h1>
      <p>
       Your dream home isn’t just a vision — it’s a reality waiting for you. As leaders in real estate, we specialize in crafting experiences where luxury meets comfort, and investment meets trust. Explore our handpicked collection of properties designed for modern lifestyles and lasting value.
     </p>
-    <button class="btn-arrow">
+    <a href="about/index.php" class="view-all-btn">
       View More <span>→</span>
-    </button>
+    </a>
     <div class="about-stats">
-       <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label">Project</span>
+              <div class="stat-item">
+                <span class="stat-number">1000+</span><br>
+                <span class="stat-label">Sold</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">30+</span><br>
+                <span class="stat-label">Ongoing</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">10+</span><br>
+                <span class="stat-label">Years</span>
               </div>
               <div class="stat-item">
-                <span class="stat-number" >100+</span><br>
-                <span class="stat-label" >Project</span>
+                <span class="stat-number">95%</span><br>
+                <span class="stat-label">Satisfaction</span>
               </div>
     </div>
   </div>
