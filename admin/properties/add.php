@@ -632,6 +632,14 @@ function get_data($field) {
             box-sizing: border-box;
             transition: border-color 0.2s;
         }
+        /* Hide number spinners for Price field */
+        #price::-webkit-outer-spin-button,
+        #price::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #price { -moz-appearance: textfield; appearance: textfield; }
+        /* Hide number spinners for Area field */
+        #area::-webkit-outer-spin-button,
+        #area::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        #area { -moz-appearance: textfield; appearance: textfield; }
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary-color);
@@ -1358,7 +1366,7 @@ async function uploadFileToServer(file){
   const form = new FormData();
   form.append('action','upload');
   form.append('file', file);
-  const res = await fetch('upload_property_images.php', { method:'POST', body: form });
+  const res = await fetch('upload_property_images.php', { method:'POST', body: form, headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' } });
   const data = await res.json().catch(()=>null);
   if (!res.ok || !data || !data.ok) {
     const msg = (data && data.error) ? data.error : 'Upload failed';
@@ -1517,29 +1525,30 @@ async function handleFiles(files) {
   if (images.length === 0) return;
   setLoader(true);
   showPageLoader();
-  uploadingCount += images.length;
-  for (const file of images) {
-    try {
-      if (file.size > maxSize) { overs.push(file.name); continue; }
-      const data = await uploadFileToServer(file);
-      // Successful upload -> store server filename, render local preview
-      uploadedServerFiles.push(data.filename);
-      const url = URL.createObjectURL(file);
-      selectedImageDataURLs.push(url);
-      renderThumb(liveImagesPreview, url, true);
-      updateClearButton();
-    } catch (e) {
-      const msg = (e && e.message) ? e.message : 'Upload failed';
-      if (msg.toLowerCase().includes('maximum upload size')) {
-        totalErr = 'Maximum upload size reached';
-        break; // stop uploading more
+  try {
+    for (const file of images) {
+      try {
+        if (file.size > maxSize) { overs.push(file.name); continue; }
+        const data = await uploadFileToServer(file);
+        // Successful upload -> store server filename, render local preview
+        uploadedServerFiles.push(data.filename);
+        const url = URL.createObjectURL(file);
+        selectedImageDataURLs.push(url);
+        renderThumb(liveImagesPreview, url, true);
+        updateClearButton();
+      } catch (e) {
+        const msg = (e && e.message) ? e.message : 'Upload failed';
+        if (msg.toLowerCase().includes('maximum upload size')) {
+          totalErr = 'Maximum upload size reached';
+          break; // stop uploading more
+        }
+        overs.push(file.name + ' (' + msg + ')');
       }
-      // show per-file error inline
-      overs.push(file.name + ' (' + msg + ')');
     }
+  } finally {
+    setLoader(false);
+    hidePageLoader();
   }
-  uploadingCount -= images.length;
-  if (uploadingCount <= 0) { setLoader(false); hidePageLoader(); }
 
   if (overs.length){
     imageSizeWarning.style.display = 'block';
