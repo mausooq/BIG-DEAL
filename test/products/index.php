@@ -1,3 +1,79 @@
+<?php
+require_once '../config/config.php';
+
+// Get selected category from URL parameter
+$mysqli = getMysqliConnection();
+$selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
+$selectedCity = isset($_GET['city']) ? $_GET['city'] : ($selectedCity ?? '');
+$isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
+$selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
+
+// Load cities for the city select
+$cities = [];
+try {
+    $citySql = "SELECT id, name FROM cities ORDER BY name";
+    if ($resCity = $mysqli->query($citySql)) {
+        while ($row = $resCity->fetch_assoc()) { $cities[] = $row; }
+        $resCity->free();
+    }
+} catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
+
+// Fetch properties with their images
+$properties = [];
+
+$query = "SELECT p.*, c.name as category_name,
+          EXISTS (SELECT 1 FROM features f WHERE f.property_id = p.id) AS is_featured,
+          (SELECT image_url FROM property_images WHERE property_id = p.id ORDER BY id ASC LIMIT 1) as main_image
+          FROM properties p 
+          LEFT JOIN categories c ON p.category_id = c.id 
+          WHERE p.status = 'Available'";
+
+// Add category filter if selected
+if (!empty($selectedCategory)) {
+    $query .= " AND c.name = '" . $mysqli->real_escape_string($selectedCategory) . "'";
+}
+
+// Add city filter if selected (match against location and landmark)
+if (!empty($selectedCity)) {
+    $city = $mysqli->real_escape_string($selectedCity);
+    $query .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
+}
+
+// Add featured-only filter if requested
+if ($isFeaturedOnly) {
+    $query .= " AND EXISTS (SELECT 1 FROM features f WHERE f.property_id = p.id)";
+}
+
+$query .= " ORDER BY p.created_at DESC LIMIT 20";
+
+$result = $mysqli->query($query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $properties[] = $row;
+    }
+}
+
+
+// Function to format price in Lakhs
+function formatPrice($price) {
+    if ($price >= 100000) {
+        return '₹' . round($price / 100000, 1) . ' L';
+    }
+    return '₹' . number_format($price);
+}
+
+// Function to calculate time ago
+function timeAgo($datetime) {
+    $time = time() - strtotime($datetime);
+    
+    if ($time < 60) return 'just now';
+    if ($time < 3600) return floor($time/60) . 'm ago';
+    if ($time < 86400) return floor($time/3600) . 'h ago';
+    if ($time < 2592000) return floor($time/86400) . 'd ago';
+    if ($time < 31536000) return floor($time/2592000) . 'mo ago';
+    return floor($time/31536000) . 'y ago';
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,24 +103,24 @@
     <div class="container">
       <div class="row">
         <div class="nav-tabs-custom mx-auto">
-          <button class="active" type="button">Buy</button>
-          <button type="button">Rent</button>
-          <button type="button">Commercial</button>
-          <button type="button">PG/Co Living</button>
-          <button type="button">1BHK/Studio</button>
-          <button type="button">Plot</button>
+          <button class="<?php echo $selectedCategory === 'Buy' || empty($selectedCategory) ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Buy')">Buy</button>
+          <button class="<?php echo $selectedCategory === 'Rent' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Rent')">Rent</button>
+          <button class="<?php echo $selectedCategory === 'Plot' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Plot')">Plot</button>
+          <button class="<?php echo $selectedCategory === 'Commercial' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Commercial')">Commercial</button>
+          <button class="<?php echo $selectedCategory === 'PG/Co Living' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('PG/Co Living')">PG/Co Living</button>
+          <button class="<?php echo $selectedCategory === '1BHK/Studio' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('1BHK/Studio')">1BHK/Studio</button>
         </div>
       </div>
 
       <!-- Select city -->
       <div class="custom-select-wrapper">
-        <select class="custom-select" name="city" id="city-select" aria-label="Select city">
-          <option disabled selected>Select city</option>
-          <option value="newyork">New York</option>
-          <option value="losangeles">Los Angeles</option>
-          <option value="chicago">Chicago</option>
-          <option value="houston">Houston</option>
-          <option value="miami">Miami</option>
+        <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onCityChange(this.value)">
+          <option value="" disabled <?php echo $selectedCity === '' ? 'selected' : ''; ?>>Select city</option>
+          <?php foreach ($cities as $city): ?>
+            <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo $selectedCity === $city['name'] ? 'selected' : ''; ?>>
+              <?php echo htmlspecialchars($city['name']); ?>
+            </option>
+          <?php endforeach; ?>
         </select>
       </div>
 
@@ -196,115 +272,49 @@
 
       <!-- Property Results -->
       <div  class="col-lg-8 col-md-7 aproperty">
-        <h2>1085 results | Property in <span class="highlight-city">Mangaluru</span> for Sale</h2>
+        <h2>
+          <?php echo count($properties); ?> results | 
+          <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
+          <?php if ($selectedCity !== ''): ?>
+            in <span class="highlight-city"><?php echo htmlspecialchars($selectedCity); ?></span>
+          <?php endif; ?>
+          for Sale
+        </h2>
 
         <div class="aproperty-cards">
-              
-         <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/prop/aprop1.png" alt="Pooja Apartment" class="property-image" />
-            <div class="property-info" style="flex: 1;">
-              <h3>Pooja Apartment <br>
-              <span>3 BHK House in kadri, Mangaluru</span></h3>
-              <p>Nearby: St Theresa's ICSE School - 0.1 km • KMC Hospital Mangaluru - 0.4 km • Machali - 0.1 km • City Centre Mall - 0.1 km</p>
-              <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
-                <span>3 BHK ₹98 L</span>
-                <span>1000 sq.ft Builtup area</span>
-                <span>Ready to move Possession status</span>
-              </div>
-              <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
-                <p class="property-time">3mo ago</p>
-                  <div class="btn-grp" style="display: flex; gap: 10px;">
-                      <button class="btn btn-share">Share</button>
-                    <button class="btn btn-contact">Contact us</button>
+          <?php if (!empty($properties)): ?>
+            <?php foreach ($properties as $property): ?>
+              <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px; cursor: pointer;" onclick="goToPropertyDetails(<?php echo $property['id']; ?>)">
+                <img src="<?php echo !empty($property['main_image']) ? '../../uploads/properties/' . $property['main_image'] : ''; ?>" 
+                     alt="<?php echo htmlspecialchars($property['title']); ?>" class="property-image" 
+                     style="width: 300px; height: 228px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" />
+                <div class="property-info" style="flex: 1;">
+                  <h3><?php echo htmlspecialchars($property['title']); ?> <br>
+                  <span><?php echo htmlspecialchars($property['configuration']); ?> House in <?php echo htmlspecialchars($property['location']); ?></span></h3>
+                  <p><?php echo htmlspecialchars($property['description']); ?></p>
+                  <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
+                    <span><?php echo htmlspecialchars($property['configuration']); ?> <?php echo formatPrice($property['price']); ?></span>
+                    <span><?php echo number_format($property['area']); ?> sq.ft Builtup area</span>
+                    <span><?php echo htmlspecialchars($property['furniture_status']); ?> Possession status</span>
                   </div>
-              </div>
-           </div>
-          </div>
-       
-          <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/prop/aprop1.png" alt="Pooja Apartment" class="property-image" />
-            <div class="property-info" style="flex: 1;">
-              <h3>Pooja Apartment <br>
-              <span>3 BHK House in kadri, Mangaluru</span></h3>
-              <p>Nearby: St Theresa's ICSE School - 0.1 km • KMC Hospital Mangaluru - 0.4 km • Machali - 0.1 km • City Centre Mall - 0.1 km</p>
-              <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
-                <span>3 BHK ₹98 L</span>
-                <span>1000 sq.ft Builtup area</span>
-                <span>Ready to move Possession status</span>
-              </div>
-              <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
-                <p class="property-time">3mo ago</p>
-                  <div class="btn-grp" style="display: flex; gap: 10px;">
-                      <button class="btn btn-share">Share</button>
-                    <button class="btn btn-contact">Contact us</button>
+                  <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
+                    <p class="property-time"><?php echo timeAgo($property['created_at']); ?></p>
+                      <div class="btn-grp" style="display: flex; gap: 10px;">
+                          <button class="btn btn-share" onclick="event.stopPropagation(); shareProperty(<?php echo $property['id']; ?>)">Share</button>
+                        <button class="btn btn-contact" onclick="event.stopPropagation(); contactProperty(<?php echo $property['id']; ?>)">Contact us</button>
+                      </div>
                   </div>
+               </div>
               </div>
-           </div>
-          </div>
-          
-          <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/prop/aprop2.png" alt="Pooja Apartment" class="property-image" />
-            <div class="property-info" style="flex: 1;">
-              <h3>Pooja Apartment <br>
-              <span>3 BHK House in kadri, Mangaluru</span></h3>
-              <p>Nearby: St Theresa's ICSE School - 0.1 km • KMC Hospital Mangaluru - 0.4 km • Machali - 0.1 km • City Centre Mall - 0.1 km</p>
-              <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
-                <span>3 BHK ₹98 L</span>
-                <span>1000 sq.ft Builtup area</span>
-                <span>Ready to move Possession status</span>
-              </div>
-              <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
-                <p class="property-time">3mo ago</p>
-                  <div class="btn-grp" style="display: flex; gap: 10px;">
-                      <button class="btn btn-share">Share</button>
-                    <button class="btn btn-contact">Contact us</button>
-                  </div>
-              </div>
-           </div>
-          </div>
-          <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/prop/aprop3.png" alt="Pooja Apartment" class="property-image" />
-            <div class="property-info" style="flex: 1;">
-              <h3>Pooja Apartment <br>
-              <span>3 BHK House in kadri, Mangaluru</span></h3>
-              <p>Nearby: St Theresa's ICSE School - 0.1 km • KMC Hospital Mangaluru - 0.4 km • Machali - 0.1 km • City Centre Mall - 0.1 km</p>
-              <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
-                <span>3 BHK ₹98 L</span>
-                <span>1000 sq.ft Builtup area</span>
-                <span>Ready to move Possession status</span>
-              </div>
-              <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
-                <p class="property-time">3mo ago</p>
-                  <div class="btn-grp" style="display: flex; gap: 10px;">
-                      <button class="btn btn-share">Share</button>
-                    <button class="btn btn-contact">Contact us</button>
-                  </div>
-              </div>
-           </div>
-          </div>
-
-          <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px;">
-            <img src="../assets/images/prop/aprop4.png" alt="Pooja Apartment" class="property-image" />
-            <div class="property-info" style="flex: 1;">
-              <h3>Pooja Apartment <br>
-              <span>3 BHK House in kadri, Mangaluru</span></h3>
-              <p>Nearby: St Theresa's ICSE School - 0.1 km • KMC Hospital Mangaluru - 0.4 km • Machali - 0.1 km • City Centre Mall - 0.1 km</p>
-              <div class="property-details" style="display: flex; justify-content: space-between; max-width: 600px;">
-                <span>3 BHK ₹98 L</span>
-                <span>1000 sq.ft Builtup area</span>
-                <span>Ready to move Possession status</span>
-              </div>
-              <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
-                <p class="property-time">3mo ago</p>
-                  <div class="btn-grp" style="display: flex; gap: 10px;">
-                      <button class="btn btn-share">Share</button>
-                    <button class="btn btn-contact">Contact us</button>
-                  </div>
-              </div>
-           </div>
-          </div>
-          </div>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <div class="no-properties" style="text-align: center; padding: 40px;">
+              <h3>No properties found</h3>
+              <p>Try adjusting your filters to see more results.</p>
+            </div>
+          <?php endif; ?>
         </div>
+      </div>
       </div>
     </div>
     
@@ -330,5 +340,72 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/scripts.js" defer></script>
+
+<script>
+function filterByCategory(category) {
+    // Update URL with category parameter
+    const url = new URL(window.location);
+    if (category) {
+        url.searchParams.set('category', category);
+    } else {
+        url.searchParams.delete('category');
+    }
+    
+    // Reload page with new category filter
+    window.location.href = url.toString();
+}
+
+function onCityChange(city) {
+    const url = new URL(window.location);
+    if (city) {
+        url.searchParams.set('city', city);
+    } else {
+        url.searchParams.delete('city');
+    }
+    window.location.href = url.toString();
+}
+
+function goToPropertyDetails(propertyId) {
+    // Navigate to product-details.php with property ID
+    window.location.href = 'product-details.php?id=' + propertyId;
+}
+
+function shareProperty(propertyId) {
+    // Handle share functionality
+    if (navigator.share) {
+        navigator.share({
+            title: 'Property Details',
+            text: 'Check out this property',
+            url: window.location.origin + '/test/products/product-details.php?id=' + propertyId
+        });
+    } else {
+        // Fallback: copy URL to clipboard
+        const url = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Property link copied to clipboard!');
+        });
+    }
+}
+
+function contactProperty(propertyId) {
+    // Handle contact functionality - you can customize this
+    alert('Contact functionality for property ID: ' + propertyId);
+    // You can redirect to a contact form or open a modal
+}
+
+// Add click handlers for better UX
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryButtons = document.querySelectorAll('.nav-tabs-custom button');
+    
+    categoryButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            categoryButtons.forEach(btn => btn.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+        });
+    });
+});
+</script>
 </body>
 </html>

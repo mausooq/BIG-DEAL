@@ -1,10 +1,84 @@
+<?php
+require_once '../config/config.php';
+
+// Get property ID from URL parameter
+$propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+if (!$propertyId) {
+    header('Location: index.php');
+    exit;
+}
+
+// Fetch property details with category and images
+$mysqli = getMysqliConnection();
+$property = null;
+$propertyImages = [];
+$relatedProperties = [];
+
+// Fetch main property details
+$query = "SELECT p.*, c.name as category_name 
+          FROM properties p 
+          LEFT JOIN categories c ON p.category_id = c.id 
+          WHERE p.id = ? AND p.status = 'Available'";
+
+$stmt = $mysqli->prepare($query);
+$stmt->bind_param("i", $propertyId);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $property = $result->fetch_assoc();
+    
+    // Fetch all images for this property
+    $imageQuery = "SELECT image_url FROM property_images WHERE property_id = ? ORDER BY id";
+    $imageStmt = $mysqli->prepare($imageQuery);
+    $imageStmt->bind_param("i", $propertyId);
+    $imageStmt->execute();
+    $imageResult = $imageStmt->get_result();
+    
+    while ($row = $imageResult->fetch_assoc()) {
+        $propertyImages[] = $row['image_url'];
+    }
+    
+    // Fetch related properties (same category, excluding current property)
+    $relatedQuery = "SELECT p.*, c.name as category_name,
+                     (SELECT image_url FROM property_images WHERE property_id = p.id LIMIT 1) as main_image
+                     FROM properties p 
+                     LEFT JOIN categories c ON p.category_id = c.id 
+                     WHERE p.category_id = ? AND p.id != ? AND p.status = 'Available'
+                     ORDER BY p.created_at DESC 
+                     LIMIT 3";
+    
+    $relatedStmt = $mysqli->prepare($relatedQuery);
+    $relatedStmt->bind_param("ii", $property['category_id'], $propertyId);
+    $relatedStmt->execute();
+    $relatedResult = $relatedStmt->get_result();
+    
+    while ($row = $relatedResult->fetch_assoc()) {
+        $relatedProperties[] = $row;
+    }
+} else {
+    header('Location: index.php');
+    exit;
+}
+
+// Function to format price in Lakhs/Crores
+function formatPrice($price) {
+    if ($price >= 10000000) {
+        return '₹' . round($price / 10000000, 1) . ' Cr';
+    } elseif ($price >= 100000) {
+        return '₹' . round($price / 100000, 1) . ' L';
+    }
+    return '₹' . number_format($price);
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
-  <title>Big Deal Ventures</title>
+  <title><?php echo htmlspecialchars($property['title']); ?> - Big Deal Ventures</title>
   <link rel="icon" href="../assets/images/logo.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -29,59 +103,73 @@
     <div class="row mt-5">
         <div class=" col-md-8">
             <div class="property-main-image">
-            <img src="../assets/images/prop/prop6.png" alt="Shaheer Sweet Home" />
+            <img id="mainImage" src="<?php echo !empty($propertyImages) ? '../../uploads/properties/' . $propertyImages[0] : '../assets/images/prop/prop6.png'; ?>" alt="<?php echo htmlspecialchars($property['title']); ?>" />
             </div>
             <div class="property-thumbnails">
-                <img src="../assets/images/prop/prop6.png" alt="Thumbnail 2" />
-                <img src="../assets/images/prop/prop6.png" alt="Thumbnail 3" />
-                <img src="../assets/images/prop/prop6.png" alt="Thumbnail 1" />
-                <div class="thumbnail-more">
-                  <img src="../assets/images/prop/prop6.png" alt="Thumbnail 1" />
-                  <span class="overlay-text">10+</span>
-                </div>
+                <?php if (!empty($propertyImages)): ?>
+                    <?php foreach (array_slice($propertyImages, 0, 3) as $index => $image): ?>
+                        <img src="../../uploads/properties/<?php echo $image; ?>" 
+                             alt="Thumbnail <?php echo $index + 1; ?>" 
+                             onclick="changeMainImage(this.src)" 
+                             style="cursor: pointer;" />
+                    <?php endforeach; ?>
+                    <?php if (count($propertyImages) > 3): ?>
+                        <div class="thumbnail-more" onclick="showAllImages()" style="cursor: pointer;">
+                            <img src="../../uploads/properties/<?php echo $propertyImages[3]; ?>" alt="More images" />
+                            <span class="overlay-text"><?php echo count($propertyImages) - 3; ?>+</span>
+                        </div>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <img src="../assets/images/prop/prop6.png" alt="Default image" />
+                <?php endif; ?>
             </div>
         </div>
 
     <div class=" col-md-4 property2-title">
-    <h2>Shaheer Sweet Home</h2>
+    <h2><?php echo htmlspecialchars($property['title']); ?></h2>
     <div class="property-details2">
             <div class="detail-box">
                 <span class="plabel">Facing</span>
-                <span class="pvalue">West</span>
+                <span class="pvalue"><?php echo htmlspecialchars($property['facing']); ?></span>
             </div>
             <div class="detail-box">
                 <span class="plabel">Configuration</span>
-                <span class="pvalue">2 BHK</span>
+                <span class="pvalue"><?php echo htmlspecialchars($property['configuration']); ?></span>
             </div>
             <div class="detail-box">
                 <span class="plabel">Area</span>
-                <span class="pvalue">1800 Sq.ft</span>
+                <span class="pvalue"><?php echo number_format($property['area']); ?> Sq.ft</span>
             </div>
             <div class="detail-box">
                 <span class="plabel">Balcony</span>
-                <span class="pvalue">3</span>
+                <span class="pvalue"><?php echo $property['balcony']; ?></span>
             </div>
             <div class="detail-box">
                 <span class="plabel">Parking</span>
-                <span class="pvalue">1</span>
+                <span class="pvalue"><?php echo htmlspecialchars($property['parking']); ?></span>
             </div><br>  
         </div>
                <div class="detail-row">
                 <div class="detail-box2">
-                    <span class="plabel">Age of Construction</span>
-                    <span class="pvalue">Less than 2 year</span>
+                    <span class="plabel">Type of Ownership</span>
+                    <span class="pvalue"><?php echo htmlspecialchars($property['ownership_type']); ?></span>
                 </div>
                 <div class="detail-box2">
                     <span class="plabel">Furnished Status</span>
-                    <span class="pvalue">Semi-furnished</span>
+                    <span class="pvalue"><?php echo htmlspecialchars($property['furniture_status']); ?></span>
                 </div>
                 </div>
 
         
 
        <div class="property-map">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
-       width="428px" height="350px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <?php if (!empty($property['map_embed_link'])): ?>
+        <iframe src="<?php echo htmlspecialchars($property['map_embed_link']); ?>"
+         width="428px" height="350px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <?php else: ?>
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
+         width="428px" height="350px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <?php endif; ?>
     </div>
     </div>
   
@@ -98,42 +186,45 @@
         </h1>
         <table>
           <tr>
-            <td class="tmain" > Price</td>
-            <td class="tdesc">  ₹1.Cr</td>      
+            <td class="tmain">Price</td>
+            <td class="tdesc"><?php echo formatPrice($property['price']); ?></td>      
           </tr>
           <tr>
             <td class="tmain">Address</td>
-            <td class="tdesc">Kankanady Gate Building, Kankanady, <br>Mangalore</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['location']); ?></td>
           </tr>
           <tr>
             <td class="tmain">Landmarks</td>
-            <td class="tdesc">Gd Edu Tech</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['landmark']); ?></td>
           </tr>
           <tr>
             <td class="tmain">Type of Ownership</td>
-            <td class="tdesc">Freehold</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['ownership_type']); ?></td>
           </tr>
           <tr>
-            <td class="tmain">Additional Room</td>
-            <td class="tdesc">Store room</td>
+            <td class="tmain">Category</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['category_name']); ?></td>
           </tr>
-          
-            
+          <tr>
+            <td class="tmain">Listing Type</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['listing_type']); ?></td>
+          </tr>
         </table>
                 <a href="#" class="tminfo">More Information <span><img src="../assets/images/icon/parrowdown.svg" alt="arrow down" class="pdarrow"></span></a>
 
           <div class="property-desc">
           <h1>Description</h1>
           <p class="pdesc">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mof
+            <?php echo !empty($property['description']) ? htmlspecialchars($property['description']) : 'No description available for this property.'; ?>
           </p>
-          <a href="#" class="view-more">
+          <?php if (!empty($property['description']) && strlen($property['description']) > 200): ?>
+          <a href="#" class="view-more" onclick="toggleDescription()">
             View More 
             <span>
               <img src="../assets/images/icon/parrowdown.svg" alt="arrow down" class="pdarrow">
             </span>
           </a>
+          <?php endif; ?>
         </div>
       </div>
 
@@ -176,54 +267,30 @@
         </div>
         <!-- Properties Grid -->
         <div class="row ">
-            <!-- Property Card 1 -->
-            <div class="col-md-4">
-                <div class="card property-card ">
-                    <img  src="../assets/images/prop/prop1.png" alt="Modern Family Villa" class="propimg">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="../assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="../assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="../assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
+            <?php if (!empty($relatedProperties)): ?>
+                <?php foreach ($relatedProperties as $relatedProperty): ?>
+                <div class="col-md-4">
+                    <div class="card property-card" onclick="goToPropertyDetails(<?php echo $relatedProperty['id']; ?>)" style="cursor: pointer;">
+                        <img src="<?php echo !empty($relatedProperty['main_image']) ? '../../uploads/properties/' . $relatedProperty['main_image'] : '../assets/images/prop/prop1.png'; ?>" 
+                             alt="<?php echo htmlspecialchars($relatedProperty['title']); ?>" class="propimg">
+                        <div class="card-body">
+                            <div class="card-title"><?php echo htmlspecialchars($relatedProperty['title']); ?></div>
+                            <div class="property-attrs">
+                                <div class="property-attr"><img src="../assets/images/icon/home_dark.svg" class="svg" > <?php echo htmlspecialchars($relatedProperty['configuration']); ?></div>
+                                <div class="property-attr"><img src="../assets/images/icon/park_dark.svg" class="svg" > <?php echo $relatedProperty['parking']; ?></div>
+                                <div class="property-attr"><img src="../assets/images/icon/sqft_dark.svg" class="svg" > <?php echo number_format($relatedProperty['area']); ?> sq. ft.</div>
+                                <div class="property-attr"><img src="../assets/images/icon/terrace_dark.svg" class="svg" > <?php echo $relatedProperty['balcony']; ?></div>
+                                <div class="property-attr"><img src="../assets/images/icon/sofa_dark.svg" class="svg" > <?php echo htmlspecialchars($relatedProperty['furniture_status']); ?></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Property Card 2 -->
-            <div class="col-md-4">
-                <div class="card property-card ">
-                    <img src="../assets/images/prop/prop2.png" alt="Modern Family Villa">
-                    <div class="card-body">
-                        <div class="card-title">Modern Family Villa</div>
-                         <div class="property-attrs">
-                            <div class="property-attr"><img src="../assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="../assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="../assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="col-12">
+                    <p>No related properties found.</p>
                 </div>
-            </div>
-            <!-- Property Card 3 -->
-            <div class="col-md-4">
-                <div class="card property-card ">
-                    <img src="../assets/images/prop/prop3.png" alt="Luxury City Apartment">
-                    <div class="card-body">
-                        <div class="card-title">Luxury City Apartment</div>
-                        <div class="property-attrs">
-                            <div class="property-attr"><img src="../assets/images/icon/home_dark.svg" class="svg" > 4BHK</div>
-                            <div class="property-attr"><img src="../assets/images/icon/park_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sqft_dark.svg" class="svg" > 4 sq. ft.</div>
-                            <div class="property-attr"><img src="../assets/images/icon/terrace_dark.svg" class="svg" > 4</div>
-                            <div class="property-attr"><img src="../assets/images/icon/sofa_dark.svg" class="svg" > Semi-furnished</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <?php endif; ?>
         </div>
   </section>
 
@@ -235,6 +302,26 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="../assets/js/scripts.js"></script>
+
+<script>
+function changeMainImage(imageSrc) {
+    document.getElementById('mainImage').src = imageSrc;
+}
+
+function showAllImages() {
+    // You can implement a lightbox or modal to show all images
+    alert('Show all images functionality - can be implemented with a lightbox');
+}
+
+function goToPropertyDetails(propertyId) {
+    window.location.href = 'product-details.php?id=' + propertyId;
+}
+
+function toggleDescription() {
+    // You can implement expand/collapse functionality for description
+    alert('Toggle description functionality');
+}
+</script>
 </body>
 </html>
 

@@ -1,6 +1,65 @@
 <?php
 require_once __DIR__ . '/config/config.php';
 $mysqli = getMysqliConnection();
+
+// Load featured properties BEFORE rendering the carousel
+$featuredProperties = [];
+try {
+  $sqlFeatured = "
+    SELECT 
+      p.id,
+      p.title,
+      p.description,
+      p.configuration,
+      p.parking,
+      p.area,
+      p.furniture_status,
+      p.balcony,
+      p.price,
+      (
+        SELECT pi.image_url 
+        FROM property_images pi 
+        WHERE pi.property_id = p.id 
+        ORDER BY pi.id ASC 
+        LIMIT 1
+      ) AS cover_image_url
+    FROM properties p
+    INNER JOIN features f ON p.id = f.property_id
+    WHERE p.status = 'Available'
+    ORDER BY p.created_at DESC, p.id DESC
+    LIMIT 3
+  ";
+  if (isset($mysqli) && $result = $mysqli->query($sqlFeatured)) {
+    while ($row = $result->fetch_assoc()) { $featuredProperties[] = $row; }
+    $result->free();
+  }
+} catch (Throwable $e) { error_log('Featured properties load error: ' . $e->getMessage()); }
+
+// Load categories to validate static search buttons against DB
+$availableCategoryNames = [];
+try {
+  if (isset($mysqli)) {
+    $resCats = $mysqli->query("SELECT name FROM categories");
+    if ($resCats) {
+      while ($r = $resCats->fetch_assoc()) { $availableCategoryNames[strtolower(trim($r['name']))] = true; }
+      $resCats->free();
+    }
+  }
+} catch (Throwable $e) { error_log('Categories load error: ' . $e->getMessage()); }
+
+// Selected city from query (for preserving selection in dropdown)
+$selectedCity = isset($_GET['city']) ? trim((string)$_GET['city']) : '';
+
+// Load cities for the hero search select
+$allCityNames = [];
+try {
+  if (isset($mysqli)) {
+    if ($resAllCities = $mysqli->query("SELECT name FROM cities ORDER BY name")) {
+      while ($row = $resAllCities->fetch_assoc()) { $allCityNames[] = $row['name']; }
+      $resAllCities->free();
+    }
+  }
+} catch (Throwable $e) { error_log('All cities load error: ' . $e->getMessage()); }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -46,24 +105,24 @@ $mysqli = getMysqliConnection();
    
         <div class="row  ">
         <div class="nav-tabs-custom mx-auto d-flex justify-content-evenly flex-wrap gap-1">
-          <button class="active" type="button">Buy</button>
-          <button type="button">Rent</button>
-          <button type="button">Plot</button>
-          <button type="button">Commercial</button>
-          <button type="button">PG/Co Living</button>
-          <button type="button">1BHK/Studio</button>
+          <button class="active" type="button" data-category="Buy" onclick="onStaticCategoryClick('Buy')">Buy</button>
+          <button type="button" data-category="Rent" onclick="onStaticCategoryClick('Rent')">Rent</button>
+          <button type="button" data-category="Plot" onclick="onStaticCategoryClick('Plot')">Plot</button>
+          <button type="button" data-category="Commercial" onclick="onStaticCategoryClick('Commercial')">Commercial</button>
+          <button type="button" data-category="PG/Co Living" onclick="onStaticCategoryClick('PG/Co Living')">PG/Co Living</button>
+          <button type="button" data-category="1BHK/Studio" onclick="onStaticCategoryClick('1BHK/Studio')">1BHK/Studio</button>
         </div>
         </div>
 
           <!-- Select city -->
         <div class="custom-select-wrapper">
-          <select class="custom-select" name="city" id="city-select" aria-label="Select city">
-            <option disabled selected>Select city</option>
-            <option value="newyork">New York</option>
-            <option value="losangeles">Los Angeles</option>
-            <option value="chicago">Chicago</option>
-            <option value="houston">Houston</option>
-            <option value="miami">Miami</option>
+          <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onHeroCityChange(this.value)">
+            <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?> disabled>Select city</option>
+            <?php foreach ($allCityNames as $cityName): ?>
+              <option value="<?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($selectedCity, $cityName) === 0 ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>
+              </option>
+            <?php endforeach; ?>
           </select>
         </div>
 
@@ -84,100 +143,77 @@ $mysqli = getMysqliConnection();
 
 
       <div class="carousel-container">
-        <div class="carousel-slide active">
-          <img src="assets/images/slider1/DHP1.png" alt="House 1" class="imgs">
-          <div class="info-box">
-            <div class="info-top">
-              <div class="info-item" title="4 Bedrooms" aria-label="4 bedrooms">
-              <img src="assets/images/icon/home.svg" class="svg">
-                4 BHK
-              </div>
-              <div class="info-item" title="4 Parking Spots" aria-label="4 parking spots">
-                <img src="assets/images/icon/park.svg" class="svg">
-                4 Cars
-              </div>
-              <div class="info-item" title="4 Square Feet" aria-label="4 square feet">
-                <img src="assets/images/icon/sqft.svg" class="svg">
-                4 sq.ft.
-              </div>
-            </div>
-            <div class="info-bottom">
-              <div class="info-item" title="4 Floors" aria-label="4 floors">
-                <img src="assets/images/icon/terrace.svg" class="svg">            4 Floors
-              </div>
-              <div class="info-item" title="Semi-furnished" aria-label="semi furnished">
-              <img src="assets/images/icon/sofa.svg" class="svg">
-                Semi-furnished
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="carousel-slide next">
-          <img src="assets/images/slider1/DHP5.png" alt="House 2" class="imgs">
-           <div class="info-box">
-            <div class="info-top">
-              <div class="info-item" title="4 Bedrooms" aria-label="4 bedrooms">
-              <img src="assets/images/icon/home.svg" class="svg">
-                4 BHK
-              </div>
-              <div class="info-item" title="4 Parking Spots" aria-label="4 parking spots">
-                <img src="assets/images/icon/park.svg" class="svg">
-                4 Cars
-              </div>
-              <div class="info-item" title="4 Square Feet" aria-label="4 square feet">
-                <img src="assets/images/icon/sqft.svg" class="svg">
-                4 sq.ft.
-              </div>
-            </div>
-            <div class="info-bottom">
-              <div class="info-item" title="4 Floors" aria-label="4 floors">
-                <img src="assets/images/icon/terrace.svg" class="svg">            4 Floors
-              </div>
-              <div class="info-item" title="Semi-furnished" aria-label="semi furnished">
-              <img src="assets/images/icon/sofa.svg" class="svg">
-                Semi-furnished
-              </div>
-            </div>
-          </div>
-        </div>
-
-        
-        <div class="carousel-slide ">
-          <img src="assets/images/slider1/DHP4.png" alt="House 2" class="imgs">
-           <div class="info-box">
-            <div class="info-top">
-              <div class="info-item" title="4 Bedrooms" aria-label="4 bedrooms">
-              <img src="assets/images/icon/home.svg" class="svg">
-                4 BHK
-              </div>
-              <div class="info-item" title="4 Parking Spots" aria-label="4 parking spots">
-                <img src="assets/images/icon/park.svg" class="svg">
-                4 Cars
-              </div>
-              <div class="info-item" title="4 Square Feet" aria-label="4 square feet">
-                <img src="assets/images/icon/sqft.svg" class="svg">
-                4 sq.ft.
+        <?php if (!empty($featuredProperties)): ?>
+          <?php foreach ($featuredProperties as $index => $featured): ?>
+            <?php
+              $img = trim((string)($featured['cover_image_url'] ?? ''));
+              if ($img !== '') {
+                $isAbsolute = str_starts_with($img, 'http://') || str_starts_with($img, 'https://') || str_starts_with($img, '/');
+                if ($isAbsolute) {
+                  // leave as-is
+                } else {
+                  $hasSlash = strpos($img, '/') !== false;
+                  $resolved = '';
+                  if (!$hasSlash) {
+                    $name = basename($img);
+                    $root = dirname(__DIR__);
+                    $candidates = [
+                      'uploads/properties/' . $name,
+                      'uploads/' . $name,
+                      'assets/images/prop/' . $name,
+                    ];
+                    foreach ($candidates as $relPath) {
+                      if (file_exists($root . '/' . $relPath)) {
+                        $resolved = '../' . $relPath;
+                        break;
+                      }
+                    }
+                    $img = $resolved !== '' ? $resolved : '';
+                  } else {
+                    $img = '../' . ltrim($img, './');
+                  }
+                }
+              }
+            ?>
+            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" onclick="goToPropertyDetails(<?php echo $featured['id']; ?>)" style="cursor: pointer;">
+              <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($featured['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="imgs">
+              <div class="info-box">
+                <div class="info-top">
+                  <div class="info-item" title="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>">
+                  <img src="assets/images/icon/home.svg" class="svg">
+                    <?php echo htmlspecialchars($featured['configuration'] ?? '—', ENT_QUOTES, 'UTF-8'); ?>
+                  </div>
+                  <div class="info-item" title="Parking" aria-label="parking">
+                    <img src="assets/images/icon/park.svg" class="svg">
+                    <?php echo ($featured['parking'] ?? '') === 'Yes' ? '1' : '0'; ?> Cars
+                  </div>
+                  <div class="info-item" title="Area" aria-label="area">
+                    <img src="assets/images/icon/sqft.svg" class="svg">
+                    <?php echo htmlspecialchars((string)($featured['area'] ?? '—')); ?> sq.ft.
+                  </div>
+                </div>
+                <div class="info-bottom">
+                  <div class="info-item" title="Balcony" aria-label="balcony">
+                    <img src="assets/images/icon/terrace.svg" class="svg">
+                    <?php echo $featured['balcony'] ?? '—'; ?> Balcony
+                  </div>
+                  <div class="info-item" title="Furniture Status" aria-label="furniture status">
+                  <img src="assets/images/icon/sofa.svg" class="svg">
+                    <?php echo htmlspecialchars($featured['furniture_status'] ?? '—', ENT_QUOTES, 'UTF-8'); ?>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="info-bottom">
-              <div class="info-item" title="4 Floors" aria-label="4 floors">
-                <img src="assets/images/icon/terrace.svg" class="svg">            4 Floors
-              </div>
-              <div class="info-item" title="Semi-furnished" aria-label="semi furnished">
-              <img src="assets/images/icon/sofa.svg" class="svg">
-                Semi-furnished
-              </div>
-            </div>
-          </div>
-        </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
       </div>
   <!-- Navigation dots -->
       <div class="carousel-dots">
-        <span class="dot active" onclick="showSlide(0)"></span>
-        <span class="dot" onclick="showSlide(1)"></span>
-        <span class="dot" onclick="showSlide(2)"></span>
-        
+        <?php if (!empty($featuredProperties)): ?>
+          <?php foreach ($featuredProperties as $index => $featured): ?>
+            <span class="dot <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showSlide(<?php echo $index; ?>)"></span>
+          <?php endforeach; ?>
+        <?php endif; ?>
       </div>
   
     </div>
@@ -234,6 +270,9 @@ $mysqli = getMysqliConnection();
               $result->free();
             }
           } catch (Throwable $e) { error_log('Properties load error: ' . $e->getMessage()); }
+          
+          // featured properties loaded at top of file
+          
           // No image fallback; use first property image as cover when available
         ?>
         <div class="row g-4">
@@ -273,7 +312,7 @@ $mysqli = getMysqliConnection();
                       }
                     }
                   ?>
-                  <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="propimg">
+                  <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="propimg" style="width: 416px; height: 277px; object-fit: cover; border-radius: 8px;">
                   <div class="card-body">
                     <div class="card-title"><?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?></div>
                     <div class="property-attrs">
@@ -528,5 +567,29 @@ $mysqli = getMysqliConnection();
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/scripts.js"></script>
+
+<script>
+function goToPropertyDetails(propertyId) {
+    window.location.href = 'products/product-details.php?id=' + propertyId;
+}
+
+// Static search bar buttons → navigate to products with category, validated vs DB categories
+function onStaticCategoryClick(categoryName) {
+    try {
+        var available = <?php echo json_encode(array_keys($availableCategoryNames), JSON_HEX_TAG|JSON_HEX_APOS|JSON_HEX_AMP|JSON_HEX_QUOT); ?>;
+        // We always navigate; the products page will filter by category if it exists in DB
+        var url = 'products/index.php?category=' + encodeURIComponent(categoryName);
+        window.location.href = url;
+    } catch (e) {
+        window.location.href = 'products/index.php?category=' + encodeURIComponent(categoryName);
+    }
+}
+
+// City change on hero search: navigate to products page with city param
+function onHeroCityChange(cityName) {
+    const url = 'products/index.php' + (cityName ? ('?city=' + encodeURIComponent(cityName)) : '');
+    window.location.href = url;
+}
+</script>
 </body>
 </html>
