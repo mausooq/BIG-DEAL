@@ -54,7 +54,7 @@ if (!$property) {
 }
 
 // Fetch property images
-$images_stmt = $mysqli->prepare("SELECT id, image_url FROM property_images WHERE property_id = ? ORDER BY id");
+$images_stmt = $mysqli->prepare("SELECT id, image_url, image_order FROM property_images WHERE property_id = ? ORDER BY image_order ASC, id ASC");
 $images_stmt->bind_param('i', $property_id);
 $images_stmt->execute();
 $property_images = $images_stmt->get_result()->fetch_all(MYSQLI_ASSOC);

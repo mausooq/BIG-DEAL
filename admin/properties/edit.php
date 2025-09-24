@@ -48,7 +48,7 @@ if (!$property) {
 }
 
 // Fetch existing images
-$images_stmt = $mysqli->prepare("SELECT id, image_url FROM property_images WHERE property_id = ? ORDER BY id");
+$images_stmt = $mysqli->prepare("SELECT id, image_url, image_order FROM property_images WHERE property_id = ? ORDER BY image_order ASC, id ASC");
 $images_stmt->bind_param('i', $property_id);
 $images_stmt->execute();
 $existing_images = $images_stmt->get_result()->fetch_all(MYSQLI_ASSOC);
@@ -187,9 +187,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         if (move_uploaded_file($_FILES['images']['tmp_name'][$i], $file_path)) {
                             $image_url = $filename; // Store only filename, not full path
                             
-                            // Insert image record
-                            $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url) VALUES (?, ?)");
-                            $img_stmt->bind_param('is', $property_id, $image_url);
+                            // Determine next order if none provided
+                            $nextOrder = 1;
+                            $ordRes = $mysqli->query("SELECT COALESCE(MAX(image_order),0)+1 AS next_order FROM property_images WHERE property_id=".(int)$property_id);
+                            if ($ordRes && $o = $ordRes->fetch_assoc()) { $nextOrder = (int)$o['next_order']; }
+                            // Insert image record with order
+                            $img_stmt = $mysqli->prepare("INSERT INTO property_images (property_id, image_url, image_order) VALUES (?, ?, ?)");
+                            $img_stmt->bind_param('isi', $property_id, $image_url, $nextOrder);
                             $img_stmt->execute();
                             $img_stmt->close();
                         } else {
@@ -242,6 +246,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $del_img_stmt->execute();
                         $del_img_stmt->close();
                     }
+                }
+            }
+        }
+
+        // Handle images re-ordering
+        if (!empty($_POST['images_order'])) {
+            $orderJson = $_POST['images_order'];
+            $map = json_decode($orderJson, true);
+            if (is_array($map)) {
+                $upd = $mysqli->prepare('UPDATE property_images SET image_order=? WHERE id=? AND property_id=?');
+                if ($upd) {
+                    foreach ($map as $imgId => $order) {
+                        $imgId = (int)$imgId; $order = (int)$order;
+                        if ($imgId > 0 && $order > 0) {
+                            $upd->bind_param('iii', $order, $imgId, $property_id);
+                            $upd->execute();
+                        }
+                    }
+                    $upd->close();
                 }
             }
         }
@@ -559,15 +582,16 @@ $pl_stmt && $pl_stmt->close();
 
                         <?php if (!empty($existing_images)): ?>
                         <div class="section-title">Current Images</div>
-                        <div>
+                        <div id="existingImagesContainer" style="display:flex;flex-wrap:wrap;gap:8px;">
                             <?php foreach ($existing_images as $image): ?>
-                                <div class="existing-image">
+                                <div class="existing-image" data-image-id="<?php echo (int)$image['id']; ?>">
                                     <img src="../../uploads/properties/<?php echo htmlspecialchars(basename($image['image_url'])); ?>" alt="Property Image">
                                     <button type="button" class="image-delete-btn" onclick="deleteImage(<?php echo $image['id']; ?>)">×</button>
                                     <input type="hidden" name="delete_images[]" id="delete_<?php echo $image['id']; ?>" value="">
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                        <input type="hidden" name="images_order" id="images_order" value="">
                         <?php endif; ?>
 
                         <div class="section-title">Add New Images</div>
@@ -978,6 +1002,36 @@ $pl_stmt && $pl_stmt->close();
             const card = btn ? btn.closest('.existing-image') : null;
             if (card) { card.style.display = 'none'; }
         }
+
+        // Drag-and-drop sorting for existing images
+        (function enableImageSorting(){
+            const container = document.getElementById('existingImagesContainer');
+            if (!container) return;
+            let dragSrc = null;
+            function handleDragStart(e){ dragSrc = this; this.style.opacity = '0.6'; e.dataTransfer.effectAllowed = 'move'; }
+            function handleDragOver(e){ if (e.preventDefault) e.preventDefault(); e.dataTransfer.dropEffect = 'move'; return false; }
+            function handleDragEnter(){ this.classList.add('over'); }
+            function handleDragLeave(){ this.classList.remove('over'); }
+            function handleDrop(e){ if (e.stopPropagation) e.stopPropagation(); if (dragSrc !== this) { const nodes = Array.from(container.children); const srcIndex = nodes.indexOf(dragSrc); const tgtIndex = nodes.indexOf(this); if (srcIndex > -1 && tgtIndex > -1) { if (srcIndex < tgtIndex) { container.insertBefore(dragSrc, this.nextSibling); } else { container.insertBefore(dragSrc, this); } updateOrderHidden(); } } return false; }
+            function handleDragEnd(){ this.style.opacity = '1'; container.querySelectorAll('.existing-image').forEach(el=> el.classList.remove('over')); }
+            function updateOrderHidden(){
+                const map = {};
+                Array.from(container.querySelectorAll('.existing-image')).forEach((el, idx)=>{ const id = el.getAttribute('data-image-id'); if (id) map[id] = idx + 1; });
+                const hidden = document.getElementById('images_order');
+                if (hidden) hidden.value = JSON.stringify(map);
+            }
+            Array.from(container.querySelectorAll('.existing-image')).forEach(el=>{
+                el.setAttribute('draggable', 'true');
+                el.addEventListener('dragstart', handleDragStart, false);
+                el.addEventListener('dragenter', handleDragEnter, false);
+                el.addEventListener('dragover', handleDragOver, false);
+                el.addEventListener('dragleave', handleDragLeave, false);
+                el.addEventListener('drop', handleDrop, false);
+                el.addEventListener('dragend', handleDragEnd, false);
+            });
+            // initialize hidden order on load
+            updateOrderHidden();
+        })();
 
         // Form validation
         document.getElementById('propertyForm').addEventListener('submit', function(e) {
