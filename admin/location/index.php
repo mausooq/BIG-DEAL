@@ -929,6 +929,37 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
          /* Table wrapper */
          .table-wrap{ border:0; border-radius:12px; overflow:hidden; background:#fff; }
+        /* Pagination - red theme */
+        .pagination .page-link {
+            color: var(--primary);
+            border-color: var(--line);
+            background-color: var(--card);
+            border-radius: 8px;
+            margin: 0 2px;
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        .pagination .page-link:hover {
+            color: #fff;
+            background-color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(225, 29, 42, 0.2);
+        }
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: #fff;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(225, 29, 42, 0.3);
+        }
+        .pagination .page-item.disabled .page-link {
+            color: var(--muted);
+            background-color: #f8f9fa;
+            border-color: var(--line);
+            cursor: not-allowed;
+        }
          /* Inner borders (match Properties) */
          .table-inner thead th{ background:transparent; border-bottom:1px solid var(--line) !important; color:#111827; font-weight:600; }
          .table-inner thead th, .table-inner tbody td{ padding:0; }
