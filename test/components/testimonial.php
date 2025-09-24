@@ -1,13 +1,49 @@
+<?php
+// Load DB config and fetch testimonials
+require_once __DIR__ . '/../config/config.php';
+
+$testimonials = [];
+// Base path for uploaded testimonial images (store only filenames in DB)
+$uploadsBase = '../uploads/testimonials/';
+$houseImage = isset($asset_path) ? $asset_path . 'images/prop/prop5.png' : 'images/prop/prop5.png';
+try {
+    $db = getMysqliConnection();
+    $sql = "SELECT id, name, feedback, rating, profile_image, home_image FROM testimonials ORDER BY created_at DESC";
+    if ($result = $db->query($sql)) {
+        while ($row = $result->fetch_assoc()) {
+            $testimonials[] = $row;
+        }
+        $result->free();
+    }
+    if (!empty($testimonials) && !empty($testimonials[0]['home_image'])) {
+        $houseImage = $uploadsBase . ltrim($testimonials[0]['home_image'], "\\/ ");
+    }
+} catch (Throwable $e) {
+    // Fail silently in UI; optionally log
+    error_log('Testimonials fetch failed: ' . $e->getMessage());
+}
+?>
 <style>
 /* Testimonials (scoped) */
 .testimonials { padding: 20px 0; width: 100%; }
 .test-head { font-size: 48px; font-weight: 700; font-style: Bold; margin-top: -80px; letter-spacing: 1%; }
 .test-sub { font-weight: 400; font-style: Regular; font-size: 16px; letter-spacing: 1px; }
+/* Utility: clip-path shape */
+.clip-notch {
+  -webkit-clip-path: polygon(40% 0%, 100% 0, 100% 100%, 0 100%, 0 40%);
+  clip-path: polygon(40% 0%, 100% 0, 100% 100%, 0 100%, 0 40%);
+}
 /* Desktop-only quote positioning to avoid conflicts on mobile/tablet */
 @media (min-width: 1025px) {
   .quote { justify-items: center; margin-top: -200px; margin-right: 15px; }
 }
 .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; gap: 10px; z-index: 1; margin-right: 70px; }
+.testimg #testimonial-house-img {
+  width: clamp(18rem, 42vw, 36rem);
+  aspect-ratio: 9 / 5;
+  object-fit: cover;
+  display: block;
+}
 .testimonial-content { position: relative; margin-top: 80px; }
 .testimonial-carousel {
   max-width: 730px; padding: 10px; padding-bottom: 0; margin-top: -60px; margin-left: 50px;
@@ -28,65 +64,58 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  /* Mirror 768px styling */
   .test-head { font-size: 1.75em; margin-top: -1.25em; }
   .test-sub { font-size: 0.8125em; }
-  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 1em; margin-top: 10em; }
-  /* Quote positioning like 768px */
-  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
-  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 2.5em; flex: 0 0 28% !important; overflow: visible; }
-  .testimg img.img-fluid { position: absolute; right: 2em; width: 15em; max-width: none; height: auto; margin-left: 0; margin-top: -8em; z-index: 3; }
-  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -9.625em !important; margin: 0 !important; z-index: 2 !important; transform: none !important; width: 5em !important; height: auto !important; }
-  .testimonial-carousel { width: 72% !important; max-width: none; margin-left: 1.875em; margin-top: -2em; padding: 0.75em; flex: 0 0 62% !important; z-index: 0; }
+  .testimonial-content { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1.5rem; margin-top: 2rem; }
+  .testimonials .testimg .quote { display: none !important; }
+  .testimg { position: relative; display: flex; justify-content: center; align-items: center; margin-right: 0; flex: 0 0 auto; overflow: visible; }
+  .testimg img.img-fluid { position: static; right: auto; margin: 0; z-index: 1; }
+  .testimg #testimonial-house-img { width: clamp(16rem, 80vw, 30rem); aspect-ratio: 9 / 5; }
+  .testimonial-carousel { width: 100% !important; max-width: 90%; margin: 0 auto; padding: 0.75em; z-index: 0; }
   .testimonial-author img { width: 3em; height: 3em; }
   .testimonial-author-info h5 { font-size: 1.125em; }
   .testimonial-author-info p { font-size: 0.75em; }
   .testimonial-author { margin-bottom: 0.5em !important; }
   .testimonial-slide p { margin: 0.375em 0 0.5em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
   .stars { font-size: 0.875em; margin: 0 0 0.375em !important; }
-  .testimonial-nav { position: absolute; bottom: 3.125em; right: 3.125em; top: 2.5em; }
+  .testimonial-nav { position: static; margin-top: 1rem; display: flex; justify-content: center; }
   .testimonial-slide { padding: 0; }
   .testimonial-nav img { width: 1.5em; height: 1.5em; }
 }
 @media (max-width: 768px) {
-  /* Keep desktop structure on small tablets */
   .test-head { font-size: 1.75em; margin-top: -1.25em; }
   .test-sub { font-size: 0.8125em; }
-  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 1em; margin-top: 10em; }
-  /* Hide distracting quote on small tablets */
-  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
-  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 2.5em; flex: 0 0 28% !important; overflow: visible; }
-  .testimg img.img-fluid { position: absolute; right: -1em; width: 15em; max-width: none; height: auto; margin-left: 0; margin-top: -8em; z-index: 3; }
-  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -9.625em !important; margin: 0 !important; z-index: 2 !important; transform: none !important;width: 5em !important; height: auto !important; }
-  .testimonial-carousel { width: 72% !important; max-width: none; margin-left: 1.875em; margin-top: -2em; padding: 0.75em; flex: 0 0 50% !important; z-index: 0; }
+  .testimonial-content { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 1.25rem; margin-top: 1.5rem; }
+  .testimonials .testimg .quote { display: none !important; }
+  .testimg { position: relative; display: flex; justify-content: center; align-items: center; margin-right: 0; flex: 0 0 auto; overflow: visible; }
+  .testimg img.img-fluid { position: static; right: auto; margin: 0; z-index: 1; }
+  .testimg #testimonial-house-img { width: clamp(14rem, 90vw, 26rem); aspect-ratio: 9 / 5; }
+  .testimonial-carousel { width: 100% !important; max-width: 94%; margin: 0 auto; padding: 0.75em; z-index: 0; }
   .testimonial-author img { width: 3em; height: 3em; }
   .testimonial-author-info h5 { font-size: 1.125em; }
   .testimonial-author-info p { font-size: 0.75em; }
   .testimonial-author { margin-bottom: 0.5em !important; }
   .testimonial-slide p { margin: 0.375em 0 0.5em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; }
   .stars { font-size: 0.875em; margin: 0 0 0.375em !important; }
-  .testimonial-nav { position: absolute; bottom: 3.125em; right: 3.125em; top: 2.5em; }
+  .testimonial-nav { position: static; margin-top: 0.75rem; display: flex; justify-content: center; }
   .testimonial-nav img { width: 1.5em; height: 1.5em; }
 }
 @media (max-width: 480px) {
-  /* Keep desktop structure on mobile (scaled) */
   .test-head { margin-top: 0; font-size: 1.5em;}
   .test-sub { font-size: 0.75em; line-height: 1.5; }
-  .testimonial-content { display: flex; flex-direction: row-reverse; align-items: flex-start; justify-content: space-between; flex-wrap: nowrap; gap: 0.75em; margin-top: 3em;margin-left: 4em;}
-  /* Hide distracting quote on mobile */
-  .testimg { position: relative; display: flex; justify-content: flex-end; align-items: center; margin-right: 12px; flex: 1 1 38%; overflow: visible; }
-  .testimg img.img-fluid { width: 12em !important; max-width: none !important; height: auto; margin-left: auto; position: relative; left: -2em; z-index: 10; margin-top: -2em; }
-  /* Smaller quote pinned to start */
-  .testimonials .testimg .quote { display: block !important; position: absolute !important; left: -10em !important; right: auto !important; top: -2.5em !important; width: 5em !important; height: auto !important; margin: 0 !important; transform: none !important; z-index: 1; }
-  .testimonial-carousel { width: 62%; max-width: none; margin-left: 0.625em; margin-top: -1.25em; padding: 0.625em; flex: 1 1 50%; z-index: 0; }
+  .testimonial-content { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 0.75rem; margin-top: 1rem; margin-left: 0; }
+  .testimonials .testimg .quote { display: none !important; }
+  .testimg { position: relative; display: flex; justify-content: center; align-items: center; margin-right: 0; flex: 0 0 auto; overflow: visible; }
+  .testimg img.img-fluid { position: static; margin: 0; left: auto; z-index: 1; }
+  .testimg #testimonial-house-img { width: 100%; max-width: 22rem; aspect-ratio: 9 / 5; }
+  .testimonial-carousel { width: 100%; max-width: 96%; margin: 0 auto; padding: 0.625em; z-index: 0; }
   .testimonial-author img { width: 2.25em; height: 2.25em; }
   .testimonial-author-info h5 { font-size: 0.9375em; }
   .testimonial-author-info p { font-size: 0.6875em; }
-  .testimonial-carousel { padding: 0.5em !important;margin-top: 6em; }
   .testimonial-author { margin-bottom: 0.375em !important; }
   .testimonial-slide p { margin: 0.25em 0 0.375em !important; line-height: 1.4 !important; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
   .stars { font-size: 0.8125em; margin: 0 0 0.375em !important; }
-  .testimonial-nav { position: absolute; bottom: 1.875em; right: 1.875em; top: 8em; }
+  .testimonial-nav { position: static; margin-top: 0.5rem; display: flex; justify-content: center; }
   .testimonial-nav img { width: 1.25em; height: 1.25em; }
 }
 </style>
@@ -98,57 +127,55 @@
         <div class="testimonial-content">
           <div class="testimg">
             <img src="<?php echo $asset_path; ?>images/icon/quote.svg" alt="quote" class="quote">
-            <img src="<?php echo $asset_path; ?>images/prop/prop5.png" alt="House" class="img-fluid">
+            <img src="<?php echo htmlspecialchars($houseImage, ENT_QUOTES, 'UTF-8'); ?>" alt="House" class="img-fluid clip-notch" id="testimonial-house-img">
           </div>
 
           <div class="testimonial-carousel">
-            <div class="testimonial-slide active">
-              <div class="testimonial-author">
-                <img src="<?php echo $asset_path; ?>images/avatar/test1.png" alt="Munazza">
-                <div class="testimonial-author-info">
-                  <h5>Munazza</h5>
-                  <p>Software Developer</p>
+            <?php if (!empty($testimonials)): ?>
+              <?php foreach ($testimonials as $index => $t): ?>
+                <?php
+                  $name = htmlspecialchars($t['name'] ?: 'Anonymous', ENT_QUOTES, 'UTF-8');
+                  $feedback = htmlspecialchars($t['feedback'] ?: '', ENT_QUOTES, 'UTF-8');
+                  $rating = (int)($t['rating'] ?: 5);
+                  if ($rating < 1) { $rating = 1; }
+                  if ($rating > 5) { $rating = 5; }
+                  $profile = $t['profile_image'];
+                  if ($profile && trim($profile) !== '') {
+                    $profile = $uploadsBase . ltrim($profile, "\\/ ");
+                  } else {
+                    $profile = isset($asset_path) ? $asset_path . 'images/avatar/test1.png' : 'images/avatar/test1.png';
+                  }
+                ?>
+                <div class="testimonial-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-home-image="<?php echo htmlspecialchars(($t['home_image'] ? $uploadsBase . ltrim($t['home_image'], "\\/ ") : ''), ENT_QUOTES, 'UTF-8'); ?>">
+                  <div class="testimonial-author">
+                    <img src="<?php echo htmlspecialchars($profile, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $name; ?>">
+                    <div class="testimonial-author-info">
+                      <h5><?php echo $name; ?></h5>
+                      <p>&nbsp;</p>
+                    </div>
+                  </div>
+
+                  <p><?php echo $feedback; ?></p>
+
+                  <div class="stars">
+                    <?php for ($i=0; $i<$rating; $i++): ?><span>★</span><?php endfor; ?>
+                    <?php for ($i=$rating; $i<5; $i++): ?><span style="opacity:.25;">★</span><?php endfor; ?>
+                  </div>
                 </div>
-              </div>
-
-              <p>Exquisite sophisticated iconic cutting-edge laborum deserunt esse bureaux cupidatat id minim. Sharp classic the best commodo nostrud delightful.</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="<?php echo $asset_path; ?>images/avatar/test2.png" alt="John Doe">
-                <div class="testimonial-author-info">
-                  <h5>John Doe</h5>
-                  <p>Designer</p>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="testimonial-slide active">
+                <div class="testimonial-author">
+                  <img src="<?php echo $asset_path; ?>images/avatar/test1.png" alt="Guest">
+                  <div class="testimonial-author-info">
+                    <h5>Guest</h5>
+                    <p>&nbsp;</p>
+                  </div>
                 </div>
+                <p>We’ll soon showcase real stories from our happy customers.</p>
+                <div class="stars"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
               </div>
-
-              <p>Amazing experience finding my dream home. The team was professional and helped me every step of the way. Highly recommended!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
-
-            <div class="testimonial-slide">
-              <div class="testimonial-author">
-                <img src="<?php echo $asset_path; ?>images/avatar/test3.png" alt="Jane Smith">
-                <div class="testimonial-author-info">
-                  <h5>Jane Smith</h5>
-                  <p>Entrepreneur</p>
-                </div>
-              </div>
-
-              <p>Outstanding service and beautiful properties. I found the perfect office space for my business. Thank you for making it so easy!</p>
-
-              <div class="stars">
-                <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-              </div>
-            </div>
+            <?php endif; ?>
           </div>
 
           <div class="testimonial-nav">
@@ -157,3 +184,31 @@
           </div>
         </div>
     </section>
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.testimonial-carousel .testimonial-slide'));
+  const prevBtn = document.getElementById('testimonial-prev');
+  const nextBtn = document.getElementById('testimonial-next');
+  const houseImg = document.getElementById('testimonial-house-img');
+  if (!slides.length || !prevBtn || !nextBtn) return;
+
+  let index = slides.findIndex(s => s.classList.contains('active'));
+  if (index < 0) index = 0;
+
+  const fallbackHouse = houseImg ? houseImg.getAttribute('src') : '';
+
+  function setActive(newIndex){
+    slides[index].classList.remove('active');
+    index = (newIndex + slides.length) % slides.length;
+    slides[index].classList.add('active');
+    // Update house image if provided for this slide
+    if (houseImg){
+      const newSrc = slides[index].getAttribute('data-home-image');
+      houseImg.src = newSrc && newSrc.trim() !== '' ? newSrc : fallbackHouse;
+    }
+  }
+
+  prevBtn.addEventListener('click', function(){ setActive(index - 1); });
+  nextBtn.addEventListener('click', function(){ setActive(index + 1); });
+})();
+</script>
