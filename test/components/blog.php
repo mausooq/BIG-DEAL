@@ -41,13 +41,9 @@
   border-radius: 28px;
   overflow: hidden;
 }
-.blog-image img {
-  height: fit-content;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 0;
-  display: block;
-}
+.blog-feature { min-height: 360px; }
+.blog-image { width: 506px; height: 594px; flex: 0 0 506px; }
+.blog-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; display: block; }
 .blog-card {
   color: #373737;
   flex: 1;
@@ -96,7 +92,7 @@
 .author-role { font-weight: 200; font-style: ExtraLight; font-size: 20px; line-height: 122%; letter-spacing: 0%; }
 .blog2, .blog3 { margin-top: 10px; padding-top: 10px; width: 100%; }
 .blog-panel { border-radius: 24px; width: 50%; display: flex; flex-direction: column; margin: 0 20px; text-align: start; }
-.blog-panel img { width: 100%; border-radius: 24px; object-fit: cover; align-items: center; }
+.blog-panel img { width: 327px; height: 329px; border-radius: 24px; object-fit: cover; display: block; margin: 0 auto; }
 .caption { font-weight: 500; font-style: Medium; font-size: 24px; line-height: 100%; letter-spacing: 0%; margin: 10px 0; color: #000000; }
 .date { font-weight: 300; font-style: Light; font-size: 16px; line-height: 100%; letter-spacing: 0%; color: #afabab; }
 
@@ -110,6 +106,7 @@
   .section-header h2 { font-size: 1.5rem; line-height: 1.3; }
   .view-all-btn { align-self: flex-end; padding: 10px 16px; font-size: 0.9rem; }
   .blog-feature { flex-direction: column; }
+  .blog-image { width: 100%; height: auto; flex: 0 0 auto; }
   .blog-image img { width: 100%; height: auto; border-radius: 28px 28px 0 0; }
   .blog-card { border-radius: 0 0 28px 28px; padding: 1.25rem; }
   .blog-card h3 { font-size: 1.1rem; margin-bottom: 12px; }
@@ -120,6 +117,7 @@
   .author-role { font-size: 0.85rem; }
   .blog2, .blog3 { margin-top: 5px; padding-top: 0.3125rem; }
   .blog-panel { width: 100%; margin: 0px 5px; padding: 10px 5px; }
+  .blog-panel img { width: 100%; height: auto; }
   .caption { font-size: 1rem; margin-top: 12px; }
   .date { font-size: 0.85rem; margin-top: 2px; }
 }
@@ -131,6 +129,71 @@
 }
 </style>
 
+<?php
+  // Load latest blogs from DB (max 4) to fill the section without changing structure/styles
+  if (!isset($mysqli) || !($mysqli instanceof mysqli)) {
+    if (!function_exists('getMysqliConnection')) {
+      $cfg = __DIR__ . '/../config/config.php';
+      if (file_exists($cfg)) { require_once $cfg; }
+    }
+    if (function_exists('getMysqliConnection')) {
+      try { $mysqli = getMysqliConnection(); } catch (Throwable $e) { $mysqli = null; }
+    }
+  }
+
+  $blogs = [];
+  if (isset($mysqli) && $mysqli instanceof mysqli) {
+    try {
+      if ($res = $mysqli->query("SELECT id, title, content, image_url, created_at FROM blogs ORDER BY created_at DESC, id DESC LIMIT 4")) {
+        while ($row = $res->fetch_assoc()) { $blogs[] = $row; }
+        $res->free();
+      }
+    } catch (Throwable $e) { /* silent in UI */ }
+  }
+
+  // Helper to resolve image path; prefer uploads/blogs when a filename only is stored
+  function resolveBlogImageSrc($raw) {
+    $raw = trim((string)($raw ?? ''));
+    if ($raw === '') { return 'assets/images/prop/bhouse3.png'; }
+    $isAbs = (stripos($raw, 'http://') === 0) || (stripos($raw, 'https://') === 0) || (strpos($raw, '/') === 0);
+    if ($isAbs) { return $raw; }
+    $name = basename($raw);
+    $testRoot = dirname(__DIR__);        // .../BIG-DEAL/test
+    $projectRoot = dirname($testRoot);   // .../BIG-DEAL
+
+    // Check under project uploads first
+    $projCandidates = [
+      $projectRoot . '/uploads/blogs/' . $name,
+      $projectRoot . '/uploads/' . $name,
+    ];
+    foreach ($projCandidates as $abs) {
+      if (file_exists($abs)) {
+        // Return path relative to /test/ pages
+        if (strpos($abs, $projectRoot . '/uploads/') === 0) {
+          return '../' . ltrim(str_replace($projectRoot . '/', '', $abs), '/');
+        }
+      }
+    }
+
+    // Fallback to test assets
+    $testCandidates = [
+      $testRoot . '/assets/images/prop/' . $name,
+    ];
+    foreach ($testCandidates as $abs) {
+      if (file_exists($abs)) {
+        return 'assets/images/prop/' . $name;
+      }
+    }
+
+    return 'assets/images/prop/bhouse3.png';
+  }
+
+  $b0 = $blogs[0] ?? null;
+  $b1 = $blogs[1] ?? null;
+  $b2 = $blogs[2] ?? null;
+  $b3 = $blogs[3] ?? null;
+?>
+
 <section class="blog-section ">
   <div class="section-header">
     <h2>Explore our latest blogs for<br>real estate insights</h2>
@@ -138,13 +201,21 @@
   </div>
   <div class="blog-feature">
     <div class="blog-image">
-      <img src="assets/images/prop/bhouse3.png" alt="Blogimage1">
+      <img src="<?php echo htmlspecialchars($b0 ? resolveBlogImageSrc($b0['image_url']) : 'assets/images/prop/bhouse3.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Blogimage1">
     </div>
     <div class="blog-card">
       <span class="blog-read">7 min read</span>
-      <h3>High-end properties</h3>
+      <h3><?php echo htmlspecialchars($b0['title'] ?? 'High-end properties', ENT_QUOTES, 'UTF-8'); ?></h3>
       <p>
-        Experience the pinnacle of luxury living with our exclusive collection of high-end properties. Featuring elegant villas, premium apartments, and penthouses in prime locations, these homes are designed with world-class amenities and modern architecture to deliver unmatched comfort, sophistication, and lifestyle value.
+        <?php
+          if ($b0) {
+            $excerpt = trim(strip_tags($b0['content'] ?? ''));
+            if (mb_strlen($excerpt) > 320) { $excerpt = mb_substr($excerpt, 0, 317) . '...'; }
+            echo htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
+          } else {
+            echo 'Experience the pinnacle of luxury living with our exclusive collection of high-end properties. Featuring elegant villas, premium apartments, and penthouses in prime locations, these homes are designed with world-class amenities and modern architecture to deliver unmatched comfort, sophistication, and lifestyle value.';
+          }
+        ?>
       </p>
       <div class="blog-author">
         <img src="assets/images/avatar/test1.png" class="author-img" alt="Admin">
@@ -157,19 +228,19 @@
   </div>
 <div class="d-flex blog2">
   <div class="blog-panel">
-    <img src="assets/images/prop/bhouse4.png" alt="Living Room">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
+    <img src="<?php echo htmlspecialchars($b1 ? resolveBlogImageSrc($b1['image_url']) : 'assets/images/prop/bhouse4.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Living Room">
+    <div class="caption"><?php echo htmlspecialchars($b1['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php echo htmlspecialchars(isset($b1['created_at']) ? date('F j, Y', strtotime($b1['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
   <div class="blog-panel">
-    <img src="assets/images/prop/bhouse5.png" alt="Modern TV Unit">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
+    <img src="<?php echo htmlspecialchars($b2 ? resolveBlogImageSrc($b2['image_url']) : 'assets/images/prop/bhouse5.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Modern TV Unit">
+    <div class="caption"><?php echo htmlspecialchars($b2['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php echo htmlspecialchars(isset($b2['created_at']) ? date('F j, Y', strtotime($b2['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
   <div class="blog-panel">
-    <img src="assets/images/prop/bhouse6.png" alt="Contemporary Kitchen">
-    <div class="caption">Market Trend</div>
-    <div class="date">April 9, 2025</div>
+    <img src="<?php echo htmlspecialchars($b3 ? resolveBlogImageSrc($b3['image_url']) : 'assets/images/prop/bhouse6.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Contemporary Kitchen">
+    <div class="caption"><?php echo htmlspecialchars($b3['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php echo htmlspecialchars(isset($b3['created_at']) ? date('F j, Y', strtotime($b3['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
   </div>
   </div>
 
