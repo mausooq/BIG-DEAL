@@ -4647,3 +4647,44 @@ body {
 .product-page .contact-section {
   margin-bottom: 100px;
 }
+
+/* ===== Latest Properties: Uniform cards & images across devices ===== */
+/* Keep existing UI; only ensure consistent image size and card stretching */
+.property-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.property-card .card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+/* Make all property images equal height while preserving cover crop */
+.property-card .propimg {
+  width: 100% !important;
+  height: 277px !important; /* desktop baseline to match current design */
+  object-fit: cover;
+  border-radius: 8px !important;
+  display: block;
+}
+@media (max-width: 480px) {
+  .property-card .propimg {
+    height: 200px !important;
+  }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  .property-card .propimg {
+    height: 220px !important;
+  }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .property-card .propimg {
+    height: 240px !important;
+  }
+}
+@media (min-width: 1025px) and (max-width: 1280px) {
+  .property-card .propimg {
+    height: 260px !important;
+  }
+}
