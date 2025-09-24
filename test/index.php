@@ -190,7 +190,7 @@ try {
               }
             }
             ?>
-            <div class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" onclick="goToPropertyDetails(<?php echo $featured['id']; ?>)" style="cursor: pointer;">
+            <a href="products/product-details.php?id=<?php echo (int)$featured['id']; ?>" class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" style="display: block;">
               <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($featured['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="imgs">
               <div class="info-box">
                 <div class="info-top">
@@ -218,7 +218,7 @@ try {
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
           <?php endforeach; ?>
         <?php endif; ?>
       </div>
@@ -249,8 +249,7 @@ try {
     <!-- Properties Grid -->
     <?php
     $properties = [];
-    $showAllProps = isset($_GET['more']) && $_GET['more'] == '1';
-    $propsLimit = $showAllProps ? 1000 : 6;
+    $propsLimit = 6; // show max 6 recently added properties
     $totalProps = 0;
     try {
       // Total count
@@ -300,6 +299,7 @@ try {
       <?php if (!empty($properties)): ?>
         <?php foreach ($properties as $i => $p): ?>
           <div class="col-md-4">
+            <a href="products/product-details.php?id=<?php echo (int)$p['id']; ?>" style="text-decoration: none; color: inherit; display: block;">
             <div class="card property-card h-100">
               <?php
               $img = trim((string)($p['cover_image_url'] ?? ''));
@@ -345,15 +345,12 @@ try {
                 </div>
               </div>
             </div>
+            </a>
           </div>
         <?php endforeach; ?>
       <?php endif; ?>
     </div>
-    <?php if (!$showAllProps && $totalProps > $propsLimit): ?>
-      <div class="text-center" style="margin: 20px 0;">
-        <a href="?more=1#latest-properties" class="view-all-btn">View More →</a>
-      </div>
-    <?php endif; ?>
+    
 
 
 
@@ -424,42 +421,13 @@ try {
                       $cimg = 'assets/images/loc/black_hero.png';
                     }
                     ?>
-                    <img src="<?php echo htmlspecialchars($cimg, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?>">
-                    <div class="city-label"><?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?></div>
+                    <a href="products/index.php?city=<?php echo urlencode($city['name']); ?>" style="display: block; text-decoration: none; color: inherit;">
+                      <img src="<?php echo htmlspecialchars($cimg, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?>">
+                      <div class="city-label"><?php echo htmlspecialchars($city['name'] ?? 'City', ENT_QUOTES, 'UTF-8'); ?></div>
+                    </a>
                   </div>
                 </div>
               <?php endforeach; ?>
-            <?php else: ?>
-              <div>
-                <div class="city-card location-extra1">
-                  <img src="assets/images/loc/blore.png" alt="Bengaluru">
-                  <div class="city-label">Bengaluru</div>
-                </div>
-              </div>
-              <div>
-                <div class="city-card location-extra2">
-                  <img src="assets/images/loc/mysore.png" alt="Mysuru">
-                  <div class="city-label">Mysuru</div>
-                </div>
-              </div>
-              <div>
-                <div class="city-card">
-                  <img src="assets/images/loc/mlore.png" alt="Mangaluru">
-                  <div class="city-label">Mangaluru</div>
-                </div>
-              </div>
-              <div>
-                <div class="city-card">
-                  <img src="assets/images/loc/chikm.png" alt="Chikkamagaluru">
-                  <div class="city-label">Chikkamagaluru</div>
-                </div>
-              </div>
-              <div>
-                <div class="city-card">
-                  <img src="assets/images/loc/kgd.png" alt="Kasaragod">
-                  <div class="city-label">Kasaragod</div>
-                </div>
-              </div>
             <?php endif; ?>
           </div>
         </div>
@@ -478,23 +446,31 @@ try {
     </div>
     <div class="row apt  ">
       <div class="col-md-3">
-        <img src="assets/images/prop/apt.png" alt="Residential">
-        <p class="figtree">Residential</p>
+        <a href="products/index.php?category=Residential" style="display: block; text-decoration: none; color: inherit;">
+          <img src="assets/images/prop/apt.png" alt="Residential">
+          <p class="figtree">Residential</p>
+        </a>
       </div>
 
       <div class="col-md-3">
-        <img src="assets/images/prop/indhouse.png" alt="Independent house">
-        <p class="figtree">Independent House</p>
+        <a href="products/index.php?category=Independent%20House" style="display: block; text-decoration: none; color: inherit;">
+          <img src="assets/images/prop/indhouse.png" alt="Independent house">
+          <p class="figtree">Independent House</p>
+        </a>
       </div>
 
       <div class="col-md-3">
-        <img src="assets/images/prop/wspace.png" alt="Working Space">
-        <p class="figtree">Working Space</p>
+        <a href="products/index.php?category=Studio" style="display: block; text-decoration: none; color: inherit;">
+          <img src="assets/images/prop/wspace.png" alt="Studio">
+          <p class="figtree">Studio</p>
+        </a>
       </div>
 
       <div class="col-md-3">
-        <img src="assets/images/prop/plot.png" alt="Plot">
-        <p class="figtree">Plot</p>
+        <a href="products/index.php?category=Plot" style="display: block; text-decoration: none; color: inherit;">
+          <img src="assets/images/prop/plot.png" alt="Plot">
+          <p class="figtree">Plot</p>
+        </a>
       </div>
     </div>
   </div>
