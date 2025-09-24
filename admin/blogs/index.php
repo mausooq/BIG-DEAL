@@ -338,7 +338,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		/* Mobile responsiveness */
 
 			.blog-card{ margin-bottom:1rem; }
-		}
+		
 		@media (max-width: 768px){
 			.blog-title{ font-size:1rem; }
 			.blog-preview{ font-size:0.85rem; }

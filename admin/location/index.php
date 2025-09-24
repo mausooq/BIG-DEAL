@@ -2138,22 +2138,22 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
 
          function searchStates() {
              const searchValue = document.getElementById('searchInput').value;
-             window.location.href = '?search=' + encodeURIComponent(searchValue);
+             window.location.href = 'index.php?search=' + encodeURIComponent(searchValue) + '#states';
          }
 
          function searchDistricts() {
              const searchValue = document.getElementById('districtSearchInput').value;
-             window.location.href = '?district_search=' + encodeURIComponent(searchValue);
+             window.location.href = 'index.php?district_search=' + encodeURIComponent(searchValue) + '#districts';
          }
 
          function searchCities() {
              const searchValue = document.getElementById('citySearchInput').value;
-             window.location.href = '?city_search=' + encodeURIComponent(searchValue);
+             window.location.href = 'index.php?city_search=' + encodeURIComponent(searchValue) + '#cities';
          }
 
          function searchTowns() {
              const searchValue = document.getElementById('townSearchInput').value;
-             window.location.href = '?town_search=' + encodeURIComponent(searchValue);
+             window.location.href = 'index.php?town_search=' + encodeURIComponent(searchValue) + '#towns';
          }
 
          // Initialize Bootstrap tabs
@@ -2167,6 +2167,24 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                      tabTrigger.show();
                  });
              });
+
+            // Ensure correct tab is shown after search/navigation using hash or query
+            try {
+                const hash = (window.location.hash || '').toLowerCase();
+                const params = new URLSearchParams(window.location.search);
+                let targetId = null;
+                if (hash === '#cities' || params.has('city_search')) targetId = 'cities';
+                else if (hash === '#districts' || params.has('district_search')) targetId = 'districts';
+                else if (hash === '#towns' || params.has('town_search')) targetId = 'towns';
+                else if (hash === '#states' || params.has('search')) targetId = 'states';
+                if (targetId) {
+                    const button = document.querySelector(`#locationTabs button[data-bs-target="#${targetId}"]`);
+                    if (button) {
+                        const tab = new bootstrap.Tab(button);
+                        tab.show();
+                    }
+                }
+            } catch (e) {}
 
             // Handle edit state modal
             document.querySelectorAll('.btn-edit-state').forEach(button => {
