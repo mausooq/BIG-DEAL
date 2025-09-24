@@ -639,9 +639,9 @@ $totalTowns = fetchScalar("SELECT COUNT(*) FROM towns");
 
 // Get states with search and pagination for States tab
 $search = $_GET['search'] ?? '';
-$page = max(1, (int)($_GET['page'] ?? 1));
-$limit = 10;
-$offset = ($page - 1) * $limit;
+$page = 1; // disable pagination
+$limit = 1000000; // show all
+$offset = 0;
 
 $whereClause = '';
 $params = [];
@@ -674,12 +674,12 @@ if ($countStmt && $search) {
 $countStmt && $countStmt->execute();
 $totalCountRow = $countStmt ? $countStmt->get_result()->fetch_row() : [0];
 $totalCount = (int)($totalCountRow[0] ?? 0);
-$totalPages = (int)ceil($totalCount / $limit);
+$totalPages = 1;
 
 // Get districts with search and pagination for Districts tab
 $districtSearch = $_GET['district_search'] ?? '';
-$districtPage = max(1, (int)($_GET['district_page'] ?? 1));
-$districtOffset = ($districtPage - 1) * $limit;
+$districtPage = 1; // disable pagination
+$districtOffset = 0;
 
 $districtWhereClause = '';
 $districtParams = [];
@@ -712,12 +712,12 @@ if ($districtCountStmt && $districtSearch) {
 $districtCountStmt && $districtCountStmt->execute();
 $districtTotalCountRow = $districtCountStmt ? $districtCountStmt->get_result()->fetch_row() : [0];
 $districtTotalCount = (int)($districtTotalCountRow[0] ?? 0);
-$districtTotalPages = (int)ceil($districtTotalCount / $limit);
+$districtTotalPages = 1;
 
 // Get cities with search and pagination for Cities tab
 $citySearch = $_GET['city_search'] ?? '';
-$cityPage = max(1, (int)($_GET['city_page'] ?? 1));
-$cityOffset = ($cityPage - 1) * $limit;
+$cityPage = 1; // disable pagination
+$cityOffset = 0;
 
 $cityWhereClause = '';
 $cityParams = [];
@@ -750,12 +750,12 @@ if ($cityCountStmt && $citySearch) {
 $cityCountStmt && $cityCountStmt->execute();
 $cityTotalCountRow = $cityCountStmt ? $cityCountStmt->get_result()->fetch_row() : [0];
 $cityTotalCount = (int)($cityTotalCountRow[0] ?? 0);
-$cityTotalPages = (int)ceil($cityTotalCount / $limit);
+$cityTotalPages = 1;
 
 // Get towns with search and pagination for Towns tab
 $townSearch = $_GET['town_search'] ?? '';
-$townPage = max(1, (int)($_GET['town_page'] ?? 1));
-$townOffset = ($townPage - 1) * $limit;
+$townPage = 1; // disable pagination
+$townOffset = 0;
 
 $townWhereClause = '';
 $townParams = [];
@@ -788,7 +788,7 @@ if ($townCountStmt && $townSearch) {
 $townCountStmt && $townCountStmt->execute();
 $townTotalCountRow = $townCountStmt ? $townCountStmt->get_result()->fetch_row() : [0];
 $townTotalCount = (int)($townTotalCountRow[0] ?? 0);
-$townTotalPages = (int)ceil($townTotalCount / $limit);
+$townTotalPages = 1;
 
 // Get all states for dropdowns
 $allStates = $mysqli->query("SELECT id, name FROM states ORDER BY name ASC")->fetch_all(MYSQLI_ASSOC);
@@ -1207,17 +1207,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  <?php endif; ?>
                              </div>
 
-                            <?php if ($totalPages > 1): ?>
-                            <nav aria-label="States pagination">
-                                <ul class="pagination justify-content-center">
-                                    <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                    <li class="page-item <?php echo $i === $page ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?page=<?php echo $i; ?>&search=<?php echo urlencode($search); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                    <?php endfor; ?>
-                                </ul>
-                            </nav>
-                            <?php endif; ?>
+                           
                 </div>
 
                 <!-- Districts Tab -->
@@ -1305,17 +1295,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  <?php endif; ?>
                              </div>
 
-                            <?php if ($districtTotalPages > 1): ?>
-                            <nav aria-label="Districts pagination">
-                                <ul class="pagination justify-content-center">
-                                    <?php for ($i = 1; $i <= $districtTotalPages; $i++): ?>
-                                    <li class="page-item <?php echo $i === $districtPage ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?district_page=<?php echo $i; ?>&district_search=<?php echo urlencode($districtSearch); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                    <?php endfor; ?>
-                                </ul>
-                            </nav>
-                            <?php endif; ?>
+                            
                 </div>
 
                 <!-- Cities Tab -->
@@ -1403,17 +1383,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  <?php endif; ?>
                              </div>
 
-                            <?php if ($cityTotalPages > 1): ?>
-                            <nav aria-label="Cities pagination">
-                                <ul class="pagination justify-content-center">
-                                    <?php for ($i = 1; $i <= $cityTotalPages; $i++): ?>
-                                    <li class="page-item <?php echo $i === $cityPage ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?city_page=<?php echo $i; ?>&city_search=<?php echo urlencode($citySearch); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                    <?php endfor; ?>
-                                </ul>
-                            </nav>
-                            <?php endif; ?>
+                            
                 </div>
 
                 <!-- Towns Tab -->
@@ -1501,17 +1471,7 @@ $allCities = $mysqli->query("SELECT id, name, district_id FROM cities ORDER BY n
                                  <?php endif; ?>
                              </div>
 
-                            <?php if ($townTotalPages > 1): ?>
-                            <nav aria-label="Towns pagination">
-                                <ul class="pagination justify-content-center">
-                                    <?php for ($i = 1; $i <= $townTotalPages; $i++): ?>
-                                    <li class="page-item <?php echo $i === $townPage ? 'active' : ''; ?>">
-                                        <a class="page-link" href="?town_page=<?php echo $i; ?>&town_search=<?php echo urlencode($townSearch); ?>"><?php echo $i; ?></a>
-                                    </li>
-                                    <?php endfor; ?>
-                                </ul>
-                            </nav>
-                            <?php endif; ?>
+                            
                 </div>
              </div>
 
