@@ -18,10 +18,10 @@
       <div class="collapse navbar-collapse justify-content-end " id="navbarNav">
         <ul class="navbar-nav ms-auto">
           <li class="nav-item">
-            <a class="nav-link <?php echo strpos($current_full_path, '/products/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>products/">For rent</a>
+            <a class="nav-link <?php echo strpos($current_full_path, '/products/') !== false && (($_GET['category'] ?? '') === 'Rent') ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>products/?category=Rent">For rent</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="<?php echo $site_base_path; ?>products/">For buyers</a>
+            <a class="nav-link <?php echo strpos($current_full_path, '/products/') !== false && (($_GET['category'] ?? '') === 'Buy') ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>products/?category=Buy">For buyers</a>
           </li>
           <li class="nav-item">
             <a class="nav-link <?php echo strpos($current_full_path, '/about/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>about/">About</a>

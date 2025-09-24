@@ -140,27 +140,70 @@
     We focus on transparency, professionalism, and making your real estate journey simple and hassle-free.</p>
 
     <div class="social-links">
-      <a href="https://facebook.com"><img src="https://img.icons8.com/material-rounded/25/facebook-new.png" class="social-icon"></a>
-      <a href="https://instagram.com"><img src="https://img.icons8.com/material-rounded/25/instagram-new.png" class="social-icon"></a>
-      <a href="https://linkedin.com"><img src="https://img.icons8.com/material-rounded/25/linkedin--v1.png" class="social-icon"></a>
-      <a href="https://youtube.com"><img src="https://img.icons8.com/material-rounded/25/youtube-play.png" class="social-icon"></a>
+      <?php
+        // Ensure DB connection is available
+        if (!isset($mysqli) || !($mysqli instanceof mysqli)) {
+          if (!function_exists('getMysqliConnection')) {
+            $cfg = __DIR__ . '/../config/config.php';
+            if (file_exists($cfg)) { require_once $cfg; }
+          }
+          if (function_exists('getMysqliConnection')) {
+            try { $mysqli = getMysqliConnection(); } catch (Throwable $e) { $mysqli = null; }
+          }
+        }
+
+        $socialLinks = [];
+        if (isset($mysqli) && $mysqli instanceof mysqli) {
+          try {
+            if ($res = $mysqli->query("SELECT platform, url FROM social_links")) {
+              while ($row = $res->fetch_assoc()) { $socialLinks[] = $row; }
+              $res->free();
+            }
+          } catch (Throwable $e) { /* silently ignore in footer */ }
+        }
+
+        // Map platform name to icon URL (icons8) – adjust if you switch to local icons
+        $iconMap = [
+          'facebook' => 'https://img.icons8.com/material-rounded/25/facebook-new.png',
+          'instagram' => 'https://img.icons8.com/material-rounded/25/instagram-new.png',
+          'linkedin' => 'https://img.icons8.com/material-rounded/25/linkedin--v1.png',
+          'youtube' => 'https://img.icons8.com/material-rounded/25/youtube-play.png',
+          'twitter' => 'https://img.icons8.com/material-rounded/25/twitter.png',
+          'x' => 'https://img.icons8.com/material-rounded/25/twitter.png'
+        ];
+
+        foreach ($socialLinks as $link) {
+          $platform = strtolower(trim((string)($link['platform'] ?? '')));
+          $url = trim((string)($link['url'] ?? ''));
+          if ($url === '') { continue; }
+          $icon = $iconMap[$platform] ?? 'https://img.icons8.com/material-rounded/25/link.png';
+          echo '<a href="' . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . '" target="_blank" rel="noopener">'
+             . '<img src="' . htmlspecialchars($icon, ENT_QUOTES, 'UTF-8') . '" class="social-icon"></a>';
+        }
+      ?>
     </div>
   </div>
 
    <div class=" col-md-2 footer-column">
                         <h3>Navigation</h3>
                         <ul class="footer-links">
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#">Home</a></li>
-                            <li><a href="#">Home</a></li>
-                            
+                            <?php
+                              // Reuse navbar path logic to build correct links from any directory
+                              if (!isset($asset_path)) { $asset_path = 'assets/'; }
+                              $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
+                            ?>
+                            <li><a href="<?php echo $site_base_path; ?>products/?category=Rent">For rent</a></li>
+                            <li><a href="<?php echo $site_base_path; ?>products/?category=Buy">For buyers</a></li>
+                            <li><a href="<?php echo $site_base_path; ?>about/">About</a></li>
+                            <li><a href="<?php echo $site_base_path; ?>blog/">Blog</a></li>
+                            <li><a href="<?php echo $site_base_path; ?>contact/">Contact us</a></li>
                         </ul>
       </div>
 
       <div class=" col-md-3 footer-column">
                         <h3>Contact</h3>
                         <ul class="footer-links">
-                            <li>+918197458962</li>
+                            <li>+9187654321</li>
                             <li>info@bigdeal.com</li>
                             <li>Kankanady Gate building, Mangalore</li>  
                         </ul>
