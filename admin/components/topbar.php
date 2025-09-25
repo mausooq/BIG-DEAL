@@ -66,10 +66,33 @@ if (!function_exists('renderAdminTopbar')) {
 						border-radius: 12px; 
 					}
 				}
+                /* Topbar dropdown action button (red theme) */
+                .dropdown-menu .btn-red{
+                    display:block; width:100%;
+                    background: var(--primary); color:#fff;
+                    border-radius: 8px; padding:.5rem .75rem;
+                    text-decoration:none;
+                }
+                .dropdown-menu .btn-red:hover, .dropdown-menu .btn-red:focus{
+                    background: var(--primary-600); color:#fff;
+                }
 			</style>';
 			$topbarStylesPrinted = true;
 		}
-		?>
+        // unread notifications badge
+        $unreadCount = 0;
+        if (!function_exists('getMysqliConnection')) {
+            @require_once __DIR__ . '/../../config/config.php';
+        }
+        if (function_exists('getMysqliConnection')) {
+            $m = @getMysqliConnection();
+            if ($m) {
+                $r = $m->query("SELECT COUNT(*) AS c FROM notifications WHERE is_read = FALSE");
+                if ($r && ($rw = $r->fetch_assoc())) { $unreadCount = (int)($rw['c'] ?? 0); }
+                if ($r) { $r->close(); }
+            }
+        }
+        ?>
 		<nav class="navbar navbar-light bg-white border-bottom sticky-top">
 			<div class="container-fluid">
 				<button class="btn btn-outline-secondary d-md-none" id="sidebarToggle" type="button" title="Toggle menu"><i class="fa-solid fa-bars"></i></button>
@@ -78,18 +101,21 @@ if (!function_exists('renderAdminTopbar')) {
 				<?php endif; ?>
 				<div class="d-flex align-items-center gap-3 ms-auto">
 					<!-- Notifications dropdown -->
-					<div class="dropdown">
-						<button class="btn btn-link text-decoration-none text-dark" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
-							<i class="fa-regular fa-bell"></i>
-						</button>
-						<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown" style="min-width:260px;">
-							<li class="dropdown-header small text-muted">Notifications</li>
-							<li><hr class="dropdown-divider"></li>
-							<li class="px-3 py-2 small text-muted">No new notifications</li>
-							<li><hr class="dropdown-divider"></li>
-							<li><a class="dropdown-item" href="../notification/"><i class="fa-regular fa-bell me-2"></i>View all</a></li>
-						</ul>
-					</div>
+                    <div class="dropdown">
+                        <button class="btn btn-link text-decoration-none text-dark position-relative" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifications">
+                            <i class="fa-regular fa-bell"></i>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill" style="background:#ef4444;">
+                                    <?php echo $unreadCount; ?>
+                                </span>
+                            <?php endif; ?>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown" style="min-width:260px;">
+                            <li class="dropdown-header small text-muted">Notifications</li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item btn-red" href="../notification/"><i class="fa-regular fa-bell me-2"></i>View all</a></li>
+                        </ul>
+                    </div>
 
 					<!-- Profile dropdown -->
 					<div class="dropdown">

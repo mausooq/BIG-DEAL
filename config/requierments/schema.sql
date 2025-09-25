@@ -34,7 +34,7 @@ CREATE TABLE properties (
     facing ENUM('East', 'West', 'North', 'South'),
     parking ENUM('Yes', 'No'),
     balcony INT DEFAULT 0,
-    status ENUM('Available', 'Sold') DEFAULT 'Available',
+    status ENUM('Available', 'Sold', 'Rented') DEFAULT 'Available',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES categories(id)
 );
@@ -51,8 +51,12 @@ CREATE TABLE property_images (
     id INT AUTO_INCREMENT PRIMARY KEY,
     property_id INT,
     image_url VARCHAR(255),
+    image_order INT DEFAULT 1,
     FOREIGN KEY (property_id) REFERENCES properties(id)
 );
+
+-- Helpful index for ordered image retrieval
+CREATE INDEX idx_property_images_order ON property_images(property_id, image_order);
 
 CREATE TABLE features (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -186,4 +190,13 @@ CREATE TABLE IF NOT EXISTS properties_location (
     FOREIGN KEY (district_id) REFERENCES districts(id) ON DELETE CASCADE,
     FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE,  
     FOREIGN KEY (town_id) REFERENCES towns(id) ON DELETE CASCADE
+);
+
+-- Featured cities
+CREATE TABLE IF NOT EXISTS featured_cities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    city_id INT NOT NULL,
+    priority INT DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (city_id) REFERENCES cities(id) ON DELETE CASCADE
 );

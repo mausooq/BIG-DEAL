@@ -7,11 +7,11 @@
  */
 
 if (!function_exists('renderAdminSidebar')) {
-	function renderAdminSidebar(string $active = ''): void {
+    function renderAdminSidebar(string $active = ''): void {
 		// Print sidebar styles once
 		static $sidebarStylesPrinted = false;
 		if (!$sidebarStylesPrinted) {
-			echo '<style>
+            echo '<style>
 				/* CSS Variables for consistent theming */
 				:root {
 					--bg: #F1EFEC; /* page background */
@@ -70,9 +70,18 @@ if (!function_exists('renderAdminSidebar')) {
 					color: var(--primary); 
 					font-weight: 600; 
 				}
-				.list-group-item:hover { 
+                .list-group-item:hover { 
 					background: #f8fafc; 
 				}
+
+                /* Sidebar badge for counts */
+                .sidebar-badge{
+                    display:inline-flex; align-items:center; justify-content:center;
+                    min-width: 22px; height: 22px; padding: 0 6px;
+                    font-size: .75rem; font-weight: 600; line-height: 1;
+                    border-radius: 999px; margin-left: 8px;
+                    background: #ef4444; color:#fff;
+                }
 				
 				/* Mobile responsiveness */
 				@media (max-width: 991.98px) { /* md breakpoint */
@@ -95,9 +104,24 @@ if (!function_exists('renderAdminSidebar')) {
 				}
 			</style>';
 			$sidebarStylesPrinted = true;
-		}
+        }
 		
-		$items = [
+        // Fetch unread notifications count (hide badge if 0)
+        $unreadNotifications = 0;
+        if (!function_exists('getMysqliConnection')) {
+            @require_once __DIR__ . '/../../config/config.php';
+        }
+        if (function_exists('getMysqliConnection')) {
+            $mysqli = @getMysqliConnection();
+            if ($mysqli) {
+                $res = $mysqli->query("SELECT COUNT(*) AS c FROM notifications WHERE is_read = FALSE");
+                if ($res && ($row = $res->fetch_assoc())) { $unreadNotifications = (int)($row['c'] ?? 0); }
+                if ($res) { $res->close(); }
+                // do not close shared connection here
+            }
+        }
+
+        $items = [
 			['key' => 'dashboard', 'icon' => 'fa-grip', 'label' => 'Dashboard', 'href' => '../dashboard/'],
 			['key' => 'sales-analytics', 'icon' => 'fa-chart-line', 'label' => 'Sales Analytics', 'href' => '../sales-analytics/'],
 			['key' => 'properties', 'icon' => 'fa-building-circle-check', 'label' => 'Properties', 'href' => '../properties/'],
@@ -119,11 +143,14 @@ if (!function_exists('renderAdminSidebar')) {
 				<img src="../../assets/logo.jpg" alt="Big Deal" style="height:48px; width:auto; object-fit:contain; display:block;">
 			</div>
 			<div class="list-group list-group-flush">
-				<?php foreach ($items as $item): ?>
-					<a class="list-group-item list-group-item-action <?php echo $active === $item['key'] ? 'active' : ''; ?>" href="<?php echo $item['href']; ?>">
-						<i class="fa-solid <?php echo $item['icon']; ?> me-2"></i><?php echo $item['label']; ?>
-					</a>
-				<?php endforeach; ?>
+                <?php foreach ($items as $item): ?>
+                    <a class="list-group-item list-group-item-action <?php echo $active === $item['key'] ? 'active' : ''; ?>" href="<?php echo $item['href']; ?>">
+                        <i class="fa-solid <?php echo $item['icon']; ?> me-2"></i><?php echo $item['label']; ?>
+                        <?php if ($item['key'] === 'notifications' && $unreadNotifications > 0): ?>
+                            <span class="sidebar-badge"><?php echo $unreadNotifications; ?></span>
+                        <?php endif; ?>
+                    </a>
+                <?php endforeach; ?>
 			</div>
 		</div>
 		<?php

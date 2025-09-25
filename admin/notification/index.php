@@ -136,10 +136,16 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }
 		/* Buttons */
-		.btn-primary{ background:var(--primary); border-color:var(--primary); }
-		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
-		.btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
-		.btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
+        .btn-primary{ background:var(--primary); border-color:var(--primary); }
+        .btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
+        .btn-primary:focus, .btn-primary:active, .btn-primary:focus-visible{ 
+            background:var(--primary-600) !important; 
+            border-color:var(--primary-600) !important; 
+            box-shadow: 0 0 0 .25rem rgba(225,29,42,.25) !important; 
+            color:#fff !important;
+        }
+        .btn-outline-primary{ color: var(--primary); border-color: var(--primary); }
+        .btn-outline-primary:hover{ background-color: var(--primary); border-color: var(--primary); color:#fff; }
 		/* Notification specific styles */
 		.notification-card{ 
 			border:1px solid var(--line); 
@@ -299,8 +305,8 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 									<?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?>
 								</span>
 								
-								<?php if (!$row['is_read']): ?>
-									<button class="btn btn-sm btn-outline-primary btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
+                                <?php if (!$row['is_read']): ?>
+                                    <button class="btn btn-sm btn-primary btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
 										<i class="fa-solid fa-check me-1"></i>Mark as Read
 									</button>
 								<?php endif; ?>
