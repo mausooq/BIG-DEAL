@@ -205,91 +205,6 @@ function timeAgo($datetime) {
   
   <style>
     /* Enhanced dropdown interactions */
-    .filter-section-header {
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .filter-section-header:hover {
-      background-color: #f8f9fa;
-    }
-    
-    .filter-section-header.active {
-      background-color: #e9ecef;
-    }
-    
-    .caret {
-      transition: transform 0.3s ease;
-      display: inline-block;
-      margin-left: auto;
-    }
-    
-    .filter-section-content {
-      transition: all 0.3s ease;
-    }
-    
-    /* Mobile filter sidebar */
-    .filter-sidebar.show {
-      transform: translateX(0);
-    }
-    
-    .filter-backdrop {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 1040;
-    }
-    
-    /* Applied filter tags */
-    .applied-filter-tag {
-      display: inline-block;
-      background-color: #007bff;
-      color: white;
-      padding: 4px 8px;
-      border-radius: 4px;
-      margin: 2px;
-      font-size: 12px;
-    }
-    
-    .applied-filter-tag button {
-      background: none;
-      border: none;
-      color: white;
-      margin-left: 5px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    
-    .applied-filter-tag button:hover {
-      color: #ffc107;
-    }
-    
-    /* Range slider enhancements */
-    .range-labels {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    
-    /* Tag interactions */
-    .tag {
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .tag:hover {
-      background-color: #007bff;
-      color: white;
-    }
-    
-    .tag.active {
-      background-color: #007bff;
-      color: white;
-    }
   </style>
 </head>
 <body class="article-page">
@@ -298,7 +213,7 @@ function timeAgo($datetime) {
     <div class="container">
       <div class="row">
         <div class="nav-tabs-custom mx-auto">
-          <button class="<?php echo $selectedCategory === 'Buy' || empty($selectedCategory) ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Buy')">Buy</button>
+          <button class="<?php echo $selectedCategory === 'Buy' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Buy')">Buy</button>
           <button class="<?php echo $selectedCategory === 'Rent' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Rent')">Rent</button>
           <button class="<?php echo $selectedCategory === 'Plot' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Plot')">Plot</button>
           <button class="<?php echo $selectedCategory === 'Commercial' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Commercial')">Commercial</button>
@@ -403,8 +318,26 @@ function timeAgo($datetime) {
     <div class="slider-range" id="sliderRange1"></div>
   </div>
   <div class="range-labels" id="rangeLabels1">
-    <span id="minLabel1">₹<?php echo number_format($minPrice > 0 ? $minPrice : $priceRange['min']); ?></span>
-    <span id="maxLabel1">₹<?php echo number_format($maxPrice > 0 ? $maxPrice : $priceRange['max']); ?></span>
+    <span id="minLabel1"><?php 
+      $minVal = $minPrice > 0 ? $minPrice : $priceRange['min'];
+      if ($minVal >= 100000) {
+        echo '₹' . round($minVal / 100000) . 'L';
+      } else if ($minVal >= 1000) {
+        echo '₹' . round($minVal / 1000) . 'K';
+      } else {
+        echo '₹' . $minVal;
+      }
+    ?></span>
+    <span id="maxLabel1"><?php 
+      $maxVal = $maxPrice > 0 ? $maxPrice : $priceRange['max'];
+      if ($maxVal >= 100000) {
+        echo '₹' . round($maxVal / 100000) . 'L';
+      } else if ($maxVal >= 1000) {
+        echo '₹' . round($maxVal / 1000) . 'K';
+      } else {
+        echo '₹' . $maxVal;
+      }
+    ?></span>
   </div>
 
 
@@ -474,8 +407,22 @@ function timeAgo($datetime) {
     <div class="slider-range" id="sliderRange2"></div>
   </div>
   <div class="range-labels" id="rangeLabels2">
-    <span id="minLabel2"><?php echo number_format($minArea > 0 ? $minArea : $areaRange['min']); ?> sq.ft</span>
-    <span id="maxLabel2"><?php echo number_format($maxArea > 0 ? $maxArea : $areaRange['max']); ?> sq.ft</span>
+    <span id="minLabel2"><?php 
+      $minAreaVal = $minArea > 0 ? $minArea : $areaRange['min'];
+      if ($minAreaVal >= 1000) {
+        echo round($minAreaVal / 1000) . 'K sq.ft';
+      } else {
+        echo $minAreaVal . ' sq.ft';
+      }
+    ?></span>
+    <span id="maxLabel2"><?php 
+      $maxAreaVal = $maxArea > 0 ? $maxArea : $areaRange['max'];
+      if ($maxAreaVal >= 1000) {
+        echo round($maxAreaVal / 1000) . 'K sq.ft';
+      } else {
+        echo $maxAreaVal . ' sq.ft';
+      }
+    ?></span>
   </div>
 
 
@@ -517,11 +464,17 @@ function timeAgo($datetime) {
         <?php endif; ?>
       </div>
     </section>
+    
+    <!-- Apply Filter Button inside filter card -->
+    <div class="filter-section" id="applyFilterSection">
+      <button type="button" class="apply-filter-btn-card" id="applyAllFiltersCard" disabled>Apply Filter</button>
+    </div>
+    
   </aside>  
       </div>
 
       <!-- Property Results -->
-      <div  class="col-lg-8 col-md-7 aproperty">
+      <div  class="col-lg-8 col-md-7 aproperty" id="results">
         <h2>
           <?php echo count($properties); ?> results | 
           <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
@@ -593,15 +546,14 @@ function timeAgo($datetime) {
 
 <script>
 function filterByCategory(category) {
-    // Update URL with category parameter
     const url = new URL(window.location);
-    if (category) {
-        url.searchParams.set('category', category);
-    } else {
+    const current = url.searchParams.get('category');
+    // Toggle: if already active, remove the filter
+    if (current === category) {
         url.searchParams.delete('category');
+    } else {
+        url.searchParams.set('category', category);
     }
-    
-    // Reload page with new category filter
     window.location.href = url.toString();
 }
 
@@ -657,7 +609,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Initialize filter functionality
+    syncUIFromParams();
     initializeFilters();
+    updateApplyButtonState();
     
     // Initialize dropdown interactions
     initializeDropdowns();
@@ -670,7 +624,16 @@ function initializeFilters() {
     propertyTypeTags.forEach(tag => {
         tag.addEventListener('click', function() {
             const value = this.getAttribute('data-value');
-            applyFilter('propertyType', value);
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                // single-select UI on mobile; apply happens on Apply Filter
+                document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                upsertAppliedTag('propertyType', value, 'Property Type: ' + value);
+                updateApplyButtonState();
+            } else {
+                applyFilter('propertyType', value);
+            }
         });
     });
 
@@ -679,7 +642,15 @@ function initializeFilters() {
     bedroomTags.forEach(tag => {
         tag.addEventListener('click', function() {
             const value = this.getAttribute('data-value');
-            applyFilter('bedrooms', value);
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                upsertAppliedTag('bedrooms', value, 'Bedrooms: ' + value);
+                updateApplyButtonState();
+            } else {
+                applyFilter('bedrooms', value);
+            }
         });
     });
 
@@ -688,7 +659,15 @@ function initializeFilters() {
     constructionStatusTags.forEach(tag => {
         tag.addEventListener('click', function() {
             const value = this.getAttribute('data-value');
-            applyFilter('constructionStatus', value);
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                document.querySelectorAll('#constructionStatusSection .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                upsertAppliedTag('constructionStatus', value, 'Status: ' + value);
+                updateApplyButtonState();
+            } else {
+                applyFilter('constructionStatus', value);
+            }
         });
     });
 
@@ -697,6 +676,16 @@ function initializeFilters() {
     localityCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
             const value = this.value;
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                if (this.checked) {
+                    upsertAppliedTag('localities', value, 'Locality: ' + value, false);
+                } else {
+                    removeAppliedTag('localities', value);
+                }
+                updateApplyButtonState();
+                return;
+            }
             if (this.checked) {
                 applyFilter('localities', value);
             } else {
@@ -716,6 +705,30 @@ function applyFilter(filterType, value) {
 }
 
 function removeFilter(filterType, value) {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+        // Only update UI on mobile; commit on Apply
+        if (filterType === 'localities') {
+            document.querySelectorAll('input[data-filter="localities"]').forEach(cb => {
+                if (cb.value === value) cb.checked = false;
+            });
+            removeAppliedTag('localities', value);
+        } else {
+            const sectionMap = {
+                'propertyType': '#propertyTypeSection',
+                'bedrooms': '#bedroomsSection',
+                'constructionStatus': '#constructionStatusSection'
+            };
+            const selector = sectionMap[filterType];
+            if (selector) {
+                document.querySelectorAll(selector + ' .tag').forEach(t => t.classList.remove('active'));
+            }
+            removeAppliedTag(filterType, value);
+        }
+        // Fallback: remove any chip span whose text includes the value
+        removeAppliedTagByText(value);
+        return;
+    }
     const url = new URL(window.location);
     url.searchParams.delete(filterType);
     window.location.href = url.toString();
@@ -733,16 +746,18 @@ function initializeRangeSliders() {
             if (parseInt(this.value) >= parseInt(maxRange1.value)) {
                 this.value = maxRange1.value;
             }
-            minLabel1.textContent = '₹' + parseInt(this.value).toLocaleString();
-            applyRangeFilter('minPrice', this.value);
+            minLabel1.textContent = formatPriceLabel(parseInt(this.value));
+            // Don't apply filter immediately, just update the label
+            updateApplyButtonState();
         });
 
         maxRange1.addEventListener('input', function() {
             if (parseInt(this.value) <= parseInt(minRange1.value)) {
                 this.value = minRange1.value;
             }
-            maxLabel1.textContent = '₹' + parseInt(this.value).toLocaleString();
-            applyRangeFilter('maxPrice', this.value);
+            maxLabel1.textContent = formatPriceLabel(parseInt(this.value));
+            // Don't apply filter immediately, just update the label
+            updateApplyButtonState();
         });
     }
 
@@ -757,16 +772,18 @@ function initializeRangeSliders() {
             if (parseInt(this.value) >= parseInt(maxRange2.value)) {
                 this.value = maxRange2.value;
             }
-            minLabel2.textContent = parseInt(this.value).toLocaleString() + ' sq.ft';
-            applyRangeFilter('minArea', this.value);
+            minLabel2.textContent = formatAreaLabel(parseInt(this.value));
+            // Don't apply filter immediately, just update the label
+            updateApplyButtonState();
         });
 
         maxRange2.addEventListener('input', function() {
             if (parseInt(this.value) <= parseInt(minRange2.value)) {
                 this.value = minRange2.value;
             }
-            maxLabel2.textContent = parseInt(this.value).toLocaleString() + ' sq.ft';
-            applyRangeFilter('maxArea', this.value);
+            maxLabel2.textContent = formatAreaLabel(parseInt(this.value));
+            // Don't apply filter immediately, just update the label
+            updateApplyButtonState();
         });
     }
 }
@@ -775,6 +792,56 @@ function applyRangeFilter(filterType, value) {
     const url = new URL(window.location);
     url.searchParams.set(filterType, value);
     window.location.href = url.toString();
+}
+
+// Helper functions for formatting labels
+function formatPriceLabel(price) {
+    if (price >= 100000) {
+        return '₹' + Math.round(price / 100000) + 'L';
+    } else if (price >= 1000) {
+        return '₹' + Math.round(price / 1000) + 'K';
+    }
+    return '₹' + price;
+}
+
+function formatAreaLabel(area) {
+    if (area >= 1000) {
+        return Math.round(area / 1000) + 'K sq.ft';
+    }
+    return area + ' sq.ft';
+}
+
+// Apply button functions for range filters
+function applyPriceRange() {
+    const minRange1 = document.getElementById('minRange1');
+    const maxRange1 = document.getElementById('maxRange1');
+    
+    if (minRange1 && maxRange1) {
+        const url = new URL(window.location);
+        
+        // Set the price range parameters
+        url.searchParams.set('minPrice', minRange1.value);
+        url.searchParams.set('maxPrice', maxRange1.value);
+        
+        // Reload page with new filters
+        window.location.href = url.toString();
+    }
+}
+
+function applyAreaRange() {
+    const minRange2 = document.getElementById('minRange2');
+    const maxRange2 = document.getElementById('maxRange2');
+    
+    if (minRange2 && maxRange2) {
+        const url = new URL(window.location);
+        
+        // Set the area range parameters
+        url.searchParams.set('minArea', minRange2.value);
+        url.searchParams.set('maxArea', maxRange2.value);
+        
+        // Reload page with new filters
+        window.location.href = url.toString();
+    }
 }
 
 // Initialize dropdown interactions
@@ -845,9 +912,63 @@ function initializeDropdowns() {
             document.body.style.overflow = '';
         });
     }
+    
+    // Initialize Apply Filter button inside filter card
+    const applyAllFiltersCardBtn = document.getElementById('applyAllFiltersCard');
+    if (applyAllFiltersCardBtn) {
+        applyAllFiltersCardBtn.addEventListener('click', function() {
+            // Only in mobile view: close and apply filters
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (!isMobile) {
+                return; // no-op on desktop
+            }
+            if (filterSidebar && filterBackdrop) {
+                filterSidebar.classList.remove('show');
+                filterBackdrop.hidden = true;
+                document.body.style.overflow = '';
+            }
+            applyAllFilters();
+        });
+    }
 }
 
 function clearRangeFilter(type) {
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) {
+        // On mobile: clear UI only, do not navigate; keep sidebar open
+        if (type === 'price') {
+            const minRange1 = document.getElementById('minRange1');
+            const maxRange1 = document.getElementById('maxRange1');
+            const minLabel1 = document.getElementById('minLabel1');
+            const maxLabel1 = document.getElementById('maxLabel1');
+            if (minRange1 && maxRange1) {
+                // Reset to slider bounds
+                minRange1.value = minRange1.min;
+                maxRange1.value = maxRange1.max;
+                if (minLabel1) minLabel1.textContent = formatPriceLabel(parseInt(minRange1.value));
+                if (maxLabel1) maxLabel1.textContent = formatPriceLabel(parseInt(maxRange1.value));
+            }
+            // Remove chip if present
+            removeAppliedTagByText('Budget:');
+            updateApplyButtonState();
+        } else if (type === 'area') {
+            const minRange2 = document.getElementById('minRange2');
+            const maxRange2 = document.getElementById('maxRange2');
+            const minLabel2 = document.getElementById('minLabel2');
+            const maxLabel2 = document.getElementById('maxLabel2');
+            if (minRange2 && maxRange2) {
+                minRange2.value = minRange2.min;
+                maxRange2.value = maxRange2.max;
+                if (minLabel2) minLabel2.textContent = formatAreaLabel(parseInt(minRange2.value));
+                if (maxLabel2) maxLabel2.textContent = formatAreaLabel(parseInt(maxRange2.value));
+            }
+            // Remove chip if present
+            removeAppliedTagByText('Area:');
+            updateApplyButtonState();
+        }
+        return;
+    }
+    // Desktop: apply immediately via navigation
     const url = new URL(window.location);
     if (type === 'price') {
         url.searchParams.delete('minPrice');
@@ -874,6 +995,144 @@ function clearAllFilters() {
     window.location.href = newUrl.toString();
 }
 
+// Apply all filters function for mobile Apply Filter button
+function applyAllFilters() {
+    const url = new URL(window.location);
+    
+    // Get price range values
+    const minRange1 = document.getElementById('minRange1');
+    const maxRange1 = document.getElementById('maxRange1');
+    if (minRange1 && maxRange1) {
+        url.searchParams.set('minPrice', minRange1.value);
+        url.searchParams.set('maxPrice', maxRange1.value);
+    }
+    
+    // Get area range values
+    const minRange2 = document.getElementById('minRange2');
+    const maxRange2 = document.getElementById('maxRange2');
+    if (minRange2 && maxRange2) {
+        url.searchParams.set('minArea', minRange2.value);
+        url.searchParams.set('maxArea', maxRange2.value);
+    }
+    
+    // Get selected property type (from active tag if present)
+    const activePropertyType = document.querySelector('#propertyTypeSection .tag.active');
+    if (activePropertyType) {
+        url.searchParams.set('propertyType', activePropertyType.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('propertyType');
+    }
+    
+    // Get selected bedrooms (from active tag if present)
+    const activeBedrooms = document.querySelector('#bedroomsSection .tag.active');
+    if (activeBedrooms) {
+        url.searchParams.set('bedrooms', activeBedrooms.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('bedrooms');
+    }
+    
+    // Get selected construction status (from active tag if present)
+    const activeStatus = document.querySelector('#constructionStatusSection .tag.active');
+    if (activeStatus) {
+        url.searchParams.set('constructionStatus', activeStatus.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('constructionStatus');
+    }
+    
+    // Get selected localities
+    const selectedLocalities = document.querySelectorAll('input[data-filter="localities"]:checked');
+    if (selectedLocalities.length > 0) {
+        const localities = Array.from(selectedLocalities).map(el => el.value);
+        url.searchParams.set('localities', localities.join(','));
+    }
+    
+    // On mobile, jump back to the results section after reload
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+        url.hash = 'results';
+    }
+    // Reload page with all filters applied
+    window.location.href = url.toString();
+}
+
+// Helpers to manage Applied Filters UI without navigation (mobile)
+function upsertAppliedTag(filterType, value, label, replaceSingle = true) {
+    const container = document.getElementById('appliedFiltersContainer');
+    if (!container) return;
+    // For single-select groups, remove existing of same type
+    const singleTypes = ['propertyType', 'bedrooms', 'constructionStatus'];
+    if (replaceSingle && singleTypes.includes(filterType)) {
+        container.querySelectorAll('.applied-filter[data-filter="' + filterType + '"]').forEach(el => el.remove());
+    }
+    // Avoid duplicates
+    const existing = container.querySelector('.applied-filter[data-filter="' + filterType + '"][data-value="' + cssEscape(value) + '"]');
+    if (existing) return;
+    const span = document.createElement('span');
+    span.className = 'applied-filter-tag applied-filter';
+    span.setAttribute('data-filter', filterType);
+    span.setAttribute('data-value', value);
+    span.textContent = label;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = '×';
+    btn.addEventListener('click', function() { removeFilter(filterType, value); });
+    span.appendChild(btn);
+    container.appendChild(span);
+}
+
+function removeAppliedTag(filterType, value) {
+    const container = document.getElementById('appliedFiltersContainer');
+    if (!container) return;
+    const el = container.querySelector('.applied-filter[data-filter="' + filterType + '"][data-value="' + cssEscape(value) + '"]');
+    if (el) el.remove();
+}
+
+function removeAppliedTagByText(value) {
+    const container = document.getElementById('appliedFiltersContainer');
+    if (!container) return;
+    const spans = container.querySelectorAll('.applied-filter-tag');
+    spans.forEach(span => {
+        if (span.textContent && span.textContent.indexOf(value) !== -1) {
+            span.remove();
+        }
+    });
+}
+
+// Minimal CSS.escape fallback for older browsers
+function cssEscape(value) {
+    if (window.CSS && typeof window.CSS.escape === 'function') return window.CSS.escape(value);
+    return String(value).replace(/[\"\'\n\r\t\f\[\]\(\)\.#:]/g, '_');
+}
+
+// Sync initial UI selections from current URL params (needed for mobile apply)
+function syncUIFromParams() {
+    try {
+        const url = new URL(window.location);
+        const params = url.searchParams;
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        if (!isMobile) return;
+
+        const map = [
+            { key: 'propertyType', section: '#propertyTypeSection' },
+            { key: 'bedrooms', section: '#bedroomsSection' },
+            { key: 'constructionStatus', section: '#constructionStatusSection' }
+        ];
+        map.forEach(({ key, section }) => {
+            const val = params.get(key);
+            if (!val) return;
+            const target = document.querySelector(section + ' .tag[data-value="' + CSS.escape ? CSS.escape(val) : val + '"]');
+            if (target) target.classList.add('active');
+        });
+
+        const localities = params.get('localities');
+        if (localities) {
+            const values = localities.split(',');
+            document.querySelectorAll('input[data-filter="localities"]').forEach(cb => {
+                if (values.includes(cb.value)) cb.checked = true;
+            });
+        }
+    } catch (_) {}
+}
+
 // Clear all button functionality
 document.addEventListener('DOMContentLoaded', function() {
     const clearAllBtn = document.getElementById('clearAllBtn');
@@ -881,6 +1140,31 @@ document.addEventListener('DOMContentLoaded', function() {
         clearAllBtn.addEventListener('click', clearAllFilters);
     }
 });
+
+// Enable/disable Apply button based on whether there is any selection change on mobile
+function updateApplyButtonState() {
+    try {
+        const btn = document.getElementById('applyAllFiltersCard');
+        if (!btn) return;
+        const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+        if (!isMobile) { btn.disabled = false; return; }
+
+        // Any active tag selections
+        const hasActiveTag = document.querySelector('#propertyTypeSection .tag.active, #bedroomsSection .tag.active, #constructionStatusSection .tag.active') !== null;
+        // Any checked locality
+        const hasCheckedLocality = document.querySelector('input[data-filter="localities"]:checked') !== null;
+        // Any range moved away from defaults
+        const minRange1 = document.getElementById('minRange1');
+        const maxRange1 = document.getElementById('maxRange1');
+        const minRange2 = document.getElementById('minRange2');
+        const maxRange2 = document.getElementById('maxRange2');
+        const priceChanged = !!(minRange1 && maxRange1 && (parseInt(minRange1.value) !== parseInt(minRange1.min) || parseInt(maxRange1.value) !== parseInt(maxRange1.max)));
+        const areaChanged = !!(minRange2 && maxRange2 && (parseInt(minRange2.value) !== parseInt(minRange2.min) || parseInt(maxRange2.value) !== parseInt(maxRange2.max)));
+
+        const shouldEnable = hasActiveTag || hasCheckedLocality || priceChanged || areaChanged;
+        btn.disabled = !shouldEnable;
+    } catch (_) {}
+}
 </script>
 </body>
 </html>
