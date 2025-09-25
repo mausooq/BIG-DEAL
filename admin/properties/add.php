@@ -904,14 +904,7 @@ function get_data($field) {
                     <div id="inlineAddState" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineStateName" placeholder="New state name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineStateSave" class="btn-animated-confirm noselect">
-                                <span class="text">Save</span>
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                    </svg>
-                                </span>
-                            </button>
+                            <button type="button" id="inlineStateSave" class="btn btn-primary">Save</button>
                             <button type="button" id="inlineStateCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -925,14 +918,7 @@ function get_data($field) {
                     <div id="inlineAddDistrict" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineDistrictName" placeholder="New district name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineDistrictSave" class="btn-animated-confirm noselect">
-                                <span class="text">Save</span>
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                    </svg>
-                                </span>
-                            </button>
+                            <button type="button" id="inlineDistrictSave" class="btn btn-primary">Save</button>
                             <button type="button" id="inlineDistrictCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -946,14 +932,7 @@ function get_data($field) {
                     <div id="inlineAddCity" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineCityName" placeholder="New city name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineCitySave" class="btn-animated-confirm noselect">
-                                <span class="text">Save</span>
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                    </svg>
-                                </span>
-                            </button>
+                            <button type="button" id="inlineCitySave" class="btn btn-primary">Save</button>
                             <button type="button" id="inlineCityCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
@@ -967,14 +946,7 @@ function get_data($field) {
                     <div id="inlineAddTown" style="display:none; margin-top:8px;">
                         <div style="display:flex; gap:6px;">
                             <input type="text" id="inlineTownName" placeholder="New town name" style="flex:1; padding:8px; border:1px solid #E0E0E0; border-radius:8px;">
-                            <button type="button" id="inlineTownSave" class="btn-animated-confirm noselect">
-                                <span class="text">Save</span>
-                                <span class="icon">
-                                    <svg viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M9.707 19.121a.997.997 0 0 1-1.414 0l-5.646-5.647a1.5 1.5 0 0 1 0-2.121l.707-.707a1.5 1.5 0 0 1 2.121 0L9 14.171l9.525-9.525a1.5 1.5 0 0 1 2.121 0l.707.707a1.5 1.5 0 0 1 0 2.121z"></path>
-                                    </svg>
-                                </span>
-                            </button>
+                            <button type="button" id="inlineTownSave" class="btn btn-primary">Save</button>
                             <button type="button" id="inlineTownCancel" class="btn btn-secondary">Cancel</button>
                                             </div>
                                         </div>
