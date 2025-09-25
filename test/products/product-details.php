@@ -144,29 +144,21 @@ function formatPrice($price)
       <div class=" col-md-8">
         <div class="property-main-image">
           <img id="mainImage" src="<?php echo !empty($propertyImages) ? '../../uploads/properties/' . $propertyImages[0] : '../assets/images/prop/prop6.png'; ?>" alt="<?php echo htmlspecialchars($property['title']); ?>" />
-          <button class="img-nav prev" type="button" aria-label="Previous" onclick="prevImage()">‹</button>
-          <button class="img-nav next" type="button" aria-label="Next" onclick="nextImage()">›</button>
         </div>
-        <div class="property-thumbnails">
-          <?php if (!empty($propertyImages)): ?>
-            <?php foreach (array_slice($propertyImages, 0, 4) as $index => $image): ?>
-              <img src="../../uploads/properties/<?php echo $image; ?>"
-                alt="Thumbnail <?php echo $index + 1; ?>"
-                onclick="changeMainImage(this.src)"
-                style="cursor: pointer;" />
-            <?php endforeach; ?>
-            <?php if (count($propertyImages) > 4): ?>
-              <div class="thumbnail-more" onclick="nextImage()" style="cursor: pointer;">
-                <img src="../../uploads/properties/<?php echo $propertyImages[4]; ?>" alt="More images" />
-                <div class="thumb-overlay">
-                  <span class="badge-pill">+<?php echo count($propertyImages) - 4; ?></span>
-                  <span class="badge-label">Next</span>
-                </div>
-              </div>
-            <?php endif; ?>
-          <?php else: ?>
-            <img src="../assets/images/prop/prop6.png" alt="Default image" />
-          <?php endif; ?>
+        <div class="thumbs-carousel">
+          <button class="thumbs-nav prev" type="button" aria-label="Previous" id="thumbPrev">‹</button>
+          <div class="thumbs-viewport">
+            <div class="thumbs-track" id="thumbsTrack">
+              <?php if (!empty($propertyImages)): ?>
+                <?php foreach ($propertyImages as $index => $image): ?>
+                  <img src="../../uploads/properties/<?php echo $image; ?>" data-index="<?php echo $index; ?>" alt="Thumbnail <?php echo $index + 1; ?>" style="cursor: pointer;" />
+                <?php endforeach; ?>
+              <?php else: ?>
+                <img src="../assets/images/prop/prop6.png" alt="Default image" />
+              <?php endif; ?>
+            </div>
+          </div>
+          <button class="thumbs-nav next" type="button" aria-label="Next" id="thumbNext">›</button>
         </div>
       </div>
 
@@ -210,10 +202,10 @@ function formatPrice($price)
         <div class="property-map">
           <?php if (!empty($property['map_embed_link'])): ?>
             <iframe src="<?php echo htmlspecialchars($property['map_embed_link']); ?>"
-              width="100%" height="350" style="border:0; pointer-events:none; filter: grayscale(1) contrast(1.05);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="100%" height="250" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php else: ?>
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
-              width="100%" height="350" style="border:0; pointer-events:none; filter: grayscale(1) contrast(1.05);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="100%" height="250" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php endif; ?>
         </div>
       </div>
@@ -358,18 +350,76 @@ function formatPrice($price)
       var idx = gallerySources.indexOf(src);
       if (idx >= 0) currentMainIndex = idx; else currentMainIndex = 0;
     }
-    function prevImage() {
-      if (!gallerySources || !gallerySources.length) return;
-      syncIndexBySrc();
-      currentMainIndex = (currentMainIndex - 1 + gallerySources.length) % gallerySources.length;
-      document.getElementById('mainImage').src = gallerySources[currentMainIndex];
-    }
-    function nextImage() {
-      if (!gallerySources || !gallerySources.length) return;
-      syncIndexBySrc();
-      currentMainIndex = (currentMainIndex + 1) % gallerySources.length;
-      document.getElementById('mainImage').src = gallerySources[currentMainIndex];
-    }
+    // Thumbnail carousel controls
+    (function(){
+      var track = document.getElementById('thumbsTrack');
+      var btnPrev = document.getElementById('thumbPrev');
+      var btnNext = document.getElementById('thumbNext');
+      if (!track || !btnPrev || !btnNext) return;
+
+      function getThumbWidth(){
+        var first = track.querySelector('img');
+        if (!first) return 0;
+        var style = window.getComputedStyle(first);
+        var width = first.getBoundingClientRect().width;
+        var marginRight = parseFloat(style.marginRight || '0');
+        return width + marginRight;
+      }
+
+      function setMainFromFirst(){
+        var first = track.querySelector('img');
+        if (first) changeMainImage(first.src);
+      }
+
+      // Click thumb to change main
+      track.addEventListener('click', function(e){
+        var t = e.target;
+        if (t && t.tagName === 'IMG') changeMainImage(t.src);
+      });
+
+      var isAnimating = false;
+      function slideNext(){
+        if (isAnimating) return;
+        var shift = getThumbWidth();
+        if (!shift) return;
+        isAnimating = true;
+        track.style.transition = 'transform 250ms ease';
+        track.style.transform = 'translateX(' + (-shift) + 'px)';
+        track.addEventListener('transitionend', function handler(){
+          track.removeEventListener('transitionend', handler);
+          track.style.transition = 'none';
+          track.style.transform = 'translateX(0)';
+          if (track.firstElementChild) track.appendChild(track.firstElementChild);
+          setMainFromFirst();
+          // allow next frame to re-enable transition
+          requestAnimationFrame(function(){ isAnimating = false; });
+        });
+      }
+      function slidePrev(){
+        if (isAnimating) return;
+        var shift = getThumbWidth();
+        if (!shift) return;
+        isAnimating = true;
+        if (track.lastElementChild) track.insertBefore(track.lastElementChild, track.firstElementChild);
+        track.style.transition = 'none';
+        track.style.transform = 'translateX(' + (-shift) + 'px)';
+        requestAnimationFrame(function(){
+          track.style.transition = 'transform 250ms ease';
+          track.style.transform = 'translateX(0)';
+        });
+        track.addEventListener('transitionend', function handler(){
+          track.removeEventListener('transitionend', handler);
+          setMainFromFirst();
+          isAnimating = false;
+        });
+      }
+
+      btnNext.addEventListener('click', slideNext);
+      btnPrev.addEventListener('click', slidePrev);
+
+      // Optional auto-advance
+      // setInterval(slideNext, 4000);
+    })();
 
     function openGalleryModal() {
       var modal = new bootstrap.Modal(document.getElementById('galleryModal'));
