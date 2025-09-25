@@ -453,6 +453,7 @@ function get_data($field) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Property</title>
     <link href="../../assets/css/loader.css" rel="stylesheet">
+    <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
 <style>
         /* General Styling */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -774,6 +775,49 @@ function get_data($field) {
             box-shadow: 2px 2px 6px rgba(0, 0, 0, 0.2);
         }
 
+        /* Clear Form Confirm Dialog (red theme) */
+        .confirm-clear-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            padding: 16px;
+        }
+        .confirm-clear-dialog {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            padding: 22px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .confirm-clear-icon {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            margin: 0 auto 12px auto;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            font-weight: 700; font-size: 28px;
+            border: 2px solid rgba(239, 68, 68, 0.25);
+        }
+        .confirm-clear-title { font-size: 18px; font-weight: 600; color: #111827; margin: 6px 0 4px; }
+        .confirm-clear-text { font-size: 14px; color: #4b5563; margin: 0 0 14px; }
+        .confirm-clear-actions { display: flex; gap: 10px; justify-content: center; margin-top: 4px; }
+        .btn-danger {
+            background: #ef4444;
+            color: #fff;
+            border: 1px solid #ef4444;
+        }
+        .btn-danger:hover { background: #dc2626; border-color: #dc2626; }
+
         /* Image Drop Zone Styles (from blog design) */
         .image-drop {
             border: 1px dashed var(--border-color);
@@ -857,7 +901,7 @@ function get_data($field) {
         <header class="card-header">
             <h1>Add Property</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
-                <button type="button" onclick="startNewProperty()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">Clear From</button>
+                <button type="button" onclick="startNewProperty()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 14px;">Clear Form</button>
                 <button class="close-btn" aria-label="Close">&times;</button>
         </div>
         </header>
@@ -1077,7 +1121,7 @@ function get_data($field) {
                     <div style="margin-top:8px;">
                         <button type="button" id="clearAllImages" class="btn btn-secondary" style="display:none;">Clear All Images</button>
                     </div>
-                    <input type="hidden" id="images_data" name="images_data[]">
+                    
                 </div>
             </div>
             <?php elseif ($current_step == 5): ?>
@@ -1239,6 +1283,19 @@ function get_data($field) {
         </form>
         </div>
       </div>
+    </div>
+
+    <!-- Red-themed confirm clear dialog -->
+    <div class="confirm-clear-overlay" id="confirmClear">
+        <div class="confirm-clear-dialog">
+            <div class="confirm-clear-icon">!</div>
+            <div class="confirm-clear-title">Clear form?</div>
+            <div class="confirm-clear-text">This will remove all entered data and uploaded images for this property.</div>
+            <div class="confirm-clear-actions">
+                <button type="button" class="btn btn-secondary" id="clearCancelBtn">Cancel</button>
+                <button type="button" class="btn btn-danger btn-animated-confirm" id="clearConfirmBtn">YES</button>
+            </div>
+        </div>
     </div>
 
 </body>
@@ -1595,8 +1652,10 @@ async function handleFiles(files) {
   }
   try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
   try { sessionStorage.setItem('prop_server_files', JSON.stringify(uploadedServerFiles)); } catch {}
-  // Enforce minimum images client-side
-  const totalImages = (uploadedServerFiles?.length || 0) + (selectedImageDataURLs?.length || 0);
+  // Enforce minimum images client-side (prefer server files if present)
+  const totalImages = (Array.isArray(uploadedServerFiles) && uploadedServerFiles.length > 0)
+    ? uploadedServerFiles.length
+    : (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
   const warn = document.getElementById('imageTotalWarning');
   if (warn) {
     if (totalImages < 8) {
@@ -1661,10 +1720,12 @@ formEl?.addEventListener('submit', function(){
     
     console.log('Submitting ' + selectedImageDataURLs.length + ' images with form');
   }
-  // Block navigation to preview (step 5) if less than 8 total images
+  // Block navigation to preview (step 5) if less than 8 total images (prefer server files)
   try {
     const serverFiles = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]');
-    const total = (Array.isArray(serverFiles) ? serverFiles.length : 0) + (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
+    const total = (Array.isArray(serverFiles) && serverFiles.length > 0)
+      ? serverFiles.length
+      : (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
     const forward = (document.activeElement && document.activeElement.name === 'goto_step') ? parseInt(document.activeElement.value,10) : null;
     if (forward === 5 && total < 8) {
       const warn = document.getElementById('imageTotalWarning');
@@ -1723,17 +1784,61 @@ document.querySelector('.close-btn')?.addEventListener('click', function(){
 
 // Function to start a new property (clear all data)
 function startNewProperty() {
-  if (confirm('Are you sure you want to start a new property? All current data will be lost.')) {
-    // Clear sessionStorage
-    sessionStorage.removeItem('prop_images');
-    // Redirect to clear session data
-    window.location.href = 'add.php?fresh=1';
+  const modal = document.getElementById('confirmClear');
+  if (modal) {
+    modal.style.display = 'flex';
+  } else {
+    // Fallback
+    if (confirm('Are you sure you want to clear the form?')) {
+      sessionStorage.removeItem('prop_images');
+      window.location.href = 'add.php?fresh=1';
+    }
   }
 }
+
+// Confirm Clear dialog handlers
+document.addEventListener('DOMContentLoaded', function(){
+  const modal = document.getElementById('confirmClear');
+  const cancelBtn = document.getElementById('clearCancelBtn');
+  const confirmBtn = document.getElementById('clearConfirmBtn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if (modal) modal.style.display = 'none';
+    });
+  }
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', function(e){
+      e.stopPropagation();
+      try { sessionStorage.removeItem('prop_images'); } catch {}
+      window.location.href = 'add.php?fresh=1';
+    });
+  }
+  // clicking outside the dialog closes it
+  if (modal) {
+    modal.addEventListener('click', function(e){
+      if (e.target === modal) {
+        modal.style.display = 'none';
+      }
+    });
+  }
+});
 
 // Function to submit form with images for final submission
 function submitWithImages() {
   const form = document.getElementById('wizardForm');
+  // Enforce 8-image minimum before final submit
+  try {
+    const serverFiles = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]');
+    const total = (Array.isArray(serverFiles) && serverFiles.length > 0)
+      ? serverFiles.length
+      : (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
+    if (total < 8) {
+      const warn = document.getElementById('imageTotalWarning');
+      if (warn) { warn.style.display = 'block'; warn.textContent = 'Please upload at least 8 images (currently ' + total + ').'; }
+      return false;
+    }
+  } catch {}
   if (form && selectedImageDataURLs.length > 0) {
     // Clear existing hidden inputs
     const existingInputs = form.querySelectorAll('input[name="images_data[]"]');
@@ -1767,6 +1872,18 @@ function submitWithImages() {
 
 // Function to handle progress bar step navigation
 function goToStep(stepNumber) {
+  // Block clicking to preview if less than 8 images
+  try {
+    const serverFiles = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]');
+    const total = (Array.isArray(serverFiles) && serverFiles.length > 0)
+      ? serverFiles.length
+      : (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
+    if (stepNumber === 5 && total < 8) {
+      const warn = document.getElementById('imageTotalWarning');
+      if (warn) { warn.style.display = 'block'; warn.textContent = 'Please upload at least 8 images (currently ' + total + ').'; }
+      return;
+    }
+  } catch {}
   // First, save current form data
   const form = document.getElementById('wizardForm');
   if (form) {
@@ -1893,4 +2010,4 @@ document.addEventListener('DOMContentLoaded', function(){
             }
         }
     </style>
-</script>
+//
