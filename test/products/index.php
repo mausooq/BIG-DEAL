@@ -203,13 +203,14 @@ function timeAgo($datetime) {
   <style>
     /* Enhanced dropdown interactions */
   </style>
+  <script src="../assets/js/custom-dropdown.js" defer></script>
 </head>
 <body class="article-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
 
     <div class="container">
       <div class="row">
-        <div class="nav-tabs-custom mx-auto">
+        <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
           <button class="<?php echo $selectedCategory === 'Buy' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Buy')">Buy</button>
           <button class="<?php echo $selectedCategory === 'Rent' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Rent')">Rent</button>
           <button class="<?php echo $selectedCategory === 'Plot' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Plot')">Plot</button>
@@ -219,12 +220,12 @@ function timeAgo($datetime) {
         </div>
       </div>
 
-      <!-- Select city -->
+      <!-- Select city with enhanced UI -->
       <div class="custom-select-wrapper">
         <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onCityChange(this.value)">
-          <option value="" disabled <?php echo $selectedCity === '' ? 'selected' : ''; ?>>Select city</option>
+          <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
           <?php foreach ($cities as $city): ?>
-            <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo $selectedCity === $city['name'] ? 'selected' : ''; ?>>
+            <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo $selectedCity === $city['name'] ? 'selected' : ''; ?> data-city-id="<?php echo (int)$city['id']; ?>">
               <?php echo htmlspecialchars($city['name']); ?>
             </option>
           <?php endforeach; ?>
@@ -1147,3 +1148,4 @@ function updateApplyButtonState() {
 </script>
 </body>
 </html>
+
