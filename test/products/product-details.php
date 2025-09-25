@@ -144,39 +144,30 @@ function formatPrice($price)
       <div class=" col-md-8">
         <div class="property-main-image">
           <img id="mainImage" src="<?php echo !empty($propertyImages) ? '../../uploads/properties/' . $propertyImages[0] : '../assets/images/prop/prop6.png'; ?>" alt="<?php echo htmlspecialchars($property['title']); ?>" />
+          <button class="img-nav prev" type="button" aria-label="Previous" onclick="prevImage()">‹</button>
+          <button class="img-nav next" type="button" aria-label="Next" onclick="nextImage()">›</button>
         </div>
         <div class="property-thumbnails">
           <?php if (!empty($propertyImages)): ?>
-            <?php foreach (array_slice($propertyImages, 0, 3) as $index => $image): ?>
+            <?php foreach (array_slice($propertyImages, 0, 4) as $index => $image): ?>
               <img src="../../uploads/properties/<?php echo $image; ?>"
                 alt="Thumbnail <?php echo $index + 1; ?>"
                 onclick="changeMainImage(this.src)"
                 style="cursor: pointer;" />
             <?php endforeach; ?>
-            <?php if (count($propertyImages) > 3): ?>
-              <div class="thumbnail-more" onclick="toggleMoreImages()" style="cursor: pointer;">
-                <img src="../../uploads/properties/<?php echo $propertyImages[3]; ?>" alt="More images" />
-                <span class="overlay-text"><?php echo count($propertyImages) - 3; ?>+</span>
-                <span class="overlay-subtext">View Gallery</span>
+            <?php if (count($propertyImages) > 4): ?>
+              <div class="thumbnail-more" onclick="nextImage()" style="cursor: pointer;">
+                <img src="../../uploads/properties/<?php echo $propertyImages[4]; ?>" alt="More images" />
+                <div class="thumb-overlay">
+                  <span class="badge-pill">+<?php echo count($propertyImages) - 4; ?></span>
+                  <span class="badge-label">Next</span>
+                </div>
               </div>
             <?php endif; ?>
           <?php else: ?>
             <img src="../assets/images/prop/prop6.png" alt="Default image" />
           <?php endif; ?>
         </div>
-        <?php if (!empty($propertyImages) && count($propertyImages) > 3): ?>
-        <div id="moreImages" class="more-images" style="display:none;">
-          <div class="container-fluid px-0">
-            <div class="row g-2">
-              <?php foreach ($propertyImages as $img): ?>
-                <div class="col-4 col-md-3">
-                  <img src="../../uploads/properties/<?php echo $img; ?>" alt="Property image" class="more-img" />
-                </div>
-              <?php endforeach; ?>
-            </div>
-          </div>
-        </div>
-        <?php endif; ?>
       </div>
 
       <div class=" col-md-4 property2-title">
@@ -219,10 +210,10 @@ function formatPrice($price)
         <div class="property-map">
           <?php if (!empty($property['map_embed_link'])): ?>
             <iframe src="<?php echo htmlspecialchars($property['map_embed_link']); ?>"
-              width="428px" height="350px" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="100%" height="350" style="border:0; pointer-events:none; filter: grayscale(1) contrast(1.05);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php else: ?>
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
-              width="428px" height="350px" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="100%" height="350" style="border:0; pointer-events:none; filter: grayscale(1) contrast(1.05);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php endif; ?>
         </div>
       </div>
@@ -306,6 +297,7 @@ function formatPrice($price)
     </div>
   </section>
 
+  
 
   <section class="container">
     <div class="property-title-section text-left">
@@ -358,10 +350,30 @@ function formatPrice($price)
       document.getElementById('mainImage').src = imageSrc;
     }
 
-    function toggleMoreImages() {
-      var el = document.getElementById('moreImages');
-      if (!el) return;
-      el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+    // Simple carousel for main image using propertyImages array
+    var gallerySources = <?php echo json_encode(array_map(function($p){ return '../../uploads/properties/' . $p; }, $propertyImages)); ?>;
+    var currentMainIndex = 0;
+    function syncIndexBySrc() {
+      var src = document.getElementById('mainImage').getAttribute('src');
+      var idx = gallerySources.indexOf(src);
+      if (idx >= 0) currentMainIndex = idx; else currentMainIndex = 0;
+    }
+    function prevImage() {
+      if (!gallerySources || !gallerySources.length) return;
+      syncIndexBySrc();
+      currentMainIndex = (currentMainIndex - 1 + gallerySources.length) % gallerySources.length;
+      document.getElementById('mainImage').src = gallerySources[currentMainIndex];
+    }
+    function nextImage() {
+      if (!gallerySources || !gallerySources.length) return;
+      syncIndexBySrc();
+      currentMainIndex = (currentMainIndex + 1) % gallerySources.length;
+      document.getElementById('mainImage').src = gallerySources[currentMainIndex];
+    }
+
+    function openGalleryModal() {
+      var modal = new bootstrap.Modal(document.getElementById('galleryModal'));
+      modal.show();
     }
 
     function goToPropertyDetails(propertyId) {
@@ -373,8 +385,41 @@ function formatPrice($price)
       alert('Toggle description functionality');
     }
 
-    // AJAX submit for enquiry form (stay on same page)
+    // AJAX submit for enquiry form (stay on same page) + Gallery viewer wiring
     document.addEventListener('DOMContentLoaded', function () {
+      // Build gallery array for viewer
+      var gallery = Array.prototype.map.call(document.querySelectorAll('#modalGrid img'), function (el) { return el.getAttribute('src'); });
+      var currentIndex = 0;
+      var modalGrid = document.getElementById('modalGrid');
+      var modalViewer = document.getElementById('modalViewer');
+      var viewerImg = document.getElementById('viewerImg');
+      var viewerPrev = document.getElementById('viewerPrev');
+      var viewerNext = document.getElementById('viewerNext');
+      var viewerBack = document.getElementById('viewerBack');
+
+      function showViewer(index) {
+        if (!gallery.length) return;
+        currentIndex = (index + gallery.length) % gallery.length;
+        viewerImg.src = gallery[currentIndex];
+        modalGrid.classList.add('d-none');
+        modalViewer.classList.remove('d-none');
+      }
+      function showGrid() {
+        modalViewer.classList.add('d-none');
+        modalGrid.classList.remove('d-none');
+      }
+      if (modalGrid) {
+        modalGrid.addEventListener('click', function (e) {
+          var t = e.target;
+          if (t && t.tagName === 'IMG' && t.dataset.index !== undefined) {
+            showViewer(parseInt(t.dataset.index, 10));
+          }
+        });
+      }
+      if (viewerPrev) viewerPrev.addEventListener('click', function () { showViewer(currentIndex - 1); });
+      if (viewerNext) viewerNext.addEventListener('click', function () { showViewer(currentIndex + 1); });
+      if (viewerBack) viewerBack.addEventListener('click', showGrid);
+
       var form = document.getElementById('enquiryForm');
       if (!form) return;
       form.addEventListener('submit', function (e) {
