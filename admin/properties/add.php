@@ -1024,6 +1024,7 @@ function get_data($field) {
                                             <option value="">Select</option>
                         <option value="Freehold" <?php echo get_data('ownership_type') == 'Freehold' ? 'selected' : ''; ?>>Freehold</option>
                         <option value="Leasehold" <?php echo get_data('ownership_type') == 'Leasehold' ? 'selected' : ''; ?>>Leasehold</option>
+                        <option value="NA" <?php echo get_data('ownership_type') == 'NA' ? 'selected' : ''; ?>>N/A</option>
                                         </select>
                                     </div>
                 <div class="form-group">

@@ -322,6 +322,10 @@ $pl_stmt && $pl_stmt->close();
         label { font-size: .9rem; color: var(--label-color); font-weight:500; margin-bottom: 6px; display:block; }
         input[type="text"], input[type="number"], input[type="url"], select, textarea { width:100%; padding:.75rem; border:1px solid var(--border-color); border-radius:8px; font-family:'Inter',sans-serif; font-size:1rem; box-sizing:border-box; }
         textarea { min-height: 100px; resize: vertical; }
+        /* Remove spinner controls for specific numeric inputs */
+        .no-spinner::-webkit-outer-spin-button,
+        .no-spinner::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .no-spinner { -moz-appearance: textfield; appearance: textfield; }
         .grid { display:grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
         .full { grid-column: 1 / -1; }
         .inline-add { margin-top:8px; }
@@ -405,11 +409,11 @@ $pl_stmt && $pl_stmt->close();
                             </div>
                             <div>
                                 <label>Price (₹)<span style="color:#dc2626"> *</span></label>
-                                <input type="number" step="0.01" name="price" required value="<?php echo htmlspecialchars($property['price'] ?? ''); ?>" placeholder="0.00">
+                                <input type="number" step="0.01" name="price" class="no-spinner" required value="<?php echo htmlspecialchars($property['price'] ?? ''); ?>" placeholder="0.00">
                             </div>
                             <div>
                                 <label>Area (sq ft)<span style="color:#dc2626"> *</span></label>
-                                <input type="number" step="0.01" name="area" required value="<?php echo htmlspecialchars($property['area'] ?? ''); ?>" placeholder="0">
+                                <input type="number" step="0.01" name="area" class="no-spinner" required value="<?php echo htmlspecialchars($property['area'] ?? ''); ?>" placeholder="0">
                             </div>
                             
                             <div>
@@ -551,6 +555,7 @@ $pl_stmt && $pl_stmt->close();
                                     <option value="">Select</option>
                                     <option value="Freehold" <?php echo $property['ownership_type'] === 'Freehold' ? 'selected' : ''; ?>>Freehold</option>
                                     <option value="Leasehold" <?php echo $property['ownership_type'] === 'Leasehold' ? 'selected' : ''; ?>>Leasehold</option>
+                                    <option value="NA" <?php echo $property['ownership_type'] === 'NA' ? 'selected' : ''; ?>>N/A</option>
                                 </select>
                             </div>
                             <div>
