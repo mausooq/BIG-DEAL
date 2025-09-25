@@ -118,10 +118,7 @@ if (!empty($selectedBedrooms)) {
     $query .= " AND p.configuration = '" . $mysqli->real_escape_string($selectedBedrooms) . "'";
 }
 
-// Add construction status filter (using furniture_status as proxy)
-if (!empty($selectedConstructionStatus)) {
-    $query .= " AND p.furniture_status = '" . $mysqli->real_escape_string($selectedConstructionStatus) . "'";
-}
+// Construction status filter removed
 
 // Add locality filter (match against location and landmark)
 if (!empty($selectedLocalities)) {
@@ -276,12 +273,7 @@ function timeAgo($datetime) {
         </span>
       <?php endif; ?>
       
-      <?php if (!empty($selectedConstructionStatus)): ?>
-        <span class="applied-filter-tag">
-          Status: <?php echo htmlspecialchars($selectedConstructionStatus); ?>
-          <button onclick="removeFilter('constructionStatus', '<?php echo htmlspecialchars($selectedConstructionStatus); ?>')">×</button>
-        </span>
-      <?php endif; ?>
+      
       
       <?php if (!empty($selectedLocalities)): ?>
         <span class="applied-filter-tag">
@@ -378,20 +370,7 @@ function timeAgo($datetime) {
       </div>
     </section>
 
-    <!-- Construction status -->
-    <section class="filter-section" id="constructionStatusSection">
-      <div class="filter-section-header" tabindex="0" data-toggle-target="constructionStatusSection">
-        Construction status
-        <span class="caret"></span>
-      </div>
-      <div class="filter-section-content">
-        <div class="tag-list" id="constructionStatusTags">
-          <div class="tag" data-filter="constructionStatus" data-value="New Launch">New Launch <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="constructionStatus" data-value="Under Construction">Under Construction <span class="add-icon">+</span></div>
-          <div class="tag" data-filter="constructionStatus" data-value="Ready to Move">Ready to Move <span class="add-icon">+</span></div>
-        </div>
-      </div>
-    </section>
+    
 
     <!-- Area Section -->
     <section class="filter-section" id="areaSection">
@@ -475,6 +454,14 @@ function timeAgo($datetime) {
 
       <!-- Property Results -->
       <div  class="col-lg-8 col-md-7 aproperty" id="results">
+        <?php 
+          $hasAnyFilter = (
+            !empty($selectedCategory) || !empty($selectedCity) || !empty($selectedPropertyType) ||
+            !empty($selectedBedrooms) || !empty($selectedLocalities) ||
+            ($minPrice > 0) || ($maxPrice > 0) || ($minArea > 0) || ($maxArea > 0) || $isFeaturedOnly
+          );
+          if (count($properties) > 0 && $hasAnyFilter):
+        ?>
         <h2>
           <?php echo count($properties); ?> results | 
           <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
@@ -483,6 +470,7 @@ function timeAgo($datetime) {
           <?php endif; ?>
           for Sale
         </h2>
+        <?php endif; ?>
 
         <div class="aproperty-cards">
           <?php if (!empty($properties)): ?>
@@ -654,22 +642,7 @@ function initializeFilters() {
         });
     });
 
-    // Handle construction status filter tags
-    const constructionStatusTags = document.querySelectorAll('[data-filter="constructionStatus"]');
-    constructionStatusTags.forEach(tag => {
-        tag.addEventListener('click', function() {
-            const value = this.getAttribute('data-value');
-            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            if (isMobile) {
-                document.querySelectorAll('#constructionStatusSection .tag').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                upsertAppliedTag('constructionStatus', value, 'Status: ' + value);
-                updateApplyButtonState();
-            } else {
-                applyFilter('constructionStatus', value);
-            }
-        });
-    });
+    // Construction status removed
 
     // Handle locality checkboxes
     const localityCheckboxes = document.querySelectorAll('[data-filter="localities"]');
@@ -851,18 +824,18 @@ function initializeDropdowns() {
     filterHeaders.forEach(header => {
         header.addEventListener('click', function() {
             const targetId = this.getAttribute('data-toggle-target');
-            const content = document.getElementById(targetId).querySelector('.filter-section-content');
-            const caret = this.querySelector('.caret');
-            
-            // Toggle content visibility
-            if (content.style.display === 'none' || content.style.display === '') {
-                content.style.display = 'block';
-                caret.style.transform = 'rotate(180deg)';
-                this.classList.add('active');
-            } else {
-                content.style.display = 'none';
-                caret.style.transform = 'rotate(0deg)';
-                this.classList.remove('active');
+            const sectionEl = document.getElementById(targetId);
+            if (!sectionEl) return;
+            const content = sectionEl.querySelector('.filter-section-content');
+            const isCollapsed = sectionEl.classList.contains('collapsed');
+
+            // Toggle collapsed state on the section (CSS handles caret and spacing)
+            sectionEl.classList.toggle('collapsed', !isCollapsed);
+            this.classList.toggle('active', !isCollapsed);
+
+            // Avoid relying on computed style empty string; set explicit display
+            if (content) {
+                content.style.display = isCollapsed ? 'block' : 'none';
             }
         });
     });
@@ -917,12 +890,9 @@ function initializeDropdowns() {
     const applyAllFiltersCardBtn = document.getElementById('applyAllFiltersCard');
     if (applyAllFiltersCardBtn) {
         applyAllFiltersCardBtn.addEventListener('click', function() {
-            // Only in mobile view: close and apply filters
+            // Close sidebar only on mobile, but always apply filters
             const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            if (!isMobile) {
-                return; // no-op on desktop
-            }
-            if (filterSidebar && filterBackdrop) {
+            if (isMobile && filterSidebar && filterBackdrop) {
                 filterSidebar.classList.remove('show');
                 filterBackdrop.hidden = true;
                 document.body.style.overflow = '';
@@ -998,59 +968,69 @@ function clearAllFilters() {
 // Apply all filters function for mobile Apply Filter button
 function applyAllFilters() {
     const url = new URL(window.location);
-    
-    // Get price range values
+    const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+
+    // Price range
     const minRange1 = document.getElementById('minRange1');
     const maxRange1 = document.getElementById('maxRange1');
     if (minRange1 && maxRange1) {
-        url.searchParams.set('minPrice', minRange1.value);
-        url.searchParams.set('maxPrice', maxRange1.value);
+        const min1 = parseInt(minRange1.min || minRange1.value, 10);
+        const max1 = parseInt(maxRange1.max || maxRange1.value, 10);
+        const curMin1 = parseInt(minRange1.value, 10);
+        const curMax1 = parseInt(maxRange1.value, 10);
+        if (curMin1 !== min1 || curMax1 !== max1) {
+            url.searchParams.set('minPrice', String(curMin1));
+            url.searchParams.set('maxPrice', String(curMax1));
+        } else {
+            url.searchParams.delete('minPrice');
+            url.searchParams.delete('maxPrice');
+        }
     }
-    
-    // Get area range values
+
+    // Area range
     const minRange2 = document.getElementById('minRange2');
     const maxRange2 = document.getElementById('maxRange2');
     if (minRange2 && maxRange2) {
-        url.searchParams.set('minArea', minRange2.value);
-        url.searchParams.set('maxArea', maxRange2.value);
+        const min2 = parseInt(minRange2.min || minRange2.value, 10);
+        const max2 = parseInt(maxRange2.max || maxRange2.value, 10);
+        const curMin2 = parseInt(minRange2.value, 10);
+        const curMax2 = parseInt(maxRange2.value, 10);
+        if (curMin2 !== min2 || curMax2 !== max2) {
+            url.searchParams.set('minArea', String(curMin2));
+            url.searchParams.set('maxArea', String(curMax2));
+        } else {
+            url.searchParams.delete('minArea');
+            url.searchParams.delete('maxArea');
+        }
     }
-    
-    // Get selected property type (from active tag if present)
+
+    // Selected tags (only overwrite when a selection is explicitly active in UI)
     const activePropertyType = document.querySelector('#propertyTypeSection .tag.active');
     if (activePropertyType) {
         url.searchParams.set('propertyType', activePropertyType.getAttribute('data-value'));
-    } else {
-        url.searchParams.delete('propertyType');
     }
-    
-    // Get selected bedrooms (from active tag if present)
+
     const activeBedrooms = document.querySelector('#bedroomsSection .tag.active');
     if (activeBedrooms) {
         url.searchParams.set('bedrooms', activeBedrooms.getAttribute('data-value'));
-    } else {
-        url.searchParams.delete('bedrooms');
     }
-    
-    // Get selected construction status (from active tag if present)
-    const activeStatus = document.querySelector('#constructionStatusSection .tag.active');
-    if (activeStatus) {
-        url.searchParams.set('constructionStatus', activeStatus.getAttribute('data-value'));
-    } else {
-        url.searchParams.delete('constructionStatus');
-    }
-    
-    // Get selected localities
+
+    // construction status removed
+
+    // Localities
     const selectedLocalities = document.querySelectorAll('input[data-filter="localities"]:checked');
     if (selectedLocalities.length > 0) {
         const localities = Array.from(selectedLocalities).map(el => el.value);
         url.searchParams.set('localities', localities.join(','));
+    } else {
+        url.searchParams.delete('localities');
     }
-    
-    // On mobile, jump back to the results section after reload
-    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) {
+
+    // Jump back to results after reload on mobile
+    if (isMobile) {
         url.hash = 'results';
     }
-    // Reload page with all filters applied
+
     window.location.href = url.toString();
 }
 
@@ -1113,8 +1093,7 @@ function syncUIFromParams() {
 
         const map = [
             { key: 'propertyType', section: '#propertyTypeSection' },
-            { key: 'bedrooms', section: '#bedroomsSection' },
-            { key: 'constructionStatus', section: '#constructionStatusSection' }
+            { key: 'bedrooms', section: '#bedroomsSection' }
         ];
         map.forEach(({ key, section }) => {
             const val = params.get(key);
@@ -1150,7 +1129,7 @@ function updateApplyButtonState() {
         if (!isMobile) { btn.disabled = false; return; }
 
         // Any active tag selections
-        const hasActiveTag = document.querySelector('#propertyTypeSection .tag.active, #bedroomsSection .tag.active, #constructionStatusSection .tag.active') !== null;
+        const hasActiveTag = document.querySelector('#propertyTypeSection .tag.active, #bedroomsSection .tag.active') !== null;
         // Any checked locality
         const hasCheckedLocality = document.querySelector('input[data-filter="localities"]:checked') !== null;
         // Any range moved away from defaults

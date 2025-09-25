@@ -3335,9 +3335,21 @@ body {
   padding: 35px;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: auto;            /* allow to grow with content */
+  min-height: fit-content; /* ensure all items fit */
   margin-bottom: 0;
   overflow-y: auto;
+}
+
+/* Keep sidebar in view on tablet/desktop; scroll only results */
+@media (min-width: 769px) {
+  .filter-sidebar {
+    position: sticky;
+    top: 90px; /* adjust if header height changes */
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    align-self: start;
+  }
 }
 
 /* Header: Applied Filters + Clear All */
@@ -3368,7 +3380,6 @@ body {
 /* Applied filters container */
 .applied-filters {
   margin-top: 12px;
-  min-height: 40px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
