@@ -1,6 +1,41 @@
 <?php
 require_once '../config/config.php';
 
+// Handle AJAX enquiry submit (stay on same page)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_enquiry') {
+  header('Content-Type: application/json');
+  try {
+    $mysqli = getMysqliConnection();
+    $propertyId = isset($_POST['property_id']) ? (int)$_POST['property_id'] : 0;
+    $name = isset($_POST['name']) ? trim($_POST['name']) : '';
+    $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+    $phone = isset($_POST['phno']) ? trim($_POST['phno']) : '';
+    $message = isset($_POST['message']) ? trim($_POST['message']) : '';
+
+    if ($propertyId <= 0 || $name === '' || ($email === '' && $phone === '')) {
+      echo json_encode(['success' => false, 'message' => 'Please provide your name and at least one contact (phone or email).']);
+      exit;
+    }
+
+    $stmt = $mysqli->prepare('INSERT INTO enquiries (property_id, name, email, phone, message) VALUES (?, ?, ?, ?, ?)');
+    if (!$stmt) {
+      echo json_encode(['success' => false, 'message' => 'Could not prepare statement.']);
+      exit;
+    }
+    $stmt->bind_param('issss', $propertyId, $name, $email, $phone, $message);
+    $ok = $stmt->execute();
+    if ($ok) {
+      echo json_encode(['success' => true]);
+    } else {
+      echo json_encode(['success' => false, 'message' => 'Failed to save enquiry.']);
+    }
+    exit;
+  } catch (Throwable $e) {
+    echo json_encode(['success' => false, 'message' => 'Server error.']);
+    exit;
+  }
+}
+
 // Get property ID from URL parameter
 $propertyId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -119,15 +154,29 @@ function formatPrice($price)
                 style="cursor: pointer;" />
             <?php endforeach; ?>
             <?php if (count($propertyImages) > 3): ?>
-              <div class="thumbnail-more" onclick="showAllImages()" style="cursor: pointer;">
+              <div class="thumbnail-more" onclick="toggleMoreImages()" style="cursor: pointer;">
                 <img src="../../uploads/properties/<?php echo $propertyImages[3]; ?>" alt="More images" />
                 <span class="overlay-text"><?php echo count($propertyImages) - 3; ?>+</span>
+                <span class="overlay-subtext">View Gallery</span>
               </div>
             <?php endif; ?>
           <?php else: ?>
             <img src="../assets/images/prop/prop6.png" alt="Default image" />
           <?php endif; ?>
         </div>
+        <?php if (!empty($propertyImages) && count($propertyImages) > 3): ?>
+        <div id="moreImages" class="more-images" style="display:none;">
+          <div class="container-fluid px-0">
+            <div class="row g-2">
+              <?php foreach ($propertyImages as $img): ?>
+                <div class="col-4 col-md-3">
+                  <img src="../../uploads/properties/<?php echo $img; ?>" alt="Property image" class="more-img" />
+                </div>
+              <?php endforeach; ?>
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
       </div>
 
       <div class=" col-md-4 property2-title">
@@ -170,10 +219,10 @@ function formatPrice($price)
         <div class="property-map">
           <?php if (!empty($property['map_embed_link'])): ?>
             <iframe src="<?php echo htmlspecialchars($property['map_embed_link']); ?>"
-              width="428px" height="350px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="428px" height="350px" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php else: ?>
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
-              width="428px" height="350px" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              width="428px" height="350px" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php endif; ?>
         </div>
       </div>
@@ -234,34 +283,29 @@ function formatPrice($price)
       </div>
 
       <div class="col-md-4">
-        <form class="visit-form">
+        <h4 style="margin: 10px 0 6px;">Enquiry</h4>
+        <form class="visit-form" id="enquiryForm">
           <label for="name">Name</label>
           <input type="text" id="name" placeholder="Jane" name="name">
 
+          <label for="email">Email (optional)</label>
+          <input type="email" id="email" placeholder="jane@example.com" name="email">
+
           <label for="phno">Phone Number</label>
           <input type="tel" id="phno" placeholder="Phone Number" name="phno">
-
-          <div class="row">
-            <div>
-              <label for="cdate">Date</label>
-              <input type="date" id="cdate" name="cdate" placeholder="dd/mm/yyyy">
-            </div>
-            <div>
-              <label for="ctime">Time</label>
-              <input type="time" id="ctime" name="ctime" placeholder="00:00">
-            </div>
-          </div>
 
           <label for="message">Your message</label>
           <textarea id="message" placeholder="Enter your question or message" name="message" rows="5"></textarea>
 
           <button type="submit" class="visit-btn">Schedule a Visit</button>
+          <div id="enquiryStatus" style="margin-top:8px;font-size:14px;display:none;"></div>
         </form>
 
       </div>
 
     </div>
   </section>
+
 
   <section class="container">
     <div class="property-title-section text-left">
@@ -314,9 +358,10 @@ function formatPrice($price)
       document.getElementById('mainImage').src = imageSrc;
     }
 
-    function showAllImages() {
-      // You can implement a lightbox or modal to show all images
-      alert('Show all images functionality - can be implemented with a lightbox');
+    function toggleMoreImages() {
+      var el = document.getElementById('moreImages');
+      if (!el) return;
+      el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
     }
 
     function goToPropertyDetails(propertyId) {
@@ -327,6 +372,38 @@ function formatPrice($price)
       // You can implement expand/collapse functionality for description
       alert('Toggle description functionality');
     }
+
+    // AJAX submit for enquiry form (stay on same page)
+    document.addEventListener('DOMContentLoaded', function () {
+      var form = document.getElementById('enquiryForm');
+      if (!form) return;
+      form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var statusEl = document.getElementById('enquiryStatus');
+        statusEl.style.display = 'none';
+        var formData = new FormData(form);
+        formData.append('action', 'submit_enquiry');
+        formData.append('property_id', '<?php echo $propertyId; ?>');
+        fetch('', { method: 'POST', body: formData })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            statusEl.style.display = 'block';
+            if (data && data.success) {
+              statusEl.style.color = '#16a34a';
+              statusEl.textContent = 'Thanks! We\'ll get back to you shortly.';
+              form.reset();
+            } else {
+              statusEl.style.color = '#b91c1c';
+              statusEl.textContent = (data && data.message) ? data.message : 'Something went wrong. Please try again.';
+            }
+          })
+          .catch(function () {
+            statusEl.style.display = 'block';
+            statusEl.style.color = '#b91c1c';
+            statusEl.textContent = 'Network error. Please try again.';
+          });
+      });
+    });
   </script>
 </body>
 
