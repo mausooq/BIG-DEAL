@@ -106,15 +106,14 @@ function validate_step_3(&$msg) {
 }
 
 function validate_step_4(&$msg) {
-    // Check if at least one image is uploaded
+    // Require at least 8 images (either server-uploaded temp files or base64 fallbacks)
     $uploaded_files = $_SESSION['uploaded_images'] ?? [];
     $images_data = $_SESSION['form_data']['images_data'] ?? [];
-    
-    if (empty($uploaded_files) && empty($images_data)) {
-        $msg = 'Please upload at least one property image.';
+    $count = (is_array($uploaded_files) ? count($uploaded_files) : 0) + (is_array($images_data) ? count($images_data) : 0);
+    if ($count < 8) {
+        $msg = 'Please upload at least 8 property images.';
         return false;
     }
-    
     return true;
 }
 
@@ -257,6 +256,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Prefer server-side uploaded files stored in session; fallback to base64 data
             $uploaded_files = $_SESSION['uploaded_images'] ?? [];
             $images_data = $_SESSION['form_data']['images_data'] ?? [];
+
+            // Enforce minimum 8 images on final submit as well
+            $total_images_selected = (is_array($uploaded_files) ? count($uploaded_files) : 0) + (is_array($images_data) ? count($images_data) : 0);
+            if ($total_images_selected < 8) {
+                throw new Exception('Please upload at least 8 property images before finishing.');
+            }
             
             // Debug: Log image data
             error_log("Image data count: " . count($images_data));
@@ -1060,7 +1065,7 @@ function get_data($field) {
                         <div style="margin-top:8px;">
                             <button type="button" class="btn btn-secondary" id="chooseBtn">Choose Images</button>
                         </div>
-                        <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB each. You can select multiple files at once.</div>
+                    <div class="text-muted small" style="margin-top:6px;">Supported: JPG, PNG, GIF, WebP. Max 10MB each. You can select multiple files at once. Minimum 8 images required.</div>
                     </div>
                     <div id="imageSizeWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
                     <div id="imageTotalWarning" style="display:none; margin-top:8px; color:#b91c1c; font-weight:500;"></div>
@@ -1590,6 +1595,18 @@ async function handleFiles(files) {
   }
   try { sessionStorage.setItem('prop_images', JSON.stringify(selectedImageDataURLs)); } catch {}
   try { sessionStorage.setItem('prop_server_files', JSON.stringify(uploadedServerFiles)); } catch {}
+  // Enforce minimum images client-side
+  const totalImages = (uploadedServerFiles?.length || 0) + (selectedImageDataURLs?.length || 0);
+  const warn = document.getElementById('imageTotalWarning');
+  if (warn) {
+    if (totalImages < 8) {
+      warn.style.display = 'block';
+      warn.textContent = 'Please upload at least 8 images (currently ' + totalImages + ').';
+    } else if (!totalErr) {
+      warn.style.display = 'none';
+      warn.textContent = '';
+    }
+  }
 }
 
 imagesInput?.addEventListener('change', function(){
@@ -1644,6 +1661,18 @@ formEl?.addEventListener('submit', function(){
     
     console.log('Submitting ' + selectedImageDataURLs.length + ' images with form');
   }
+  // Block navigation to preview (step 5) if less than 8 total images
+  try {
+    const serverFiles = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]');
+    const total = (Array.isArray(serverFiles) ? serverFiles.length : 0) + (Array.isArray(selectedImageDataURLs) ? selectedImageDataURLs.length : 0);
+    const forward = (document.activeElement && document.activeElement.name === 'goto_step') ? parseInt(document.activeElement.value,10) : null;
+    if (forward === 5 && total < 8) {
+      const warn = document.getElementById('imageTotalWarning');
+      if (warn) { warn.style.display = 'block'; warn.textContent = 'Please upload at least 8 images (currently ' + total + ').'; }
+      event.preventDefault();
+      return false;
+    }
+  } catch {}
 });
 
 // Clear all images functionality

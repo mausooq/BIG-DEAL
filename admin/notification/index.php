@@ -181,6 +181,8 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 			color:#111827;
 			margin:0;
 		}
+		/* Ensure the name part uses exact 600, not browser 'bolder' */
+		.notification-title strong{ font-weight:600; }
 		.notification-meta{
 			display:flex;
 			align-items:center;
@@ -222,6 +224,25 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 			.actions-cell{ justify-content:center; }
 			.table thead th:last-child, .table tbody td:last-child{ text-align:center; }
 		}
+
+		/* Pagination - red theme */
+		.pagination .page-link{
+			color: var(--primary);
+			border-color: var(--line);
+		}
+		.pagination .page-link:hover{
+			color:#fff;
+			background-color: var(--primary);
+			border-color: var(--primary);
+		}
+		.pagination .page-link:focus{
+			box-shadow: 0 0 0 .2rem rgba(225,29,42,.2);
+		}
+		.page-item.active .page-link{
+			background-color: var(--primary);
+			border-color: var(--primary);
+			color:#fff;
+		}
 	</style>
 </head>
 <body>
@@ -249,15 +270,15 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 				<div class="card-body">
 					<div class="d-flex align-items-center justify-content-between mb-4">
 						<div class="h6 mb-0">Notifications</div>
-						<div class="d-flex align-items-center gap-3">
-							<span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
-							<?php if ($unreadNotifications > 0): ?>
-								<span class="badge bg-light text-dark border"><?php echo $unreadNotifications; ?> unread</span>
-							<?php endif; ?>
-							<button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
-								<i class="fa-solid fa-check-double me-1"></i>Mark All Read
-							</button>
-						</div>
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-light text-dark border"><?php echo $totalCount; ?> total</span>
+                            <?php if ($unreadNotifications > 0): ?>
+                                <span class="badge bg-light text-dark border"><?php echo $unreadNotifications; ?> unread</span>
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#markAllReadModal">
+                                    <i class="fa-solid fa-check-double me-1"></i>Mark All Read
+                                </button>
+                            <?php endif; ?>
+                        </div>
 					</div>
 					
 					<div class="notifications-container">
@@ -297,7 +318,43 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 								</div>
 							</div>
 							
-							<p class="notification-title"><?php echo htmlspecialchars($row['message']); ?></p>
+                            <?php 
+                                $msg = $row['message'];
+                                $pid = 0; $namePart = ''; $propLabel = '';
+                                // Expect format: New enquiry from NAME — [PID:ID] TITLE (em dash U+2014)
+                                if (preg_match('/^\s*New\s+enquiry\s+from\s+(.+?)\s+\x{2014}\s+\[PID:(\d+)\]\s+(.*)$/u', $msg, $m)) {
+                                    $namePart = trim($m[1]);
+                                    $pid = (int)$m[2];
+                                    $propLabel = trim($m[3]);
+                                } elseif (preg_match('/^\s*New\s+enquiry\s+from\s+(.+?)\s+—\s+\[PID:(\d+)\]\s+(.*)$/u', $msg, $m)) { // fallback ascii dash
+                                    $namePart = trim($m[1]);
+                                    $pid = (int)$m[2];
+                                    $propLabel = trim($m[3]);
+                                } elseif (preg_match('/^\s*New\s+enquiry\s+from\s+(.+?)\s+\x{2014}\s+(.*)$/u', $msg, $m)) { // no PID, em dash
+                                    $namePart = trim($m[1]);
+                                    $propLabel = trim($m[2]);
+                                } elseif (preg_match('/^\s*New\s+enquiry\s+from\s+(.+?)\s+—\s+(.*)$/u', $msg, $m)) { // no PID, ascii dash
+                                    $namePart = trim($m[1]);
+                                    $propLabel = trim($m[2]);
+                                } elseif (preg_match('/\[PID:(\d+)\]\s*(.*)/u', $msg, $m)) {
+                                    $pid = (int)$m[1];
+                                    $propLabel = trim($m[2]);
+                                } else {
+                                    $propLabel = $msg;
+                                }
+                            ?>
+                            <div class="notification-title">
+                                <?php if ($namePart !== ''): ?>
+                                    <strong>New enquiry from <?php echo htmlspecialchars($namePart); ?></strong>
+                                <?php endif; ?>
+                                <?php if ($pid > 0): ?>
+                                    — <a href="../properties/view.php?id=<?php echo $pid; ?>" style="color:#111827; text-decoration:none;">
+                                        <?php echo htmlspecialchars($propLabel ?: ('Property #' . $pid)); ?>
+                                      </a>
+                                <?php else: ?>
+                                    <?php echo htmlspecialchars($propLabel); ?>
+                                <?php endif; ?>
+                            </div>
 							
 							<div class="notification-meta">
 								<span class="notification-time">
@@ -305,11 +362,18 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 									<?php echo date('M d, Y H:i', strtotime($row['created_at'])); ?>
 								</span>
 								
-                                <?php if (!$row['is_read']): ?>
-                                    <button class="btn btn-sm btn-primary btn-mark-read ms-auto" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
-										<i class="fa-solid fa-check me-1"></i>Mark as Read
-									</button>
-								<?php endif; ?>
+                                <div class="d-flex gap-2 ms-auto">
+                                    <?php if ($pid > 0): ?>
+                                        <a class="btn btn-sm btn-outline-primary" href="../properties/view.php?id=<?php echo $pid; ?>" title="View Property">
+                                            <i class="fa-solid fa-eye me-1"></i>View
+                                        </a>
+                                    <?php endif; ?>
+                                    <?php if (!$row['is_read']): ?>
+                                        <button class="btn btn-sm btn-primary btn-mark-read" data-bs-toggle="modal" data-bs-target="#markReadModal" title="Mark as Read">
+                                            <i class="fa-solid fa-check me-1"></i>Mark as Read
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
 							</div>
 						</div>
 						<?php endwhile; ?>

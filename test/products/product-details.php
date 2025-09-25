@@ -25,6 +25,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $stmt->bind_param('issss', $propertyId, $name, $email, $phone, $message);
     $ok = $stmt->execute();
     if ($ok) {
+      // Create admin notification about the new enquiry with property token for linking
+      $propTitle = '';
+      if ($propertyId > 0) {
+        $pstmt = $mysqli->prepare('SELECT title FROM properties WHERE id = ? LIMIT 1');
+        if ($pstmt) { $pstmt->bind_param('i', $propertyId); $pstmt->execute(); $pstmt->bind_result($propTitle); $pstmt->fetch(); $pstmt->close(); }
+      }
+      $safeName = trim($name);
+      // Format: New enquiry from {Name} — [PID:ID] {Property Title}
+      $msg = sprintf('New enquiry from %s — [PID:%d] %s', $safeName, (int)$propertyId, $propTitle ?: ('Property #' . (int)$propertyId));
+      $nstmt = $mysqli->prepare('INSERT INTO notifications (message) VALUES (?)');
+      if ($nstmt) { $nstmt->bind_param('s', $msg); $nstmt->execute(); $nstmt->close(); }
       echo json_encode(['success' => true]);
     } else {
       echo json_encode(['success' => false, 'message' => 'Failed to save enquiry.']);
