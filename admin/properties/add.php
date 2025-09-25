@@ -55,9 +55,21 @@ function validate_step_1(&$msg) {
     $title = trim(_get_form_value('title'));
     $price = _get_form_value('price');
     $area = _get_form_value('area');
-    if ($title === '') { $msg = 'Please enter Title.'; return false; }
+    $landmark = trim(_get_form_value('landmark'));
+    $configuration = trim(_get_form_value('configuration'));
+    $category_id = _get_form_value('category_id');
+    $description = trim(_get_form_value('description'));
+    $map_embed_link = trim(_get_form_value('map_embed_link'));
+    
+    if ($title === '') { $msg = 'Please enter Property Title.'; return false; }
     if ($price === '' || !is_numeric($price) || (float)$price <= 0) { $msg = 'Please enter a valid Price.'; return false; }
     if ($area === '' || !is_numeric($area) || (float)$area <= 0) { $msg = 'Please enter a valid Area.'; return false; }
+    if ($landmark === '') { $msg = 'Please enter Landmark.'; return false; }
+    if ($configuration === '') { $msg = 'Please enter Configuration (e.g., 2BHK, 3BHK).'; return false; }
+    if ($category_id === '') { $msg = 'Please select Category.'; return false; }
+    if ($description === '') { $msg = 'Please enter Description.'; return false; }
+    if ($map_embed_link === '') { $msg = 'Please enter Map Embed Link.'; return false; }
+    
     return true;
 }
 
@@ -67,16 +79,42 @@ function validate_step_2(&$msg) {
     $city_id = (int)(_get_form_value('city_id') ?: 0);
     $town_id = (int)(_get_form_value('town_id') ?: 0);
     $pincode = trim(_get_form_value('pincode'));
+    
     if ($state_id <= 0) { $msg = 'Please select State.'; return false; }
     if ($district_id <= 0) { $msg = 'Please select District.'; return false; }
     if ($city_id <= 0) { $msg = 'Please select City.'; return false; }
     if ($town_id <= 0) { $msg = 'Please select Town.'; return false; }
     if ($pincode === '') { $msg = 'Please enter Pincode.'; return false; }
+    
     return true;
 }
 
 function validate_step_3(&$msg) {
-    // No required fields currently; always valid
+    $furniture_status = trim(_get_form_value('furniture_status'));
+    $ownership_type = trim(_get_form_value('ownership_type'));
+    $facing = trim(_get_form_value('facing'));
+    $parking = trim(_get_form_value('parking'));
+    $balcony = _get_form_value('balcony');
+    
+    if ($furniture_status === '') { $msg = 'Please select Furniture Status.'; return false; }
+    if ($ownership_type === '') { $msg = 'Please select Ownership Type.'; return false; }
+    if ($facing === '') { $msg = 'Please select Facing.'; return false; }
+    if ($parking === '') { $msg = 'Please select Parking.'; return false; }
+    if ($balcony === '' || !is_numeric($balcony) || (int)$balcony < 0) { $msg = 'Please enter valid Number of Balconies.'; return false; }
+    
+    return true;
+}
+
+function validate_step_4(&$msg) {
+    // Check if at least one image is uploaded
+    $uploaded_files = $_SESSION['uploaded_images'] ?? [];
+    $images_data = $_SESSION['form_data']['images_data'] ?? [];
+    
+    if (empty($uploaded_files) && empty($images_data)) {
+        $msg = 'Please upload at least one property image.';
+        return false;
+    }
+    
     return true;
 }
 
@@ -86,9 +124,16 @@ function furthest_allowed_step($mysqli) {
     $furthest = 2;
     if (!validate_step_2($m)) { return $furthest; }
     // If category is Plot, step 3 is skipped; allow reaching preview (5) after images (4)
-    if (is_plot_category($mysqli)) { return 5; }
+    if (is_plot_category($mysqli)) { 
+        $furthest = 4;
+        if (!validate_step_4($m)) { return $furthest; }
+        return 5; 
+    }
+    $furthest = 3;
     if (!validate_step_3($m)) { return $furthest; }
-    // After step 3 (or if no requirements), allow reaching preview (5)
+    $furthest = 4;
+    if (!validate_step_4($m)) { return $furthest; }
+    // After step 4 (images), allow reaching preview (5)
     return 5;
 }
 
@@ -325,13 +370,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Determine target step: explicit goto trumps continue
     $goto_step = isset($_POST['goto_step']) ? (int)$_POST['goto_step'] : 0;
     if ($goto_step >= 1 && $goto_step <= $total_steps) {
-        // Validate current step before allowing forward jumps
-        $err = '';
-        $validCurrent = true;
-        if ($submitted_step === 1) { $validCurrent = validate_step_1($err); }
-        elseif ($submitted_step === 2) { $validCurrent = validate_step_2($err); }
-        elseif ($submitted_step === 3 && !is_plot_category($mysqli)) { $validCurrent = validate_step_3($err); }
-
         // Compute furthest allowed based on saved data
         $maxAllowed = furthest_allowed_step($mysqli);
 
@@ -340,15 +378,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($submitted_step > 3) { $goto_step = 2; } else { $goto_step = 4; }
         }
 
-        // Block jumping beyond current if current invalid
-        if (!$validCurrent && $goto_step > $submitted_step) {
-            $_SESSION['form_error'] = $err ?: 'Please complete this step before continuing.';
-            header('Location: ?step=' . $submitted_step);
-            exit();
+        // Only validate current step if going forward, not backward
+        if ($goto_step > $submitted_step) {
+            $err = '';
+            $validCurrent = true;
+            if ($submitted_step === 1) { $validCurrent = validate_step_1($err); }
+            elseif ($submitted_step === 2) { $validCurrent = validate_step_2($err); }
+            elseif ($submitted_step === 3 && !is_plot_category($mysqli)) { $validCurrent = validate_step_3($err); }
+            elseif ($submitted_step === 4) { $validCurrent = validate_step_4($err); }
+
+            // Block jumping beyond current if current invalid
+            if (!$validCurrent) {
+                $_SESSION['form_error'] = $err ?: 'Please complete this step before continuing.';
+                header('Location: ?step=' . $submitted_step);
+                exit();
+            }
         }
 
-        // Clamp to furthest allowed
-        if ($goto_step > $maxAllowed) { $goto_step = $maxAllowed; }
+        // Clamp to furthest allowed (only for forward navigation)
+        if ($goto_step > $submitted_step && $goto_step > $maxAllowed) { 
+            $goto_step = $maxAllowed; 
+        }
 
         header("Location: ?step=" . $goto_step);
         exit();
@@ -362,6 +412,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($submitted_step === 1) { $validCurrent = validate_step_1($err); }
     elseif ($submitted_step === 2) { $validCurrent = validate_step_2($err); }
     elseif ($submitted_step === 3 && !is_plot_category($mysqli)) { $validCurrent = validate_step_3($err); }
+    elseif ($submitted_step === 4) { $validCurrent = validate_step_4($err); }
     if (!$validCurrent) {
         $_SESSION['form_error'] = $err ?: 'Please complete this step before continuing.';
         header('Location: ?step=' . $submitted_step);
@@ -837,11 +888,11 @@ function get_data($field) {
             <div class="form-grid">
                 <div class="form-group full-width">
                     <label for="title">Property Title</label>
-                    <input type="text" id="title" name="title" value="<?php echo get_data('title'); ?>" placeholder="Beautiful 3BHK Apartment in Downtown">
+                    <input type="text" id="title" name="title" value="<?php echo get_data('title'); ?>" placeholder="Beautiful 3BHK Apartment in Downtown" required>
                                     </div>
                 <div class="form-group">
                     <label for="listing_type">Listing Type</label>
-                    <select id="listing_type" name="listing_type">
+                    <select id="listing_type" name="listing_type" required>
                         <option value="Buy" <?php echo get_data('listing_type') == 'Buy' ? 'selected' : ''; ?>>Buy</option>
                         <option value="Rent" <?php echo get_data('listing_type') == 'Rent' ? 'selected' : ''; ?>>Rent</option>
                         <option value="PG/Co-living" <?php echo get_data('listing_type') == 'PG/Co-living' ? 'selected' : ''; ?>>PG/Co-living</option>
@@ -849,7 +900,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="status">Status</label>
-                    <select id="status" name="status">
+                    <select id="status" name="status" required>
                         <option value="Available" <?php echo get_data('status') == 'Available' ? 'selected' : ''; ?>>Available</option>
                         <option value="Sold" <?php echo get_data('status') == 'Sold' ? 'selected' : ''; ?>>Sold</option>
                         <option value="Rented" <?php echo get_data('status') == 'Rented' ? 'selected' : ''; ?>>Rented</option>
@@ -857,24 +908,24 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="price">Price (₹)</label>
-                    <input type="number" step="0.01" id="price" name="price" value="<?php echo get_data('price'); ?>" placeholder="0.00">
+                    <input type="number" step="0.01" id="price" name="price" value="<?php echo get_data('price'); ?>" placeholder="0.00" required>
                                         </div>
                 <div class="form-group">
                     <label for="area">Area (sq ft)</label>
-                    <input type="number" step="0.01" id="area" name="area" value="<?php echo get_data('area'); ?>" placeholder="0">
+                    <input type="number" step="0.01" id="area" name="area" value="<?php echo get_data('area'); ?>" placeholder="0" required>
                                     </div>
             
                 <div class="form-group">
                     <label for="landmark">Landmark</label>
-                    <input type="text" id="landmark" name="landmark" value="<?php echo get_data('landmark'); ?>" placeholder="Nearby landmark or reference point">
+                    <input type="text" id="landmark" name="landmark" value="<?php echo get_data('landmark'); ?>" placeholder="Nearby landmark or reference point" required>
                                     </div>
                 <div class="form-group">
                     <label for="configuration">Configuration</label>
-                    <input type="text" id="configuration" name="configuration" value="<?php echo get_data('configuration'); ?>" placeholder="e.g., 2BHK, 3BHK">
+                    <input type="text" id="configuration" name="configuration" value="<?php echo get_data('configuration'); ?>" placeholder="e.g., 2BHK, 3BHK" required>
                                     </div>
                 <div class="form-group">
                     <label for="category_id">Category</label>
-                    <select id="category_id" name="category_id">
+                    <select id="category_id" name="category_id" required>
                                             <option value="">Select Category</option>
                         <?php foreach($categories as $cat): ?>
                             <option value="<?php echo (int)$cat['id']; ?>" <?php echo get_data('category_id') == (string)$cat['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat['name']); ?></option>
@@ -883,18 +934,18 @@ function get_data($field) {
                                     </div>
                 <div class="form-group full-width">
                     <label for="description">Description</label>
-                    <textarea id="description" name="description" placeholder="Describe the property features, amenities, and unique selling points..."><?php echo get_data('description'); ?></textarea>
+                    <textarea id="description" name="description" placeholder="Describe the property features, amenities, and unique selling points..." required><?php echo get_data('description'); ?></textarea>
                                     </div>
                 <div class="form-group full-width">
                     <label for="map_embed_link">Map Embed Link</label>
-                    <input type="url" id="map_embed_link" name="map_embed_link" value="<?php echo get_data('map_embed_link'); ?>" placeholder="https://www.google.com/maps/embed?pb=...">
+                    <input type="url" id="map_embed_link" name="map_embed_link" value="<?php echo get_data('map_embed_link'); ?>" placeholder="https://www.google.com/maps/embed?pb=..." required>
                         </div>
                             </div>
             <?php elseif ($current_step == 2): ?>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="state_id">State</label>
-                    <select id="state_id" name="state_id">
+                    <select id="state_id" name="state_id" required>
                                             <option value="">Select State</option>
                         <?php foreach($states as $s): ?>
                             <option value="<?php echo (int)$s['id']; ?>" <?php echo get_data('state_id') == (string)$s['id'] ? 'selected' : ''; ?>><?php echo htmlspecialchars($s['name']); ?></option>
@@ -911,7 +962,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="district_id">District</label>
-                    <select id="district_id" name="district_id">
+                    <select id="district_id" name="district_id" required>
                                             <option value="">Select District</option>
                                             <option value="__add__">+ Add District</option>
                                         </select>
@@ -925,7 +976,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="city_id">City</label>
-                    <select id="city_id" name="city_id">
+                    <select id="city_id" name="city_id" required>
                                             <option value="">Select City</option>
                                             <option value="__add__">+ Add City</option>
                                         </select>
@@ -939,7 +990,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="town_id">Town</label>
-                    <select id="town_id" name="town_id">
+                    <select id="town_id" name="town_id" required>
                                             <option value="">Select Town</option>
                                             <option value="__add__">+ Add Town</option>
                                         </select>
@@ -953,14 +1004,14 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="pincode">Pincode</label>
-                    <input type="text" id="pincode" name="pincode" value="<?php echo get_data('pincode'); ?>" placeholder="560001">
+                    <input type="text" id="pincode" name="pincode" value="<?php echo get_data('pincode'); ?>" placeholder="560001" required>
                                     </div>
                         </div>
             <?php elseif ($current_step == 3): ?>
             <div class="form-grid">
                 <div class="form-group">
                     <label for="furniture_status">Furniture Status</label>
-                    <select id="furniture_status" name="furniture_status">
+                    <select id="furniture_status" name="furniture_status" required>
                                             <option value="">Select</option>
                         <option value="Furnished" <?php echo get_data('furniture_status') == 'Furnished' ? 'selected' : ''; ?>>Furnished</option>
                         <option value="Semi-Furnished" <?php echo get_data('furniture_status') == 'Semi-Furnished' ? 'selected' : ''; ?>>Semi-Furnished</option>
@@ -969,7 +1020,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="ownership_type">Ownership Type</label>
-                    <select id="ownership_type" name="ownership_type">
+                    <select id="ownership_type" name="ownership_type" required>
                                             <option value="">Select</option>
                         <option value="Freehold" <?php echo get_data('ownership_type') == 'Freehold' ? 'selected' : ''; ?>>Freehold</option>
                         <option value="Leasehold" <?php echo get_data('ownership_type') == 'Leasehold' ? 'selected' : ''; ?>>Leasehold</option>
@@ -977,7 +1028,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="facing">Facing</label>
-                    <select id="facing" name="facing">
+                    <select id="facing" name="facing" required>
                                             <option value="">Select</option>
                         <option value="East" <?php echo get_data('facing') == 'East' ? 'selected' : ''; ?>>East</option>
                         <option value="West" <?php echo get_data('facing') == 'West' ? 'selected' : ''; ?>>West</option>
@@ -987,7 +1038,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="parking">Parking</label>
-                    <select id="parking" name="parking">
+                    <select id="parking" name="parking" required>
                                             <option value="">Select</option>
                         <option value="Yes" <?php echo get_data('parking') == 'Yes' ? 'selected' : ''; ?>>Yes</option>
                         <option value="No" <?php echo get_data('parking') == 'No' ? 'selected' : ''; ?>>No</option>
@@ -995,7 +1046,7 @@ function get_data($field) {
                                     </div>
                 <div class="form-group">
                     <label for="balcony">Number of Balconies</label>
-                    <input type="number" id="balcony" name="balcony" value="<?php echo get_data('balcony'); ?>" min="0" placeholder="0">
+                    <input type="number" id="balcony" name="balcony" value="<?php echo get_data('balcony'); ?>" min="0" placeholder="0" required>
                                     </div>
                         </div>
             <?php elseif ($current_step == 4): ?>
@@ -1637,13 +1688,8 @@ document.querySelector('.close-btn')?.addEventListener('click', function(){
   window.location.href = 'index.php';
 });
 
-// Prevent background iframe from capturing clicks
-document.addEventListener('click', function(e) {
-  // If click is outside modal container, redirect to index
-  if (!document.querySelector('.modal-container').contains(e.target)) {
-    window.location.href = 'index.php';
-  }
-});
+// Prevent accidental form closure - removed click-outside-to-close functionality
+// Users must use the close button (X) or complete the form to exit
 
 // Function to start a new property (clear all data)
 function startNewProperty() {
