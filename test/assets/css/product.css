@@ -21,7 +21,7 @@
 }
 .article-page .nav-tabs-custom button.active,
 .article-page .nav-tabs-custom button:hover {
-  color: #f9f0f0 !important;
+  color: #000000 !important;
   border-bottom: 2px solid #cc1a1a;
 }
 

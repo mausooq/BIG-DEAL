@@ -557,8 +557,19 @@ function onCityChange(city) {
 }
 
 function goToPropertyDetails(propertyId) {
-    // Navigate to product-details.php with property ID
-    window.location.href = 'product-details.php?id=' + propertyId;
+    // Generate random characters for the URL
+    const randomChars = generateRandomString(12);
+    // Navigate to product-details.php with property ID and random characters
+    window.location.href = 'product-details.php?id=' + propertyId + '&share=' + randomChars;
+}
+
+function generateRandomString(length) {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }
 
 function shareProperty(propertyId) {
@@ -579,9 +590,9 @@ function shareProperty(propertyId) {
 }
 
 function contactProperty(propertyId) {
-    // Handle contact functionality - you can customize this
-    alert('Contact functionality for property ID: ' + propertyId);
-    // You can redirect to a contact form or open a modal
+    // Call the phone number directly
+    const phoneNumber = '+91876543210';
+    window.location.href = 'tel:' + phoneNumber;
 }
 
 // Add click handlers for better UX

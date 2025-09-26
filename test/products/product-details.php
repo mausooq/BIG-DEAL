@@ -55,6 +55,32 @@ if (!$propertyId) {
   exit;
 }
 
+// Generate random characters for URL if not present
+$randomChars = isset($_GET['share']) ? $_GET['share'] : generateRandomString(12);
+
+// Function to generate random string
+function generateRandomString($length = 12) {
+  $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  $charactersLength = strlen($characters);
+  $randomString = '';
+  for ($i = 0; $i < $length; $i++) {
+    $randomString .= $characters[rand(0, $charactersLength - 1)];
+  }
+  return $randomString;
+}
+
+// If no share parameter, add random characters to current URL without redirect
+if (!isset($_GET['share'])) {
+  $_GET['share'] = $randomChars;
+  // Update the URL in browser without redirect
+  $currentUrl = $_SERVER['REQUEST_URI'];
+  $separator = strpos($currentUrl, '?') !== false ? '&' : '?';
+  $newUrl = $currentUrl . $separator . 'share=' . $randomChars;
+  
+  // Use JavaScript to update URL without page reload
+  echo '<script>history.replaceState(null, null, "' . htmlspecialchars($newUrl) . '");</script>';
+}
+
 // Fetch property details with category and images
 $mysqli = getMysqliConnection();
 $property = null;
