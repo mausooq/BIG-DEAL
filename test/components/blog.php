@@ -41,7 +41,7 @@
   border-radius: 28px;
   overflow: hidden;
 }
-.blog-feature { min-height: 360px; }
+.blog-feature { min-height: 480px; }
 /* Flexible lead image sizing across viewports */
 .blog-image { width: clamp(320px, 40vw, 506px); height: auto; flex: 0 0 clamp(320px, 40vw, 506px); }
 .blog-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 0; display: block; }

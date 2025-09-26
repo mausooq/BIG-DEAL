@@ -1,7 +1,4 @@
 <style>
-
-<!-- Connect With Our Experts Section -->
-<style>
 /* Lets Connect (scoped) */
 .blac2 { padding: 10px; background-color: #222; border-radius: 0px 0px 25px 0px; color: #fff; font-weight: 500; font-style: Medium; font-size: 3.125rem; line-height: 150%; letter-spacing: 0%; }
 .blac2-sub { padding: 10px; margin-left: 2%; font-weight: 300; font-style: Light; font-size: 20px; line-height: 150%; letter-spacing: 9%; }
