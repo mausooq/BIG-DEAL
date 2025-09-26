@@ -3,9 +3,17 @@
 require_once __DIR__ . '/../config/config.php';
 
 $testimonials = [];
-// Base path for uploaded testimonial images (store only filenames in DB)
-$uploadsBase = '../uploads/testimonials/';
-$houseImage = isset($asset_path) ? $asset_path . 'images/prop/prop5.png' : 'images/prop/prop5.png';
+// Determine assets base path relative to pages that include this component
+$assetBase = isset($asset_path) ? $asset_path : ($projectRoot . 'assets/');
+// Compute project root (e.g., "/BIG-DEAL/") and build root-relative uploads base
+$scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'] ?? '', '/'));
+$projectRoot = '/';
+if (!empty($scriptParts)) {
+    $projectRoot .= $scriptParts[0] . '/';
+}
+// Public URL base for uploaded testimonial images (root-relative)
+$uploadsBase = $projectRoot . 'uploads/testimonials/';
+$houseImage = $assetBase . 'images/prop/prop5.png';
 try {
     $db = getMysqliConnection();
     $sql = "SELECT id, name, feedback, rating, profile_image, home_image FROM testimonials ORDER BY created_at DESC";
@@ -126,7 +134,7 @@ try {
         
         <div class="testimonial-content">
           <div class="testimg">
-            <img src="<?php echo $asset_path; ?>images/icon/quote.svg" alt="quote" class="quote">
+            <img src="<?php echo $assetBase; ?>images/icon/quote.svg" alt="quote" class="quote">
             <img src="<?php echo htmlspecialchars($houseImage, ENT_QUOTES, 'UTF-8'); ?>" alt="House" class="img-fluid clip-notch" id="testimonial-house-img">
           </div>
 
@@ -143,7 +151,7 @@ try {
                   if ($profile && trim($profile) !== '') {
                     $profile = $uploadsBase . ltrim($profile, "\\/ ");
                   } else {
-                    $profile = isset($asset_path) ? $asset_path . 'images/avatar/test1.png' : 'images/avatar/test1.png';
+                    $profile = $assetBase . 'images/avatar/test1.png';
                   }
                 ?>
                 <div class="testimonial-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-home-image="<?php echo htmlspecialchars(($t['home_image'] ? $uploadsBase . ltrim($t['home_image'], "\\/ ") : ''), ENT_QUOTES, 'UTF-8'); ?>">
@@ -166,7 +174,7 @@ try {
             <?php else: ?>
               <div class="testimonial-slide active">
                 <div class="testimonial-author">
-                  <img src="<?php echo $asset_path; ?>images/avatar/test1.png" alt="Guest">
+                  <img src="<?php echo $assetBase; ?>images/avatar/test1.png" alt="Guest">
                   <div class="testimonial-author-info">
                     <h5>Guest</h5>
                     <p>&nbsp;</p>
@@ -179,8 +187,8 @@ try {
           </div>
 
           <div class="testimonial-nav">
-            <img src="<?php echo $asset_path; ?>images/icon/prev.svg" alt="previous" id="testimonial-prev">
-            <img src="<?php echo $asset_path; ?>images/icon/next.svg" alt="next" id="testimonial-next">
+            <img src="<?php echo $assetBase; ?>images/icon/prev.svg" alt="previous" id="testimonial-prev">
+            <img src="<?php echo $assetBase; ?>images/icon/next.svg" alt="next" id="testimonial-next">
           </div>
         </div>
     </section>
