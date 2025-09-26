@@ -254,7 +254,7 @@ $recentFaqs = $mysqli->query("SELECT question, answer FROM faqs ORDER BY order_i
 		.actions-cell{ width:150px; }
 		#faqsTable{ width:100%; table-layout:fixed; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }

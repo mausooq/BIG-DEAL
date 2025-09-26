@@ -176,7 +176,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 		.toolbar .chip.active{ background:var(--primary); border-color:var(--primary); color:#fff; }
 		.toolbar .divider{ width:1px; height:24px; background:var(--line); margin:0 4px; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }

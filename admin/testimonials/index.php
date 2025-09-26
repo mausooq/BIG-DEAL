@@ -240,7 +240,7 @@ $recentTestimonials = $mysqli->query("SELECT name, rating, DATE_FORMAT(created_a
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
 		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }

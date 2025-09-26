@@ -131,7 +131,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 		.actions-cell{ display:flex; gap:8px; justify-content:flex-end; }
 		.actions-cell .btn{ width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:12px; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }
@@ -364,7 +364,7 @@ $recentNotifications = $mysqli->query("SELECT message, is_read, DATE_FORMAT(crea
 								
                                 <div class="d-flex gap-2 ms-auto">
                                     <?php if ($pid > 0): ?>
-                                        <a class="btn btn-sm btn-outline-primary" href="../properties/view.php?id=<?php echo $pid; ?>" title="View Property">
+                                        <a class="btn btn-sm btn-outline-danger" href="../properties/view.php?id=<?php echo $pid; ?>" title="View Property">
                                             <i class="fa-solid fa-eye me-1"></i>View
                                         </a>
                                     <?php endif; ?>

@@ -256,7 +256,7 @@ function getPlatformColor($platform) {
 		.url-link{ color:#1d4ed8; text-decoration:none; }
 		.url-link:hover{ text-decoration:underline; }
 		/* Badges */
-		.badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+		.badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
 		/* Activity list */
 		.list-activity{ max-height:420px; overflow:auto; }
 		.sticky-side{ position:sticky; top:96px; }

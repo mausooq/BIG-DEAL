@@ -1319,6 +1319,11 @@ stateSel?.addEventListener('change', async function(){
   d.forEach(it=>{ const o=document.createElement('option'); o.value=it.id; o.textContent=it.name; if('<?php echo get_data('district_id'); ?>'===String(it.id)) o.selected=true; districtSel.appendChild(o); });
   // re-add inline add option
   const addOptD = document.createElement('option'); addOptD.value='__add__'; addOptD.textContent='+ Add District'; districtSel.appendChild(addOptD);
+  
+  // Trigger district change to populate cities and towns if district is already selected
+  if (districtSel.value) {
+    districtSel.dispatchEvent(new Event('change'));
+  }
 });
 
 districtSel?.addEventListener('change', async function(){
@@ -1329,6 +1334,11 @@ districtSel?.addEventListener('change', async function(){
   const c = await fetchJSON('hierarchy.php?action=fetch&level=cities&district_id=' + encodeURIComponent(did));
   c.forEach(it=>{ const o=document.createElement('option'); o.value=it.id; o.textContent=it.name; if('<?php echo get_data('city_id'); ?>'===String(it.id)) o.selected=true; citySel.appendChild(o); });
   const addOptC = document.createElement('option'); addOptC.value='__add__'; addOptC.textContent='+ Add City'; citySel.appendChild(addOptC);
+  
+  // Trigger city change to populate towns if city is already selected
+  if (citySel.value) {
+    citySel.dispatchEvent(new Event('change'));
+  }
 });
 
 citySel?.addEventListener('change', async function(){
@@ -1342,10 +1352,45 @@ citySel?.addEventListener('change', async function(){
 
 // On load, trigger chain if state/district/city are preset in session
 window.addEventListener('DOMContentLoaded', async ()=>{
-  if (stateSel && stateSel.value){ stateSel.dispatchEvent(new Event('change')); }
-  // Defer district/city triggers slightly to allow previous population
-  setTimeout(()=>{ if (districtSel && districtSel.value){ districtSel.dispatchEvent(new Event('change')); } }, 200);
-  setTimeout(()=>{ if (citySel && citySel.value){ citySel.dispatchEvent(new Event('change')); } }, 400);
+  // Store the original values before any changes
+  const originalState = stateSel ? stateSel.value : '';
+  const originalDistrict = districtSel ? districtSel.value : '';
+  const originalCity = citySel ? citySel.value : '';
+  const originalTown = townSel ? townSel.value : '';
+  
+  if (stateSel && originalState){ 
+    stateSel.dispatchEvent(new Event('change')); 
+    // Wait for districts to load, then restore district
+    setTimeout(async ()=>{
+      if (districtSel && originalDistrict) {
+        // Find and select the district
+        const districtOption = districtSel.querySelector(`option[value="${originalDistrict}"]`);
+        if (districtOption) {
+          districtSel.value = originalDistrict;
+          districtSel.dispatchEvent(new Event('change'));
+          // Wait for cities to load, then restore city
+          setTimeout(async ()=>{
+            if (citySel && originalCity) {
+              const cityOption = citySel.querySelector(`option[value="${originalCity}"]`);
+              if (cityOption) {
+                citySel.value = originalCity;
+                citySel.dispatchEvent(new Event('change'));
+                // Wait for towns to load, then restore town
+                setTimeout(()=>{
+                  if (townSel && originalTown) {
+                    const townOption = townSel.querySelector(`option[value="${originalTown}"]`);
+                    if (townOption) {
+                      townSel.value = originalTown;
+                    }
+                  }
+                }, 200);
+              }
+            }
+          }, 200);
+        }
+      }
+    }, 300);
+  }
 });
 
 // Inline add (no extra dialog): show inline inputs when selecting __add__
@@ -1684,7 +1729,7 @@ window.addEventListener('DOMContentLoaded', ()=>{
 });
 
 // On submit to step 5, mirror current thumbs to preview grid so user sees them
-formEl?.addEventListener('submit', function(){
+formEl?.addEventListener('submit', function(e){
   // If going to preview step
   const next = (document.activeElement && document.activeElement.name === 'goto_step') ? parseInt(document.activeElement.value,10) : null;
   if (next === 5 && previewImagesGrid){
@@ -1694,7 +1739,7 @@ formEl?.addEventListener('submit', function(){
   }
   
   // Always submit image data with the form
-  if (selectedImageDataURLs.length > 0) {
+  if (selectedImageDataURLs.length > 0 || uploadedServerFiles.length > 0) {
     // Clear existing hidden inputs
     const existingInputs = formEl.querySelectorAll('input[name="images_data[]"], input[name="uploaded_filenames[]"]');
     existingInputs.forEach(input => input.remove());
@@ -1708,7 +1753,7 @@ formEl?.addEventListener('submit', function(){
         i.value = fn;
         formEl.appendChild(i);
       });
-    } else {
+    } else if (selectedImageDataURLs.length > 0) {
       selectedImageDataURLs.forEach((dataURL) => {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
@@ -1718,8 +1763,9 @@ formEl?.addEventListener('submit', function(){
       });
     }
     
-    console.log('Submitting ' + selectedImageDataURLs.length + ' images with form');
+    console.log('Submitting ' + (uploadedServerFiles.length || selectedImageDataURLs.length) + ' images with form');
   }
+  
   // Block navigation to preview (step 5) if less than 8 total images (prefer server files)
   try {
     const serverFiles = JSON.parse(sessionStorage.getItem('prop_server_files') || '[]');
@@ -1730,10 +1776,26 @@ formEl?.addEventListener('submit', function(){
     if (forward === 5 && total < 8) {
       const warn = document.getElementById('imageTotalWarning');
       if (warn) { warn.style.display = 'block'; warn.textContent = 'Please upload at least 8 images (currently ' + total + ').'; }
-      event.preventDefault();
+      e.preventDefault();
       return false;
     }
   } catch {}
+  
+  // Ensure all form data is preserved by checking if any required fields are empty
+  // This prevents accidental data loss during navigation
+  const requiredFields = formEl.querySelectorAll('input[required], select[required], textarea[required]');
+  let hasEmptyRequired = false;
+  requiredFields.forEach(field => {
+    if (!field.value.trim()) {
+      hasEmptyRequired = true;
+    }
+  });
+  
+  // If this is not a final submit and we have empty required fields, warn user
+  const isFinalSubmit = formEl.querySelector('input[name="final_submit"]');
+  if (!isFinalSubmit && hasEmptyRequired) {
+    console.log('Some required fields are empty, but allowing navigation to preserve data');
+  }
 });
 
 // Clear all images functionality
@@ -1884,53 +1946,56 @@ function goToStep(stepNumber) {
       return;
     }
   } catch {}
-  // First, save current form data
+  
+  // Use the existing form instead of creating a temporary one
   const form = document.getElementById('wizardForm');
   if (form) {
-    // Create a temporary form to submit current data
-    const tempForm = document.createElement('form');
-    tempForm.method = 'POST';
-    tempForm.style.display = 'none';
-    
-    // Add current step
-    const stepInput = document.createElement('input');
-    stepInput.type = 'hidden';
-    stepInput.name = 'step';
-    stepInput.value = '<?php echo $current_step; ?>';
-    tempForm.appendChild(stepInput);
-    
-    // Add goto_step
-    const gotoInput = document.createElement('input');
-    gotoInput.type = 'hidden';
-    gotoInput.name = 'goto_step';
-    gotoInput.value = stepNumber;
-    tempForm.appendChild(gotoInput);
-    
-    // Collect all form data from current step
-    const formData = new FormData(form);
-    for (let [key, value] of formData.entries()) {
-      if (key !== 'step' && key !== 'goto_step') {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = key;
-        input.value = value;
-        tempForm.appendChild(input);
-      }
+    // Update the step value
+    const stepInput = form.querySelector('input[name="step"]');
+    if (stepInput) {
+      stepInput.value = '<?php echo $current_step; ?>';
     }
     
-    // Add image data if available
-    if (selectedImageDataURLs.length > 0) {
+    // Add goto_step input
+    let gotoInput = form.querySelector('input[name="goto_step"]');
+    if (!gotoInput) {
+      gotoInput = document.createElement('input');
+      gotoInput.type = 'hidden';
+      gotoInput.name = 'goto_step';
+      form.appendChild(gotoInput);
+    }
+    gotoInput.value = stepNumber;
+    
+    // Remove any existing final_submit input
+    const finalSubmitInput = form.querySelector('input[name="final_submit"]');
+    if (finalSubmitInput) {
+      finalSubmitInput.remove();
+    }
+    
+    // Add image data if available (prefer server files)
+    const existingImageInputs = form.querySelectorAll('input[name="images_data[]"], input[name="uploaded_filenames[]"]');
+    existingImageInputs.forEach(input => input.remove());
+    
+    if (uploadedServerFiles.length > 0) {
+      uploadedServerFiles.forEach(fn => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'uploaded_filenames[]';
+        hiddenInput.value = fn;
+        form.appendChild(hiddenInput);
+      });
+    } else if (selectedImageDataURLs.length > 0) {
       selectedImageDataURLs.forEach((dataURL, index) => {
         const hiddenInput = document.createElement('input');
         hiddenInput.type = 'hidden';
         hiddenInput.name = 'images_data[]';
         hiddenInput.value = dataURL;
-        tempForm.appendChild(hiddenInput);
+        form.appendChild(hiddenInput);
       });
     }
     
-    document.body.appendChild(tempForm);
-    tempForm.submit();
+    // Submit the form
+    form.submit();
   }
 }
 

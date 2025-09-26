@@ -134,7 +134,7 @@ $enquiries = $stmt ? $stmt->get_result() : $mysqli->query("SELECT e.id, e.name, 
         .message-box{ border:1px solid var(--line); background:#fff; border-radius:12px; padding:10px 12px; color:#111827; }
         .two-col{ display:grid; grid-template-columns: 1fr 1fr; gap:16px; }
         .divider{ height:1px; background:var(--line); margin:12px 0; }
-        .badge-soft{ background:#f4f7ff; color:#4356e0; border:1px solid #e4e9ff; }
+        .badge-soft{ background:#fef2f2; color:#dc2626; border:1px solid #fecaca; }
         .badge-status-success{ background:#dcfce7; color:#166534; border:1px solid #bbf7d0; }
         .badge-status-warning{ background:#fef3c7; color:#92400e; border:1px solid #fde68a; }
         .badge-status-danger{ background:#fecaca; color:#991b1b; border:1px solid #fca5a5; }
