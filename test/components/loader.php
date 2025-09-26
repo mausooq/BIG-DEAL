@@ -71,18 +71,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Hide loader with smooth transition
+        loader.classList.add('hidden');
+        
+        // Remove loader from DOM after animation
         setTimeout(function() {
-          loader.classList.add('hidden');
-          
-          // Remove loader from DOM after animation
-          setTimeout(function() {
-            if (loader.parentNode) {
-              loader.parentNode.removeChild(loader);
-            }
-          }, 1000);
-        }, 500);
+          if (loader.parentNode) {
+            loader.parentNode.removeChild(loader);
+          }
+        }, 1000);
       }
-    }, 2000); // Minimum 2 seconds display time for GIF
+    }, 2500); // Minimum 2.5 seconds display time for GIF
   });
   
   // Fallback: hide loader after 8 seconds regardless

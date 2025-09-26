@@ -99,7 +99,7 @@ try {
 
 <body>
 
-
+<?php include __DIR__ . '/components/loader.php'; ?>
   <?php $asset_path = 'assets/';
   include __DIR__ . '/components/navbar.php'; ?>
   <section class=" hero-section">
