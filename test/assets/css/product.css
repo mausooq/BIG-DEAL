@@ -814,6 +814,13 @@ padding: 0.6rem 0.8rem;
 font-size: 0.8rem;
 border-radius: 6px;
 }
+
+/* Neutralize dropdown-options styling on mobile */
+.dropdown-options {
+  max-height: none;
+  padding: 0;
+  overflow: visible;
+}
 }
 
 /* For small devices (phones, portrait) */
