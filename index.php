@@ -6,6 +6,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="assets/favicon.png" type="image/png">
 <title>BIG DEAL | Coming Soon</title>
 <style>
   :root { color-scheme: light dark; }
@@ -43,7 +44,7 @@
 </head>
 <body>
   <main class="container" role="main">
-    <img src="assets/logo.jpg" alt="BIG DEAL logo" class="logo">
+    <img src="assets/logo.png" alt="BIG DEAL logo" class="logo">
     <h1>COMING SOON</h1>
     <p>We're working hard to launch our new experience.</p>
     <div class="subtle">Stay tuned.</div>
