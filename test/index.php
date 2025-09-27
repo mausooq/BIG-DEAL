@@ -190,11 +190,8 @@ try {
               }
             }
             ?>
-            <a href="products/product-details.php?id=<?php echo (int)$featured['id']; ?>&share=<?php echo substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), 0, 12); ?>" class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" style="display: block;">
+            <a href="products/product-details.php?id=<?php echo (int)$featured['id']; ?>" class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" style="display: block;">
               <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($featured['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="imgs">
-              <button class="share-btn" onclick="event.stopPropagation(); openShareModal(<?php echo (int)$featured['id']; ?>, '<?php echo htmlspecialchars($featured['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>', '<?php echo htmlspecialchars($featured['description'] ?? 'Amazing featured property available for sale', ENT_QUOTES, 'UTF-8'); ?>')" title="Share Property">
-                <i class="fas fa-share-alt"></i>
-              </button>
               <div class="info-box">
                 <div class="info-top">
                   <div class="info-item" title="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>">
@@ -302,7 +299,7 @@ try {
       <?php if (!empty($properties)): ?>
         <?php foreach ($properties as $i => $p): ?>
           <div class="col-md-4">
-            <a href="products/product-details.php?id=<?php echo (int)$p['id']; ?>&share=<?php echo substr(str_shuffle('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'), 0, 12); ?>" style="text-decoration: none; color: inherit; display: block;">
+            <a href="products/product-details.php?id=<?php echo (int)$p['id']; ?>" style="text-decoration: none; color: inherit; display: block;">
             <div class="card property-card h-100">
               <?php
               $img = trim((string)($p['cover_image_url'] ?? ''));
@@ -337,9 +334,6 @@ try {
               }
               ?>
               <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="propimg" style="width: 416px; height: 277px; object-fit: cover; border-radius: 8px;">
-              <button class="share-btn" onclick="event.stopPropagation(); openShareModal(<?php echo (int)$p['id']; ?>, '<?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>', '<?php echo htmlspecialchars($p['description'] ?? 'Amazing property available for sale', ENT_QUOTES, 'UTF-8'); ?>')" title="Share Property">
-                <i class="fas fa-share-alt"></i>
-              </button>
               <div class="card-body">
                 <div class="card-title"><?php echo htmlspecialchars($p['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?></div>
                 <div class="property-attrs">
@@ -602,156 +596,7 @@ try {
       const url = 'products/index.php' + (cityName ? ('?city=' + encodeURIComponent(cityName)) : '');
       window.location.href = url;
     }
-
-    // Share functionality
-    let currentShareUrl = '';
-    let currentShareTitle = '';
-    let currentShareDescription = '';
-
-    function openShareModal(propertyId, title, description) {
-      // Generate random characters for share link
-      const randomChars = generateRandomString(12);
-      currentShareUrl = window.location.origin + '/test/products/product-details.php?id=' + propertyId + '&share=' + randomChars;
-      currentShareTitle = title || 'Check out this property';
-      currentShareDescription = description || 'Amazing property available for sale';
-      
-      // Debug: log the generated URL
-      console.log('Generated share URL:', currentShareUrl);
-      console.log('Property ID:', propertyId);
-      console.log('Random chars:', randomChars);
-      
-      document.getElementById('shareUrl').value = currentShareUrl;
-      
-      const shareModal = new bootstrap.Modal(document.getElementById('shareModal'));
-      shareModal.show();
-    }
-
-    function generateRandomString(length) {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let result = '';
-      for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-      }
-      return result;
-    }
-
-    function shareViaWhatsApp() {
-      const text = `${currentShareTitle}\n\n${currentShareDescription}\n\n${currentShareUrl}`;
-      const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
-      window.open(url, '_blank');
-    }
-
-    function shareViaFacebook() {
-      const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareUrl)}`;
-      window.open(url, '_blank', 'width=600,height=400');
-    }
-
-    function shareViaTwitter() {
-      const text = `${currentShareTitle} - ${currentShareDescription}`;
-      const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(currentShareUrl)}`;
-      window.open(url, '_blank', 'width=600,height=400');
-    }
-
-    function shareViaLinkedIn() {
-      const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentShareUrl)}`;
-      window.open(url, '_blank', 'width=600,height=400');
-    }
-
-    function shareViaEmail() {
-      const subject = `Check out this property: ${currentShareTitle}`;
-      const body = `${currentShareDescription}\n\nView details: ${currentShareUrl}`;
-      const url = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      window.location.href = url;
-    }
-
-    function copyToClipboard() {
-      const shareUrlInput = document.getElementById('shareUrl');
-      shareUrlInput.select();
-      shareUrlInput.setSelectionRange(0, 99999); // For mobile devices
-      
-      try {
-        document.execCommand('copy');
-        showCopySuccess();
-      } catch (err) {
-        // Fallback for modern browsers
-        navigator.clipboard.writeText(currentShareUrl).then(() => {
-          showCopySuccess();
-        }).catch(() => {
-          alert('Failed to copy link');
-        });
-      }
-    }
-
-    function showCopySuccess() {
-      const copyBtn = document.querySelector('.share-url-container button');
-      const originalText = copyBtn.innerHTML;
-      copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-      copyBtn.style.color = '#28a745';
-      
-      setTimeout(() => {
-        copyBtn.innerHTML = originalText;
-        copyBtn.style.color = '';
-      }, 2000);
-    }
   </script>
-
-  <!-- Share Modal -->
-  <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content share-modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="shareModalLabel">Share Property</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <div class="share-options">
-            <div class="share-option" onclick="shareViaWhatsApp()">
-              <div class="share-icon whatsapp">
-                <i class="fab fa-whatsapp"></i>
-              </div>
-              <span>WhatsApp</span>
-            </div>
-            <div class="share-option" onclick="shareViaFacebook()">
-              <div class="share-icon facebook">
-                <i class="fab fa-facebook-f"></i>
-              </div>
-              <span>Facebook</span>
-            </div>
-            <div class="share-option" onclick="shareViaTwitter()">
-              <div class="share-icon twitter">
-                <i class="fab fa-twitter"></i>
-              </div>
-              <span>Twitter</span>
-            </div>
-            <div class="share-option" onclick="shareViaLinkedIn()">
-              <div class="share-icon linkedin">
-                <i class="fab fa-linkedin-in"></i>
-              </div>
-              <span>LinkedIn</span>
-            </div>
-            <div class="share-option" onclick="shareViaEmail()">
-              <div class="share-icon email">
-                <i class="fas fa-envelope"></i>
-              </div>
-              <span>Email</span>
-            </div>
-            <div class="share-option" onclick="copyToClipboard()">
-              <div class="share-icon copy">
-                <i class="fas fa-copy"></i>
-              </div>
-              <span>Copy Link</span>
-            </div>
-          </div>
-          <div class="share-url-container">
-            <input type="text" id="shareUrl" class="form-control" readonly>
-            <button class="btn btn-outline-secondary" onclick="copyToClipboard()">
-              <i class="fas fa-copy"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </body>
 
 </html>
