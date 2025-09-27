@@ -95,6 +95,11 @@ try {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonhets.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Enhanced dropdown interactions */
+  </style>
+  <script src="assets/js/custom-dropdown.js" defer></script>
 </head>
 
 <body>
@@ -117,9 +122,8 @@ try {
 
   <div class="place">
     <div class="container">
-
-      <div class="row  ">
-        <div class="nav-tabs-custom mx-auto d-flex justify-content-evenly flex-wrap gap-1">
+      <div class="row">
+        <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
           <button class="active" type="button" data-category="Buy" onclick="onStaticCategoryClick('Buy')">Buy</button>
           <button type="button" data-category="Rent" onclick="onStaticCategoryClick('Rent')">Rent</button>
           <button type="button" data-category="Plot" onclick="onStaticCategoryClick('Plot')">Plot</button>
@@ -129,10 +133,10 @@ try {
         </div>
       </div>
 
-      <!-- Select city -->
+      <!-- Select city with enhanced UI -->
       <div class="custom-select-wrapper">
         <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onHeroCityChange(this.value)">
-          <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?> disabled>Select city</option>
+          <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
           <?php foreach ($allCityNames as $cityName): ?>
             <option value="<?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($selectedCity, $cityName) === 0 ? 'selected' : ''; ?>>
               <?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>

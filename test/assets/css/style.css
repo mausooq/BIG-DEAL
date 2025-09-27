@@ -4798,3 +4798,316 @@ body {
   -webkit-clip-path: polygon(50% 0%, 100% 0, 100% 100%, 0 100%, 0 43%);
   clip-path: polygon(50% 0%, 100% 0, 100% 100%, 0 100%, 0 43%);
 }
+
+/* Article page styles - Enhanced dropdown and navigation */
+.filter-section-header {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Align article (products) tabs/select to homepage structure */
+.article-page .nav-tabs-custom {
+  background: var(--nav-bg, #ffffff);
+  border-radius: 40px 40px 0 0;
+  border: 2px solid rgb(0, 0, 0);
+  --nav-text: rgb(0, 0, 0);
+  width: 58%;
+  gap: 45px;
+  padding-top: 10px;
+  padding-bottom: 25px;
+}
+
+/* Ensure button colors mirror homepage inside article page */
+.article-page .nav-tabs-custom button {
+  color: var(--nav-text, white);
+}
+.article-page .nav-tabs-custom button.active,
+.article-page .nav-tabs-custom button:hover {
+  color: #000000 !important;
+  border-bottom: 2px solid #cc1a1a;
+}
+
+.article-page .custom-select-wrapper {
+  width: 60%;
+}
+
+/* Reset select visuals to homepage style inside article page */
+.article-page .custom-select {
+  border-radius: 40px;
+  padding: 1.8rem 3rem;
+  width: 100%;
+  font-size: 1.6rem;
+  font-weight: 600;
+  border: 3px solid #e4d2d2; /* outer dropdown border */
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #ffffff
+    url('data:image/svg+xml;utf8,<svg fill="none" height="24" stroke="rgb(204,26,26)" stroke-width="3" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6"/></svg>')
+    no-repeat right 2.5rem center/1.5rem auto;
+  cursor: pointer;
+  color: #111111;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Focus ring and border coloring to match theme */
+.article-page .custom-select:focus,
+.article-page .custom-select:focus-visible {
+  border-color: #cc1a1a;
+  box-shadow: 0 0 0 4px rgba(204, 26, 26, 0.12);
+  outline: none;
+}
+
+/* Enhanced dropdown styling */
+.article-page .custom-select-wrapper {
+  position: relative;
+  display: block;        /* align with homepage structure */
+  width: 60%;            /* keep consistent width */
+  margin: 0 auto;        /* center horizontally */
+}
+
+/* Hide the native dropdown */
+.article-page .custom-select {
+  position: relative;
+  z-index: 10;
+}
+
+/* Custom dropdown styling */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.selected-option {
+  padding: 18px 25px;
+  background: rgb(0, 0, 0);
+  border-radius: 50px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+  font-weight: 400;
+  border: none;
+  min-height: 60px;
+}
+
+.selected-option::after {
+  content: '';
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E53935'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  position: absolute;
+  right: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+}
+
+.select-wrapper.active .selected-option::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.custom-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e4d2d2;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  display: none;
+  /* Hide scrollbar but keep scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  box-shadow: none;
+}
+
+.custom-dropdown::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.custom-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  display: block;
+}
+
+.dropdown-options {
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 8px 0;
+  /* Hide scrollbar but keep scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.dropdown-options::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.dropdown-option {
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-family: "Poppins", sans-serif;
+  display: flex;
+  align-items: center;
+  color: #333;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-option:hover {
+  background: #fff3f3;
+  color: #cc1a1a;
+}
+
+.dropdown-option.selected {
+  background: #ffe3e3;
+  color: #b22323;
+  font-weight: 600;
+}
+
+.dropdown-option.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  font-weight: 500;
+  color: #999;
+}
+
+.article-page .dropdown-option.disabled {
+  color: #9e9e9e;
+  background: #fafafa;
+  font-style: italic;
+  cursor: not-allowed;
+}
+
+/* Fallback styles for native select (still needed) */
+.article-page .custom-select option {
+  background: #ffffff;
+  color: #111111;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.95rem;
+  padding: 10px 14px;
+  border: 1px solid #e8caca;
+  margin: 4px;
+  line-height: 1.4;
+}
+
+.article-page .custom-select option:checked {
+  background: #ffe3e3;
+  color: #b22323;
+}
+
+.article-page .custom-select option:hover {
+  background: #fff3f3;
+  color: #e14c4c;
+}
+
+.article-page .custom-select option[disabled],
+.article-page .custom-select option[disabled][selected] {
+  color: #9e9e9e;
+  background: #fafafa;
+  font-style: italic;
+}
+
+/* Multi-select list consistency if used */
+.article-page select[multiple].custom-select option:checked {
+  background: #e14c4c;
+  color: #ffffff;
+}
+
+/* Responsive adjustments for article page */
+@media (max-width: 1024px) {
+  .article-page .nav-tabs-custom {
+    width: 60%;
+    gap: 45px;
+    padding-top: 10px;
+    padding-bottom: 25px;
+  }
+
+  .article-page .nav-tabs-custom button {
+    font-size: 0.9rem;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .article-page .custom-select-wrapper {
+    width: 70%;
+    font-size: 1.25rem;
+  }
+
+  .article-page .custom-select {
+    padding: 1rem 1.75rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .article-page .nav-tabs-custom {
+    width: 90%;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .article-page .nav-tabs-custom button {
+    font-size: 0.8rem;
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .article-page .custom-select-wrapper {
+    width: 100%;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  .article-page .custom-select {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .article-page .nav-tabs-custom {
+    width: 90%;
+    gap: 1rem;
+    padding: 0.5rem 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .article-page .nav-tabs-custom button {
+    font-size: 0.7rem;
+    padding: 0.35rem 0.5rem;
+    margin-bottom: 0.25rem;
+    min-width: auto;
+  }
+
+  .article-page .custom-select-wrapper {
+    width: 100%;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+  }
+
+  .article-page .custom-select {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.9rem;
+  }
+}
