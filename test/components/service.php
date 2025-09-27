@@ -119,6 +119,7 @@
 }
 
 .our-work h1 {
+	background-image: linear-gradient(269deg, #cc1a1a 1.26%, #f9f0f0 98.74%);
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
 	display: inline-flex;
@@ -174,7 +175,7 @@
 .blurred-box__title {
 	font-size: 28px;
 	font-weight: 600;
-	color: #ffffff;
+	color: #fff;
 	margin-bottom: 24px;
 	line-height: 1.3;
 	font-family: 'DM Sans', sans-serif;
@@ -188,14 +189,14 @@
 	display: block;
 	width: 60px;
 	height: 3px;
-	background: linear-gradient(135deg, #cc1a1a, #f9f0f0);
+	background: linear-gradient(135deg, #cc1a1a, #ff6b6b);
 	margin-bottom: 16px;
 	border-radius: 2px;
 }
 
 .blurred-box__text {
 	font-size: 16px;
-	color: #f9f0f0;
+	color: rgba(255, 255, 255, 0.8);
 	line-height: 1.6;
 	margin-bottom: 12px;
 	font-family: 'DM Sans', sans-serif;
@@ -216,12 +217,12 @@
 }
 
 .carousel__nav__item {
-	background: #3a3a3a;
+	background: #424b58;
 	box-shadow: none;
 	display: block;
 	width: 12px;
 	height: 12px;
-	border: 1px solid rgba(249, 240, 240, 0.3);
+	border: 1px solid rgba(255, 255, 255, 0.2);
 	border-radius: 50%;
 	cursor: pointer;
 	transition: all 0.3s ease;
@@ -368,12 +369,12 @@
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
 	.carousel__item {
-		background: rgba(17, 17, 17, 0.9);
-		border: 2px solid #ffffff;
+		background: rgba(0, 0, 0, 0.8);
+		border: 2px solid #fff;
 	}
 	
 	.blurred-box__text {
-		color: #ffffff;
+		color: #fff;
 	}
 }
 
@@ -451,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					scale: 1,
 				}, '<')
 				.to(previousItem, { 
-					backgroundColor: '#3a3a3a', 
+					backgroundColor: '#424b58', 
 					boxShadow: '0 0 16px transparent' 
 				}, '<')
 				.to(slides[i - 1], {
