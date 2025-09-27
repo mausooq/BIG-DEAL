@@ -1046,3 +1046,140 @@ border-radius: 4px;
 }
 }
 
+/* Active Filter States */
+.tag.active {
+  background: #cc1a1a !important;
+  color: #ffffff !important;
+  border-color: #cc1a1a !important;
+  position: relative;
+  padding-right: 35px;
+}
+
+.tag.active .add-icon {
+  display: none;
+}
+
+.tag.active::after {
+  content: "×";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transition: background 0.2s ease;
+}
+
+.tag.active:hover::after {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Property Pagination Navigation Styles */
+.property-pagination {
+  margin: 40px 0;
+  text-align: center;
+}
+
+.property-pagination .pagination-info {
+  margin-bottom: 20px;
+  color: #666;
+  font-size: 14px;
+}
+
+.property-pagination .pagination-arrows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+  padding: 0 20px;
+}
+
+.property-pagination .pagination-arrow {
+  padding: 12px 20px;
+  background: #f5f5f5;
+  border: 2px solid #ddd;
+  border-radius: 50px;
+  text-decoration: none;
+  color: #333;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  display: inline-block;
+  min-width: 50px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.property-pagination .pagination-arrow:hover {
+  background: #cc1a1a;
+  border-color: #cc1a1a;
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.property-pagination .pagination-arrow.disabled {
+  background: #f9f9f9;
+  border: 2px solid #eee;
+  color: #ccc;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Responsive pagination navigation */
+@media (max-width: 1024px) {
+  .property-pagination .pagination-arrows {
+    gap: 15px;
+    margin: 15px 0;
+    padding: 0 15px;
+  }
+  
+  .property-pagination .pagination-arrow {
+    padding: 10px 16px;
+    font-size: 16px;
+    min-width: 45px;
+  }
+}
+
+@media (max-width: 768px) {
+  .property-pagination .pagination-arrows {
+    gap: 12px;
+    margin: 12px 0;
+    padding: 0 12px;
+    flex-wrap: wrap;
+  }
+  
+  .property-pagination .pagination-arrow {
+    padding: 10px 14px;
+    font-size: 16px;
+    min-width: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .property-pagination .pagination-arrows {
+    gap: 10px;
+    margin: 10px 0;
+    padding: 0 10px;
+    flex-direction: row;
+    justify-content: space-between;
+    max-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .property-pagination .pagination-arrow {
+    padding: 8px 12px;
+    font-size: 14px;
+    min-width: 35px;
+  }
+}
+
+

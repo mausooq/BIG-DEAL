@@ -3874,6 +3874,10 @@ body {
   background-color: #111;
   color: white;
 }
+.btn-contact:hover {
+  background-color: #000000;
+  color: white;
+}
 
 /* contact us  */
 .about-page .navbar-brand,

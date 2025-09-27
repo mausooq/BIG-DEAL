@@ -147,7 +147,66 @@ if ($isFeaturedOnly) {
     $query .= " AND EXISTS (SELECT 1 FROM features f WHERE f.property_id = p.id)";
 }
 
-$query .= " ORDER BY p.created_at DESC LIMIT 20";
+$query .= " ORDER BY p.created_at DESC";
+
+// Pagination settings
+$propertiesPerPage = 10;
+$currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$offset = ($currentPage - 1) * $propertiesPerPage;
+
+// Get total count for pagination
+$countQuery = "SELECT COUNT(*) as total FROM properties p LEFT JOIN categories c ON p.category_id = c.id WHERE p.status = 'Available'";
+
+// Add the same filters to count query
+if (!empty($selectedCategory)) {
+    $countQuery .= " AND c.name = '" . $mysqli->real_escape_string($selectedCategory) . "'";
+}
+
+if (!empty($selectedCity)) {
+    $city = $mysqli->real_escape_string($selectedCity);
+    $countQuery .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
+}
+
+if (!empty($selectedPropertyType)) {
+    $countQuery .= " AND c.name = '" . $mysqli->real_escape_string($selectedPropertyType) . "'";
+}
+
+if (!empty($selectedBedrooms)) {
+    $countQuery .= " AND p.configuration = '" . $mysqli->real_escape_string($selectedBedrooms) . "'";
+}
+
+if (!empty($selectedLocalities)) {
+    $locality = $mysqli->real_escape_string($selectedLocalities);
+    $countQuery .= " AND (p.location LIKE '%" . $locality . "%' OR p.landmark LIKE '%" . $locality . "%')";
+}
+
+if ($minPrice > 0) {
+    $countQuery .= " AND p.price >= " . $minPrice;
+}
+if ($maxPrice > 0) {
+    $countQuery .= " AND p.price <= " . $maxPrice;
+}
+
+if ($minArea > 0) {
+    $countQuery .= " AND p.area >= " . $minArea;
+}
+if ($maxArea > 0) {
+    $countQuery .= " AND p.area <= " . $maxArea;
+}
+
+if ($isFeaturedOnly) {
+    $countQuery .= " AND EXISTS (SELECT 1 FROM features f WHERE f.property_id = p.id)";
+}
+
+$totalProperties = 0;
+if ($countResult = $mysqli->query($countQuery)) {
+    $countRow = $countResult->fetch_assoc();
+    $totalProperties = isset($countRow['total']) ? (int)$countRow['total'] : 0;
+    $countResult->free();
+}
+
+// Add pagination to main query
+$query .= " LIMIT $propertiesPerPage OFFSET $offset";
 
 $result = $mysqli->query($query);
 if ($result) {
@@ -258,44 +317,9 @@ function timeAgo($datetime) {
       <button class="clear-btn" id="clearAllBtn">Clear All</button>
     </div>
 
-    <!-- Applied filters tags container -->
-    <div class="applied-filters" id="appliedFiltersContainer">
-      <?php if (!empty($selectedPropertyType)): ?>
-        <span class="applied-filter-tag">
-          Property Type: <?php echo htmlspecialchars($selectedPropertyType); ?>
-          <button onclick="removeFilter('propertyType', '<?php echo htmlspecialchars($selectedPropertyType); ?>')">×</button>
-        </span>
-      <?php endif; ?>
-      
-      <?php if (!empty($selectedBedrooms)): ?>
-        <span class="applied-filter-tag">
-          Bedrooms: <?php echo htmlspecialchars($selectedBedrooms); ?>
-          <button onclick="removeFilter('bedrooms', '<?php echo htmlspecialchars($selectedBedrooms); ?>')">×</button>
-        </span>
-      <?php endif; ?>
-      
-      
-      
-      <?php if (!empty($selectedLocalities)): ?>
-        <span class="applied-filter-tag">
-          Locality: <?php echo htmlspecialchars($selectedLocalities); ?>
-          <button onclick="removeFilter('localities', '<?php echo htmlspecialchars($selectedLocalities); ?>')">×</button>
-        </span>
-      <?php endif; ?>
-      
-      <?php if ($minPrice > 0 || $maxPrice > 0): ?>
-        <span class="applied-filter-tag">
-          Budget: ₹<?php echo $minPrice > 0 ? number_format($minPrice) : '0'; ?> - ₹<?php echo $maxPrice > 0 ? number_format($maxPrice) : '∞'; ?>
-          <button onclick="clearRangeFilter('price')">×</button>
-        </span>
-      <?php endif; ?>
-      
-      <?php if ($minArea > 0 || $maxArea > 0): ?>
-        <span class="applied-filter-tag">
-          Area: <?php echo $minArea > 0 ? number_format($minArea) : '0'; ?> - <?php echo $maxArea > 0 ? number_format($maxArea) : '∞'; ?> sq.ft
-          <button onclick="clearRangeFilter('area')">×</button>
-        </span>
-      <?php endif; ?>
+    <!-- Applied filters tags container - Hidden as we now use active states on filter items -->
+    <div class="applied-filters" id="appliedFiltersContainer" style="display: none;">
+      <!-- Filter tags are now shown as active states on the filter items themselves -->
     </div>
 
     <!-- Budget Section -->
@@ -346,7 +370,7 @@ function timeAgo($datetime) {
       <div class="filter-section-content">
         <div class="tag-list" id="propertyTypeTags">
           <?php foreach ($categories as $category): ?>
-            <div class="tag" data-filter="propertyType" data-value="<?php echo htmlspecialchars($category['name']); ?>">
+            <div class="tag <?php echo ($selectedPropertyType === $category['name']) ? 'active' : ''; ?>" data-filter="propertyType" data-value="<?php echo htmlspecialchars($category['name']); ?>">
               <?php echo htmlspecialchars($category['name']); ?> <span class="add-icon">+</span>
             </div>
           <?php endforeach; ?>
@@ -363,7 +387,7 @@ function timeAgo($datetime) {
       <div class="filter-section-content">
         <div class="tag-list bedroom-tags" id="bedroomTags">
           <?php foreach ($configurations as $config): ?>
-            <div class="tag" data-filter="bedrooms" data-value="<?php echo htmlspecialchars($config); ?>">
+            <div class="tag <?php echo ($selectedBedrooms === $config) ? 'active' : ''; ?>" data-filter="bedrooms" data-value="<?php echo htmlspecialchars($config); ?>">
               <span class="add-icon">+</span> <?php echo htmlspecialchars($config); ?>
             </div>
           <?php endforeach; ?>
@@ -422,9 +446,10 @@ function timeAgo($datetime) {
           $totalLocalities = count($localities);
           for ($i = 0; $i < min($displayCount, $totalLocalities); $i++): 
             $locality = $localities[$i];
+            $isChecked = ($selectedLocalities === $locality['name']);
           ?>
             <label>
-              <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" /> 
+              <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" <?php echo $isChecked ? 'checked' : ''; ?> /> 
               <?php echo htmlspecialchars($locality['name']); ?>
             </label>
           <?php endfor; ?>
@@ -434,9 +459,10 @@ function timeAgo($datetime) {
           <div class="locality-list" id="extraLocalities" style="display:none; margin-top: 12px;">
             <?php for ($i = $displayCount; $i < $totalLocalities; $i++): 
               $locality = $localities[$i];
+              $isChecked = ($selectedLocalities === $locality['name']);
             ?>
               <label>
-                <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" /> 
+                <input type="checkbox" data-filter="localities" value="<?php echo htmlspecialchars($locality['name']); ?>" <?php echo $isChecked ? 'checked' : ''; ?> /> 
                 <?php echo htmlspecialchars($locality['name']); ?>
               </label>
             <?php endfor; ?>
@@ -506,6 +532,38 @@ function timeAgo($datetime) {
             </div>
           <?php endif; ?>
         </div>
+        
+        <!-- Property Pagination Navigation -->
+        <?php if ($totalProperties > $propertiesPerPage): ?>
+          <div class="property-pagination">
+            <div class="pagination-arrows">
+              <?php if ($currentPage > 1): ?>
+                <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $currentPage - 1])); ?>" 
+                   class="pagination-arrow prev-arrow">
+                  ←
+                </a>
+              <?php else: ?>
+                <span class="pagination-arrow disabled">
+                  ←
+                </span>
+              <?php endif; ?>
+              
+              <?php 
+              $totalPages = ceil($totalProperties / $propertiesPerPage);
+              if ($currentPage < $totalPages): ?>
+                <a href="?<?php echo http_build_query(array_merge($_GET, ['page' => $currentPage + 1])); ?>" 
+                   class="pagination-arrow next-arrow">
+                  →
+                </a>
+              <?php else: ?>
+                <span class="pagination-arrow disabled">
+                  →
+                </span>
+              <?php endif; ?>
+            </div>
+          </div>
+        <?php endif; ?>
+        
       </div>
       </div>
     </div>
@@ -540,10 +598,48 @@ function filterByCategory(category) {
     // Toggle: if already active, remove the filter
     if (current === category) {
         url.searchParams.delete('category');
+        // Sync with property type filter - remove active state
+        syncNavWithPropertyType(category, false);
     } else {
         url.searchParams.set('category', category);
+        // Sync with property type filter - add active state
+        syncNavWithPropertyType(category, true);
     }
     window.location.href = url.toString();
+}
+
+// Function to sync nav-tabs-custom with property type filters
+function syncNavWithPropertyType(category, isActive) {
+    // Find matching property type tag
+    const propertyTypeTag = document.querySelector(`[data-filter="propertyType"][data-value="${category}"]`);
+    if (propertyTypeTag) {
+        if (isActive) {
+            // Remove active from all property type tags
+            document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
+            // Add active to matching tag
+            propertyTypeTag.classList.add('active');
+        } else {
+            // Remove active from matching tag
+            propertyTypeTag.classList.remove('active');
+        }
+    }
+}
+
+// Function to sync property type filters with nav-tabs-custom
+function syncPropertyTypeWithNav(propertyType, isActive) {
+    // Find matching nav button
+    const navButton = document.querySelector(`.nav-tabs-custom button[onclick*="${propertyType}"]`);
+    if (navButton) {
+        if (isActive) {
+            // Remove active from all nav buttons
+            document.querySelectorAll('.nav-tabs-custom button').forEach(btn => btn.classList.remove('active'));
+            // Add active to matching button
+            navButton.classList.add('active');
+        } else {
+            // Remove active from matching button
+            navButton.classList.remove('active');
+        }
+    }
 }
 
 function onCityChange(city) {
@@ -591,7 +687,7 @@ function shareProperty(propertyId) {
 
 function contactProperty(propertyId) {
     // Call the phone number directly
-    const phoneNumber = '+91876543210';
+    const phoneNumber = '9187654321';
     window.location.href = 'tel:' + phoneNumber;
 }
 
@@ -615,23 +711,73 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize dropdown interactions
     initializeDropdowns();
+    
+    // Initial sync between nav-tabs-custom and property type filters
+    syncInitialStates();
 });
+
+// Function to sync initial states on page load
+function syncInitialStates() {
+    // Check if any nav button is active
+    const activeNavButton = document.querySelector('.nav-tabs-custom button.active');
+    if (activeNavButton) {
+        const category = activeNavButton.textContent.trim();
+        // Sync with property type filter
+        syncNavWithPropertyType(category, true);
+    }
+    
+    // Check if any property type tag is active
+    const activePropertyTypeTag = document.querySelector('#propertyTypeSection .tag.active');
+    if (activePropertyTypeTag) {
+        const propertyType = activePropertyTypeTag.getAttribute('data-value');
+        // Sync with nav-tabs-custom
+        syncPropertyTypeWithNav(propertyType, true);
+    }
+}
 
 // Filter functionality
 function initializeFilters() {
     // Handle property type filter tags
     const propertyTypeTags = document.querySelectorAll('[data-filter="propertyType"]');
     propertyTypeTags.forEach(tag => {
-        tag.addEventListener('click', function() {
+        tag.addEventListener('click', function(e) {
             const value = this.getAttribute('data-value');
             const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            
+            // Check if cross button was clicked
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
+            
+            if (isCrossClick && this.classList.contains('active')) {
+                // Remove filter
+                if (isMobile) {
+                    this.classList.remove('active');
+                    // Sync with nav-tabs-custom
+                    syncPropertyTypeWithNav(value, false);
+                    updateApplyButtonState();
+                } else {
+                    // Sync with nav-tabs-custom before removing
+                    syncPropertyTypeWithNav(value, false);
+                    removeFilter('propertyType', value);
+                }
+                return;
+            }
+            
             if (isMobile) {
                 // single-select UI on mobile; apply happens on Apply Filter
                 document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                upsertAppliedTag('propertyType', value, 'Property Type: ' + value);
+                // Sync with nav-tabs-custom
+                syncPropertyTypeWithNav(value, true);
                 updateApplyButtonState();
             } else {
+                // Toggle active state for desktop
+                document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                // Sync with nav-tabs-custom
+                syncPropertyTypeWithNav(value, true);
                 applyFilter('propertyType', value);
             }
         });
@@ -640,15 +786,35 @@ function initializeFilters() {
     // Handle bedroom filter tags
     const bedroomTags = document.querySelectorAll('[data-filter="bedrooms"]');
     bedroomTags.forEach(tag => {
-        tag.addEventListener('click', function() {
+        tag.addEventListener('click', function(e) {
             const value = this.getAttribute('data-value');
             const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            
+            // Check if cross button was clicked
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
+            
+            if (isCrossClick && this.classList.contains('active')) {
+                // Remove filter
+                if (isMobile) {
+                    this.classList.remove('active');
+                    updateApplyButtonState();
+                } else {
+                    removeFilter('bedrooms', value);
+                }
+                return;
+            }
+            
             if (isMobile) {
                 document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
                 this.classList.add('active');
-                upsertAppliedTag('bedrooms', value, 'Bedrooms: ' + value);
                 updateApplyButtonState();
             } else {
+                // Toggle active state for desktop
+                document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
                 applyFilter('bedrooms', value);
             }
         });
@@ -663,11 +829,6 @@ function initializeFilters() {
             const value = this.value;
             const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
             if (isMobile) {
-                if (this.checked) {
-                    upsertAppliedTag('localities', value, 'Locality: ' + value, false);
-                } else {
-                    removeAppliedTag('localities', value);
-                }
                 updateApplyButtonState();
                 return;
             }
@@ -693,25 +854,8 @@ function removeFilter(filterType, value) {
     const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
     if (isMobile) {
         // Only update UI on mobile; commit on Apply
-        if (filterType === 'localities') {
-            document.querySelectorAll('input[data-filter="localities"]').forEach(cb => {
-                if (cb.value === value) cb.checked = false;
-            });
-            removeAppliedTag('localities', value);
-        } else {
-            const sectionMap = {
-                'propertyType': '#propertyTypeSection',
-                'bedrooms': '#bedroomsSection',
-                'constructionStatus': '#constructionStatusSection'
-            };
-            const selector = sectionMap[filterType];
-            if (selector) {
-                document.querySelectorAll(selector + ' .tag').forEach(t => t.classList.remove('active'));
-            }
-            removeAppliedTag(filterType, value);
-        }
-        // Fallback: remove any chip span whose text includes the value
-        removeAppliedTagByText(value);
+        setFilterActiveState(filterType, value, false);
+        updateApplyButtonState();
         return;
     }
     const url = new URL(window.location);
@@ -1046,47 +1190,32 @@ function applyAllFilters() {
     window.location.href = url.toString();
 }
 
-// Helpers to manage Applied Filters UI without navigation (mobile)
-function upsertAppliedTag(filterType, value, label, replaceSingle = true) {
-    const container = document.getElementById('appliedFiltersContainer');
-    if (!container) return;
-    // For single-select groups, remove existing of same type
-    const singleTypes = ['propertyType', 'bedrooms', 'constructionStatus'];
-    if (replaceSingle && singleTypes.includes(filterType)) {
-        container.querySelectorAll('.applied-filter[data-filter="' + filterType + '"]').forEach(el => el.remove());
-    }
-    // Avoid duplicates
-    const existing = container.querySelector('.applied-filter[data-filter="' + filterType + '"][data-value="' + cssEscape(value) + '"]');
-    if (existing) return;
-    const span = document.createElement('span');
-    span.className = 'applied-filter-tag applied-filter';
-    span.setAttribute('data-filter', filterType);
-    span.setAttribute('data-value', value);
-    span.textContent = label;
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = '×';
-    btn.addEventListener('click', function() { removeFilter(filterType, value); });
-    span.appendChild(btn);
-    container.appendChild(span);
-}
-
-function removeAppliedTag(filterType, value) {
-    const container = document.getElementById('appliedFiltersContainer');
-    if (!container) return;
-    const el = container.querySelector('.applied-filter[data-filter="' + filterType + '"][data-value="' + cssEscape(value) + '"]');
-    if (el) el.remove();
-}
-
-function removeAppliedTagByText(value) {
-    const container = document.getElementById('appliedFiltersContainer');
-    if (!container) return;
-    const spans = container.querySelectorAll('.applied-filter-tag');
-    spans.forEach(span => {
-        if (span.textContent && span.textContent.indexOf(value) !== -1) {
-            span.remove();
+// Filter active state management
+function setFilterActiveState(filterType, value, isActive) {
+    if (filterType === 'localities') {
+        const checkbox = document.querySelector(`input[data-filter="localities"][value="${value}"]`);
+        if (checkbox) {
+            checkbox.checked = isActive;
         }
-    });
+    } else {
+        const sectionMap = {
+            'propertyType': '#propertyTypeSection',
+            'bedrooms': '#bedroomsSection'
+        };
+        const selector = sectionMap[filterType];
+        if (selector) {
+            const tag = document.querySelector(`${selector} .tag[data-value="${value}"]`);
+            if (tag) {
+                if (isActive) {
+                    // Remove active from all tags in section
+                    document.querySelectorAll(`${selector} .tag`).forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            }
+        }
+    }
 }
 
 // Minimal CSS.escape fallback for older browsers
