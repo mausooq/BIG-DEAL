@@ -129,6 +129,9 @@
 </div>
 
 
+    <!-- Interior Designs -->
+<?php include '../components/interior.php'; ?>
+
     <!-- Testimonials -->
 <?php include '../components/testimonial.php'; ?>
 
