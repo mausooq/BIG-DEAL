@@ -220,12 +220,31 @@ body {
   color: #111111 !important;
 }
 
+/* Force light theme for homepage dropdown */
+body:not(.article-page) .custom-select {
+  background: #ffffff !important;
+  color: #111111 !important;
+  border: 3px solid #e4d2d2 !important;
+}
+
 .custom-select:focus {
   outline: 3px solid #cc1a1a;
   outline-offset: 2px;
 }
 
-/* Ensure dropdown options have light theme */
+/* Ensure dropdown options have light theme - High specificity to override article-page styles */
+.custom-select,
+.custom-select option {
+  background: #ffffff !important;
+  color: #111111 !important;
+  font-family: "Poppins", sans-serif;
+  font-size: 1rem;
+  padding: 10px 14px;
+  border: none;
+  margin: 4px;
+  line-height: 1.4;
+}
+
 .custom-select option {
   background: #ffffff !important;
   color: #111111 !important;
@@ -245,6 +264,13 @@ body {
 .custom-select option:hover {
   background: #fff3f3 !important;
   color: #e14c4c !important;
+}
+
+/* Override article-page styles for homepage */
+body:not(.article-page) .custom-select,
+body:not(.article-page) .custom-select option {
+  background: #ffffff !important;
+  color: #111111 !important;
 }
 
 /* Carousel */
