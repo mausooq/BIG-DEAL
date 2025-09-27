@@ -3,17 +3,70 @@
 require_once __DIR__ . '/../config/config.php';
 
 $testimonials = [];
-// Determine assets base path relative to pages that include this component
-$assetBase = isset($asset_path) ? $asset_path : ($projectRoot . 'assets/');
-// Compute project root (e.g., "/BIG-DEAL/") and build root-relative uploads base
-$scriptParts = explode('/', trim($_SERVER['SCRIPT_NAME'] ?? '', '/'));
-$projectRoot = '/';
-if (!empty($scriptParts)) {
-    $projectRoot .= $scriptParts[0] . '/';
+
+// Derive site paths so returned URLs work from any depth using the provided $asset_path from parent page
+if (!isset($asset_path)) { $asset_path = 'assets/'; }
+$site_base_path = preg_replace('~assets/?$~', '', $asset_path);
+$dotdotCount = substr_count($asset_path, '../');
+$uploads_prefix = str_repeat('../', $dotdotCount + 1);
+
+// Helper to resolve testimonial image path; prefer uploads/testimonials when a filename only is stored
+function resolveTestimonialImageSrc($raw, $type = 'profile') {
+    global $asset_path, $site_base_path, $uploads_prefix;
+    $raw = trim((string)($raw ?? ''));
+    
+    // Default fallback images based on type
+    $defaultImages = [
+        'profile' => $asset_path . 'images/avatar/test1.png',
+        'home' => $asset_path . 'images/prop/prop5.png'
+    ];
+    
+    if ($raw === '') { return $defaultImages[$type] ?? $defaultImages['profile']; }
+    
+    // Check if it's already an absolute URL
+    $isAbs = (stripos($raw, 'http://') === 0) || (stripos($raw, 'https://') === 0) || (strpos($raw, '/') === 0);
+    if ($isAbs) { return $raw; }
+    
+    $name = basename($raw);
+    $testRoot = dirname(__DIR__);        // .../BIG-DEAL/test
+    $projectRoot = dirname($testRoot);   // .../BIG-DEAL
+
+    // Check under project uploads first
+    $projCandidates = [
+        $projectRoot . '/uploads/testimonials/' . $name,
+        $projectRoot . '/uploads/' . $name,
+    ];
+    foreach ($projCandidates as $abs) {
+        if (file_exists($abs)) {
+            // Return URL to project uploads from current page depth
+            if (strpos($abs, $projectRoot . '/uploads/testimonials/') === 0) {
+                return $uploads_prefix . 'uploads/testimonials/' . $name;
+            }
+            if (strpos($abs, $projectRoot . '/uploads/') === 0) {
+                return $uploads_prefix . 'uploads/' . $name;
+            }
+        }
+    }
+
+    // Fallback to test assets
+    $testCandidates = [
+        $testRoot . '/assets/images/avatar/' . $name,
+        $testRoot . '/assets/images/prop/' . $name,
+    ];
+    foreach ($testCandidates as $abs) {
+        if (file_exists($abs)) {
+            if (strpos($abs, '/avatar/') !== false) {
+                return $asset_path . 'images/avatar/' . $name;
+            }
+            if (strpos($abs, '/prop/') !== false) {
+                return $asset_path . 'images/prop/' . $name;
+            }
+        }
+    }
+
+    return $defaultImages[$type] ?? $defaultImages['profile'];
 }
-// Public URL base for uploaded testimonial images (root-relative)
-$uploadsBase = $projectRoot . 'uploads/testimonials/';
-$houseImage = $assetBase . 'images/prop/prop5.png';
+$houseImage = resolveTestimonialImageSrc('', 'home');
 try {
     $db = getMysqliConnection();
     $sql = "SELECT id, name, feedback, rating, profile_image, home_image FROM testimonials ORDER BY created_at DESC";
@@ -24,7 +77,7 @@ try {
         $result->free();
     }
     if (!empty($testimonials) && !empty($testimonials[0]['home_image'])) {
-        $houseImage = $uploadsBase . ltrim($testimonials[0]['home_image'], "\\/ ");
+        $houseImage = resolveTestimonialImageSrc($testimonials[0]['home_image'], 'home');
     }
 } catch (Throwable $e) {
     // Fail silently in UI; optionally log
@@ -134,7 +187,7 @@ try {
         
         <div class="testimonial-content">
           <div class="testimg">
-            <img src="<?php echo $assetBase; ?>images/icon/quote.svg" alt="quote" class="quote">
+            <img src="<?php echo $asset_path; ?>images/icon/quote.svg" alt="quote" class="quote">
             <img src="<?php echo htmlspecialchars($houseImage, ENT_QUOTES, 'UTF-8'); ?>" alt="House" class="img-fluid clip-notch" id="testimonial-house-img">
           </div>
 
@@ -147,14 +200,9 @@ try {
                   $rating = (int)($t['rating'] ?: 5);
                   if ($rating < 1) { $rating = 1; }
                   if ($rating > 5) { $rating = 5; }
-                  $profile = $t['profile_image'];
-                  if ($profile && trim($profile) !== '') {
-                    $profile = $uploadsBase . ltrim($profile, "\\/ ");
-                  } else {
-                    $profile = $assetBase . 'images/avatar/test1.png';
-                  }
+                  $profile = resolveTestimonialImageSrc($t['profile_image'], 'profile');
                 ?>
-                <div class="testimonial-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-home-image="<?php echo htmlspecialchars(($t['home_image'] ? $uploadsBase . ltrim($t['home_image'], "\\/ ") : ''), ENT_QUOTES, 'UTF-8'); ?>">
+                <div class="testimonial-slide <?php echo $index === 0 ? 'active' : ''; ?>" data-home-image="<?php echo htmlspecialchars(resolveTestimonialImageSrc($t['home_image'], 'home'), ENT_QUOTES, 'UTF-8'); ?>">
                   <div class="testimonial-author">
                     <img src="<?php echo htmlspecialchars($profile, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo $name; ?>">
                     <div class="testimonial-author-info">
@@ -174,7 +222,7 @@ try {
             <?php else: ?>
               <div class="testimonial-slide active">
                 <div class="testimonial-author">
-                  <img src="<?php echo $assetBase; ?>images/avatar/test1.png" alt="Guest">
+                  <img src="<?php echo resolveTestimonialImageSrc('', 'profile'); ?>" alt="Guest">
                   <div class="testimonial-author-info">
                     <h5>Guest</h5>
                     <p>&nbsp;</p>
@@ -187,8 +235,8 @@ try {
           </div>
 
           <div class="testimonial-nav">
-            <img src="<?php echo $assetBase; ?>images/icon/prev.svg" alt="previous" id="testimonial-prev">
-            <img src="<?php echo $assetBase; ?>images/icon/next.svg" alt="next" id="testimonial-next">
+            <img src="<?php echo $asset_path; ?>images/icon/prev.svg" alt="previous" id="testimonial-prev">
+            <img src="<?php echo $asset_path; ?>images/icon/next.svg" alt="next" id="testimonial-next">
           </div>
         </div>
     </section>
