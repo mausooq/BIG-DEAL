@@ -124,7 +124,7 @@ try {
     <div class="container">
       <div class="row">
         <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
-          <button class="active" type="button" data-category="Buy" onclick="onStaticCategoryClick('Buy')">Buy</button>
+          <button type="button" data-category="Buy" onclick="onStaticCategoryClick('Buy')">Buy</button>
           <button type="button" data-category="Rent" onclick="onStaticCategoryClick('Rent')">Rent</button>
           <button type="button" data-category="Plot" onclick="onStaticCategoryClick('Plot')">Plot</button>
           <button type="button" data-category="Commercial" onclick="onStaticCategoryClick('Commercial')">Commercial</button>
