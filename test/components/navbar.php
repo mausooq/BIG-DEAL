@@ -7,6 +7,74 @@
   $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
   $current_full_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
 ?>
+<style>
+  /* Navbar Logo Styles */
+  .navbar-brand img {
+    width: 8rem;
+    height: auto;
+    max-width: 200px;
+    transition: all 0.3s ease;
+  }
+  
+  /* Nav Link Hover Effect */
+  .nav-link {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .nav-link::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background-color: #cc1a1a;
+    transition: left 0.3s ease;
+  }
+  
+  .nav-link:hover::before {
+    left: 0;
+  }
+  
+  /* Agent Login Button Styles */
+  .agent-login-btn {
+    background: linear-gradient(135deg, #cc1a1a, #e14c4c) !important;
+    color: white !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.2rem !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    text-decoration: none !important;
+  }
+  
+  .agent-login-btn:hover {
+    background: linear-gradient(135deg, #b01717, #cc1a1a) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(204, 26, 26, 0.3);
+  }
+  
+  .agent-login-btn::before {
+    display: none !important;
+  }
+  
+  /* Responsive Logo Sizing */
+  @media (max-width: 1024px) {
+    .navbar-brand img {
+      width: 7rem;
+      max-width: 180px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .navbar-brand img {
+      width: 5rem;
+      max-width: 120px;
+    }
+  }
+</style>
 <section class="container-fluid" >
     <div class="nav1">
   <nav class="navbar navbar-expand-md navbar-light bg-transparent">
@@ -31,6 +99,9 @@
           </li>
           <li class="nav-item">
             <a class="nav-link <?php echo strpos($current_full_path, '/contact/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>contact/">Contact us</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link agent-login-btn" href="<?php echo $site_base_path; ?>agent/">Agent Login</a>
           </li>
         </ul>
       </div>
