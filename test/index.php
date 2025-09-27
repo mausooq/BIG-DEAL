@@ -104,13 +104,12 @@ try {
 
 <body>
 
-<?php include __DIR__ . '/components/loader.php'; ?>
   <?php $asset_path = 'assets/';
   include __DIR__ . '/components/navbar.php'; ?>
   <section class=" hero-section">
-    <div class="text-center  headh  figtree ">
-      <h1 class="fw-bold">Find your Beautiful House</h1>
-      <p class="sfpro subtitle">From breathtaking views to exquisite furnishings, our accommodations <br>redefine luxury and offer an experience beyond compare.</p>
+    <div class="text-center  headh ">
+      <h1 class="fw-bold"><span style="color:rgba(230, 27, 27, 0.93)">Next-Gen </span>Real Estate</h1>
+      <p class="sfpro subtitle">Discover homes that combine style, comfort, and future-ready living for a modern world.</p>
       <div class="hero-image-container">
         <img src="assets/images/hero-image.jpg" alt="hero-image" class="hero-image">
         <img src="assets/images/hero-image.jpg" alt="hero-image" class="hero-image">

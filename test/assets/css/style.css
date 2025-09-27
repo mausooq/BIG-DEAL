@@ -51,7 +51,7 @@ body {
 .subtitle {
   font-weight: 274;
   font-style: Light;
-  font-size: 20px;
+  font-size: 1rem;
   line-height: 1.2;
   letter-spacing: 0.5px;
   text-align: center;
@@ -4009,7 +4009,7 @@ body:not(.article-page) .custom-select option {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url("img/heroc.png");
+  background-image: url("../images/heroc.png");
   background-size: cover;
   background-position: center;
   opacity: 0.5; /* Adjusted opacity for better visibility */
@@ -4138,7 +4138,7 @@ body:not(.article-page) .custom-select option {
   left: 50%;
   width: 100%;
   height: 100%;
-  background-image: url("img/hero-about.png");
+  background-image: url("../images/hero-about.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
@@ -4159,7 +4159,7 @@ body:not(.article-page) .custom-select option {
   left: 50%;
   width: 100%;
   height: 100%;
-  background-image: url("img/hero-blog.png");
+  background-image: url("../images/hero-blog.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center center;
