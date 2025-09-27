@@ -309,9 +309,8 @@
                               if (!isset($asset_path)) { $asset_path = 'assets/'; }
                               $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
                             ?>
-                            <li><a href="<?php echo $site_base_path; ?>products/?category=Rent">For rent</a></li>
-                            <li><a href="<?php echo $site_base_path; ?>products/?category=Buy">For buyers</a></li>
                             <li><a href="<?php echo $site_base_path; ?>about/">About</a></li>
+                            <li><a href="<?php echo $site_base_path; ?>services/">Services</a></li>
                             <li><a href="<?php echo $site_base_path; ?>blog/">Blog</a></li>
                             <li><a href="<?php echo $site_base_path; ?>contact/">Contact us</a></li>
                         </ul>

@@ -93,7 +93,7 @@
 .our-work {
 	display: flex;
 	align-items: center;
-	background-color: #111111;
+	background-color: #ffffff;
 	background-position: center;
 	background-size: cover;
 	position: relative;
@@ -107,11 +107,11 @@
 	top: 50%;
 	left: 50%;
 	z-index: 0;
-	background: #cc1a1a;
+	background: #f9f0f0;
 	border-radius: 760px;
 	transform: translate(-50%, -50%);
 	backface-visibility: hidden;
-	opacity: 0.3;
+	opacity: 0.4;
 	filter: blur(270px);
 	content: '';
 	pointer-events: none;
@@ -119,7 +119,7 @@
 }
 
 .our-work h1 {
-	background-image: linear-gradient(269deg, #cc1a1a 1.26%, #f9f0f0 98.74%);
+	background-image: linear-gradient(269deg, #111111 1.26%, #cc1a1a 98.74%);
 	background-clip: text;
 	-webkit-text-fill-color: transparent;
 	display: inline-flex;
@@ -146,8 +146,8 @@
 	width: 100%;
 	min-height: 440px;
 	padding: 48px;
-	color: #ffffff;
-	background: rgba(58, 58, 58, 0.8);
+	color: #111111;
+	background: rgba(249, 240, 240, 0.8);
 	border: 1px solid rgba(204, 26, 26, 0.3);
 	border-radius: 16px;
 	position: absolute;
@@ -160,14 +160,14 @@
 .blurred-box__step {
 	width: 60px;
 	height: 60px;
-	background: linear-gradient(135deg, #cc1a1a, #f9f0f0);
+	background: linear-gradient(135deg, #cc1a1a, #111111);
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	font-size: 24px;
 	font-weight: 700;
-	color: #111111;
+	color: #ffffff;
 	margin-bottom: 24px;
 	font-family: 'DM Sans', sans-serif;
 }
@@ -175,7 +175,7 @@
 .blurred-box__title {
 	font-size: 28px;
 	font-weight: 600;
-	color: #fff;
+	color: #111111;
 	margin-bottom: 24px;
 	line-height: 1.3;
 	font-family: 'DM Sans', sans-serif;
@@ -189,14 +189,14 @@
 	display: block;
 	width: 60px;
 	height: 3px;
-	background: linear-gradient(135deg, #cc1a1a, #ff6b6b);
+	background: linear-gradient(135deg, #cc1a1a, #111111);
 	margin-bottom: 16px;
 	border-radius: 2px;
 }
 
 .blurred-box__text {
 	font-size: 16px;
-	color: rgba(255, 255, 255, 0.8);
+	color: #3a3a3a;
 	line-height: 1.6;
 	margin-bottom: 12px;
 	font-family: 'DM Sans', sans-serif;
@@ -217,12 +217,12 @@
 }
 
 .carousel__nav__item {
-	background: #424b58;
+	background: #f9f0f0;
 	box-shadow: none;
 	display: block;
 	width: 12px;
 	height: 12px;
-	border: 1px solid rgba(255, 255, 255, 0.2);
+	border: 1px solid rgba(17, 17, 17, 0.2);
 	border-radius: 50%;
 	cursor: pointer;
 	transition: all 0.3s ease;
@@ -318,7 +318,7 @@
 }
 
 ::-webkit-scrollbar-track {
-	background: #f1f1f1;
+	background: #f9f0f0;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -327,7 +327,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	background: #ff6b6b;
+	background: #111111;
 }
 
 /* Loading States */
@@ -369,12 +369,12 @@
 /* High Contrast Mode */
 @media (prefers-contrast: high) {
 	.carousel__item {
-		background: rgba(0, 0, 0, 0.8);
-		border: 2px solid #fff;
+		background: rgba(255, 255, 255, 0.9);
+		border: 2px solid #111111;
 	}
 	
 	.blurred-box__text {
-		color: #fff;
+		color: #111111;
 	}
 }
 
@@ -452,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
 					scale: 1,
 				}, '<')
 				.to(previousItem, { 
-					backgroundColor: '#424b58', 
+					backgroundColor: '#f9f0f0', 
 					boxShadow: '0 0 16px transparent' 
 				}, '<')
 				.to(slides[i - 1], {
