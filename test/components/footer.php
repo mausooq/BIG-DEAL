@@ -66,6 +66,57 @@
       opacity: 1;
     }
     
+    /* Footer bottom section styling */
+    .footer-bottom {
+      margin-top: 20px;
+      padding: 15px 0;
+    }
+    
+    .copyright-text {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+    }
+    
+    .developer-text {
+      font-size: 14px;
+      color: #666;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    /* UrbanBiz link styling */
+    .urbanbiz-link {
+      font-weight: bold;
+      color: var(--primary, #bf1d1d);
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .urbanbiz-link:hover {
+      color: var(--lighter, #d63384);
+      text-decoration: underline;
+    }
+    
+    /* BrandWeave link styling */
+    .brandweave-link {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+    
+    .brandweave-link:hover {
+      transform: scale(1.05);
+    }
+    
+    .brandweave-logo {
+      height: 20px;
+      margin-left: 5px;
+      transition: all 0.3s ease;
+    }
+    
     .social-icon {
       filter: grayscale(100%);
       padding: 10px;
@@ -319,9 +370,10 @@
       <div class=" col-md-3 footer-column">
                         <h3>Contact</h3>
                         <ul class="footer-links">
-                            <li>+9187654321</li>
-                            <li>info@bigdeal.com</li>
-                            <li>Kankanady Gate building, Mangalore</li>  
+                            <li>+91 80888 55555</li>
+                            <li>office@bigdeal.property</li>
+                            <li>First Floor, Gate Building, Kankanady Bypass Rd, Kankanady, Mangaluru, Karnataka 575002
+                            </li>  
                         </ul>
       </div>
 
@@ -334,9 +386,9 @@
       </div>
 
     <hr class="section-divider">
-      <div class="col-md-12 d-flex justify-content-between align-items-center">
-      <p >&copy;<script>document.write(new Date().getFullYear());</script> Big Deal Real Estate </p>
- <p >   Developed by </p>
+      <div class="col-md-12 d-flex justify-content-between align-items-center footer-bottom">
+      <p class="copyright-text">&copy;<script>document.write(new Date().getFullYear());</script> Big Deal PROPERTY - Powered by <a href="https://www.urbanbiz.in/" target="_blank" rel="noopener" class="urbanbiz-link">UrbanBiz Ventures Pvt Ltd</a></p>
+ <p class="developer-text">   Developed by <a href="https://thebrandweave.com" target="_blank" rel="noopener" class="brandweave-link"><img src="<?php echo $asset_path; ?>images/brandweave.png" alt="The Brand Weave" class="brandweave-logo"></a></p>
           </div>
 
 </footer>

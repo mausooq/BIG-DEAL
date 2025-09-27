@@ -4,8 +4,9 @@
 <section class="our-work Service-section">
     <div class="container sticky">
         <div class="row align-items-center">
-            <div class="col-12 col-md-4">
-                <h1>Your Guided Property Journey</h1>
+            <div class="col-12 col-md-4 sfpro">
+                <h4 style="color : #cc1a1a !important">Bigdeal.property </h4>
+                <h1>Your Trusted Property Service</h1>
             </div>
             <div class="col-12 col-md-8 slider">
                 <div class="carousel__slider">
@@ -55,15 +56,6 @@
                         </p>
                         </div>
                     </div>
-                    <div class="carousel__item" id="our-work-6">
-                        <div class="blurred-box__step">6</div>
-                        <h2 class="blurred-box__title">Post-Transaction Services & Growth</h2>
-                        <div class="blurred-box__footer">
-                            <span class="blurred-box__footer-line"></span>
-                            <p class="blurred-box__text">We offer ongoing financial advice, re-valuation services, and access to exclusive future investment opportunities.</p>
-                            <p class="blurred-box__text">Your lifelong partner for all real estate needs and portfolio growth.</p>
-                        </div>
-                    </div>
                 </div>
                 <ul class="carousel__nav">
                     <li class="carousel__nav__item" data-target="our-work-1"></li>
@@ -71,7 +63,6 @@
                     <li class="carousel__nav__item" data-target="our-work-3"></li>
                     <li class="carousel__nav__item" data-target="our-work-4"></li>
                     <li class="carousel__nav__item" data-target="our-work-5"></li>
-                    <li class="carousel__nav__item" data-target="our-work-6"></li>
                 </ul>
             </div>
         </div>
