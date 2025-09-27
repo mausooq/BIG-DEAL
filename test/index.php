@@ -198,7 +198,7 @@ try {
               <div class="info-box">
                 <div class="info-top">
                   <div class="info-item" title="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>">
-                    <img src="assets/images/icon/home.svg" class="svg">
+                    <img src="assets/images/icon/Home.svg" class="svg">
                     <?php echo htmlspecialchars($featured['configuration'] ?? '—', ENT_QUOTES, 'UTF-8'); ?>
                   </div>
                   <div class="info-item" title="Parking" aria-label="parking">
@@ -479,21 +479,20 @@ try {
   </div>
 
 
-
-
-  <!-- contact  -->
-  <?php include 'components/letsconnect.php'; ?>
-
-
-  <!-- Testimonials -->
-  <?php include 'components/testimonial.php'; ?>
-
-
+<!-- service section -->
+<?php include 'components/service.php'; ?>
+  
   <!-- about section  -->
   <?php include 'components/about.php'; ?>
-
-  <!-- blog section  -->
-  <?php include 'components/blog.php'; ?>
+  <!-- Testimonials -->
+  <?php include 'components/testimonial.php'; ?> 
+  
+    <!-- blog section  -->
+    <?php include 'components/blog.php'; ?>
+  
+  
+  <!-- contact  -->
+  <?php include 'components/letsconnect.php'; ?>
 
 
 
