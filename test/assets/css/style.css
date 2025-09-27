@@ -192,7 +192,6 @@ body {
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  font-family: "Poppins", sans-serif;
   font-weight: 300;
   font-style: Light;
   font-size: 20px;
@@ -4880,7 +4879,7 @@ body {
 
 .selected-option {
   padding: 18px 25px;
-  background: rgb(0, 0, 0);
+  background: rgb(255, 255, 255);
   border-radius: 50px;
   cursor: pointer;
   display: flex;
@@ -4889,7 +4888,7 @@ body {
   font-size: 1.2rem;
   position: relative;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  color: #ffffff;
+  color: #000000;
   font-weight: 400;
   border: none;
   min-height: 60px;
