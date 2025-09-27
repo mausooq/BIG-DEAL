@@ -128,6 +128,7 @@ if (!function_exists('renderAdminSidebar')) {
 			['key' => 'categories', 'icon' => 'fa-tags', 'label' => 'Categories', 'href' => '../categories/'],
 			['key' => 'location', 'icon' => 'fa-map-location-dot', 'label' => 'Locations', 'href' => '../location/'],
 			['key' => 'enquiries', 'icon' => 'fa-envelope-open-text', 'label' => 'Enquiries', 'href' => '../enquiries/'],
+			['key' => 'our-builds', 'icon' => 'fa-hammer', 'label' => 'Our Builds', 'href' => '../our-builds/'],
 			['key' => 'blogs', 'icon' => 'fa-newspaper', 'label' => 'Blogs', 'href' => '../blogs/'],
 			['key' => 'testimonials', 'icon' => 'fa-face-smile', 'label' => 'Testimonials', 'href' => '../testimonials/'],
 			['key' => 'notifications', 'icon' => 'fa-bell', 'label' => 'Notifications', 'href' => '../notification/'],
