@@ -37,28 +37,6 @@
     left: 0;
   }
   
-  /* Agent Login Button Styles */
-  .agent-login-btn {
-    background: linear-gradient(135deg, #cc1a1a, #e14c4c) !important;
-    color: white !important;
-    border-radius: 8px !important;
-    padding: 0.5rem 1.2rem !important;
-    font-weight: 600 !important;
-    transition: all 0.3s ease !important;
-    border: none !important;
-    text-decoration: none !important;
-  }
-  
-  .agent-login-btn:hover {
-    background: linear-gradient(135deg, #b01717, #cc1a1a) !important;
-    color: white !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(204, 26, 26, 0.3);
-  }
-  
-  .agent-login-btn::before {
-    display: none !important;
-  }
   
   /* Responsive Logo Sizing */
   @media (max-width: 1024px) {
@@ -101,7 +79,7 @@
             <a class="nav-link <?php echo strpos($current_full_path, '/contact/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>contact/">Contact us</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link agent-login-btn" href="<?php echo $site_base_path; ?>agent/">Agent Login</a>
+            <a class="nav-link" href="<?php echo $site_base_path; ?>agent/">List Your Property</a>
           </li>
         </ul>
       </div>
