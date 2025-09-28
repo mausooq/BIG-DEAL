@@ -11,7 +11,7 @@
             </div>
             <div class="col-12 col-md-8 slider">
                 <div class="carousel__slider">
-                    <div class="carousel__item" id="our-work-1">
+                    <div class="carousel__item" id="our-work-1" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop1.png')">
                         <div class="blurred-box__step wow animated" style="visibility: visible;">1</div>
                         <h2 class="blurred-box__title wow animated" style="visibility: visible;">Tech-Driven Search & Support</h2>
                         <div class="blurred-box__footer">
@@ -20,7 +20,7 @@
                             <p class="blurred-box__text wow animated" style="visibility: visible;">Leverage our data platform for **AI-powered property recommendations** and initial market support.</p>
                         </div>
                     </div>
-                    <div class="carousel__item" id="our-work-2">
+                    <div class="carousel__item" id="our-work-2" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop2.png')">
                         <div class="blurred-box__step">2</div>
                         <h2 class="blurred-box__title">Expert Evaluation & Purchase</h2>
                         <div class="blurred-box__footer">
@@ -29,7 +29,7 @@
                             <p class="blurred-box__text">Our experts handle aggressive **negotiation and price finalization** to secure your best deal.</p>
                         </div>
                     </div>
-                    <div class="carousel__item" id="our-work-3">
+                    <div class="carousel__item" id="our-work-3" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop3.png')">
                         <div class="blurred-box__step">3</div>
                         <h2 class="blurred-box__title">Seamless Documentation & Registration</h2>
                         <div class="blurred-box__footer">
@@ -38,7 +38,7 @@
                             <p class="blurred-box__text">Ensure a smooth, transparent, and **error-free property registration process** from start to finish.</p>
                         </div>
                     </div>
-                    <div class="carousel__item" id="our-work-4">
+                    <div class="carousel__item" id="our-work-4" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop4.png')">
                         <div class="blurred-box__step">4</div>
                         <h2 class="blurred-box__title">Design & Interiors Services</h2>
                         <div class="blurred-box__footer">
@@ -47,7 +47,7 @@
                             <p class="blurred-box__text">From concept to execution, we ensure the property matches your vision and is ready for occupancy.</p>
                         </div>
                     </div>
-                    <div class="carousel__item" id="our-work-5">
+                    <div class="carousel__item" id="our-work-5" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop5.png')">
                         <div class="blurred-box__step">5</div>
                         <h2 class="blurred-box__title">Professional Property Management</h2>
                         <div class="blurred-box__footer">
@@ -151,6 +151,10 @@
 	padding: 48px;
 	color: #111111;
 	background: rgba(255, 255, 255, 0.95);
+	background-image: var(--bg-image);
+	background-size: cover;
+	background-position: center;
+	background-repeat: no-repeat;
 	border: none;
 	border-radius: 8px;
 	position: absolute;
@@ -159,6 +163,24 @@
 	backdrop-filter: blur(10px);
 	transition: all 0.3s ease;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.carousel__item::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: rgba(255, 255, 255, 0.85);
+	border-radius: 8px;
+	z-index: 1;
+	pointer-events: none;
+}
+
+.carousel__item > * {
+	position: relative;
+	z-index: 2;
 }
 
 .blurred-box__step {
