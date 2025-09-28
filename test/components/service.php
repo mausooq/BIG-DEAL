@@ -16,8 +16,8 @@
                         <h2 class="blurred-box__title wow animated" style="visibility: visible;">Tech-Driven Search & Support</h2>
                         <div class="blurred-box__footer">
                             <span class="blurred-box__footer-line wow animated" style="visibility: visible;"></span>
-                            <p class="blurred-box__text wow animated" style="visibility: visible;">We begin with a detailed consultation to understand your goals (buy, rent, or invest).</p>
-                            <p class="blurred-box__text wow animated" style="visibility: visible;">Leverage our data platform for **AI-powered property recommendations** and initial market support.</p>
+                            <p class="blurred-box__text wow animated" style="visibility: visible;">We begin with a detailed consultation to understand your goals (buy, rent, or invest). <br>
+                            Leverage our data platform for <span class="highlight">AI-powered property recommendations</span> and initial market support.</p>
                         </div>
                     </div>
                     <div class="carousel__item" id="our-work-2" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop2.png')">
@@ -25,8 +25,8 @@
                         <h2 class="blurred-box__title">Expert Evaluation & Purchase</h2>
                         <div class="blurred-box__footer">
                             <span class="blurred-box__footer-line"></span>
-                            <p class="blurred-box__text">We provide in-depth analysis on selected properties covering investment potential and future value.</p>
-                            <p class="blurred-box__text">Our experts handle aggressive **negotiation and price finalization** to secure your best deal.</p>
+                            <p class="blurred-box__text">We provide in-depth analysis on selected properties covering investment potential and future value. <br>
+                            Our experts handle aggressive <span class="highlight">negotiation and price finalization</span> to secure your best deal.</p>
                         </div>
                     </div>
                     <div class="carousel__item" id="our-work-3" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop3.png')">
@@ -34,8 +34,8 @@
                         <h2 class="blurred-box__title">Seamless Documentation & Registration</h2>
                         <div class="blurred-box__footer">
                             <span class="blurred-box__footer-line"></span>
-                            <p class="blurred-box__text">Manage all complex legal documentation, stamp duty payments, and government formalities.</p>
-                            <p class="blurred-box__text">Ensure a smooth, transparent, and **error-free property registration process** from start to finish.</p>
+                            <p class="blurred-box__text">Manage all complex legal documentation, stamp duty payments, and government formalities. <br>
+                            Ensure a smooth, transparent, and <span class="highlight">error-free property registration process</span> from start to finish.</p>
                         </div>
                     </div>
                     <div class="carousel__item" id="our-work-4" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop4.png')">
@@ -43,8 +43,8 @@
                         <h2 class="blurred-box__title">Design & Interiors Services</h2>
                         <div class="blurred-box__footer">
                             <span class="blurred-box__footer-line"></span>
-                            <p class="blurred-box__text">Connect you with top-tier partners for **turnkey interior design and furnishing solutions**.</p>
-                            <p class="blurred-box__text">From concept to execution, we ensure the property matches your vision and is ready for occupancy.</p>
+                            <p class="blurred-box__text">Connect you with top-tier partners for <span class="highlight">turnkey interior design and furnishing solutions</span>. <br>
+                            From concept to execution, we ensure the property matches your vision and is ready for occupancy.</p>
                         </div>
                     </div>
                     <div class="carousel__item" id="our-work-5" style="--bg-image: url('<?php echo $asset_path; ?>images/prop/prop5.png')">
@@ -52,8 +52,8 @@
                         <h2 class="blurred-box__title">Professional Property Management</h2>
                         <div class="blurred-box__footer">
                             <span class="blurred-box__footer-line"></span>
-                            <p class="blurred-box__text">Maximize your return on investment with our professional rental management and tenant screening services.</p>
-                            <p class="blurred-box__text">Handle all maintenance, rent collection, and regulatory compliance on your behalf.</p>
+                            <p class="blurred-box__text">Maximize your return on investment with our professional rental management and tenant screening services. <br>
+                            Handle all maintenance, rent collection, and regulatory compliance on your behalf.</p>
                         </p>
                         </div>
                     </div>
@@ -114,7 +114,6 @@
 	font-size: 48px;
 	font-weight: 700;
 	font-style: Bold;
-	/* margin-top: 1em; */
 	letter-spacing: 1%;
 	color: #111111;
 	display: inline-flex;
@@ -128,7 +127,6 @@
 	font-size: 16px;
 	letter-spacing: 1px;
 	color: #666;
-	margin-top: 1em;
 	font-family: 'DM Sans', sans-serif;
 }
 
@@ -194,42 +192,51 @@
 	font-size: 24px;
 	font-weight: 700;
 	color: #ffffff;
-	margin-bottom: 24px;
+	margin-bottom: 20px;
 	font-family: 'DM Sans', sans-serif;
+	box-shadow: 0 4px 12px rgba(204, 26, 26, 0.3);
 }
 
 .blurred-box__title {
-	font-size: 28px;
-	font-weight: 600;
+	font-size: 32px;
+	font-weight: 700;
 	color: #111111;
-	margin-bottom: 24px;
-	line-height: 1.3;
+	margin-bottom: 20px;
+	line-height: 1.2;
 	font-family: 'DM Sans', sans-serif;
+	letter-spacing: -0.5px;
 }
 
 .blurred-box__footer {
-	margin-top: 24px;
+	margin-top: 20px;
 }
 
 .blurred-box__footer-line {
 	display: block;
 	width: 60px;
-	height: 3px;
+	height: 4px;
 	background: linear-gradient(135deg, #cc1a1a, #111111);
-	margin-bottom: 16px;
+	margin-bottom: 20px;
 	border-radius: 2px;
+	box-shadow: 0 2px 8px rgba(204, 26, 26, 0.2);
 }
 
 .blurred-box__text {
 	font-size: 16px;
-	color: #3a3a3a;
-	line-height: 1.6;
-	margin-bottom: 12px;
+	color: #444444;
+	line-height: 1.7;
+	margin-bottom: 16px;
 	font-family: 'DM Sans', sans-serif;
+	font-weight: 400;
+	letter-spacing: 0.3px;
 }
 
 .blurred-box__text:last-child {
 	margin-bottom: 0;
+}
+
+.blurred-box__text .highlight {
+	font-weight: 700;
 }
 
 .carousel__nav {
@@ -291,13 +298,25 @@
 	}
 	
 	.blurred-box__title {
-		font-size: 24px;
+		font-size: 28px;
+		letter-spacing: -0.3px;
 	}
 	
 	.blurred-box__step {
 		width: 50px;
 		height: 50px;
 		font-size: 20px;
+		margin-bottom: 16px;
+	}
+	
+	.blurred-box__text {
+		font-size: 15px;
+		line-height: 1.6;
+		margin-bottom: 14px;
+	}
+	
+	.blurred-box__footer-line {
+		margin-bottom: 16px;
 	}
 	
 	.carousel__nav {
@@ -318,17 +337,26 @@
 	}
 	
 	.blurred-box__title {
-		font-size: 20px;
+			font-size: 24px;
+		letter-spacing: -0.2px;
+		margin-bottom: 16px;
 	}
 	
 	.blurred-box__text {
 		font-size: 14px;
+		line-height: 1.5;
+		margin-bottom: 12px;
 	}
 	
 	.blurred-box__step {
 		width: 40px;
 		height: 40px;
 		font-size: 18px;
+		margin-bottom: 14px;
+	}
+	
+	.blurred-box__footer-line {
+		margin-bottom: 14px;
 	}
 }
 
