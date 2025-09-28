@@ -7,6 +7,7 @@
             <div class="col-12 col-md-4 sfpro">
                 <h4 style="color : #cc1a1a !important">Bigdeal.property </h4>
                 <h1>Your Trusted Property Service</h1>
+                <p class="service-subtitle">Comprehensive solutions for all your property needs</p>
             </div>
             <div class="col-12 col-md-8 slider">
                 <div class="carousel__slider">
@@ -110,14 +111,25 @@
 }
 
 .our-work h1 {
-	background-image: linear-gradient(269deg, #111111 1.26%, #cc1a1a 98.74%);
-	background-clip: text;
-	-webkit-text-fill-color: transparent;
+	font-size: 48px;
+	font-weight: 700;
+	font-style: Bold;
+	/* margin-top: 1em; */
+	letter-spacing: 1%;
+	color: #111111;
 	display: inline-flex;
-	font-size: 3.3rem;
 	line-height: 1.1;
 	font-family: 'DM Sans', sans-serif;
-	font-weight: 700;
+}
+
+.service-subtitle {
+	font-weight: 400;
+	font-style: Regular;
+	font-size: 16px;
+	letter-spacing: 1px;
+	color: #666;
+	margin-top: 1em;
+	font-family: 'DM Sans', sans-serif;
 }
 
 .slider {
@@ -138,14 +150,15 @@
 	min-height: 440px;
 	padding: 48px;
 	color: #111111;
-	background: rgba(249, 240, 240, 0.8);
-	border: 1px solid rgba(204, 26, 26, 0.3);
-	border-radius: 16px;
+	background: rgba(255, 255, 255, 0.95);
+	border: none;
+	border-radius: 8px;
 	position: absolute;
 	top: 0%;
 	opacity: 0;
 	backdrop-filter: blur(10px);
 	transition: all 0.3s ease;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .blurred-box__step {
@@ -361,7 +374,8 @@
 @media (prefers-contrast: high) {
 	.carousel__item {
 		background: rgba(255, 255, 255, 0.9);
-		border: 2px solid #111111;
+		border: none;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 	}
 	
 	.blurred-box__text {

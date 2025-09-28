@@ -197,12 +197,13 @@ $mysqli->close();
   display: block;
   opacity: 1;
   transform: translate(-50%, -50%);
-  background: rgba(249, 240, 240, 0.8);
-  border: 1px solid rgba(204, 26, 26, 0.3);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border: none;
+  border-radius: 8px;
   overflow: hidden;
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .box:after {
@@ -237,7 +238,7 @@ $mysqli->close();
   top: 0;
   left: 0;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: 8px;
   z-index: 1;
 }
 
@@ -273,32 +274,80 @@ $mysqli->close();
 }
 
 .interior-title {
+  font-size: 48px;
+  font-weight: 700;
+  font-style: Bold;
+  margin-top: 1em;
+  letter-spacing: 1%;
+  color: #111111;
+  z-index: 100;
   position: absolute;
   top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background-image: linear-gradient(269deg, #111111 1.26%, #cc1a1a 98.74%);
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  display: inline-flex;
-  font-size: 3.3rem;
-  line-height: 1.1;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  left: 2.3em;
+}
+
+.interior-subtitle {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  letter-spacing: 1px;
+  color: #666;
+  margin-top: 3.5em;
   z-index: 100;
-  text-align: center;
+  position: absolute;
+  top: 5rem;
+  left: 2rem;
+  margin-left: 5em;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .interior-title {
+    font-size: 1.75em;
+    top: 1.5rem;
+  }
+  .interior-subtitle {
+    font-size: 0.8125em;
+    top: 4rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .interior-title {
+    font-size: 1.75em;
+    top: 1rem;
+  }
+  .interior-subtitle {
+    font-size: 0.8125em;
+    top: 3.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .interior-title {
+    font-size: 1.5em;
+    top: 1rem;
+  }
+  .interior-subtitle {
+    font-size: 0.75em;
+    line-height: 1.5;
+    top: 3rem;
+  }
 }
 </style>
 
 <section class="interior-section">
-  <h2 class="interior-title">Our Interior Designs</h2>
+  <div class="container">
+    <h2 class="interior-title">Our Interior Designs</h2>
+    <p class="interior-subtitle">Transform your space with our innovative design solutions</p>
+  </div>
   
   <div class="boxes">
     <?php 
     $counter = 1;
     foreach ($projects as $project): 
         $imagePath = $project['image_filename'] ? 
-            '../uploads/projects/' . $project['image_filename'] : 
+            '../../uploads/projects/' . $project['image_filename'] : 
             $asset_path . 'images/prop/aboutimg.png'; // fallback image
     ?>
     <div class="box" style="--src: url(<?php echo $imagePath; ?>)">
