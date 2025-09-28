@@ -298,7 +298,7 @@ $mysqli->close();
     $counter = 1;
     foreach ($projects as $project): 
         $imagePath = $project['image_filename'] ? 
-            '../../uploads/projects/' . $project['image_filename'] : 
+            '../uploads/projects/' . $project['image_filename'] : 
             $asset_path . 'images/prop/aboutimg.png'; // fallback image
     ?>
     <div class="box" style="--src: url(<?php echo $imagePath; ?>)">

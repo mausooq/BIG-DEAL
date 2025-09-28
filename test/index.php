@@ -439,6 +439,8 @@ try {
     </div>
   </div>
 
+  <!-- Interior section -->
+  <?php include 'components/interior.php'; ?>
 
 
   <!-- Apartment     -->
