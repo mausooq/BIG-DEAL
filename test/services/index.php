@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/about.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/services.css" />
   <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
                 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,25 +21,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-<style>
-  /* Match about component view-all button styling */
-  .view-all-btn {
-    background: #111;
-    color: #fff;
-    border: none;
-    font-family: DM Sans, sans-serif;
-    font-weight: 600;
-    border-radius: 15px;
-    height: 44px;
-    padding: 0 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-  }
-  .view-all-btn:hover { background: #333; color: #fff; }
-  .view-all-btn span { margin-left: 8px; display: inline-block; }
-</style>
 </head>
 
 
@@ -108,6 +90,10 @@
               </div>
             </div>
 </div>
+
+<?php include '../components/trusted-clients.php'; ?>
+
+<?php include '../components/search-banner.php'; ?>
 
 <!-- Services Section -->
 <section id="services-section">
