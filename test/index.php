@@ -237,6 +237,9 @@ try {
     </div>
   </div>
 
+  <!-- partner section -->
+  <?php include 'components/trusted-clients.php'; ?>
+
 
 
   <div class="container" id="latest-properties">

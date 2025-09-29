@@ -92,6 +92,9 @@
             <a class="nav-link <?php echo strpos($current_full_path, '/products/') !== false && (($_GET['listing'] ?? '') === 'Buy') ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>products/?listing=Buy">For buyers</a>
           </li>
           <li class="nav-item">
+            <a class="nav-link <?php echo strpos($current_full_path, '/about/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>services/">Service</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link <?php echo strpos($current_full_path, '/about/') !== false ? 'active' : ''; ?>" href="<?php echo $site_base_path; ?>about/">About</a>
           </li>
           <li class="nav-item">

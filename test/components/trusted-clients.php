@@ -17,8 +17,8 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="tc-sec-heading">
-          <h2>Our Clients</h2>
-          <p class="tc-subtitle">Trusted by leading companies worldwide</p>
+          <h2>Trusted By</h2>
+          <p class="tc-subtitle">Partnering with leading developers and real estate brands</p>
         </div>
       </div>
     </div>
@@ -26,28 +26,31 @@
       <div class="col-md-12">
         <div class="owl-carousel owl-theme tc-clients-carousel">
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/rear.jpg">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/startupindia.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/rohancorpration.jpg">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/makgroup.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/inland.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/mohtiasham.jpg">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/westlinegroup.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/bhandarybuilders.jpg">
+          </div>
+          <div class="item tc-logo-box">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/vishwas.jpg">
           </div>
         </div>
       </div>

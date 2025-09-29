@@ -94,7 +94,7 @@
 
 /* Background for the specific our-work Service-section */
 .our-work.Service-section {
-	background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.75) 100%), url('<?php echo $asset_path; ?>images/prop/prop1.png');
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.75) 100%), url('<?php echo $asset_path; ?>images/service-bg.jpg');
 	background-position: center;
 	background-size: cover;
 	background-repeat: no-repeat;
@@ -134,7 +134,7 @@
 	font-style: Regular;
 	font-size: 16px;
 	letter-spacing: 1px;
-	color: #666;
+	color: #000000;
 	font-family: 'DM Sans', sans-serif;
 }
 
