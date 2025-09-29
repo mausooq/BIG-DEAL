@@ -166,6 +166,12 @@
       footer.container-fluid {
         padding: 1em 0.75em;
       }
+      .footer p,
+      .footer-links a,
+      .footer-links li {
+        font-size: 14px;
+        line-height: 1.5;
+      }
       .row {
         margin: 0;
       }
@@ -175,6 +181,9 @@
         flex: 0 0 100%;
         text-align: left;
         margin-bottom: 1em;
+      }
+      .footer-column h3{
+        font-size: 18px;
       }
       .footer img[alt="footer logo"] {
         width: 5rem;
@@ -209,6 +218,7 @@
         min-width: 0;
         width: 100%;
         padding: 0.625em 0.75em;
+        font-size: 16px; /* avoid iOS zoom */
         border-radius: 0.375em;
         border: none;
       }
@@ -232,6 +242,18 @@
         text-align: left;
         align-items: flex-start;
       }
+      .footer-bottom {
+        padding: 10px 0.75em; /* tighter padding on very small screens */
+      }
+      .copyright-text,
+      .developer-text {
+        font-size: 12px;
+      }
+      /* Reduce hover-shift on touch devices */
+      .footer-links a { padding-left: 0; }
+      .footer-links a:hover { padding-left: 0.5rem; }
+      /* Long address wrapping */
+      .footer-links li { word-break: break-word; }
     }
 
     /* For larger phones (landscape) */

@@ -603,25 +603,26 @@ body:not(.article-page) .custom-select option {
 
   .info-box .info-item {
     width: 100% !important;
-    height: 25% !important;
+    height: auto !important;
     margin: 0 5px;
     font-size: 9px;
     padding: 2px 4px !important;
     gap: 2px;
   }
   .info-bottom {
-    margin-top: 16% !important;
+    margin-top: 0 !important;
   }
 
   .carousel-dots {
-    width: 300px !important;
+    width: 100% !important;
     position: relative !important;
-    left: 34% !important;
-    top: 1%;
+    left: 50% !important;
+    top: 0;
     transform: translateX(-50%);
     display: flex;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
+    padding: 6px 0;
     z-index: 5;
   }
 
@@ -1284,12 +1285,10 @@ body:not(.article-page) .custom-select option {
     height: 400px;
   }
 
-
   .blog-page .hero-banner h1,
   .about-page .hero-banner h1 {
     font-size: 28px;
     margin-top: 50px;
-
   }
 
   .blog-page .hero-content1 {
@@ -2029,13 +2028,13 @@ body:not(.article-page) .custom-select option {
     margin-bottom: -12em !important;
   }
   .about-page .hero-content1,
-  .blog-page .hero-content1{
+  .blog-page .hero-content1 {
     margin: 30px;
     margin-left: 20px !important;
     font-size: 2em !important;
   }
   .about-page .hero-content2,
-  .blog-page .hero-content2{
+  .blog-page .hero-content2 {
     margin-top: 0.8em !important;
     font-size: 3em !important;
   }
@@ -3506,7 +3505,7 @@ body:not(.article-page) .custom-select option {
   padding: 35px;
   display: flex;
   flex-direction: column;
-  height: auto;            /* allow to grow with content */
+  height: auto; /* allow to grow with content */
   min-height: fit-content; /* ensure all items fit */
   margin-bottom: 0;
   overflow-y: auto;
@@ -3967,7 +3966,6 @@ body:not(.article-page) .custom-select option {
   text-align: center;
   overflow: hidden;
 }
-
 
 .blog-page .hero-banner h1,
 .about-page .hero-banner h1 {
@@ -4956,9 +4954,9 @@ body:not(.article-page) .custom-select option {
 /* Enhanced dropdown styling */
 .article-page .custom-select-wrapper {
   position: relative;
-  display: block;        /* align with homepage structure */
-  width: 60%;            /* keep consistent width */
-  margin: 0 auto;        /* center horizontally */
+  display: block; /* align with homepage structure */
+  width: 60%; /* keep consistent width */
+  margin: 0 auto; /* center horizontally */
 }
 
 /* Hide the native dropdown */
@@ -4991,7 +4989,7 @@ body:not(.article-page) .custom-select option {
 }
 
 .selected-option::after {
-  content: '';
+  content: "";
   width: 20px;
   height: 20px;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23E53935'%3E%3Cpath d='M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z'/%3E%3C/svg%3E");
