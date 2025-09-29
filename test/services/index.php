@@ -98,7 +98,7 @@
 
 <!-- Services Section -->
 <section id="services-section">
-    <!-- <?php include '../components/service.php'; ?> -->
+    <?php include '../components/service.php'; ?>
 </section>
 
 <!-- Other Services (cards) -->
