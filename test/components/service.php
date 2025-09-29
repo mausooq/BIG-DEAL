@@ -78,7 +78,7 @@
 }
 
 .Service-section {
-	height: 100vh;
+	height: 120vh;
 }
 
 
@@ -148,7 +148,7 @@
 .carousel__slider {
 	position: relative;
 	width: 100%;
-	min-height: 440px;
+	min-height: 560px;
 }
 
 .carousel__item {

@@ -190,7 +190,7 @@
 .wcu-card-img {
 	display: block;
 	width: 100%;
-	height: 240px;
+	height: 350px;
 	object-fit: cover;
 	transition: transform 0.6s ease;
 }
