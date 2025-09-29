@@ -59,13 +59,13 @@
 <style>
 /* Trusted Clients Component Styles - Unique Classes */
 .trusted-clients-component .tc-clients-section {
-  padding: 3em 0;
-  background: #f8f9fa;
+  padding-top: 3em;
+  /* background: #f8f9fa; */
 }
 
 .trusted-clients-component .tc-sec-heading {
-  margin-bottom: 2em;
-  text-align: center;
+  /* margin-bottom: 2em; */
+  letter-spacing: 0.5px;
 }
 
 .trusted-clients-component .tc-sec-heading h2 {
@@ -114,6 +114,12 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .trusted-clients-component .tc-sec-heading {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 0.5em;
+  }
   .trusted-clients-component .tc-sec-heading h2 {
     font-size: 2.25em;
   }
