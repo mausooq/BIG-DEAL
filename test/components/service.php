@@ -191,17 +191,16 @@
 .blurred-box__step {
 	width: 60px;
 	height: 60px;
-	background: linear-gradient(135deg, #cc1a1a, #111111);
+	border: 1px solid #444444;
 	border-radius: 50%;
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	font-size: 24px;
 	font-weight: 700;
-	color: #ffffff;
+	color:rgb(71, 69, 69);
 	margin-bottom: 20px;
 	font-family: 'DM Sans', sans-serif;
-	box-shadow: 0 4px 12px rgba(204, 26, 26, 0.3);
 }
 
 .blurred-box__title {
