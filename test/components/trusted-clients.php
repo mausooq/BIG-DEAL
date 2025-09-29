@@ -41,7 +41,7 @@
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/inland.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/mohtiasham.jpg">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/mohtisham.jpg">
           </div>
           <div class="item tc-logo-box">
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/westlinegroup.png">
