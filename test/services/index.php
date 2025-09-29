@@ -73,24 +73,6 @@
         </div>
        
     </div>
-            <div class="about-stats d-flex justify-content-between text-center ">
-              <div class="stat-item">
-                <span class="stat-number">5000+</span><br>
-                <span class="stat-label">Properties Sold</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label">Happy Clients</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">15+</span><br>
-                <span class="stat-label">Years Experience</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">98%</span><br>
-                <span class="stat-label">Success Rate</span>
-              </div>
-            </div>
 </div>
 
 <?php include '../components/trusted-clients.php'; ?>
@@ -133,6 +115,31 @@
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Best Interior</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Best Interior</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Best Interior</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
