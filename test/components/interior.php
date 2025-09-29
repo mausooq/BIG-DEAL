@@ -410,13 +410,13 @@ document.addEventListener('DOMContentLoaded', function() {
     markers: false // Set to true for debugging
   });
 
-  // Set initial state for 3D carousel - all cards visible
+  // Set initial state for 3D carousel - start from left and move right
   gsap.set(BOXES, { 
-    x: (index) => (index - Math.floor(BOXES.length / 2)) * 420,
-    z: (index) => -Math.abs(index - Math.floor(BOXES.length / 2)) * 120,
-    rotateY: (index) => (index - Math.floor(BOXES.length / 2)) * 20,
-    scale: (index) => index === Math.floor(BOXES.length / 2) ? 1.15 : 0.75,
-    opacity: (index) => Math.abs(index - Math.floor(BOXES.length / 2)) <= 1 ? 1 : 0.3
+    x: (index) => index * 420,
+    z: (index) => -index * 120,
+    rotateY: (index) => index * 20,
+    scale: (index) => index === 0 ? 1.15 : 0.75,
+    opacity: (index) => index <= 1 ? 1 : 0.3
   });
 
   // Create animations for each box - rotate carousel
