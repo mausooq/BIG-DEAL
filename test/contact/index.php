@@ -76,21 +76,21 @@
         <img src="../assets/images/icon/phone.svg" alt="phone">
         <div class="contact-info-text">
           <p class="contact-info-title">Call Now</p>
-          <a href="tel:+91 8197458962" class="contact-info-detail">+91 8197458962</a>
+          <a href="tel:+91 80888 55555" class="contact-info-detail">+91 80888 55555</a>
         </div>
       </div>
       <div class="col-3 col-md-4  contact-info-item">
         <img src="../assets/images/icon/location.svg" alt="location" >
         <div class="contact-info-text">
           <p class="contact-info-title">Location</p>
-          <p class="contact-info-detail">Kankanady Gate Building</p>
+          <p class="contact-info-detail">First Floor, Gate Building, Kankanady Bypass Rd, Kankanady, Mangaluru, Karnataka 575002</p>
         </div>
       </div>
       <div class="col-5 col-md-4 contact-info-item">
         <img src="../assets/images/icon/mail.svg" alt="email">
         <div class="contact-info-text">
           <p class="contact-info-title">Email Now</p>
-          <a href="mailto:munazzabegam11@gmail.com" class="contact-info-detail">munazzabegam11@gmail.com</a>
+          <a href="mailto:office@bigdeal.property" class="contact-info-detail">office@bigdeal.property</a>
         </div>
       </div>
     </div>
