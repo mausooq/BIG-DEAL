@@ -22,32 +22,32 @@
         </div>
       </div>
     </div>
-    <div class="row">
+    <div class="row" style="margin-top: 2em;">
       <div class="col-md-12">
         <div class="owl-carousel owl-theme tc-clients-carousel">
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="../assets/images/logo.png">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/logo.png">
           </div>
         </div>
       </div>
@@ -59,7 +59,7 @@
 <style>
 /* Trusted Clients Component Styles - Unique Classes */
 .trusted-clients-component .tc-clients-section {
-  padding-top: 3em;
+  padding: 3em;
   /* background: #f8f9fa; */
 }
 
@@ -73,6 +73,8 @@
   font-size: 3em;
   font-weight: 700;
   color: #222;
+  display: flex;
+  justify-content: center;
 }
 
 .trusted-clients-component .tc-subtitle {
@@ -81,14 +83,16 @@
   color: #666;
   margin: 0;
   font-weight: 400;
+  display: flex;
+  justify-content: center;
 }
 
 .trusted-clients-component .tc-logo-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 9.375em;
-  width: 15.625em;
+  height: 10.5em;
+  width: 17em;
   transition: transform 0.5s ease-in;
   margin: 0 0.625em;
   padding: 1.25em;
@@ -96,7 +100,7 @@
 
 .trusted-clients-component .tc-logo-box img {
   max-width: 100%;
-  max-height: 6.25em;
+  max-height: 8em;
   width: auto;
   height: auto;
   object-fit: contain;
@@ -133,12 +137,12 @@
   }
   
   .trusted-clients-component .tc-logo-box {
-    width: 12.5em;
-    height: 7.5em;
+    width: 13.5em;
+    height: 8.5em;
   }
   
   .trusted-clients-component .tc-logo-box img {
-    max-height: 5em;
+    max-height: 6em;
   }
 }
 
@@ -156,12 +160,12 @@
   }
   
   .trusted-clients-component .tc-logo-box {
-    width: 11.25em;
-    height: 6.25em;
+    width: 12em;
+    height: 7em;
   }
   
   .trusted-clients-component .tc-logo-box img {
-    max-height: 4.375em;
+    max-height: 5em;
   }
 }
 </style>

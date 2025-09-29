@@ -30,7 +30,7 @@ $mysqli->close();
 
 :root {
   --bg: hsl(0, 0%, 10%);
-  --min-size: 200px;
+  --min-size: 280px;
 }
 
 .interior-section {
@@ -190,10 +190,10 @@ $mysqli->close();
   position: absolute;
   top: 50%;
   left: 50%;
-  height: 25vmin;
-  width: 25vmin;
-  min-height: 250px;
-  min-width: 250px;
+  height: 30vmin;
+  width: 30vmin;
+  min-height: 320px;
+  min-width: 320px;
   display: block;
   opacity: 1;
   transform: translate(-50%, -50%);
@@ -358,7 +358,7 @@ $mysqli->close();
     endforeach; 
     ?>
     
-    <div class="controls">
+    <!-- <div class="controls">
       <button class="prev">
         <span>Previous album</span>
         <svg viewBox="0 0 448 512" width="100" title="Previous Album">
@@ -370,7 +370,7 @@ $mysqli->close();
         <svg viewBox="0 0 448 512" width="100" title="Next Album">
           <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"/>
         </svg>
-      </button>
+      </button> -->
     </div>
   </div>
   
@@ -412,10 +412,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Set initial state for 3D carousel - all cards visible
   gsap.set(BOXES, { 
-    x: (index) => (index - Math.floor(BOXES.length / 2)) * 350,
-    z: (index) => -Math.abs(index - Math.floor(BOXES.length / 2)) * 100,
+    x: (index) => (index - Math.floor(BOXES.length / 2)) * 420,
+    z: (index) => -Math.abs(index - Math.floor(BOXES.length / 2)) * 120,
     rotateY: (index) => (index - Math.floor(BOXES.length / 2)) * 20,
-    scale: (index) => index === Math.floor(BOXES.length / 2) ? 1.1 : 0.7,
+    scale: (index) => index === Math.floor(BOXES.length / 2) ? 1.15 : 0.75,
     opacity: (index) => Math.abs(index - Math.floor(BOXES.length / 2)) <= 1 ? 1 : 0.3
   });
 
@@ -434,10 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
         duration: 0.5
       }, 0.5 * i)
       .to(BOXES, {
-        x: (index) => (index - i) * 350,
-        z: (index) => -Math.abs(index - i) * 100,
+        x: (index) => (index - i) * 420,
+        z: (index) => -Math.abs(index - i) * 120,
         rotateY: (index) => (index - i) * 20,
-        scale: (index) => index === i ? 1.1 : 0.7,
+        scale: (index) => index === i ? 1.15 : 0.75,
         opacity: (index) => Math.abs(index - i) <= 1 ? 1 : 0.3,
         duration: 0.5
       }, '<')
