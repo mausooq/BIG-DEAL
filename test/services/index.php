@@ -7,12 +7,14 @@
   <title>Our Services - Big Deal Ventures</title>
   <link rel="icon" href="../assets/images/favicon.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/about.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/services.css" />
   <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
+  <link href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@flaticon/flaticon-uicons@3.3.1/css/all/all.min.css" rel="stylesheet">
                 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,7 +98,43 @@
 
 <!-- Services Section -->
 <section id="services-section">
-    <?php include '../components/service.php'; ?>
+    <!-- <?php include '../components/service.php'; ?> -->
+</section>
+
+<!-- Other Services (cards) -->
+<section class="other-services-section py-5">
+  <div class="container other-services-wrap">
+    <div class="property-title-section text-left">
+      <div class="property-title">Other Services</div>
+      <div class="property-subtitle">What we also offer</div>
+    </div>
+    <div class="row g-4 align-items-stretch">
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-blueprint svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Perfect Planning</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-interior-design svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Professional Design</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
+          <div class="svc-title">Best Interior</div>
+          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- Interior Designs -->
