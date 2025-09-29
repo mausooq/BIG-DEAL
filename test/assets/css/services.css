@@ -55,11 +55,17 @@
 
 .svc-card { background: #fff; border: 1px solid #e9ecef; border-radius: 16px; padding: 24px 22px; height: 100%; box-shadow: 0 6px 18px rgba(0,0,0,.05); }
 .svc-icon {
-  width: 64px; height: 64px; margin-bottom: 18px;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-size: 30px; color: #cc1a1a;
-  background: #f1f5fa; border: 1px solid #e7edf5; border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 14px;
+  width: auto;
+  height: auto;
+  padding: 0;
+  background: none;
+  border: none;
 }
+.svc-icon img { width: 34px; height: 34px; object-fit: contain; display: block; }
 .svc-title { font-family: 'DM Sans', sans-serif; font-size: 1.125rem; font-weight: 700; color: #111111; margin-bottom: 10px; letter-spacing: 0; }
 .svc-desc { font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: #666666; line-height: 1.6; margin-bottom: 18px; }
 .svc-link { font-family: 'DM Sans', sans-serif; color: #111111; font-weight: 700; text-decoration: none; position: relative; display: inline-block; padding-bottom: 6px; }

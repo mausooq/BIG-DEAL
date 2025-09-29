@@ -75,6 +75,9 @@
     </div>
 </div>
 
+
+<?php include '../components/why-choose-us.php'; ?> 
+
 <?php include '../components/trusted-clients.php'; ?>
 
 
@@ -93,49 +96,49 @@
     <div class="row g-4 align-items-stretch">
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-blueprint svc-icon" aria-hidden="true"></i>
+          <span class="svc-icon"><img src="../assets/images/icon/blueprint.png" alt="Blueprint"></span>
           <div class="svc-title">Perfect Planning</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <div class="svc-desc">Our property management covers tenant screening, rent collection, and maintenance to maximize your returns.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-interior-design svc-icon" aria-hidden="true"></i>
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Interior Design"></span>
           <div class="svc-title">Professional Design</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <div class="svc-desc">From renovations to smart automation, we upgrade spaces with modern layouts and stylish finishes.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
+          <span class="svc-icon"><img src="../assets/images/icon/bedroom.png" alt="Interior"></span>
           <div class="svc-title">Best Interior</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <div class="svc-desc">With trusted partners, we deliver turnkey interior and furnishing solutions that align with your style and needs.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
-          <div class="svc-title">Best Interior</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <span class="svc-icon"><img src="../assets/images/icon/plan.png" alt="Plan"></span>
+          <div class="svc-title">Green & Sustainable Spaces</div>
+          <div class="svc-desc">Eco-friendly designs for homes, offices, and commercial spaces with energy-efficient solutions.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
-          <div class="svc-title">Best Interior</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Plot"></span>
+          <div class="svc-title">Plot Potential</div>
+          <div class="svc-desc">Expert guidance for buying, selling, or developing land with zoning and legal support included comprehensively.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <i class="fi flaticon-house svc-icon" aria-hidden="true"></i>
-          <div class="svc-title">Best Interior</div>
-          <div class="svc-desc">Lacus, etiam sed est eu tempus need Temer diam congue laoret cursus nam nunc fam interdum Viverra.</div>
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Deals"></span>
+          <div class="svc-title">Quick Deals</div>
+          <div class="svc-desc">Fast, secure, and transparent transactions with expert negotiation and paperwork support efficiently.</div>
           <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
