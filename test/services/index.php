@@ -93,7 +93,6 @@
 
 <?php include '../components/trusted-clients.php'; ?>
 
-<?php include '../components/search-banner.php'; ?>
 
 <!-- Services Section -->
 <section id="services-section">
