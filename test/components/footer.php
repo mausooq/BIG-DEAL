@@ -68,8 +68,7 @@
     
     /* Footer bottom section styling */
     .footer-bottom {
-      margin-top: 20px;
-      padding: 15px 0;
+      padding: 15px 2rem; /* left/right spacing */
     }
     
     .copyright-text {
