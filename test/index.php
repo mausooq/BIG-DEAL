@@ -485,9 +485,7 @@ try {
   
   <!-- about section  -->
   <?php include 'components/about.php'; ?>
-  <!-- Testimonials -->
-  <?php include 'components/testimonial.php'; ?> 
-  
+
     <!-- blog section  -->
     <?php include 'components/blog.php'; ?>
   
@@ -495,7 +493,9 @@ try {
   <!-- contact  -->
   <?php include 'components/letsconnect.php'; ?>
 
-
+  <!-- Testimonials -->
+  <?php include 'components/testimonial.php'; ?> 
+  
 
 
   <!-- Faq  -->
