@@ -108,7 +108,7 @@
   margin-top: 30px;
 }
 .stat-number {
-  font-weight: 100;
+  font-weight: 120;
   font-style: Thin;
   font-size: 48px;
   line-height: 150%;
