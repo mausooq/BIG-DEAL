@@ -4099,7 +4099,6 @@ body:not(.article-page) .custom-select option {
 }
 
 .contact-info-item img {
-  padding: 0 40px;
   width: 30%;
   height: auto;
 }

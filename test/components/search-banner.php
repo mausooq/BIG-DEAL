@@ -9,7 +9,7 @@
   <div class="search-banner-container">
     <!-- Background Interior Image -->
     <div class="interior-background">
-      <img src="../assets/images/sb2.jpg" alt="Modern Interior" class="interior-image">
+      <img src="../assets/images/sp2.jpg" alt="Modern Interior" class="interior-image" decoding="async" fetchpriority="high">
     </div>
     
     <!-- White Overlay Banner -->
@@ -78,6 +78,7 @@
   object-fit: cover;
   object-position: center;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
 }
 
 .white-banner-overlay {
@@ -135,7 +136,7 @@
 
 .banner-description {
   margin: 0 0 30px 0;
-  color:rgb(199, 199, 196);
+  color:rgb(250, 250, 250);
   font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   line-height: 1.6;
@@ -260,33 +261,44 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchBanner = document.querySelector('.search-banner');
   
   if (interiorImage && searchBanner) {
-    console.log('Scroll effect initialized'); // Debug log
-    
-    function handleScroll() {
+    let ticking = false;
+
+    const updateParallax = () => {
       const scrollY = window.pageYOffset;
       const viewportBottom = scrollY + window.innerHeight;
       const bannerRect = searchBanner.getBoundingClientRect();
       const bannerTop = bannerRect.top + scrollY;
       const bannerHeight = bannerRect.height;
-      
-      // Start movement only when the banner begins entering from the bottom of the screen
+
       const progressFromViewportBottom = Math.max(0, viewportBottom - bannerTop);
-      
-      // Limit progress to the banner's height so it doesn't move indefinitely
       const clampedProgress = Math.min(progressFromViewportBottom, bannerHeight);
-      
-      // Move image upward as user scrolls up through the banner's visible area
       const parallaxOffset = clampedProgress * 0.3;
-      interiorImage.style.transform = `translateY(${ -parallaxOffset }px)`;
-    }
-    
-    // Add scroll listener
-    window.addEventListener('scroll', handleScroll);
-    
-    // Initial call
-    handleScroll();
+      interiorImage.style.transform = `translate3d(0, ${ -parallaxOffset }px, 0)`;
+      ticking = false;
+    };
+
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    };
+
+    // Only observe when banner is near viewport to avoid unnecessary work
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          window.addEventListener('scroll', onScroll, { passive: true });
+          updateParallax();
+        } else {
+          window.removeEventListener('scroll', onScroll);
+        }
+      });
+    }, { root: null, rootMargin: '200px', threshold: 0 });
+
+    io.observe(searchBanner);
   } else {
-    console.log('Elements not found'); // Debug log
+    // Elements missing; no-op
   }
 });
 </script>
