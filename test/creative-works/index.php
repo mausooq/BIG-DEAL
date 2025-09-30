@@ -8,6 +8,7 @@ $uploads_prefix = '../../uploads/projects/';
 $mysqli = getMysqliConnection();
 
 $projects = [];
+$projectImages = [];
 $sql = "
   SELECT p.id, p.name, p.description, p.location, p.order_id,
          pi.image_filename
@@ -25,6 +26,20 @@ if ($res = $mysqli->query($sql)) {
 }
 
 $mysqli->close();
+// Fetch all images for gallery modal
+try {
+  $mysqli2 = getMysqliConnection();
+  $imgSql = "SELECT project_id, image_filename, display_order FROM project_images ORDER BY project_id ASC, display_order ASC, id ASC";
+  if ($imgRes = $mysqli2->query($imgSql)) {
+    while ($r = $imgRes->fetch_assoc()) {
+      $pid = (int)$r['project_id'];
+      if (!isset($projectImages[$pid])) { $projectImages[$pid] = []; }
+      $projectImages[$pid][] = $r['image_filename'];
+    }
+    $imgRes->free();
+  }
+  $mysqli2->close();
+} catch (Exception $e) {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,6 +81,9 @@ $mysqli->close();
     .work-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .work-chip { position: absolute; top: 12px; left: 12px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff;
       background: linear-gradient(135deg, #cc1a1a, #111111); box-shadow: 0 6px 16px rgba(204,26,26,0.25); }
+    .work-eye { position: absolute; right: 12px; bottom: 12px; width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color:#fff; background: linear-gradient(135deg, #cc1a1a, #111111); cursor: pointer; box-shadow: 0 10px 22px rgba(0,0,0,.18); transition: transform .15s ease; }
+    .work-eye:hover { transform: translateY(-2px); }
+    .work-eye i { pointer-events: none; }
     .work-body { padding: 16px 16px 18px 16px; }
     .work-name { font-size: 18px; font-weight: 700; color: #111111; margin: 0 0 6px 0; }
     .work-meta { display: flex; align-items: center; gap: 8px; color: #666; font-size: 14px; margin-bottom: 10px; }
@@ -84,6 +102,16 @@ $mysqli->close();
       .works-subtitle { font-size: 14px; }
       .work-name { font-size: 16px; }
     }
+
+    /* Lightbox modal */
+    .lightbox-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.75); display: none; align-items: center; justify-content: center; z-index: 9998; }
+    .lightbox-backdrop.show { display: flex; }
+    .lightbox { position: relative; width: min(92vw, 1100px); height: min(86vh, 720px); background: #000; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .lightbox img { width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .lightbox-close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(17,17,17,.85); color:#fff; cursor: pointer; z-index: 2; }
+    .lightbox-nav { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; pointer-events: none; }
+    .lightbox-btn { pointer-events: all; width: 56px; height: 56px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: rgba(17,17,17,.6); color:#fff; margin: 0 10px; cursor: pointer; }
+    .lightbox-counter { position: absolute; left: 12px; bottom: 10px; color: #fff; font-size: 13px; background: rgba(17,17,17,.6); padding: 6px 10px; border-radius: 999px; }
   </style>
 </head>
 <body>
@@ -119,12 +147,20 @@ $mysqli->close();
             $name = htmlspecialchars($p['name'] ?? 'Untitled');
             $location = htmlspecialchars($p['location'] ?? '');
             $desc = htmlspecialchars($p['description'] ?? '');
+            $pid = (int)$p['id'];
+            $imagesForProject = $projectImages[$pid] ?? [];
+            $imageUrls = [];
+            foreach ($imagesForProject as $fn) { $imageUrls[] = $uploads_prefix . $fn; }
+            $dataImages = htmlspecialchars(json_encode($imageUrls), ENT_QUOTES, 'UTF-8');
           ?>
           <div class="col-12 col-sm-6 col-lg-4">
             <article class="work-card">
               <div class="work-thumb">
                 <img src="<?php echo $image; ?>" alt="<?php echo $name; ?>">
                 <?php if ($location): ?><span class="work-chip"><?php echo $location; ?></span><?php endif; ?>
+                <button class="work-eye" type="button" aria-label="View gallery" data-images='<?php echo $dataImages; ?>' data-start="0">
+                  <i class="fa-regular fa-eye"></i>
+                </button>
               </div>
               <div class="work-body">
                 <h3 class="work-name"><?php echo $name; ?></h3>
@@ -144,6 +180,93 @@ $mysqli->close();
   <?php include '../components/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (function(){
+      const backdrop = document.createElement('div');
+      backdrop.className = 'lightbox-backdrop';
+      backdrop.innerHTML = `
+        <div class="lightbox" role="dialog" aria-modal="true" aria-label="Project gallery">
+          <button class="lightbox-close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
+          <div class="lightbox-nav">
+            <button class="lightbox-btn prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+            <button class="lightbox-btn next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+          </div>
+          <div class="lightbox-counter" aria-live="polite">1 / 1</div>
+          <img alt="Gallery image" />
+        </div>`;
+      document.body.appendChild(backdrop);
+
+      const imgEl = backdrop.querySelector('img');
+      const counterEl = backdrop.querySelector('.lightbox-counter');
+      const closeBtn = backdrop.querySelector('.lightbox-close');
+      const prevBtn = backdrop.querySelector('.prev');
+      const nextBtn = backdrop.querySelector('.next');
+
+      let images = [];
+      let index = 0;
+
+      function update() {
+        if (!images.length) return;
+        imgEl.src = images[index];
+        counterEl.textContent = (index + 1) + ' / ' + images.length;
+      }
+
+      function open(imagesArr, startIdx) {
+        images = imagesArr || [];
+        index = Math.max(0, Math.min(startIdx || 0, images.length - 1));
+        update();
+        backdrop.classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function close() {
+        backdrop.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      function prev(){ if (!images.length) return; index = (index - 1 + images.length) % images.length; update(); }
+      function next(){ if (!images.length) return; index = (index + 1) % images.length; update(); }
+
+      closeBtn.addEventListener('click', close);
+      backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+      document.addEventListener('keydown', (e) => {
+        if (!backdrop.classList.contains('show')) return;
+        if (e.key === 'Escape') close();
+        if (e.key === 'ArrowLeft') prev();
+        if (e.key === 'ArrowRight') next();
+      });
+
+      // Swipe support (basic)
+      let startX = 0;
+      imgEl.addEventListener('touchstart', (e) => { startX = e.changedTouches[0].clientX; }, { passive: true });
+      imgEl.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (dx > 30) prev();
+        if (dx < -30) next();
+      }, { passive: true });
+
+      // Hook eyes
+      document.querySelectorAll('.work-eye').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          try {
+            const arr = JSON.parse(btn.getAttribute('data-images') || '[]');
+            if (!arr.length) {
+              // Fallback to the thumbnail image in the same card
+              const thumb = btn.parentElement.querySelector('img');
+              open([thumb ? thumb.src : ''], 0);
+            } else {
+              open(arr, parseInt(btn.getAttribute('data-start') || '0', 10));
+            }
+          } catch(err) {
+            const thumb = btn.parentElement.querySelector('img');
+            open([thumb ? thumb.src : ''], 0);
+          }
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
 
