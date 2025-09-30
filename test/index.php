@@ -442,6 +442,8 @@ try {
     </div>
   </div>
 
+  <?php include 'components/interior.php'; ?>
+
   <!-- Apartment     -->
   <div class="container  ">
 

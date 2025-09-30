@@ -6,6 +6,12 @@ require_once __DIR__ . '/../config/config.php';
 $mysqli = getMysqliConnection();
 $projects = [];
 
+// Derive uploads prefix relative to current page depth using $asset_path when available
+// This mirrors the strategy used in other components to make URLs work from any route
+if (!isset($asset_path)) { $asset_path = 'assets/'; }
+$dotdotCount = substr_count($asset_path, '../');
+$uploads_prefix = str_repeat('../', $dotdotCount + 1); // from current page to project root
+
 $query = "
     SELECT p.id, p.name, p.description, p.location, pi.image_filename
     FROM projects p
@@ -178,7 +184,7 @@ $mysqli->close();
   position: absolute;
   transform-style: preserve-3d;
   perspective: 1000px;
-  touch-action: none;
+  touch-action: pan-y; /* allow vertical scroll on touch devices */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -333,6 +339,9 @@ $mysqli->close();
     line-height: 1.5;
     top: 3rem;
   }
+  /* Improve scroll performance on mobile */
+  .boxes { will-change: transform; }
+  .box { will-change: transform, opacity; }
 }
 </style>
 
@@ -346,12 +355,13 @@ $mysqli->close();
     <?php 
     $counter = 1;
     foreach ($projects as $project): 
-        $imagePath = $project['image_filename'] ? 
-            '../../uploads/projects/' . $project['image_filename'] : 
-            $asset_path . 'images/prop/aboutimg.png'; // fallback image
+        // Skip projects without a primary image (no fallback)
+        if (empty($project['image_filename'])) { continue; }
+        // Build a URL that works from any page depth
+        $imagePath = $uploads_prefix . 'uploads/projects/' . $project['image_filename'];
     ?>
     <div class="box" style="--src: url(<?php echo $imagePath; ?>)">
-      <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($project['name']); ?>">
+      <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($project['name']); ?>" loading="lazy" decoding="async">
     </div>
     <?php 
     $counter++;
@@ -396,15 +406,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const tl = gsap.timeline();
 
+  // Mobile-friendly adjustments
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
   const myST = ScrollTrigger.create({
     animation: tl,
     id: "interior-st",
     trigger: ".interior-section",
     start: "top top",
-    end: "+=500%",
+    end: isMobile ? "+=250%" : "+=500%",
     pin: ".interior-section",
-    scrub: true,
-    snap: {
+    scrub: isMobile ? 0.5 : true,
+    anticipatePin: 1,
+    snap: isMobile ? {
+      snapTo: (value) => {
+        const step = 1 / BOXES.length;
+        return Math.round(value / step) * step;
+      },
+      duration: 0.25,
+      delay: 0,
+    } : {
       snapTo: 1 / (BOXES.length)
     },
     markers: false // Set to true for debugging
