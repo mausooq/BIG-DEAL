@@ -7,12 +7,14 @@
   <title>Our Services - Big Deal Ventures</title>
   <link rel="icon" href="../assets/images/favicon.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/about.css" />
   <link rel="stylesheet" href="../assets/css/style.css" />
   <link rel="stylesheet" href="../assets/css/services.css" />
   <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
+  <link href="https://cdn-uicons.flaticon.com/uicons-regular-rounded/css/uicons-regular-rounded.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@flaticon/flaticon-uicons@3.3.1/css/all/all.min.css" rel="stylesheet">
                 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -71,25 +73,10 @@
         </div>
        
     </div>
-            <div class="about-stats d-flex justify-content-between text-center ">
-              <div class="stat-item">
-                <span class="stat-number">5000+</span><br>
-                <span class="stat-label">Properties Sold</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">100+</span><br>
-                <span class="stat-label">Happy Clients</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">15+</span><br>
-                <span class="stat-label">Years Experience</span>
-              </div>
-              <div class="stat-item">
-                <span class="stat-number">98%</span><br>
-                <span class="stat-label">Success Rate</span>
-              </div>
-            </div>
 </div>
+
+
+<?php include '../components/why-choose-us.php'; ?> 
 
 <?php include '../components/trusted-clients.php'; ?>
 
@@ -97,6 +84,67 @@
 <!-- Services Section -->
 <section id="services-section">
     <?php include '../components/service.php'; ?>
+</section>
+
+<!-- Other Services (cards) -->
+<section class="other-services-section py-5">
+  <div class="container other-services-wrap">
+    <div class="property-title-section text-left">
+      <div class="property-title">Other Services</div>
+      <div class="property-subtitle">What we also offer</div>
+    </div>
+    <div class="row g-4 align-items-stretch">
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/blueprint.png" alt="Blueprint"></span>
+          <div class="svc-title">Perfect Planning</div>
+          <div class="svc-desc">Our property management covers tenant screening, rent collection, and maintenance to maximize your returns.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Interior Design"></span>
+          <div class="svc-title">Professional Design</div>
+          <div class="svc-desc">From renovations to smart automation, we upgrade spaces with modern layouts and stylish finishes.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/bedroom.png" alt="Interior"></span>
+          <div class="svc-title">Best Interior</div>
+          <div class="svc-desc">With trusted partners, we deliver turnkey interior and furnishing solutions that align with your style and needs.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/plan.png" alt="Plan"></span>
+          <div class="svc-title">Green & Sustainable Spaces</div>
+          <div class="svc-desc">Eco-friendly designs for homes, offices, and commercial spaces with energy-efficient solutions.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Plot"></span>
+          <div class="svc-title">Plot Potential</div>
+          <div class="svc-desc">Expert guidance for buying, selling, or developing land with zoning and legal support included comprehensively.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="svc-card">
+          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Deals"></span>
+          <div class="svc-title">Quick Deals</div>
+          <div class="svc-desc">Fast, secure, and transparent transactions with expert negotiation and paperwork support efficiently.</div>
+          <a href="#services-section" class="svc-link">Learn More...</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </section>
 
 <!-- Interior Designs -->

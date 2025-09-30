@@ -32,6 +32,9 @@
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/startupindia.png">
           </div>
           <div class="item tc-logo-box">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/startupkarantaka.jpg">
+          </div>
+          <div class="item tc-logo-box">
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/rohancorpration.jpg">
           </div>
           <div class="item tc-logo-box">
@@ -45,6 +48,9 @@
           </div>
           <div class="item tc-logo-box">
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/westlinegroup.png">
+          </div>
+          <div class="item tc-logo-box">
+            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/sobha.jpg">
           </div>
           <div class="item tc-logo-box">
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/bhandarybuilders.jpg">

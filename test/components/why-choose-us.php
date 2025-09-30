@@ -47,17 +47,17 @@
 		<div class="row wcu-cards-row">
 			<div class="col-12 col-md-4">
 				<div class="wcu-card">
-					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/prop/prop1.png" alt="Property Valuation">
+					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-valuation.jpg" alt="Property Valuation">
 				</div>
 			</div>
 			<div class="col-12 col-md-4">
 				<div class="wcu-card">
-					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/prop/prop2.png" alt="Property Management">
+					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-management.jpg" alt="Property Management">
 				</div>
 			</div>
 			<div class="col-12 col-md-4">
 				<div class="wcu-card">
-					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/prop/prop3.png" alt="Invest Opportunities">
+					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/invest-opportunities.jpg" alt="Invest Opportunities">
 				</div>
 			</div>
 		</div>

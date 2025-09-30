@@ -6,15 +6,38 @@ function db() { return getMysqliConnection(); }
 // Helper: activity logging
 function logActivity(mysqli $mysqli, string $action, string $details): void {
     $admin_id = isset($_SESSION['admin_id']) ? (int)$_SESSION['admin_id'] : null;
+    
+    // Check if a similar log entry already exists in the last 5 seconds to prevent duplicates
+    $check_stmt = $mysqli->prepare("
+        SELECT COUNT(*) as count 
+        FROM activity_logs 
+        WHERE admin_id = ? AND action = ? AND details = ? 
+        AND created_at > DATE_SUB(NOW(), INTERVAL 5 SECOND)
+    ");
+    
     if ($admin_id === null) {
-        $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (NULL, ?, ?, NOW())");
-        $stmt && $stmt->bind_param('ss', $action, $details);
+        $check_stmt->bind_param('sss', $admin_id, $action, $details);
     } else {
-        $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
-        $stmt && $stmt->bind_param('iss', $admin_id, $action, $details);
+        $check_stmt->bind_param('iss', $admin_id, $action, $details);
     }
-    $stmt && $stmt->execute();
-    $stmt && $stmt->close();
+    
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
+    $row = $result->fetch_assoc();
+    $check_stmt->close();
+    
+    // Only insert if no recent duplicate exists
+    if ($row['count'] == 0) {
+        if ($admin_id === null) {
+            $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (NULL, ?, ?, NOW())");
+            $stmt && $stmt->bind_param('ss', $action, $details);
+        } else {
+            $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
+            $stmt && $stmt->bind_param('iss', $admin_id, $action, $details);
+        }
+        $stmt && $stmt->execute();
+        $stmt && $stmt->close();
+    }
 }
 
 $message = '';
@@ -475,6 +498,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 item.addEventListener('drop', handleDrop);
                 item.addEventListener('dragend', handleDragEnd);
             });
+            
+            // Ensure initial order is sequential
+            updateExistingImageOrder();
         }
 
         function handleFiles(files) {
@@ -538,17 +564,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function removeNewImage(index) {
             selectedFiles.splice(index, 1);
             updateGallery();
+            updateImageOrderInput();
         }
 
         function removeExistingImage(imageId) {
-            if (confirm('Are you sure you want to remove this image?')) {
-                deletedImageIds.push(imageId);
-                const item = document.querySelector(`[data-id="${imageId}"]`);
-                if (item) {
-                    item.remove();
-                }
-                updateDeleteImagesInput();
+            // Remove image without confirmation dialog
+            deletedImageIds.push(imageId);
+            const item = document.querySelector(`[data-id="${imageId}"]`);
+            if (item) {
+                item.remove();
             }
+            updateDeleteImagesInput();
+            updateExistingImageOrder();
         }
 
         function updateDeleteImagesInput() {
@@ -581,21 +608,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (draggedElement !== this) {
                 // Handle existing images reordering
                 if (this.closest('#existingImagesGrid')) {
-                    const draggedId = parseInt(draggedElement.dataset.id);
-                    const targetId = parseInt(this.dataset.id);
-                    
                     // Swap positions in DOM
-                    const draggedOrder = parseInt(draggedElement.dataset.order);
-                    const targetOrder = parseInt(this.dataset.order);
+                    const parent = this.parentNode;
+                    const draggedIndex = Array.from(parent.children).indexOf(draggedElement);
+                    const targetIndex = Array.from(parent.children).indexOf(this);
                     
-                    draggedElement.dataset.order = targetOrder;
-                    this.dataset.order = draggedOrder;
+                    if (draggedIndex < targetIndex) {
+                        parent.insertBefore(draggedElement, this.nextSibling);
+                    } else {
+                        parent.insertBefore(draggedElement, this);
+                    }
                     
-                    // Update order numbers
-                    draggedElement.querySelector('.order-number').textContent = targetOrder;
-                    this.querySelector('.order-number').textContent = draggedOrder;
-                    
-                    updateImageOrderInput();
+                    // Update order numbers to be sequential
+                    updateExistingImageOrder();
                 }
                 // Handle new images reordering
                 else if (this.closest('#galleryGrid')) {
@@ -616,6 +641,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         function handleDragEnd(e) {
             this.classList.remove('dragging');
             draggedElement = null;
+        }
+
+        function updateExistingImageOrder() {
+            if (existingImagesGrid) {
+                const items = existingImagesGrid.querySelectorAll('.gallery-item');
+                items.forEach((item, index) => {
+                    const newOrder = index + 1;
+                    item.dataset.order = newOrder;
+                    const orderNumberElement = item.querySelector('.order-number');
+                    if (orderNumberElement) {
+                        orderNumberElement.textContent = newOrder;
+                    }
+                });
+            }
+            updateImageOrderInput();
         }
 
         function updateImageOrderInput() {
@@ -650,11 +690,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             updateDeleteImagesInput();
         });
 
-        // Close button and outside click navigates back
-        document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
+        // Close button navigates back
+        document.querySelector('.close-btn')?.addEventListener('click', function(e){ 
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = 'index.php';
+        });
         document.addEventListener('click', function(e){
             const modal = document.querySelector('.modal-container');
-            if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
+            if (modal && !modal.contains(e.target)) { 
+                // Don't close the form on outside click
+            }
         });
     </script>
 </body>
