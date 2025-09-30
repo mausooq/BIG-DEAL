@@ -6,15 +6,38 @@ function db() { return getMysqliConnection(); }
 // Helper: activity logging
 function logActivity(mysqli $mysqli, string $action, string $details): void {
     $admin_id = isset($_SESSION['admin_id']) ? (int)$_SESSION['admin_id'] : null;
+    
+    // Check if a similar log entry already exists in the last 5 seconds to prevent duplicates
+    $check_stmt = $mysqli->prepare("
+        SELECT COUNT(*) as count 
+        FROM activity_logs 
+        WHERE admin_id = ? AND action = ? AND details = ? 
+        AND created_at > DATE_SUB(NOW(), INTERVAL 5 SECOND)
+    ");
+    
     if ($admin_id === null) {
-        $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (NULL, ?, ?, NOW())");
-        $stmt && $stmt->bind_param('ss', $action, $details);
+        $check_stmt->bind_param('sss', $admin_id, $action, $details);
     } else {
-        $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
-        $stmt && $stmt->bind_param('iss', $admin_id, $action, $details);
+        $check_stmt->bind_param('iss', $admin_id, $action, $details);
     }
-    $stmt && $stmt->execute();
-    $stmt && $stmt->close();
+    
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
+    $row = $result->fetch_assoc();
+    $check_stmt->close();
+    
+    // Only insert if no recent duplicate exists
+    if ($row['count'] == 0) {
+        if ($admin_id === null) {
+            $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (NULL, ?, ?, NOW())");
+            $stmt && $stmt->bind_param('ss', $action, $details);
+        } else {
+            $stmt = $mysqli->prepare("INSERT INTO activity_logs (admin_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
+            $stmt && $stmt->bind_param('iss', $admin_id, $action, $details);
+        }
+        $stmt && $stmt->execute();
+        $stmt && $stmt->close();
+    }
 }
 
 $message = '';
@@ -473,11 +496,17 @@ if ($result && $row = $result->fetch_assoc()) {
             input.files = dt.files;
         });
 
-        // Close button and outside click navigates back
-        document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
+        // Close button navigates back
+        document.querySelector('.close-btn')?.addEventListener('click', function(e){ 
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = 'index.php';
+        });
         document.addEventListener('click', function(e){
             const modal = document.querySelector('.modal-container');
-            if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
+            if (modal && !modal.contains(e.target)) { 
+                // Don't close the form on outside click
+            }
         });
     </script>
 </body>

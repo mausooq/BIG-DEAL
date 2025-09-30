@@ -167,7 +167,7 @@ $is_featured = $featureRow ? true : false;
                 </div>
                 <form method="post" class="d-flex align-items-center gap-2">
                     <input type="hidden" name="toggle_feature" value="1">
-                    <button type="submit" class="btn <?php echo $is_featured ? 'btn-warning' : 'btn-outline-warning'; ?>" title="<?php echo $is_featured ? 'Unmark Featured' : 'Mark as Featured'; ?>">
+                    <button type="submit" class="btn <?php echo $is_featured ? 'btn-danger' : 'btn-outline-danger'; ?>" title="<?php echo $is_featured ? 'Unmark Featured' : 'Mark as Featured'; ?>">
                         <i class="fa-<?php echo $is_featured ? 'solid' : 'regular'; ?> fa-star me-2"></i><?php echo $is_featured ? 'Featured' : 'Add to Featured'; ?>
                     </button>
                 </form>

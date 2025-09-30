@@ -247,7 +247,7 @@
       }
       .copyright-text,
       .developer-text {
-        font-size: 12px;
+        font-size: 10px;
       }
       /* Reduce hover-shift on touch devices */
       .footer-links a { padding-left: 0; }
@@ -324,7 +324,9 @@
   <div class="row ">
 
     <div class="col-md-4 footer">
-    <img src="<?php echo $asset_path; ?>images/logo.png" alt="footer logo">
+    <a href="<?php echo $site_base_path; ?>" style="text-decoration: none;">
+      <img src="<?php echo $asset_path; ?>images/logo.png" alt="footer logo" >
+    </a>
   <p>Big Deal Real Estate is your trusted partner in buying, selling, and investing in properties. 
     We focus on transparency, professionalism, and making your real estate journey simple and hassle-free.</p>
 
