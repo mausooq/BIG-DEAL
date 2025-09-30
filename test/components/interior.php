@@ -184,7 +184,7 @@ $mysqli->close();
   position: absolute;
   transform-style: preserve-3d;
   perspective: 1000px;
-  touch-action: pan-y; /* allow vertical scroll on touch devices */
+  touch-action: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -339,9 +339,6 @@ $mysqli->close();
     line-height: 1.5;
     top: 3rem;
   }
-  /* Improve scroll performance on mobile */
-  .boxes { will-change: transform; }
-  .box { will-change: transform, opacity; }
 }
 </style>
 
@@ -361,7 +358,7 @@ $mysqli->close();
         $imagePath = $uploads_prefix . 'uploads/projects/' . $project['image_filename'];
     ?>
     <div class="box" style="--src: url(<?php echo $imagePath; ?>)">
-      <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($project['name']); ?>" loading="lazy" decoding="async">
+      <img src="<?php echo $imagePath; ?>" alt="<?php echo htmlspecialchars($project['name']); ?>">
     </div>
     <?php 
     $counter++;
@@ -406,26 +403,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const tl = gsap.timeline();
 
-  // Mobile-friendly adjustments
-  const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
   const myST = ScrollTrigger.create({
     animation: tl,
     id: "interior-st",
     trigger: ".interior-section",
     start: "top top",
-    end: isMobile ? "+=250%" : "+=500%",
+    end: "+=500%",
     pin: ".interior-section",
-    scrub: isMobile ? 0.5 : true,
-    anticipatePin: 1,
-    snap: isMobile ? {
-      snapTo: (value) => {
-        const step = 1 / BOXES.length;
-        return Math.round(value / step) * step;
-      },
-      duration: 0.25,
-      delay: 0,
-    } : {
+    scrub: true,
+    snap: {
       snapTo: 1 / (BOXES.length)
     },
     markers: false // Set to true for debugging
