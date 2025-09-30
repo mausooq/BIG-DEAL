@@ -108,6 +108,8 @@
               </div>
             </div>
 </div>
+<?php include '../components/trusted-clients.php'; ?>
+
 <div class="container">
 <div class="latest-works">
   <h2 class="latest-works-title">See Our <br><span class="latest-works-highlight gugi">LATEST<span style="color: red;"> WORKS</span> </span></h2>
@@ -128,9 +130,12 @@
 </div>
 </div>
 
+<?php include '../components/why-choose-us.php'; ?>
 
     <!-- Interior Designs -->
 <?php include '../components/interior.php'; ?>
+
+<?php include '../components/search-banner.php'; ?>
 
     <!-- Testimonials -->
 <?php include '../components/testimonial.php'; ?>

@@ -11,6 +11,9 @@ $projects = [];
 if (!isset($asset_path)) { $asset_path = 'assets/'; }
 $dotdotCount = substr_count($asset_path, '../');
 $uploads_prefix = str_repeat('../', $dotdotCount + 1); // from current page to project root
+// Build page link prefix (from current page depth)
+$page_prefix = str_repeat('../', $dotdotCount);
+$interior_page_link = $page_prefix . 'interior/index.php';
 
 $query = "
     SELECT p.id, p.name, p.description, p.location, pi.image_filename
@@ -52,6 +55,28 @@ $mysqli->close();
   position: relative;
   overflow: hidden;
 }
+
+.interior-link-arrow {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 400;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #cc1a1a, #111111);
+  color: #ffffff;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
+}
+
+.interior-link-arrow:hover { transform: translateY(-50%) scale(1.05); }
+.interior-link-arrow svg { width: 28px; height: 28px; fill: currentColor; }
 
 .interior-section:before {
   width: 50vw;
