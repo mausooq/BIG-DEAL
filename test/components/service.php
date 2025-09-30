@@ -5,7 +5,7 @@
     <div class="container sticky">
         <div class="row align-items-center">
             <div class="col-12 col-md-4 sfpro">
-                <h4 style="color : #cc1a1a !important">Bigdeal.property </h4>
+                <h4 style="color : #cc1a1a !important">Bigdeal.property</h4>
                 <h1>Your Trusted Property Service</h1>
                 <p class="service-subtitle">Comprehensive solutions for all your property needs</p>
             </div>
