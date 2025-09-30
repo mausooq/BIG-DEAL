@@ -10,7 +10,7 @@
 				<p class="wcu-desc">We are a real estate firm with over 20 years of expertise, and our main goal is to provide amazing locations to our partners and clients. Within the luxury real estate market, our agency offers customized solutions.</p>
 			</div>
 			<div class="col-12 col-lg-4 wcu-cta-col">
-				<a href="#contact" class="wcu-btn">Contact Us <span class="wcu-btn-arrow">→</span></a>
+				<a href="<?php echo $site_base_path; ?>contact" class="wcu-btn">Contact Us <span class="wcu-btn-arrow">→</span></a>
 			</div>
 		</div>
 
@@ -23,6 +23,9 @@
 				</div>
 				<h3 class="wcu-icon-title">Property Valuation</h3>
 				<p class="wcu-icon-desc">All living, dining, kitchen and play areas were devised by attached to the home.</p>
+				<div class="wcu-mobile-image">
+					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-valuation.jpg" alt="Property Valuation">
+				</div>
 			</div>
 			<div class="col-12 col-md-4 wcu-icon-card">
 				<div class="wcu-icon">
@@ -32,6 +35,9 @@
 				</div>
 				<h3 class="wcu-icon-title">Property Management</h3>
 				<p class="wcu-icon-desc">Generous amounts of south facing glazing maximize the solar gains for most of the year.</p>
+				<div class="wcu-mobile-image">
+					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-management.jpg" alt="Property Management">
+				</div>
 			</div>
 			<div class="col-12 col-md-4 wcu-icon-card">
 				<div class="wcu-icon">
@@ -41,22 +47,7 @@
 				</div>
 				<h3 class="wcu-icon-title">Invest Opportunities</h3>
 				<p class="wcu-icon-desc">All-inclusive real estate services to facilitate the easy management of your properties.</p>
-			</div>
-		</div>
-
-		<div class="row wcu-cards-row">
-			<div class="col-12 col-md-4">
-				<div class="wcu-card">
-					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-valuation.jpg" alt="Property Valuation">
-				</div>
-			</div>
-			<div class="col-12 col-md-4">
-				<div class="wcu-card">
-					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/property-management.jpg" alt="Property Management">
-				</div>
-			</div>
-			<div class="col-12 col-md-4">
-				<div class="wcu-card">
+				<div class="wcu-mobile-image">
 					<img class="wcu-card-img" src="<?php echo $asset_path; ?>images/why-choose-us/invest-opportunities.jpg" alt="Invest Opportunities">
 				</div>
 			</div>
@@ -102,18 +93,18 @@
 	align-items: center;
 	gap: 8px;
 	padding: 10px 18px;
-	background: transparent;
-	border: 1px solid #cc1a1a;
+	background:rgb(22, 21, 21);
+	border: 1px solid rgb(22, 21, 21);
 	border-radius: 999px;
-	color: #cc1a1a;
+	color: #ffffff;
 	text-decoration: none;
 	transition: all 0.2s ease;
 }
 
 .wcu-btn:hover {
-	background: #cc1a1a;
-	color: #ffffff;
-	border-color: #cc1a1a;
+	background: #000000;
+	color:rgb(255, 255, 255);
+	border-color: #000000;
 }
 
 .wcu-btn-arrow { transition: transform 0.2s ease; }
@@ -132,16 +123,17 @@
 	width: 72px;
 	height: 72px;
 	border-radius: 50%;
-	background: rgba(204,26,26,0.06);
-	border: 2px solid rgba(204,26,26,0.35);
+	/* background: rgba(204,26,26,0.06); */
+	border: 2px solid rgb(0, 0, 0);
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: #cc1a1a;
-	margin-bottom: 12px;
-    font-size: 0; /* icons are SVG */
+	color:rgb(3, 3, 3);
+	margin-bottom: 15px;
+	font-size: 16px; /* base for em sizing */
+	line-height: 0; /* suppress extra inline height */
 	position: relative;
-	box-shadow: 0 0 0 6px rgba(204,26,26,0.05);
+	/* box-shadow: 0 0 0 6px rgba(204,26,26,0.05); */
 	transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
 }
 
@@ -153,8 +145,8 @@
 .wcu-icon:hover {
 	transform: scale(1.06);
 	box-shadow: 0 0 0 8px rgba(204,26,26,0.08);
-	background: rgba(204,26,26,0.1);
-	border-color: #cc1a1a;
+	/* background: rgba(204,26,26,0.1); */
+	border-color:rgb(0, 0, 0);
 }
 
 .wcu-icon-title {
@@ -167,7 +159,7 @@
 
 .wcu-icon-desc {
 	color: #666666;
-	margin: 0;
+	margin-bottom: 2em;
 	line-height: 1.6;
 	font-size: 0.95rem;
 }
@@ -225,13 +217,175 @@
 	}
 }
 
-/* Responsive */
-@media (max-width: 992px) {
-	.wcu-cta-col { justify-content: start; margin-top: 16px; }
+/* Responsive Design */
+
+/* For tablets */
+@media (max-width: 64em) { /* 1024px */
+	.wcu-section {
+		padding: 3.5em 0;
+	}
+	
+	.wcu-title {
+		font-size: 2rem;
+	}
+	
+	.wcu-desc {
+		font-size: 0.95rem;
+	}
+	
+	.wcu-icon {
+		width: 2.8em;
+		height: 2.8em;
+	}
+	
+	.wcu-icon svg {
+		width: 1.8em;
+		height: 1.8em;
+	}
+	
+	.wcu-card-img {
+		height: 20em;
+	}
 }
 
-@media (max-width: 576px) {
-	.wcu-title { font-size: 1.875rem; }
-	.wcu-card-img { height: 200px; }
+/* For larger phones (landscape) */
+@media (max-width: 48em) { /* 768px */
+	.wcu-section {
+		padding: 3em 0;
+	}
+	
+    .wcu-header {
+        text-align: left;
+    }
+	
+    .wcu-cta-col {
+        justify-content: start;
+        margin-bottom: 1.5em;
+    }
+	
+	.wcu-title {
+		font-size: 1.875rem;
+		margin-bottom: 0.5em;
+	}
+	
+	.wcu-desc {
+		font-size: 0.9rem;
+		margin-bottom: 1em;
+	}
+	
+    .wcu-icons-row {
+        margin-top: 2em;
+        text-align: left;
+    }
+	
+	.wcu-icon-card {
+		margin-bottom: 2em;
+	}
+	
+    .wcu-icon {
+		margin: 0 0 1em 0;
+		width: 2.8em !important;   /* larger for phablets/tablets */
+		height: 2.8em !important;
+    }
+	.wcu-icon svg { width: 1.8em !important; height: 1.8em !important; }
+	
+	.wcu-icon-title {
+		font-size: 1.1rem;
+	}
+	
+	.wcu-icon-desc {
+		font-size: 0.9rem;
+	}
+	
+	.wcu-cards-row {
+		margin-top: 1.5em;
+	}
+	
+	.wcu-card {
+		margin-bottom: 1.5em;
+	}
+	
+	.wcu-card-img {
+		width: 100%;
+		height: 14em; /* unify image height on small tablets */
+		object-fit: cover;
+	}
+}
+
+/* For small devices (phones, portrait) */
+@media (max-width: 30em) { /* 480px */
+	.wcu-section {
+		padding: 2.5em 0;
+	}
+	
+	.wcu-title {
+		font-size: 1.5rem;
+		letter-spacing: 0.5px;
+		margin-bottom: 0.75em;
+	}
+	
+	.wcu-desc {
+		font-size: 0.85rem;
+		line-height: 1.6;
+		letter-spacing: 0.5px;
+		margin-bottom: 1.25em;
+	}
+	
+	.wcu-btn {
+		padding: 0.75em 1.25em;
+		font-size: 0.9rem;
+	}
+	
+	.wcu-icons-row {
+		margin-top: 1.5em;
+	}
+	
+	.wcu-icon-card {
+		margin-bottom: 2.5em;
+	}
+	
+    .wcu-icon {
+		width: 6.5em !important;   /* increase further on small phones */
+		height: 6.5em !important;
+        margin-bottom: 1em;
+    }
+	
+    .wcu-icon svg {
+		width: 2.8em !important;  /* increase SVG icon size */
+		height: 2.8em !important;
+    }
+	
+	.wcu-icon-title {
+		font-size: 1rem;
+		margin-bottom: 0.5em;
+	}
+	
+	.wcu-icon-desc {
+		font-size: 0.85rem;
+		line-height: 1.5;
+	}
+	
+	.wcu-cards-row {
+		margin-top: 1em;
+		display: none; /* hide separate image row on small devices */
+	}
+	
+	.wcu-card {
+		margin-bottom: 1.25em;
+	}
+	
+	.wcu-card-img { width: 100%; height: 14em; object-fit: cover; }
+
+	/* show mobile images below each icon card */
+	.wcu-mobile-image { display: block; margin-top: 0.75em; }
+	
+	/* Adjust animation delays for mobile */
+	.wcu-icons-row .wcu-icon-card:nth-child(1) { animation-delay: 0.1s; }
+	.wcu-icons-row .wcu-icon-card:nth-child(2) { animation-delay: 0.2s; }
+	.wcu-icons-row .wcu-icon-card:nth-child(3) { animation-delay: 0.3s; }
+	
+	.wcu-cards-row .col-12:nth-child(1) .wcu-card { animation-delay: 0.2s; }
+	.wcu-cards-row .col-12:nth-child(2) .wcu-card { animation-delay: 0.3s; }
+	.wcu-cards-row .col-12:nth-child(3) .wcu-card { animation-delay: 0.4s; }
 }
 </style>
