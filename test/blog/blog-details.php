@@ -94,6 +94,7 @@ function resolveRecentImage($raw) {
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/blog-details.css" />
   <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
                 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +118,7 @@ function resolveRecentImage($raw) {
         </div>
         <div class="image-container">
         <?php $cover = resolveBlogCover($blog['image_url'] ?? ''); if ($cover !== ''): ?>
-        <img src="<?php echo htmlspecialchars($cover, ENT_QUOTES, 'UTF-8'); ?>" alt="Blog cover" style="width: 1296px; height: 617px; max-width: 100%; object-fit: cover; display: block; margin: 0 auto;" />
+        <img src="<?php echo htmlspecialchars($cover, ENT_QUOTES, 'UTF-8'); ?>" alt="Blog cover" class="blog-cover" />
         <?php endif; ?>
         </div>
    </section>
@@ -125,7 +126,7 @@ function resolveRecentImage($raw) {
   <div class="container blog-points">
    <div>
      <?php if (!empty($blog['content'])): ?>
-       <p style="font-size: 1.125rem; line-height: 1.75;"><?php echo nl2br(htmlspecialchars($blog['content'], ENT_QUOTES, 'UTF-8')); ?></p>
+       <p class="blog-content-text"><?php echo nl2br(htmlspecialchars($blog['content'], ENT_QUOTES, 'UTF-8')); ?></p>
      <?php endif; ?>
      <?php if (!empty($subtitles)): ?>
        <?php foreach ($subtitles as $sec): ?>
@@ -133,8 +134,8 @@ function resolveRecentImage($raw) {
            <h2><?php echo htmlspecialchars($sec['subtitle'], ENT_QUOTES, 'UTF-8'); ?></h2>
          <?php endif; ?>
          <?php $secImg = resolveSectionImage($sec['image_url'] ?? ''); if ($secImg !== ''): ?>
-           <div style="margin: 16px 0; text-align: center;">
-             <img src="<?php echo htmlspecialchars($secImg, ENT_QUOTES, 'UTF-8'); ?>" alt="Section image" style="width: 100%; height: 360px; object-fit: cover; border-radius: 12px; display: block;" />
+           <div class="section-image-wrap">
+             <img src="<?php echo htmlspecialchars($secImg, ENT_QUOTES, 'UTF-8'); ?>" alt="Section image" class="section-image" />
            </div>
          <?php endif; ?>
          <?php if (!empty($sec['content'])): ?>
@@ -149,8 +150,8 @@ function resolveRecentImage($raw) {
     <h1>Recent Blogs</h1>
     <div class="d-flex blog2">
     <?php foreach ($recentBlogs as $rb): ?>
-      <div class="blog-panel" onclick="window.location.href='blog-details.php?id=<?php echo (int)$rb['id']; ?>'" style="cursor:pointer">
-        <img src="<?php echo htmlspecialchars(resolveRecentImage($rb['image_url'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="Recent Blog" style="width: 392px; height: 290px; object-fit: cover; display: block; margin: 0 auto; border-radius: 12px;">
+      <div class="blog-panel" onclick="window.location.href='blog-details.php?id=<?php echo (int)$rb['id']; ?>'">
+        <img src="<?php echo htmlspecialchars(resolveRecentImage($rb['image_url'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="Recent Blog" class="recent-img">
         <div class="caption"><?php echo htmlspecialchars($rb['title'] ?? 'Blog', ENT_QUOTES, 'UTF-8'); ?></div>
         <div class="date"><?php echo htmlspecialchars(date('F j, Y', strtotime($rb['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8'); ?></div>
       </div>
