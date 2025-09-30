@@ -4,6 +4,7 @@ require_once '../config/config.php';
 // Get selected filters from URL parameters
 $mysqli = getMysqliConnection();
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
+$selectedListing = isset($_GET['listing']) ? $_GET['listing'] : '';
 $selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
 $isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
 
@@ -108,6 +109,12 @@ if (!empty($selectedCity)) {
     $query .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
 }
 
+// Add listing type filter (Buy / Rent / PG/Co-living)
+if (!empty($selectedListing)) {
+    $listing = $mysqli->real_escape_string($selectedListing);
+    $query .= " AND p.listing_type = '" . $listing . "'";
+}
+
 // Add property type filter (category-based)
 if (!empty($selectedPropertyType)) {
     $query .= " AND c.name = '" . $mysqli->real_escape_string($selectedPropertyType) . "'";
@@ -165,6 +172,11 @@ if (!empty($selectedCategory)) {
 if (!empty($selectedCity)) {
     $city = $mysqli->real_escape_string($selectedCity);
     $countQuery .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
+}
+
+if (!empty($selectedListing)) {
+    $listing = $mysqli->real_escape_string($selectedListing);
+    $countQuery .= " AND p.listing_type = '" . $listing . "'";
 }
 
 if (!empty($selectedPropertyType)) {
@@ -270,12 +282,12 @@ function timeAgo($datetime) {
     <div class="container">
       <div class="row">
         <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
-          <button class="<?php echo $selectedCategory === 'Buy' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Buy')">Buy</button>
-          <button class="<?php echo $selectedCategory === 'Rent' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Rent')">Rent</button>
-          <button class="<?php echo $selectedCategory === 'Plot' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Plot')">Plot</button>
-          <button class="<?php echo $selectedCategory === 'Commercial' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Commercial')">Commercial</button>
-          <button class="<?php echo $selectedCategory === 'PG/Co Living' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('PG/Co Living')">PG/Co Living</button>
-          <button class="<?php echo $selectedCategory === '1BHK/Studio' ? 'active' : ''; ?>" type="button" onclick="filterByCategory('1BHK/Studio')">1BHK/Studio</button>
+          <button class="<?php echo ($selectedListing === 'Buy') ? 'active' : ''; ?>" type="button" onclick="filterByListing('Buy')">Buy</button>
+          <button class="<?php echo ($selectedListing === 'Rent') ? 'active' : ''; ?>" type="button" onclick="filterByListing('Rent')">Rent</button>
+          <button class="<?php echo (empty($selectedListing) && $selectedCategory === 'Plot') ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Plot')">Plot</button>
+          <button class="<?php echo (empty($selectedListing) && $selectedCategory === 'Commercial') ? 'active' : ''; ?>" type="button" onclick="filterByCategory('Commercial')">Commercial</button>
+          <button class="<?php echo ($selectedListing === 'PG/Co-living') ? 'active' : ''; ?>" type="button" onclick="filterByListing('PG/Co-living')">PG/Co-living</button>
+          <button class="<?php echo (empty($selectedListing) && $selectedCategory === '1BHK/Studio') ? 'active' : ''; ?>" type="button" onclick="filterByCategory('1BHK/Studio')">1BHK/Studio</button>
         </div>
       </div>
 
@@ -592,6 +604,20 @@ function timeAgo($datetime) {
 <script src="../assets/js/scripts.js" defer></script>
 
 <script>
+ function filterByListing(listing) {
+     const url = new URL(window.location);
+     // Toggle: clicking active clears it
+     const current = url.searchParams.get('listing');
+     if (current === listing) {
+         url.searchParams.delete('listing');
+     } else {
+         url.searchParams.set('listing', listing);
+         // Clear category to avoid conflicting UI states
+         url.searchParams.delete('category');
+     }
+     url.searchParams.delete('page');
+     window.location.href = url.toString();
+ }
 function filterByCategory(category) {
     const url = new URL(window.location);
     const current = url.searchParams.get('category');
@@ -737,59 +763,37 @@ function syncInitialStates() {
 
 // Filter functionality
 function initializeFilters() {
-    // Handle property type filter tags
+    // Handle property type filter tags (do NOT navigate immediately; apply on Apply Filter)
     const propertyTypeTags = document.querySelectorAll('[data-filter="propertyType"]');
     propertyTypeTags.forEach(tag => {
         tag.addEventListener('click', function(e) {
             const value = this.getAttribute('data-value');
-            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            
-            // Check if cross button was clicked
+            // Detect cross (remove) click region
             const rect = this.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
             const clickY = e.clientY - rect.top;
             const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
-            
+
             if (isCrossClick && this.classList.contains('active')) {
-                // Remove filter
-                if (isMobile) {
-                    this.classList.remove('active');
-                    // Sync with nav-tabs-custom
-                    syncPropertyTypeWithNav(value, false);
-                    updateApplyButtonState();
-                } else {
-                    // Sync with nav-tabs-custom before removing
-                    syncPropertyTypeWithNav(value, false);
-                    removeFilter('propertyType', value);
-                }
+                this.classList.remove('active');
+                syncPropertyTypeWithNav(value, false);
+                updateApplyButtonState();
                 return;
             }
-            
-            if (isMobile) {
-                // single-select UI on mobile; apply happens on Apply Filter
-                document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                // Sync with nav-tabs-custom
-                syncPropertyTypeWithNav(value, true);
-                updateApplyButtonState();
-            } else {
-                // Toggle active state for desktop
-                document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                // Sync with nav-tabs-custom
-                syncPropertyTypeWithNav(value, true);
-                applyFilter('propertyType', value);
-            }
+
+            // Single-select behavior: one active at a time
+            document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            syncPropertyTypeWithNav(value, true);
+            updateApplyButtonState();
         });
     });
 
-    // Handle bedroom filter tags
+    // Handle bedroom filter tags (do NOT navigate immediately)
     const bedroomTags = document.querySelectorAll('[data-filter="bedrooms"]');
     bedroomTags.forEach(tag => {
         tag.addEventListener('click', function(e) {
             const value = this.getAttribute('data-value');
-            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            
             // Check if cross button was clicked
             const rect = this.getBoundingClientRect();
             const clickX = e.clientX - rect.left;
@@ -797,46 +801,25 @@ function initializeFilters() {
             const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
             
             if (isCrossClick && this.classList.contains('active')) {
-                // Remove filter
-                if (isMobile) {
-                    this.classList.remove('active');
-                    updateApplyButtonState();
-                } else {
-                    removeFilter('bedrooms', value);
-                }
+                this.classList.remove('active');
+                updateApplyButtonState();
                 return;
             }
             
-            if (isMobile) {
-                document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                updateApplyButtonState();
-            } else {
-                // Toggle active state for desktop
-                document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                applyFilter('bedrooms', value);
-            }
+            // Single-select behavior; apply only on Apply Filter
+            document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            updateApplyButtonState();
         });
     });
 
     // Construction status removed
 
-    // Handle locality checkboxes
+    // Handle locality checkboxes (do NOT navigate immediately)
     const localityCheckboxes = document.querySelectorAll('[data-filter="localities"]');
     localityCheckboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const value = this.value;
-            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
-            if (isMobile) {
-                updateApplyButtonState();
-                return;
-            }
-            if (this.checked) {
-                applyFilter('localities', value);
-            } else {
-                removeFilter('localities', value);
-            }
+            updateApplyButtonState();
         });
     });
 

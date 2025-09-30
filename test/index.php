@@ -123,11 +123,11 @@ try {
     <div class="container">
       <div class="row">
         <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
-          <button type="button" data-category="Buy" onclick="onStaticCategoryClick('Buy')">Buy</button>
-          <button type="button" data-category="Rent" onclick="onStaticCategoryClick('Rent')">Rent</button>
+          <button type="button" data-category="Buy" onclick="onStaticListingClick('Buy')">Buy</button>
+          <button type="button" data-category="Rent" onclick="onStaticListingClick('Rent')">Rent</button>
           <button type="button" data-category="Plot" onclick="onStaticCategoryClick('Plot')">Plot</button>
           <button type="button" data-category="Commercial" onclick="onStaticCategoryClick('Commercial')">Commercial</button>
-          <button type="button" data-category="PG/Co Living" onclick="onStaticCategoryClick('PG/Co Living')">PG/Co Living</button>
+          <button type="button" data-category="PG/Co-living" onclick="onStaticListingClick('PG/Co-living')">PG/Co-living</button>
           <button type="button" data-category="1BHK/Studio" onclick="onStaticCategoryClick('1BHK/Studio')">1BHK/Studio</button>
         </div>
       </div>
@@ -529,6 +529,16 @@ try {
         window.location.href = url;
       } catch (e) {
         window.location.href = 'products/index.php?category=' + encodeURIComponent(categoryName);
+      }
+    }
+
+    // Listing type buttons (Buy / Rent / PG/Co-living)
+    function onStaticListingClick(listingType) {
+      try {
+        var url = 'products/index.php?listing=' + encodeURIComponent(listingType);
+        window.location.href = url;
+      } catch (e) {
+        window.location.href = 'products/index.php?listing=' + encodeURIComponent(listingType);
       }
     }
 
