@@ -247,7 +247,7 @@
       }
       .copyright-text,
       .developer-text {
-        font-size: 12px;
+        font-size: 10px;
       }
       /* Reduce hover-shift on touch devices */
       .footer-links a { padding-left: 0; }
