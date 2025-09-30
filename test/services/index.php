@@ -143,7 +143,7 @@
 </section>
 
 <!-- Interior Designs -->
-<?php include '../components/interior.php'; ?>
+<?php include '../components/our-works.php'; ?>
 
 <!-- Testimonials -->
 <?php include '../components/testimonial.php'; ?>

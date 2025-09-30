@@ -442,7 +442,7 @@ try {
     </div>
   </div>
 
-  <?php include 'components/interior.php'; ?>
+  <?php include 'components/our-works.php'; ?>
 
   <!-- Apartment     -->
   <div class="container  ">

@@ -1,0 +1,149 @@
+<?php
+require_once __DIR__ . '/../config/config.php';
+
+// Build asset path and uploads path (this page sits at test/creative-works)
+$asset_path = '../assets/';
+$uploads_prefix = '../../uploads/projects/';
+
+$mysqli = getMysqliConnection();
+
+$projects = [];
+$sql = "
+  SELECT p.id, p.name, p.description, p.location, p.order_id,
+         pi.image_filename
+  FROM projects p
+  LEFT JOIN project_images pi
+    ON p.id = pi.project_id AND pi.display_order = 1
+  ORDER BY p.order_id ASC, p.created_at DESC
+";
+
+if ($res = $mysqli->query($sql)) {
+  while ($row = $res->fetch_assoc()) {
+    $projects[] = $row;
+  }
+  $res->free();
+}
+
+$mysqli->close();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Our Works - Big Deal Ventures</title>
+  <link rel="icon" href="<?php echo $asset_path; ?>images/favicon.png" type="image/png">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="<?php echo $asset_path; ?>css/style.css" />
+  <style>
+    body { font-family: 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+
+    .hero-banner {
+      position: relative;
+      min-height: 38vh;
+      background: linear-gradient(180deg, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.85) 100%), url('<?php echo $asset_path; ?>images/service-bg.jpg');
+      background-size: cover; background-position: center; display: grid; place-items: center;
+    }
+    .hero-banner .centered { text-align: center; }
+    .hero-banner h1 { font-weight: 700; color: #111111; margin-bottom: 0.5rem; }
+    .breadcrumbs { color: #666; font-size: 14px; }
+    .breadcrumbs a { color: #cc1a1a; text-decoration: none; }
+
+    .works-section { padding: 56px 0; background: #ffffff; position: relative; }
+    .works-header { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+    .works-title { font-size: 32px; font-weight: 700; color: #111111; margin: 0; }
+    .works-subtitle { color: #444; margin: 0; font-size: 16px; }
+
+    .work-card {
+      position: relative; border: none; border-radius: 12px; overflow: hidden;
+      background: rgba(255,255,255,0.95); box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      height: 100%; transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+    .work-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px rgba(0,0,0,0.12); }
+    .work-thumb { position: relative; aspect-ratio: 16 / 10; width: 100%; overflow: hidden; background: #f6f6f6; }
+    .work-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .work-chip { position: absolute; top: 12px; left: 12px; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, #cc1a1a, #111111); box-shadow: 0 6px 16px rgba(204,26,26,0.25); }
+    .work-body { padding: 16px 16px 18px 16px; }
+    .work-name { font-size: 18px; font-weight: 700; color: #111111; margin: 0 0 6px 0; }
+    .work-meta { display: flex; align-items: center; gap: 8px; color: #666; font-size: 14px; margin-bottom: 10px; }
+    .work-desc { color: #444; font-size: 14px; line-height: 1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .works-grid { row-gap: 24px; }
+
+    /* CTA */
+    .works-cta { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; text-decoration: none;
+      color: #fff; background: #111111; transition: transform 150ms ease; }
+    .works-cta:hover { transform: translateY(-2px); opacity: .95; }
+    .works-cta svg { width: 18px; height: 18px; fill: currentColor; }
+
+    @media (max-width: 576px) {
+      .works-title { font-size: 24px; }
+      .works-subtitle { font-size: 14px; }
+      .work-name { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <?php include '../components/smallloader.php'; ?>
+  <?php require_once __DIR__ . '/../components/navbar.php'; ?>
+
+  <section class="hero-banner">
+    <div class="centered">
+      <h1>Our Works</h1>
+      <div class="breadcrumbs"><a href="../index.php">Home</a> > <span>Our Works</span></div>
+    </div>
+  </section>
+
+  <section class="works-section">
+    <div class="container">
+      <div class="works-header">
+        <div>
+          <h2 class="works-title">Featured Creative Works</h2>
+          <p class="works-subtitle">Explore our latest projects and interiors</p>
+        </div>
+        <a href="../services/index.php#services-section" class="works-cta" aria-label="Explore Services">
+          <span>Explore Services</span>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/></svg>
+        </a>
+      </div>
+
+      <div class="row works-grid">
+        <?php if (!count($projects)): ?>
+          <div class="col-12"><p class="text-muted mb-0">No works to display yet.</p></div>
+        <?php else: ?>
+          <?php foreach ($projects as $idx => $p):
+            $image = $p['image_filename'] ? ($uploads_prefix . $p['image_filename']) : ($asset_path . 'images/prop/aboutimg.png');
+            $name = htmlspecialchars($p['name'] ?? 'Untitled');
+            $location = htmlspecialchars($p['location'] ?? '');
+            $desc = htmlspecialchars($p['description'] ?? '');
+          ?>
+          <div class="col-12 col-sm-6 col-lg-4">
+            <article class="work-card">
+              <div class="work-thumb">
+                <img src="<?php echo $image; ?>" alt="<?php echo $name; ?>">
+                <?php if ($location): ?><span class="work-chip"><?php echo $location; ?></span><?php endif; ?>
+              </div>
+              <div class="work-body">
+                <h3 class="work-name"><?php echo $name; ?></h3>
+                <?php if ($location): ?>
+                <div class="work-meta"><i class="fa-regular fa-compass"></i> <span><?php echo $location; ?></span></div>
+                <?php endif; ?>
+                <p class="work-desc"><?php echo $desc; ?></p>
+              </div>
+            </article>
+          </div>
+          <?php endforeach; ?>
+        <?php endif; ?>
+      </div>
+    </div>
+  </section>
+
+  <?php include '../components/footer.php'; ?>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

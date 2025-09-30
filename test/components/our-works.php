@@ -13,7 +13,7 @@ $dotdotCount = substr_count($asset_path, '../');
 $uploads_prefix = str_repeat('../', $dotdotCount + 1); // from current page to project root
 // Build page link prefix (from current page depth)
 $page_prefix = str_repeat('../', $dotdotCount);
-$interior_page_link = $page_prefix . 'interior/index.php';
+$interior_page_link = $page_prefix . 'creative-works/index.php';
 
 $query = "
     SELECT p.id, p.name, p.description, p.location, pi.image_filename
@@ -56,6 +56,22 @@ $mysqli->close();
   overflow: hidden;
 }
 
+/* Constrain section content width */
+.interior-section .container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Header row (title + button) */
+.interior-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .interior-link-arrow {
   position: absolute;
   right: 2rem;
@@ -85,7 +101,6 @@ $mysqli->close();
   top: 50%;
   left: 50%;
   z-index: 0;
-  background: #f9f0f0;
   border-radius: 760px;
   transform: translate(-50%, -50%);
   backface-visibility: hidden;
@@ -203,13 +218,13 @@ $mysqli->close();
 }
 
 .boxes {
-  height: 100vh;
+  height: 80vh;
   width: 100%;
   overflow: hidden;
-  position: absolute;
+  position: relative;
   transform-style: preserve-3d;
   perspective: 1000px;
-  touch-action: none;
+  touch-action: pan-y;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -308,14 +323,30 @@ $mysqli->close();
   font-size: 48px;
   font-weight: 700;
   font-style: Bold;
-  margin-top: 1em;
+  margin: 2rem 0 0.25rem 0;
   letter-spacing: 1%;
   color: #111111;
-  z-index: 100;
-  position: absolute;
-  top: 2rem;
-  left: 2.3em;
 }
+
+.interior-title-link {
+  position: absolute;
+  right: 5rem;
+  top: 3.5rem;
+  z-index: 120;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: #111111;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+}
+
+.interior-title-link:hover { opacity: 0.9; }
+.interior-title-link svg { width: 18px; height: 18px; fill: currentColor; }
 
 .interior-subtitle {
   font-weight: 400;
@@ -323,58 +354,58 @@ $mysqli->close();
   font-size: 16px;
   letter-spacing: 1px;
   color: #666;
-  margin-top: 3.5em;
-  z-index: 100;
-  position: absolute;
-  top: 5rem;
-  left: 2rem;
-  margin-left: 5em;
+  margin: 0 0 1.5rem 0;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .interior-title {
     font-size: 1.75em;
-    top: 1.5rem;
   }
   .interior-subtitle {
     font-size: 0.8125em;
-    top: 4rem;
   }
 }
 
 @media (max-width: 768px) {
   .interior-title {
     font-size: 1.75em;
-    top: 1rem;
   }
   .interior-subtitle {
     font-size: 0.8125em;
-    top: 3.5rem;
   }
 }
 
 @media (max-width: 480px) {
   .interior-title {
     font-size: 1.5em;
-    top: 1rem;
   }
   .interior-subtitle {
     font-size: 0.75em;
     line-height: 1.5;
-    top: 3rem;
+    margin-bottom: 1rem;
   }
+  .interior-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .interior-title-link { position: static; padding: 8px 12px; }
+  .boxes { height: 60vh; }
 }
 </style>
 
 <section class="interior-section">
   <div class="container">
-    <h2 class="interior-title">Our Interior Designs</h2>
-    <p class="interior-subtitle">Transform your space with our innovative design solutions</p>
-  </div>
-  
-  <div class="boxes">
-    <?php 
+    <div class="interior-header">
+      <div>
+        <h2 class="interior-title">Creative Works</h2>
+        <p class="interior-subtitle">Transform your space with our innovative design solutions</p>
+      </div>
+      <a class="interior-title-link" href="<?php echo $interior_page_link; ?>" aria-label="View all interiors">
+        <span>View all</span>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"/></svg>
+      </a>
+    </div>
+
+    <div class="boxes">
+    <?php
     $counter = 1;
     foreach ($projects as $project): 
         // Skip projects without a primary image (no fallback)
@@ -393,6 +424,8 @@ $mysqli->close();
     
     </div>
   </div>
+  
+ 
   
   
   <div class="drag-proxy"></div>
