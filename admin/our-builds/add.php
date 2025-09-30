@@ -473,11 +473,17 @@ if ($result && $row = $result->fetch_assoc()) {
             input.files = dt.files;
         });
 
-        // Close button and outside click navigates back
-        document.querySelector('.close-btn')?.addEventListener('click', function(){ window.location.href = 'index.php'; });
+        // Close button navigates back
+        document.querySelector('.close-btn')?.addEventListener('click', function(e){ 
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = 'index.php';
+        });
         document.addEventListener('click', function(e){
             const modal = document.querySelector('.modal-container');
-            if (modal && !modal.contains(e.target)) { window.location.href = 'index.php'; }
+            if (modal && !modal.contains(e.target)) { 
+                // Don't close the form on outside click
+            }
         });
     </script>
 </body>
