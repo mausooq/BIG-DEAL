@@ -126,7 +126,7 @@
 
 .banner-headline {
   margin: 0 0 20px 0;
-  color:rgb(255, 230, 0);
+  color:rgb(250, 250, 250);
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   line-height: 1.2;
@@ -135,7 +135,7 @@
 
 .banner-description {
   margin: 0 0 30px 0;
-  color:rgb(0, 0, 0);
+  color:rgb(199, 199, 196);
   font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   line-height: 1.6;
