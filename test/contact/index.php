@@ -25,7 +25,6 @@
 
 <body class="contact-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
-
  <section class="hero-banner">
     <div class="centered">
      
@@ -70,6 +69,7 @@
     </div>
   </section>
 
+
   <div class=" container">
     <div class="row ">
       <div class="col-4 col-md-4  contact-info-item">
@@ -95,6 +95,7 @@
       </div>
     </div>
   </div>
+  <?php include '../components/search-banner.php'; ?>
 
 <!-- contact  -->
 <?php include '../components/letsconnect.php'; ?>

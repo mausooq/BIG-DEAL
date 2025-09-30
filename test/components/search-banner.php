@@ -9,7 +9,7 @@
   <div class="search-banner-container">
     <!-- Background Interior Image -->
     <div class="interior-background">
-      <img src="../assets/images/prop/blogdimg.png" alt="Modern Interior" class="interior-image">
+      <img src="../assets/images/sb2.jpg" alt="Modern Interior" class="interior-image">
     </div>
     
     <!-- White Overlay Banner -->
@@ -26,7 +26,7 @@
               Discover premium properties with our advanced search platform. Get personalized recommendations and expert guidance every step of the way.
             </p>
             
-            <a href="products/index.php" class="search-now-btn">
+            <a href="/BIG-DEAL/test/products/index.php" class="search-now-btn">
               EXPLORE PROPERTIES
               <span>→</span>
             </a>
@@ -74,7 +74,7 @@
 
 .interior-image {
   width: 100%;
-  /* height: 120%; */
+  height: 120%;
   object-fit: cover;
   object-position: center;
   will-change: transform;
@@ -85,7 +85,6 @@
   bottom: 0;
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.7) 100%);
   padding: 40px;
   z-index: 10;
   display: flex;
@@ -127,7 +126,7 @@
 
 .banner-headline {
   margin: 0 0 20px 0;
-  color: #222;
+  color:rgb(255, 230, 0);
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   line-height: 1.2;
@@ -136,7 +135,7 @@
 
 .banner-description {
   margin: 0 0 30px 0;
-  color: #666;
+  color:rgb(0, 0, 0);
   font-family: 'DM Sans', sans-serif;
   font-size: 16px;
   line-height: 1.6;
@@ -265,18 +264,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function handleScroll() {
       const scrollY = window.pageYOffset;
+      const viewportBottom = scrollY + window.innerHeight;
       const bannerRect = searchBanner.getBoundingClientRect();
       const bannerTop = bannerRect.top + scrollY;
       const bannerHeight = bannerRect.height;
       
-      // Calculate how much we've scrolled past the banner
-      const scrolledPast = scrollY - bannerTop;
+      // Start movement only when the banner begins entering from the bottom of the screen
+      const progressFromViewportBottom = Math.max(0, viewportBottom - bannerTop);
       
-      // Create parallax effect - move image down as we scroll
-      const parallaxOffset = scrolledPast * 0.3; // Reduced from 0.5 to 0.3 for less movement
-      interiorImage.style.transform = `translateY(${parallaxOffset}px)`;
+      // Limit progress to the banner's height so it doesn't move indefinitely
+      const clampedProgress = Math.min(progressFromViewportBottom, bannerHeight);
       
-      console.log('Scroll Y:', scrollY, 'Parallax Offset:', parallaxOffset); // Debug log
+      // Move image upward as user scrolls up through the banner's visible area
+      const parallaxOffset = clampedProgress * 0.3;
+      interiorImage.style.transform = `translateY(${ -parallaxOffset }px)`;
     }
     
     // Add scroll listener
