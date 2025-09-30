@@ -96,7 +96,7 @@
     <div class="row g-4 align-items-stretch">
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/blueprint.png" alt="Blueprint"></span>
+          <span class="svc-icon"><img src="../assets/images/icon/planning.png" alt="Blueprint"></span>
           <div class="svc-title">Perfect Planning</div>
           <div class="svc-desc">Smart property management with tenant screening, rent collection, and upkeep designed to keep your returns high.</div>
         </div>
@@ -110,7 +110,7 @@
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/bedroom.png" alt="Interior"></span>
+          <span class="svc-icon"><img src="../assets/images/icon/living-room.png" alt="Interior"></span>
           <div class="svc-title">Best Interior</div>
           <div class="svc-desc">With trusted partners, we deliver turnkey interior and furnishing solutions that align with your style and needs.</div>
         </div>
