@@ -852,6 +852,21 @@ function initializeRangeSliders() {
     const maxRange1 = document.getElementById('maxRange1');
     const minLabel1 = document.getElementById('minLabel1');
     const maxLabel1 = document.getElementById('maxLabel1');
+    const sliderRange1 = document.getElementById('sliderRange1');
+
+    function updateSliderVisual(minInput, maxInput, sliderEl) {
+        if (!minInput || !maxInput || !sliderEl) return;
+        const absMin = parseInt(minInput.min || '0', 10);
+        const absMax = parseInt(maxInput.max || '100', 10);
+        const curMin = Math.min(parseInt(minInput.value || String(absMin), 10), parseInt(maxInput.value || String(absMax), 10));
+        const curMax = Math.max(parseInt(maxInput.value || String(absMax), 10), curMin);
+        const span = absMax - absMin;
+        if (span <= 0) { sliderEl.style.left = '0%'; sliderEl.style.width = '0%'; return; }
+        const leftPct = ((curMin - absMin) / span) * 100;
+        const rightPct = ((curMax - absMin) / span) * 100;
+        sliderEl.style.left = leftPct + '%';
+        sliderEl.style.width = Math.max(0, rightPct - leftPct) + '%';
+    }
 
     if (minRange1 && maxRange1) {
         minRange1.addEventListener('input', function() {
@@ -861,6 +876,7 @@ function initializeRangeSliders() {
             minLabel1.textContent = formatPriceLabel(parseInt(this.value));
             // Don't apply filter immediately, just update the label
             updateApplyButtonState();
+            updateSliderVisual(minRange1, maxRange1, sliderRange1);
         });
 
         maxRange1.addEventListener('input', function() {
@@ -870,7 +886,10 @@ function initializeRangeSliders() {
             maxLabel1.textContent = formatPriceLabel(parseInt(this.value));
             // Don't apply filter immediately, just update the label
             updateApplyButtonState();
+            updateSliderVisual(minRange1, maxRange1, sliderRange1);
         });
+        // Initial position
+        updateSliderVisual(minRange1, maxRange1, sliderRange1);
     }
 
     // Area range slider
@@ -878,6 +897,7 @@ function initializeRangeSliders() {
     const maxRange2 = document.getElementById('maxRange2');
     const minLabel2 = document.getElementById('minLabel2');
     const maxLabel2 = document.getElementById('maxLabel2');
+    const sliderRange2 = document.getElementById('sliderRange2');
 
     if (minRange2 && maxRange2) {
         minRange2.addEventListener('input', function() {
@@ -887,6 +907,7 @@ function initializeRangeSliders() {
             minLabel2.textContent = formatAreaLabel(parseInt(this.value));
             // Don't apply filter immediately, just update the label
             updateApplyButtonState();
+            updateSliderVisual(minRange2, maxRange2, sliderRange2);
         });
 
         maxRange2.addEventListener('input', function() {
@@ -896,7 +917,10 @@ function initializeRangeSliders() {
             maxLabel2.textContent = formatAreaLabel(parseInt(this.value));
             // Don't apply filter immediately, just update the label
             updateApplyButtonState();
+            updateSliderVisual(minRange2, maxRange2, sliderRange2);
         });
+        // Initial position
+        updateSliderVisual(minRange2, maxRange2, sliderRange2);
     }
 }
 
@@ -1005,7 +1029,12 @@ function initializeDropdowns() {
         filterToggleBtn.addEventListener('click', function() {
             filterSidebar.classList.add('show');
             filterBackdrop.hidden = false;
-            document.body.style.overflow = 'hidden';
+            const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
+            if (isMobile) {
+                document.body.style.overflow = '';
+            } else {
+                document.body.style.overflow = 'hidden';
+            }
         });
     }
     

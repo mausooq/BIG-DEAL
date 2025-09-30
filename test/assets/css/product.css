@@ -12,7 +12,7 @@
   width: 58%;
   gap: 45px;
   padding-top: 10px;
-  padding-bottom: 25px;
+  /* padding-bottom: 25px; */
 }
 
 /* Ensure button colors mirror homepage inside article page */
@@ -246,7 +246,8 @@
 
 /* Mobile filter sidebar */
 .filter-sidebar.show {
-  transform: translateX(0);
+  right: 0;
+  transform: none;
 }
 
 .filter-backdrop {
@@ -426,6 +427,7 @@ display: none;
 
 /* Desktop view tweaks */
 @media (min-width: 1025px) {
+
   .apply-filter-btn-card {
     padding: 12px 18px;
     font-size: 1rem;
@@ -440,6 +442,10 @@ display: none;
 /* Mobile filter panel base styles */
 @media (max-width: 768px) {
 /* For larger phones (landscape) */
+.selected-option {
+  padding: 1rem 3rem;
+  margin-top: -0.6em;
+}
 .filter-toggle-btn {
 background: #111;
 color: #fff;
@@ -447,6 +453,7 @@ border: none;
 border-radius: 20px;
 padding: 0.5rem 1rem;
 font-size: 0.9rem;
+margin-top: 1em;
 }
 
 .filter-backdrop {
@@ -463,17 +470,26 @@ top: 0;
 right: -100%;
 width: 86%;
 max-width: 420px;
-height: 100vh;
+height: 100vh; /* fallback */
+height: 100dvh; /* modern mobile */
+min-height: 100vh;
+max-height: none;
 background: #fff;
 box-shadow: -8px 0 24px rgba(0,0,0,0.18);
 z-index: 1050;
-overflow-y: auto;           /* enable vertical scrolling inside panel */
+overflow-y: auto !important;           /* enable vertical scrolling inside panel */
+overflow-x: hidden !important;
 -webkit-overflow-scrolling: touch; /* momentum scrolling on iOS */
 overscroll-behavior: contain;      /* prevent body scroll chaining */
 touch-action: pan-y;               /* improve touch scroll */
 transition: right 0.3s ease;
 padding-top: 52px;  /* room for close button */
 padding-bottom: 80px; /* breathing space at bottom for last items */
+}
+
+/* When shown, slide the drawer into view */
+#filterSidebar.show {
+right: 0;
 }
 
 /* Apply Filter button for mobile */
@@ -540,6 +556,11 @@ padding-bottom: 120px;
 
 #filterSidebar.open {
 right: 0;
+}
+
+/* Ensure inner content doesn't disable scrolling */
+#filterSidebar * {
+  overscroll-behavior: contain;
 }
 
 .filter-close-btn {
@@ -667,6 +688,13 @@ font-size: 0.9rem;
 /* For larger phones (landscape) */
 @media (max-width: 768px) {
 /* For larger phones (landscape) */
+/* Re-enable page overflow on mobile so drawer can scroll even if body overflow was locked on desktop */
+html, body {
+overflow: auto !important;
+height: auto !important;
+-webkit-overflow-scrolling: touch;
+}
+
   /* Navigation tabs */
 .article-page .nav-tabs-custom {
   width: 90%;
