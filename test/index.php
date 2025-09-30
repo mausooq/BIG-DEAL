@@ -501,71 +501,7 @@ try {
 
 
   <!-- Faq  -->
-  <?php
-  // Load FAQs from database (reuse connection from top)
-  $faqs = [];
-  try {
-    $sql = "SELECT id, question, answer FROM faqs ORDER BY COALESCE(order_id, 1000000), id";
-    if (isset($mysqli) && $result = $mysqli->query($sql)) {
-      while ($row = $result->fetch_assoc()) {
-        $faqs[] = $row;
-      }
-      $result->free();
-    }
-  } catch (Throwable $e) {
-    // Fail silently in UI; optionally log
-    error_log('FAQ load error: ' . $e->getMessage());
-  }
-  ?>
-  <section class="container-fluid faq">
-    <div class="row">
-
-      <div class="col-md-5">
-        <button class="btn-faq">FAQs</button>
-        <h3>
-          Your <span style="color: red;">questions</span> <br> answered
-        </h3>
-
-        <p>
-          Here are the most common questions<br> clients ask.
-        </p>
-
-        <button class="btn-arrow">
-          Get in Touch <span>→</span>
-        </button>
-
-      </div>
-
-      <div class="col-md-7">
-
-        <div class="FaqQ">
-          <?php if (!empty($faqs)): ?>
-            <?php foreach ($faqs as $index => $faq): ?>
-              <div class="FaqQ-item<?php echo $index === 0 ? ' ' : ''; ?>">
-                <div class="FaqQ-title">
-                  <span><?php echo htmlspecialchars($faq['question'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                  <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
-                </div>
-                <div class="FaqQ-content">
-                  <span><?php echo htmlspecialchars($faq['answer'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                </div>
-              </div>
-            <?php endforeach; ?>
-          <?php else: ?>
-            <div class="FaqQ-item">
-              <div class="FaqQ-title">
-                <span>No FAQs available right now.</span>
-                <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
-              </div>
-              <div class="FaqQ-content">
-                <span>Please check back later.</span>
-              </div>
-            </div>
-          <?php endif; ?>
-        </div>
-      </div>
-    </div>
-  </section>
+  <?php include 'components/faq.php'; ?>
 
 
 

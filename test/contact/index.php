@@ -25,7 +25,9 @@
 
 <body class="contact-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
- <section class="hero-banner">
+ <section class="hero-banner " style="
+    margin-top: 16px;
+" >
     <div class="centered">
      
       <h1>Contact Us</h1>
@@ -59,10 +61,8 @@
             </div>
             <div class="col-md-5  ">
                 <div class="contact-map shadow rounded-4 overflow-hidden" style="height: 100%;">
-                    <iframe
-                        src="https://www.openstreetmap.org/export/embed.html?bbox=74.8447%2C12.8815%2C74.8557%2C12.8865&amp;layer=mapnik"
-                        style="border:0; width:100%; height:100%;">
-                    </iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.5891905270946!2d74.85795507572209!3d12.86978921710093!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35b42801d3787%3A0x6382971e18a25583!2sBig%20Deal%20Ventures%20India!5e0!3m2!1sen!2sin!4v1759227103128!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    
                 </div>
             </div>
         </div>
@@ -100,7 +100,7 @@
 <!-- contact  -->
 <?php include '../components/letsconnect.php'; ?>
 
-
+<?php include '../components/faq.php'; ?>
 
   <!-- footer -->
 <?php include '../components/footer.php'; ?>
