@@ -3072,6 +3072,7 @@ body:not(.article-page) .custom-select option {
   font-weight: 400;
 }
 .btn-arrow {
+  text-decoration: none;
   display: inline-flex;
   align-items: center;
   background: #fff;

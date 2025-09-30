@@ -82,6 +82,7 @@
 }
 
 .white-banner-overlay {
+  background: rgba(0, 0, 0, 0.4);
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -145,11 +146,11 @@
 }
 
 .search-now-btn {
-  background: #111;
-  color: #fff;
+  background:rgba(255, 255, 255, 0.75);
+  color: #000;
   border: none;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-weight: 800;
   border-radius: 15px;
   height: 44px;
   padding: 0 16px;
