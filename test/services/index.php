@@ -98,8 +98,7 @@
         <div class="svc-card">
           <span class="svc-icon"><img src="../assets/images/icon/blueprint.png" alt="Blueprint"></span>
           <div class="svc-title">Perfect Planning</div>
-          <div class="svc-desc">Our property management covers tenant screening, rent collection, and maintenance to maximize your returns.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
+          <div class="svc-desc">Smart property management with tenant screening, rent collection, and upkeep designed to keep your returns high.</div>
         </div>
       </div>
       <div class="col-md-4">
@@ -107,7 +106,6 @@
           <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Interior Design"></span>
           <div class="svc-title">Professional Design</div>
           <div class="svc-desc">From renovations to smart automation, we upgrade spaces with modern layouts and stylish finishes.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
@@ -115,31 +113,27 @@
           <span class="svc-icon"><img src="../assets/images/icon/bedroom.png" alt="Interior"></span>
           <div class="svc-title">Best Interior</div>
           <div class="svc-desc">With trusted partners, we deliver turnkey interior and furnishing solutions that align with your style and needs.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/plan.png" alt="Plan"></span>
-          <div class="svc-title">Green & Sustainable Spaces</div>
+          <span class="svc-icon"><img src="../assets/images/icon/sustainable.png" alt="Plan"></span>
+          <div class="svc-title">Furniture</div>
           <div class="svc-desc">Eco-friendly designs for homes, offices, and commercial spaces with energy-efficient solutions.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Plot"></span>
-          <div class="svc-title">Plot Potential</div>
+          <span class="svc-icon"><img src="../assets/images/icon/trade.png" alt="Plot"></span>
+          <div class="svc-title">Complete decoration</div>
           <div class="svc-desc">Expert guidance for buying, selling, or developing land with zoning and legal support included comprehensively.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Deals"></span>
-          <div class="svc-title">Quick Deals</div>
+          <span class="svc-icon"><img src="../assets/images/icon/exterior.png" alt="Deals"></span>
+          <div class="svc-title">Exterior Design</div>
           <div class="svc-desc">Fast, secure, and transparent transactions with expert negotiation and paperwork support efficiently.</div>
-          <a href="#services-section" class="svc-link">Learn More...</a>
         </div>
       </div>
 
