@@ -365,19 +365,7 @@ $mysqli->close();
     endforeach; 
     ?>
     
-    <!-- <div class="controls">
-      <button class="prev">
-        <span>Previous album</span>
-        <svg viewBox="0 0 448 512" width="100" title="Previous Album">
-          <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"/>
-        </svg>
-      </button>
-      <button class="next">
-        <span>Next album</span>
-        <svg viewBox="0 0 448 512" width="100" title="Next Album">
-          <path d="M424.4 214.7L72.4 6.6C43.8-10.3 0 6.1 0 47.9V464c0 37.5 40.7 60.1 72.4 41.3l352-208c31.4-18.5 31.5-64.1 0-82.6z"/>
-        </svg>
-      </button> -->
+    
     </div>
   </div>
   
@@ -386,122 +374,70 @@ $mysqli->close();
 </section>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollToPlugin.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Register GSAP plugins
-  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
+  const BOXES = Array.from(document.querySelectorAll('.box'));
+  if (!BOXES.length) return;
 
-  const BOXES = document.querySelectorAll('.box');
-  
-  if (!BOXES.length) {
-    console.log('No boxes found');
-    return;
-  }
+  let currentIndex = 0;
 
-  const tl = gsap.timeline();
-
-  const myST = ScrollTrigger.create({
-    animation: tl,
-    id: "interior-st",
-    trigger: ".interior-section",
-    start: "top top",
-    end: "+=500%",
-    pin: ".interior-section",
-    scrub: true,
-    snap: {
-      snapTo: 1 / (BOXES.length)
-    },
-    markers: false // Set to true for debugging
-  });
-
-  // Set initial state for 3D carousel - start from left and move right
-  gsap.set(BOXES, { 
-    x: (index) => index * 420,
-    z: (index) => -index * 120,
-    rotateY: (index) => index * 20,
-    scale: (index) => index === 0 ? 1.15 : 0.75,
-    opacity: (index) => index <= 1 ? 1 : 0.3
-  });
-
-  // Create animations for each box - rotate carousel
-  BOXES.forEach((box, i) => {
-    const centerIndex = Math.floor(BOXES.length / 2);
-    const offset = i - centerIndex;
-    
-    tl
-      .to(box, {
-        x: 0,
-        z: 0,
-        rotateY: 0,
-        scale: 1.1,
-        opacity: 1,
-        duration: 0.5
-      }, 0.5 * i)
-      .to(BOXES, {
-        x: (index) => (index - i) * 420,
-        z: (index) => -Math.abs(index - i) * 120,
-        rotateY: (index) => (index - i) * 20,
-        scale: (index) => index === i ? 1.15 : 0.75,
-        opacity: (index) => Math.abs(index - i) <= 1 ? 1 : 0.3,
-        duration: 0.5
-      }, '<')
-      .add("interior-work-" + (i + 1));
-  });
-
-  // Navigation functions
-  const NEXT = () => {
-    const currentProgress = tl.progress();
-    const nextProgress = Math.min(1, currentProgress + (1 / BOXES.length));
-    gsap.to(window, { duration: 1, scrollTo: myST.start + (myST.end - myST.start) * nextProgress });
-  };
-  
-  const PREV = () => {
-    const currentProgress = tl.progress();
-    const prevProgress = Math.max(0, currentProgress - (1 / BOXES.length));
-    gsap.to(window, { duration: 1, scrollTo: myST.start + (myST.end - myST.start) * prevProgress });
+  // layout function for a simple centered carousel
+  const layout = () => {
+    BOXES.forEach((box, index) => {
+      const distance = index - currentIndex;
+      const clamped = Math.max(-1, Math.min(1, distance));
+      const x = clamped * 420;
+      const z = -Math.abs(clamped) * 120;
+      const rotateY = clamped * 20;
+      const scale = index === currentIndex ? 1.15 : 0.75;
+      const opacity = Math.abs(distance) <= 1 ? 1 : 0.3;
+      gsap.to(box, { x, z, rotateY, scale, opacity, duration: 0.5, overwrite: true });
+    });
   };
 
-  // Event listeners
-  document.addEventListener('keydown', event => {
-    if (event.code === 'ArrowLeft' || event.code === 'KeyA') PREV();
-    if (event.code === 'ArrowRight' || event.code === 'KeyD') NEXT();
+  // initial positions
+  BOXES.forEach((box, index) => {
+    gsap.set(box, {
+      x: index * 420,
+      z: -index * 120,
+      rotateY: index * 20,
+      scale: index === 0 ? 1.15 : 0.75,
+      opacity: index <= 1 ? 1 : 0.3
+    });
   });
 
+  const next = () => {
+    currentIndex = (currentIndex + 1) % BOXES.length;
+    layout();
+  };
+
+  const prev = () => {
+    currentIndex = (currentIndex - 1 + BOXES.length) % BOXES.length;
+    layout();
+  };
+
+  // click to focus a card
   document.querySelector('.boxes').addEventListener('click', e => {
-    const BOX = e.target.closest('.box');
-    if (BOX) {
-      const index = Array.from(BOXES).indexOf(BOX);
-      if (index !== -1) {
-        const targetProgress = index / BOXES.length;
-        gsap.to(window, { duration: 1, scrollTo: myST.start + (myST.end - myST.start) * targetProgress });
-      }
-    }
+    const box = e.target.closest('.box');
+    if (!box) return;
+    const idx = BOXES.indexOf(box);
+    if (idx === -1) return;
+    currentIndex = idx;
+    layout();
   });
 
-  // Button events
-  const nextBtn = document.querySelector('.next');
-  const prevBtn = document.querySelector('.prev');
-  
-  console.log('Next button found:', nextBtn);
-  console.log('Prev button found:', prevBtn);
-  
-  if (nextBtn) {
-    nextBtn.addEventListener('click', () => {
-      console.log('Next button clicked');
-      NEXT();
-    });
-  }
-  if (prevBtn) {
-    prevBtn.addEventListener('click', () => {
-      console.log('Prev button clicked');
-      PREV();
-    });
-  }
-
-  console.log('Interior carousel initialized with ScrollTrigger');
-  console.log('Timeline labels:', tl.labels);
+  // autoplay: move left-to-right repeatedly
+  let direction = 1; // 1 forward, -1 backward
+  const autoplay = () => {
+    currentIndex = (currentIndex + direction + BOXES.length) % BOXES.length;
+    layout();
+  };
+  // ping-pong effect across items
+  setInterval(() => {
+    if (currentIndex === BOXES.length - 1) direction = -1;
+    else if (currentIndex === 0) direction = 1;
+    autoplay();
+  }, 2000);
 });
 </script>
