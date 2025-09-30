@@ -45,6 +45,13 @@ try {
 ?>
 
 <!-- Faq (component) -->
+<style>
+  /* Arrow rotation: default up, expanded down */
+  .faq .farrow { transition: transform .2s ease; display:inline-block; }
+  .faq .farrow.up { transform: rotate(180deg); }
+  .faq .farrow.down { transform: rotate(0deg); }
+</style>
+<?php if (!isset($asset_path)) { $asset_path = 'assets/'; } $site_base_path = preg_replace('~assets/?$~', '', $asset_path); ?>
 <section class="container-fluid faq">
   <div class="row">
 
@@ -58,9 +65,9 @@ try {
         Here are the most common questions<br> clients ask.
       </p>
 
-      <button class="btn-arrow">
+      <a href="<?php echo $site_base_path; ?>contact/" class="btn-arrow">
         Get in Touch <span>→</span>
-      </button>
+      </a>
 
     </div>
 
@@ -70,9 +77,10 @@ try {
         <?php if (!empty($faqs)): ?>
           <?php foreach ($faqs as $index => $faq): ?>
             <div class="FaqQ-item<?php echo $index === 0 ? ' ' : ''; ?>">
+              <?php if (!isset($asset_path)) { $asset_path = 'assets/'; } ?>
               <div class="FaqQ-title">
                 <span><?php echo htmlspecialchars($faq['question'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
-                <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
+                <img src="<?php echo $asset_path; ?>images/icon/arrowdown.svg" alt="arrow" class="farrow up">
               </div>
               <div class="FaqQ-content">
                 <span><?php echo htmlspecialchars($faq['answer'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
@@ -81,9 +89,10 @@ try {
           <?php endforeach; ?>
         <?php else: ?>
           <div class="FaqQ-item">
+            <?php if (!isset($asset_path)) { $asset_path = 'assets/'; } ?>
             <div class="FaqQ-title">
               <span>No FAQs available right now.</span>
-              <img src="assets/images/icon/arrowdown.svg" alt="arrow" class="farrow down">
+              <img src="<?php echo $asset_path; ?>images/icon/arrowdown.svg" alt="arrow" class="farrow up">
             </div>
             <div class="FaqQ-content">
               <span>Please check back later.</span>
@@ -107,11 +116,9 @@ try {
         var arrow = item.querySelector('.farrow');
         if (!title || !content) return;
         // Initialize: show first, hide others (match previous behavior)
-        if (idx === 0) {
-          content.style.display = content.style.display || 'block';
-        } else {
-          content.style.display = 'none';
-        }
+        // Default state: arrow up (collapsed), content hidden
+        content.style.display = 'none';
+        if (arrow) { arrow.classList.add('up'); arrow.classList.remove('down'); }
         title.addEventListener('click', function(){
           var isOpen = content.style.display !== 'none';
           // Close all others to behave like accordion
@@ -119,13 +126,13 @@ try {
             var c = other.querySelector('.FaqQ-content');
             var a = other.querySelector('.farrow');
             if (c) c.style.display = 'none';
-            if (a) a.classList.add('down');
+            if (a) { a.classList.add('up'); a.classList.remove('down'); }
           });
           // Toggle current
           content.style.display = isOpen ? 'none' : 'block';
           if (arrow) {
-            if (isOpen) { arrow.classList.add('down'); }
-            else { arrow.classList.remove('down'); }
+            if (isOpen) { arrow.classList.add('up'); arrow.classList.remove('down'); }
+            else { arrow.classList.add('down'); arrow.classList.remove('up'); }
           }
         });
       });
