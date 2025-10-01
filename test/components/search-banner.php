@@ -74,7 +74,7 @@
 
 .interior-image {
   width: 100%;
-  height: 120%;
+  height: 150%;
   object-fit: cover;
   object-position: center;
   will-change: transform;
@@ -179,7 +179,12 @@
     height: 18em;
   }
   
+  .interior-image {
+    height: 100%;
+  }
+  
   .white-banner-overlay {
+    height: 100%;
     padding: 30px 20px;
   }
   
@@ -197,13 +202,12 @@
     max-width: 150px;
   }
   
-  .headline-line-1,
-  .headline-line-2 {
-    font-size: 24px;
+  .banner-headline {
+    font-size: 32px;
   }
   
   .banner-description {
-    font-size: 14px;
+    font-size: 16px;
     margin-bottom: 25px;
   }
   
@@ -218,7 +222,12 @@
     height: 16em;
   }
   
+  .interior-image {
+    height: 100%;
+  }
+  
   .white-banner-overlay {
+    height: 100%;
     padding: 25px 15px;
   }
   
@@ -230,13 +239,12 @@
     max-width: 200px;
   }
   
-  .headline-line-1,
-  .headline-line-2 {
-    font-size: 20px;
+  .banner-headline {
+    font-size: 24px;
   }
   
   .banner-description {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 20px;
   }
   

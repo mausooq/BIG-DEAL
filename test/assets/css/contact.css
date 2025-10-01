@@ -5,10 +5,10 @@
 .contact-page .contact-form .form-control { font-size: 1em; padding: 0.8em 1em; }
 .contact-page .contact-form .btn { padding: 0.8em 1.2em; font-size: 1em; }
 .contact-page .contact-map { min-height: 22em; }
-.contact-page .contact-info-item { display: flex; gap: 0.75em; align-items: center; margin: 0.75em 0; }
+.contact-page .contact-info-item { display: flex; gap: 0.75em; align-items: center; margin: 0.75em 0; text-align: left; }
 .contact-page .contact-info-item img { width: 1.75em; height: 1.75em; flex: 0 0 auto; margin-top: 1.8em; }
-.contact-page .contact-info-title { font-size: 1em; margin: 0; }
-.contact-page .contact-info-detail { font-size: 1em; }
+.contact-page .contact-info-title { font-size: 1em; margin: 0; text-align: left; }
+.contact-page .contact-info-detail { font-size: 1em; text-align: left; }
 
 /* For small devices (phones, portrait) */
 @media (max-width: 480px) {
@@ -66,9 +66,9 @@
     flex: 0 0 100%;
     max-width: 100%;
   }
-  /* Center container and row on mobile */
-  .contact-page .container { margin-left: auto; margin-right: auto; }
-  .contact-page .row { justify-content: center; }
+  /* Align container and row to left on mobile */
+  .contact-page .container { margin-left: 0; margin-right: auto; }
+  .contact-page .row { justify-content: flex-start; }
   /* Force one item per row on mobile */
   .contact-page .contact-info-item { width: 100%; }
   /* Keep icon and text inline in a single row */
@@ -78,9 +78,15 @@
     align-items: center;
     gap: 0.75em;
     flex-wrap: nowrap;
+    text-align: left;
   }
   .contact-page .contact-info-item img { flex: 0 0 auto; }
-  .contact-page .contact-info-text { flex: 1 1 auto; display: flex; flex-direction: column; }
+  .contact-page .contact-info-text { 
+    flex: 1 1 auto; 
+    display: flex; 
+    flex-direction: column; 
+    text-align: left;
+  }
 }
 
 /* For larger phones (landscape) */
