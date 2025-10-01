@@ -24,7 +24,6 @@ CREATE TABLE properties (
     map_embed_link TEXT,
     listing_type ENUM('Buy','Rent','PG/Co-living') DEFAULT 'Buy',
     price DECIMAL(15,2),
-    location VARCHAR(255),
     landmark VARCHAR(255),
     area FLOAT,  -- in sqft
     configuration VARCHAR(50),  -- e.g., 2BHK, 3BHK

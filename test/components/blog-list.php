@@ -4,8 +4,8 @@
 /* Latest Blog Posts typography/colors to match site UI */
 .blog-list-page .blog-list-container .blog-main h1{font-family:'DM Sans',sans-serif;font-weight:700;font-size:2em;line-height:1.1;color:#222;margin:0 0 10px}
 .blog-list-page .blog-list-container .blog-main p{font-family:'DM Sans',sans-serif;color:#666}
-.blog-list-page .blog-title{font-family:'DM Sans',sans-serif;font-weight:700;font-size:22px;color:#1a1a1a}
-.blog-list-page .blog-excerpt{font-family:'DM Sans',sans-serif;font-weight:400;font-size:14px;line-height:1.7;color:#666}
+.blog-list-page .blog-title{font-family:'DM Sans',sans-serif;font-weight:700;font-size:1.375em;color:#1a1a1a}
+.blog-list-page .blog-excerpt{font-family:'DM Sans',sans-serif;font-weight:400;font-size:0.875em;line-height:1.7;color:#666}
 .blog-list-page .blog-meta{font-family:'DM Sans',sans-serif;color:#888}
 .blog-list-page .read-more{font-family:'DM Sans',sans-serif;color:#111;text-decoration:underline}
 
@@ -26,7 +26,7 @@ body {
     margin: 0 auto;
     padding: 20px;
     display: grid;
-    grid-template-columns: 2fr 300px;
+    grid-template-columns: 2fr 380px;
     gap: 40px;
 }
 
@@ -51,35 +51,13 @@ body {
     align-items: flex-start !important;
 }
 
-/* Featured first blog - larger image and text, like featured property */
-.featured-blog-card {
-    border-bottom: 0 !important;
-    padding: 0 0 20px 0 !important;
-}
-.blog-image-container.featured {
-    width: 420px !important;
-    min-width: 420px !important;
-    height: 280px !important;
-    border-radius: 12px !important;
-}
-.blog-content.featured {
-    padding: 8px 24px 8px 24px !important;
-}
-.blog-title.featured {
-    font-size: 32px;
-    line-height: 1.25;
-}
-.blog-excerpt.featured {
-    font-size: 16px;
-}
 @media (max-width: 1024px) {
-    .blog-image-container, .blog-image-container.featured { width: 100% !important; height: 320px !important; }
-    .blog-title, .blog-title.featured { font-size: 28px; }
+    .blog-image-container { width: 100% !important; height: 320px !important; }
+    .blog-title { font-size: 28px; }
 }
 @media (max-width: 768px) {
-    .featured-blog-card { padding-bottom: 10px !important; }
-    .blog-image-container, .blog-image-container.featured { height: 240px !important; }
-    .blog-title, .blog-title.featured { font-size: 24px; }
+    .blog-image-container { height: 240px !important; }
+    .blog-title { font-size: 24px; }
 }
 
 .blog-card:last-of-type {
@@ -148,7 +126,7 @@ body {
 }
 
 .blog-title {
-    font-size: 36px;
+    font-size: 1.5em !important;
     font-weight: 700;
     color: #1a1a1a;
     margin-bottom: 6px;
@@ -163,10 +141,11 @@ body {
 }
 
 .blog-excerpt {
-    font-size: 17px;
+    font-size: 1em !important;
     color: #666;
     line-height: 1.7;
     margin-bottom: 8px;
+    text-align: justify;
 }
 
 .read-more {
@@ -189,6 +168,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    position: sticky;
+    top: 5em;
+    align-self: start;
+    height: max-content;
 }
 
 .sidebar-section {
@@ -217,7 +200,7 @@ body {
 
 /* Use existing homepage #search and #search-button styles from project */
 #search-wrapper { display:flex; align-items:stretch; border-radius:50px; background-color:#fff; overflow:hidden; max-width:400px; margin: 0 !important; }
-#search { border:none; width:350px; font-size:15px; padding:10px 20px; color:#111; background-color:#ffffff; }
+#search { border:none; width:350px; font-size:0.9375em; padding:10px 20px; color:#111; background-color:#ffffff; }
 #search:focus { outline:none; }
 #search-button { border:none; cursor:pointer; color:#fff; background-color:#111; padding:0 12px; }
 
@@ -226,7 +209,7 @@ body {
     padding: 12px 44px 12px 16px;
     border: 2px solid #ececec;
     border-radius: 12px;
-    font-size: 14px;
+    font-size: 0.875em;
     outline: none;
     transition: all 0.2s ease;
     background: #fafafa;
@@ -273,7 +256,7 @@ body {
     justify-content: space-between;
     padding: 10px 12px;
     border-bottom: 1px solid #f4f4f4;
-    font-size: 14px;
+    font-size: 0.875em;
     cursor: pointer;
     transition: all 0.2s ease;
     border-radius: 8px;
@@ -287,7 +270,7 @@ body {
 
 .category-count {
     color: #999;
-    font-size: 13px;
+    font-size: 0.8125em;
 }
 
 /* Recent Posts */
@@ -300,13 +283,13 @@ body {
 }
 
 .recent-post-author {
-    font-size: 11px;
+    font-size: 0.6875em;
     color: #999;
     margin-bottom: 5px;
 }
 
 .recent-post-title {
-    font-size: 14px;
+    font-size: 1em;
     font-weight: 600;
     color: #333;
     line-height: 1.4;
@@ -322,7 +305,7 @@ body {
     gap: 10px;
 }
 
-.newsletter-input { flex:1; padding:12px 15px; border:2px solid #ececec; border-radius:12px; font-size:14px; outline:none; background:#fafafa; transition:all .2s ease; }
+.newsletter-input { flex:1; padding:12px 15px; border:2px solid #ececec; border-radius:12px; font-size:0.875em; outline:none; background:#fafafa; transition:all .2s ease; }
 .newsletter-input:focus{ border-color:#cc1a1a; box-shadow:0 0 0 3px rgba(204,26,26,0.12); background:#fff; }
 .newsletter-btn { background:#111; color:#fff; border:none; padding:12px 18px; border-radius:12px; cursor:pointer; font-size:16px; transition:background .2s ease, transform .08s ease; }
 .newsletter-btn:hover { background:#cc1a1a; }
@@ -331,7 +314,7 @@ body {
 /* Tags */
 .tags-cloud { display:flex; flex-wrap:wrap; gap:10px; padding:0; background:transparent; border:none; }
 
-.tag { padding:8px 12px; background:#fff3f3; border:1px solid #f3c8c8; border-radius:999px; font-size:12px; color:#e14c4c; cursor:pointer; transition:all .2s ease; text-decoration:none; }
+.tag { padding:8px 12px; background:#fff3f3; border:1px solid #f3c8c8; border-radius:999px; font-size:0.75em; color:#e14c4c; cursor:pointer; transition:all .2s ease; text-decoration:none; }
 .tag:hover { background:#cc1a1a; border-color:#cc1a1a; color:#fff; }
 
 /* Pagination */
@@ -355,7 +338,7 @@ body {
     background: white;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 0.875em;
     transition: all 0.3s;
     display: flex;
     align-items: center;
@@ -407,25 +390,26 @@ body {
 @media (max-width: 768px) {
     .blog-list-container { gap: 1.5em; padding: 1.25em; }
     .blog-card { flex-direction: column !important; padding: 0.6em 0 0.6em 0 !important; }
-    .blog-image-container, .blog-image-container.featured { width: 100% !important; min-width: 0 !important; height: auto !important; aspect-ratio: 16 / 9; }
-    .blog-title, .blog-title.featured { font-size: 1.5em; }
-    .blog-excerpt, .blog-excerpt.featured { font-size: 0.95em; }
+    .blog-image-container { width: 100% !important; min-width: 0 !important; height: auto !important; aspect-ratio: 16 / 9; }
+    .blog-title { font-size: 1.5em; }
+    .blog-excerpt { font-size: 0.95em; }
     .blog-meta { font-size: 0.9em; }
     #search-wrapper { max-width: 100%; }
     .tags-cloud .tag { font-size: 0.85em; padding: 0.6em 1em; }
     .pagination a, .pagination span { width: 2.2em; height: 2.2em; font-size: 0.9em; }
     .blog-list-page .blog-list-container .blog-main h1 { font-size: 1.4em; }
     .blog-list-page .hero-banner::before { background-size: cover; background-position: center; z-index: -7; }
+    .sidebar { position: static; top: auto; }
 }
 
 /* For small devices (phones, portrait) */
 @media (max-width: 480px) {
     .blog-list-container { padding: 1em; gap: 1.25em; }
     .blog-card { padding: 0.5em 0 0.5em 0 !important; }
-    .blog-image-container, .blog-image-container.featured { width: 100% !important; min-width: 0 !important; height: auto !important; aspect-ratio: 16 / 9; }
+    .blog-image-container { width: 100% !important; min-width: 0 !important; height: auto !important; aspect-ratio: 16 / 9; }
     .blog-content { padding: 0.75em 0 0 0 !important; }
-    .blog-title, .blog-title.featured { font-size: 1.3em; }
-    .blog-excerpt, .blog-excerpt.featured { font-size: 0.9em; line-height: 1.6; }
+    .blog-title { font-size: 1.3em; }
+    .blog-excerpt { font-size: 0.9em; line-height: 1.6; }
     .blog-meta { font-size: 0.85em; }
     .categories-list li { padding: 0.7em 0.9em; font-size: 0.9em; }
     .recent-post { gap: 0.7em; }
@@ -643,21 +627,19 @@ function getExcerpt($content, $length = 150) {
                         ? strtoupper($blog['category'])
                         : $categoryNames[$categoryIndex % count($categoryNames)];
                     $categoryIndex++;
-                    $isFeatured = $isFirst; // first blog as featured
                 ?>
-                    <article class="blog-card<?php echo $isFeatured ? ' featured-blog-card' : ''; ?>" onclick="window.location.href='blog-details.php?id=<?php echo (int)$blog['id']; ?>'">
-                        <div class="blog-image-container<?php echo $isFeatured ? ' featured' : ''; ?>">
+                    <article class="blog-card" onclick="window.location.href='blog-details.php?id=<?php echo (int)$blog['id']; ?>'">
+                        <div class="blog-image-container">
                             <img src="<?php echo htmlspecialchars(resolveBlogImage($blog['image_url']), ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($blog['title'], ENT_QUOTES, 'UTF-8'); ?>">
                             <span class="blog-category"><?php echo $categoryName; ?></span>
                         </div>
-                        <div class="blog-content<?php echo $isFeatured ? ' featured' : ''; ?>">
+                        <div class="blog-content">
                             <div class="blog-meta">
                                 <span>By Admin</span>
                                 <span><?php echo date('M j, Y', strtotime($blog['created_at'])); ?></span>
                             </div>
-                            <h2 class="blog-title<?php echo $isFeatured ? ' featured' : ''; ?>"><?php echo htmlspecialchars($blog['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
-                            <p class="blog-excerpt<?php echo $isFeatured ? ' featured' : ''; ?>"><?php echo htmlspecialchars(getExcerpt($blog['content'], 220), ENT_QUOTES, 'UTF-8'); ?></p>
-                            <a class="read-more">Read More</a>
+                            <h2 class="blog-title"><?php echo htmlspecialchars($blog['title'], ENT_QUOTES, 'UTF-8'); ?></h2>
+                            <p class="blog-excerpt"><?php echo htmlspecialchars(getExcerpt($blog['content'], 220), ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>
                     </article>
                 <?php $isFirst = false; endwhile; ?>

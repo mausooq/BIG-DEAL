@@ -86,6 +86,7 @@ $mysqli = getMysqliConnection();
 $property = null;
 $propertyImages = [];
 $relatedProperties = [];
+$propLocation = null;
 
 // Fetch main property details
 $query = "SELECT p.*, c.name as category_name 
@@ -112,22 +113,75 @@ if ($result->num_rows > 0) {
     $propertyImages[] = $row['image_url'];
   }
 
-  // Fetch related properties (same category, excluding current property)
+  // Fetch related properties (same category + closest matching location, excluding current property)
+  // Prefer match by town, else city, else district, else state, else only category.
   $relatedQuery = "SELECT p.*, c.name as category_name,
                      (SELECT image_url FROM property_images WHERE property_id = p.id LIMIT 1) as main_image
-                     FROM properties p 
-                     LEFT JOIN categories c ON p.category_id = c.id 
-                     WHERE p.category_id = ? AND p.id != ? AND p.status = 'Available'
-                     ORDER BY p.created_at DESC 
-                     LIMIT 3";
+                   FROM properties p
+                   LEFT JOIN categories c ON p.category_id = c.id
+                   LEFT JOIN properties_location pl2
+                     ON pl2.id = (SELECT id FROM properties_location WHERE property_id = p.id ORDER BY id DESC LIMIT 1)
+                   WHERE p.status = 'Available' AND p.id != ? AND p.category_id = ?";
+
+  $bindTypes = "ii"; // p.id != ?, category_id
+  $bindValues = [ $propertyId, $property['category_id'] ];
+
+  if ($propLocation && !empty($propLocation['town_id'])) {
+    $relatedQuery .= " AND pl2.town_id = ?";
+    $bindTypes .= "i";
+    $bindValues[] = (int)$propLocation['town_id'];
+  } elseif ($propLocation && !empty($propLocation['city_id'])) {
+    $relatedQuery .= " AND pl2.city_id = ?";
+    $bindTypes .= "i";
+    $bindValues[] = (int)$propLocation['city_id'];
+  } elseif ($propLocation && !empty($propLocation['district_id'])) {
+    $relatedQuery .= " AND pl2.district_id = ?";
+    $bindTypes .= "i";
+    $bindValues[] = (int)$propLocation['district_id'];
+  } elseif ($propLocation && !empty($propLocation['state_id'])) {
+    $relatedQuery .= " AND pl2.state_id = ?";
+    $bindTypes .= "i";
+    $bindValues[] = (int)$propLocation['state_id'];
+  }
+
+  $relatedQuery .= " ORDER BY p.created_at DESC LIMIT 3";
 
   $relatedStmt = $mysqli->prepare($relatedQuery);
-  $relatedStmt->bind_param("ii", $property['category_id'], $propertyId);
+  if ($relatedStmt) {
+    $relatedStmt->bind_param($bindTypes, ...$bindValues);
+  }
   $relatedStmt->execute();
   $relatedResult = $relatedStmt->get_result();
 
   while ($row = $relatedResult->fetch_assoc()) {
     $relatedProperties[] = $row;
+  }
+
+  // Fetch properties_location with human-readable names (latest record)
+  $locStmt = $mysqli->prepare(
+    "SELECT pl.pincode,
+            pl.state_id, pl.district_id, pl.city_id, pl.town_id,
+            s.name AS state_name,
+            d.name AS district_name,
+            c.name AS city_name,
+            t.name AS town_name
+     FROM properties_location pl
+     LEFT JOIN states s ON pl.state_id = s.id
+     LEFT JOIN districts d ON pl.district_id = d.id
+     LEFT JOIN cities c ON pl.city_id = c.id
+     LEFT JOIN towns t ON pl.town_id = t.id
+     WHERE pl.property_id = ?
+     ORDER BY pl.id DESC
+     LIMIT 1"
+  );
+  if ($locStmt) {
+    $locStmt->bind_param("i", $propertyId);
+    $locStmt->execute();
+    $locRes = $locStmt->get_result();
+    if ($locRes && $locRes->num_rows > 0) {
+      $propLocation = $locRes->fetch_assoc();
+    }
+    $locStmt->close();
   }
 } else {
   header('Location: index.php');
@@ -265,10 +319,6 @@ function formatPrice($price)
             <td class="tdesc"><?php echo formatPrice($property['price']); ?></td>
           </tr>
           <tr>
-            <td class="tmain">Address</td>
-            <td class="tdesc"><?php echo htmlspecialchars($property['location']); ?></td>
-          </tr>
-          <tr>
             <td class="tmain">Landmarks</td>
             <td class="tdesc"><?php echo htmlspecialchars($property['landmark']); ?></td>
           </tr>
@@ -276,16 +326,39 @@ function formatPrice($price)
             <td class="tmain">Type of Ownership</td>
             <td class="tdesc"><?php echo htmlspecialchars($property['ownership_type']); ?></td>
           </tr>
+          
           <tr>
             <td class="tmain">Category</td>
             <td class="tdesc"><?php echo htmlspecialchars($property['category_name']); ?></td>
           </tr>
           <tr>
-            <td class="tmain">Listing Type</td>
-            <td class="tdesc"><?php echo htmlspecialchars($property['listing_type']); ?></td>
+            <td class="tmain">Status</td>
+            <td class="tdesc"><?php echo htmlspecialchars($property['status']); ?></td>
           </tr>
+          <?php if ($propLocation): ?>
+          <tr>
+            <td class="tmain">Pincode</td>
+            <td class="tdesc"><?php echo htmlspecialchars($propLocation['pincode']); ?></td>
+          </tr>
+          <tr>
+            <td class="tmain">State</td>
+            <td class="tdesc"><?php echo htmlspecialchars($propLocation['state_name'] ?? $propLocation['state_id']); ?></td>
+          </tr>
+          <tr>
+            <td class="tmain">District</td>
+            <td class="tdesc"><?php echo htmlspecialchars($propLocation['district_name'] ?? $propLocation['district_id']); ?></td>
+          </tr>
+          <tr>
+            <td class="tmain">City</td>
+            <td class="tdesc"><?php echo htmlspecialchars($propLocation['city_name'] ?? $propLocation['city_id']); ?></td>
+          </tr>
+          <tr>
+            <td class="tmain">Town</td>
+            <td class="tdesc"><?php echo htmlspecialchars($propLocation['town_name'] ?? $propLocation['town_id']); ?></td>
+          </tr>
+          <?php endif; ?>
         </table>
-        <a href="#" class="tminfo">More Information <span><img src="../assets/images/icon/parrowdown.svg" alt="arrow down" class="pdarrow"></span></a>
+        <a href="#" class="tminfo">More Information <span><svg class="pdarrow-table" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 13.2L7.4 8.6L6 10L12 16L18 10L16.6 8.6L12 13.2Z" fill="#EC1F2B"/></svg></span></a>
 
         <div class="property-desc">
           <h1>Description</h1>
@@ -293,10 +366,10 @@ function formatPrice($price)
             <?php echo !empty($property['description']) ? htmlspecialchars($property['description']) : 'No description available for this property.'; ?>
           </p>
           <?php if (!empty($property['description']) && strlen($property['description']) > 200): ?>
-            <a href="#" class="view-more" onclick="toggleDescription()">
-              View More
+            <a href="#" class="view-more" onclick="toggleDescription(event)" aria-expanded="false">
+              <span class="label">View More</span>
               <span>
-                <img src="../assets/images/icon/parrowdown.svg" alt="arrow down" class="pdarrow">
+                <svg class="pdarrow-desc" width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 13.2L7.4 8.6L6 10L12 16L18 10L16.6 8.6L12 13.2Z" fill="#EC1F2B"/></svg>
               </span>
             </a>
           <?php endif; ?>
@@ -514,10 +587,65 @@ function formatPrice($price)
       window.location.href = 'product-details.php?id=' + propertyId;
     }
 
-    function toggleDescription() {
-      // You can implement expand/collapse functionality for description
-      alert('Toggle description functionality');
+    function toggleDescription(e) {
+      if (e && e.preventDefault) e.preventDefault();
+      var link = e ? e.currentTarget : null;
+      var p = document.querySelector('.property-desc .pdesc');
+      if (!p) return;
+      var expanded = p.classList.toggle('expanded');
+      if (link) {
+        link.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        var label = link.querySelector('.label');
+        if (label) label.textContent = expanded ? 'View Less' : 'View More';
+        var icon = link.querySelector('.pdarrow');
+        if (icon) {
+          icon.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+          icon.style.transition = 'transform 150ms ease';
+        }
+      }
     }
+
+    // Collapse/expand for More Details table
+    (function(){
+      document.addEventListener('DOMContentLoaded', function(){
+        var moreSection = document.querySelector('.more');
+        if (!moreSection) return;
+        var table = moreSection.querySelector('table');
+        var toggleLink = moreSection.querySelector('.tminfo');
+        if (!table || !toggleLink) return;
+
+        var rows = Array.prototype.slice.call(table.querySelectorAll('tr'));
+        if (!rows.length) return;
+
+        var COLLAPSED_COUNT = 4; // show first 4 by default
+        var expanded = false;
+
+        function applyState(){
+          rows.forEach(function(row, idx){
+            if (!expanded && idx >= COLLAPSED_COUNT) {
+              row.style.display = 'none';
+            } else {
+              row.style.display = '';
+            }
+          });
+          toggleLink.firstChild.nodeValue = expanded ? 'Less Information ' : 'More Information ';
+          var icon = toggleLink.querySelector('.pdarrow');
+          if (icon) {
+            icon.style.transform = expanded ? 'rotate(180deg)' : 'rotate(0deg)';
+            icon.style.transition = 'transform 150ms ease';
+          }
+        }
+
+        // Initialize collapsed state
+        applyState();
+
+        toggleLink.addEventListener('click', function(ev){
+          ev.preventDefault();
+          expanded = !expanded;
+          applyState();
+        });
+      });
+    })();
 
     // AJAX submit for enquiry form (stay on same page) + Gallery viewer wiring
     document.addEventListener('DOMContentLoaded', function () {

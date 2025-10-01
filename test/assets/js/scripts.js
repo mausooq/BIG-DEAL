@@ -137,16 +137,24 @@ search.addEventListener('focusout',(event)=>{
 document.addEventListener('DOMContentLoaded', function() {
   const viewMore = document.querySelector('.view-more');
   const description = document.querySelector('.property-desc .pdesc');
-  
+  // If page provides its own handler (e.g., product details), skip global wiring to avoid double-toggle
+  if (typeof window.toggleDescription === 'function') return;
+  if (!viewMore || !description) return;
+
   viewMore.addEventListener('click', function(e) {
     e.preventDefault();
 
+    var label = viewMore.querySelector('.label');
+    var icon = viewMore.querySelector('.pdarrow, .pdarrow-desc, .pdarrow-table');
+
     if (description.classList.contains('expanded')) {
       description.classList.remove('expanded');
-      viewMore.innerHTML = 'View More <span><img src="img/icon/parrowdown.svg" alt="arrow down" class="pdarrow"></span>';
+      if (label) label.textContent = 'View More';
+      if (icon) { icon.style.transform = 'rotate(0deg)'; icon.style.transition = 'transform 150ms ease'; }
     } else {
       description.classList.add('expanded');
-      viewMore.innerHTML = 'View Less <span><img src="img/icon/parrowdown.svg" alt="arrow down" class="pdarrow"></span>';
+      if (label) label.textContent = 'View Less';
+      if (icon) { icon.style.transform = 'rotate(180deg)'; icon.style.transition = 'transform 150ms ease'; }
     }
   });
 });

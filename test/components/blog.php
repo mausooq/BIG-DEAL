@@ -176,8 +176,9 @@
       if ($res = $mysqli->query("SELECT id, title, content, image_url, created_at FROM blogs ORDER BY created_at DESC, id DESC LIMIT 4")) {
         while ($row = $res->fetch_assoc()) { $blogs[] = $row; }
         $res->free();
+        if (count($blogs) === 0) { error_log('[blog.php] No blogs returned from DB.'); }
       }
-    } catch (Throwable $e) { /* silent in UI */ }
+    } catch (Throwable $e) { error_log('[blog.php] Blog query error: ' . $e->getMessage()); }
   }
 
   // Derive site paths so returned URLs work from any depth using the provided $asset_path from parent page
@@ -190,7 +191,7 @@
   function resolveBlogImageSrc($raw) {
     global $asset_path, $site_base_path, $uploads_prefix;
     $raw = trim((string)($raw ?? ''));
-    if ($raw === '') { return $asset_path . 'images/prop/bhouse3.png'; }
+    if ($raw === '') { return ''; }
     $isAbs = (stripos($raw, 'http://') === 0) || (stripos($raw, 'https://') === 0) || (strpos($raw, '/') === 0);
     if ($isAbs) { return $raw; }
     $name = basename($raw);
@@ -224,66 +225,82 @@
       }
     }
 
-    return $asset_path . 'images/prop/bhouse3.png';
+    return '';
   }
 
   $b0 = $blogs[0] ?? null;
   $b1 = $blogs[1] ?? null;
   $b2 = $blogs[2] ?? null;
-  $b3 = $blogs[3] ?? null;
+$b3 = $blogs[3] ?? null;
 ?>
 
+<?php if ($b0 || $b1 || $b2 || $b3): ?>
 <section class="blog-section ">
   <div class="section-header">
     <h2>Explore our latest blogs for<br>real estate insights</h2>
     <button class="view-all-btn">View all <span>→</span></button>
   </div>
-  <div class="blog-feature" <?php if ($b0) { echo 'onclick="goToBlog(' . (int)$b0['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
+  <?php if ($b0): ?>
+  <div class="blog-feature" <?php echo 'onclick="goToBlog(' . (int)$b0['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; ?> >
     <div class="blog-image">
-      <img src="<?php echo htmlspecialchars($b0 ? resolveBlogImageSrc($b0['image_url']) : 'assets/images/prop/bhouse3.png', ENT_QUOTES, 'UTF-8'); ?>" alt="Blogimage1">
+      <?php $img0 = resolveBlogImageSrc($b0['image_url'] ?? ''); if ($img0 !== '') { ?>
+      <img src="<?php echo htmlspecialchars($img0, ENT_QUOTES, 'UTF-8'); ?>" alt="Blogimage1">
+      <?php } ?>
     </div>
     <div class="blog-card">
       <span class="blog-read">7 min read</span>
-      <h3><?php echo htmlspecialchars($b0['title'] ?? 'High-end properties', ENT_QUOTES, 'UTF-8'); ?></h3>
+      <h3><?php echo htmlspecialchars($b0['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h3>
       <p>
         <?php
-          if ($b0) {
-            $excerpt = trim(strip_tags($b0['content'] ?? ''));
-            if (mb_strlen($excerpt) > 320) { $excerpt = mb_substr($excerpt, 0, 317) . '...'; }
-            echo htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
-          } else {
-            echo 'Experience the pinnacle of luxury living with our exclusive collection of high-end properties. Featuring elegant villas, premium apartments, and penthouses in prime locations, these homes are designed with world-class amenities and modern architecture to deliver unmatched comfort, sophistication, and lifestyle value.';
-          }
+          $excerpt = trim(strip_tags($b0['content'] ?? ''));
+          $lenFn = function_exists('mb_strlen') ? 'mb_strlen' : 'strlen';
+          $subFn = function_exists('mb_substr') ? 'mb_substr' : 'substr';
+          if ($lenFn($excerpt) > 320) { $excerpt = $subFn($excerpt, 0, 317) . '...'; }
+          echo htmlspecialchars($excerpt, ENT_QUOTES, 'UTF-8');
         ?>
       </p>
       <div class="blog-author">
         <img src="<?php echo htmlspecialchars($asset_path . 'images/avatar/test1.png', ENT_QUOTES, 'UTF-8'); ?>" class="author-img" alt="Admin">
         <div>
           <span class="author-name">Admin</span><br>
-          <span class="author-role">Software Dev</span>
+          <span class="author-role">Content Writer</span>
         </div>
       </div>
     </div>
   </div>
+  <?php endif; ?>
 <div class="d-flex blog2">
-  <div class="blog-panel" <?php if ($b1) { echo 'onclick="goToBlog(' . (int)$b1['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
-    <img src="<?php echo htmlspecialchars($b1 ? resolveBlogImageSrc($b1['image_url']) : ($asset_path . 'images/prop/bhouse4.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Living Room">
-    <div class="caption"><?php echo htmlspecialchars($b1['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
-    <div class="date"><?php echo htmlspecialchars(isset($b1['created_at']) ? date('F j, Y', strtotime($b1['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
+  <?php if ($b1): ?>
+  <div class="blog-panel" <?php echo 'onclick="goToBlog(' . (int)$b1['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; ?> >
+    <?php $img1 = resolveBlogImageSrc($b1['image_url'] ?? ''); if ($img1 !== '') { ?>
+    <img src="<?php echo htmlspecialchars($img1, ENT_QUOTES, 'UTF-8'); ?>" alt="Living Room">
+    <?php } ?>
+    <div class="caption"><?php echo htmlspecialchars($b1['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php if (isset($b1['created_at'])) { echo htmlspecialchars(date('F j, Y', strtotime((string)$b1['created_at'])), ENT_QUOTES, 'UTF-8'); } ?></div>
   </div>
-  <div class="blog-panel" <?php if ($b2) { echo 'onclick="goToBlog(' . (int)$b2['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
-    <img src="<?php echo htmlspecialchars($b2 ? resolveBlogImageSrc($b2['image_url']) : ($asset_path . 'images/prop/bhouse5.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Modern TV Unit">
-    <div class="caption"><?php echo htmlspecialchars($b2['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
-    <div class="date"><?php echo htmlspecialchars(isset($b2['created_at']) ? date('F j, Y', strtotime($b2['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
+  <?php endif; ?>
+  <?php if ($b2): ?>
+  <div class="blog-panel" <?php echo 'onclick="goToBlog(' . (int)$b2['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; ?> >
+    <?php $img2 = resolveBlogImageSrc($b2['image_url'] ?? ''); if ($img2 !== '') { ?>
+    <img src="<?php echo htmlspecialchars($img2, ENT_QUOTES, 'UTF-8'); ?>" alt="Modern TV Unit">
+    <?php } ?>
+    <div class="caption"><?php echo htmlspecialchars($b2['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php if (isset($b2['created_at'])) { echo htmlspecialchars(date('F j, Y', strtotime((string)$b2['created_at'])), ENT_QUOTES, 'UTF-8'); } ?></div>
   </div>
-  <div class="blog-panel" <?php if ($b3) { echo 'onclick="goToBlog(' . (int)$b3['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; } ?>>
-    <img src="<?php echo htmlspecialchars($b3 ? resolveBlogImageSrc($b3['image_url']) : ($asset_path . 'images/prop/bhouse6.png'), ENT_QUOTES, 'UTF-8'); ?>" alt="Contemporary Kitchen">
-    <div class="caption"><?php echo htmlspecialchars($b3['title'] ?? 'Market Trend', ENT_QUOTES, 'UTF-8'); ?></div>
-    <div class="date"><?php echo htmlspecialchars(isset($b3['created_at']) ? date('F j, Y', strtotime($b3['created_at'])) : 'April 9, 2025', ENT_QUOTES, 'UTF-8'); ?></div>
+  <?php endif; ?>
+  <?php if ($b3): ?>
+  <div class="blog-panel" <?php echo 'onclick="goToBlog(' . (int)$b3['id'] . ')" style="cursor:pointer" role="link" tabindex="0"'; ?> >
+    <?php $img3 = resolveBlogImageSrc($b3['image_url'] ?? ''); if ($img3 !== '') { ?>
+    <img src="<?php echo htmlspecialchars($img3, ENT_QUOTES, 'UTF-8'); ?>" alt="Contemporary Kitchen">
+    <?php } ?>
+    <div class="caption"><?php echo htmlspecialchars($b3['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></div>
+    <div class="date"><?php if (isset($b3['created_at'])) { echo htmlspecialchars(date('F j, Y', strtotime((string)$b3['created_at'])), ENT_QUOTES, 'UTF-8'); } ?></div>
   </div>
+  <?php endif; ?>
   </div>
 
 </section>
+<?php endif; ?>
 <script>
 function goToBlog(id){
   if(!id) return;
