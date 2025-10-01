@@ -78,6 +78,7 @@ CREATE TABLE blogs (
     content TEXT,
     image_url VARCHAR(255),
     category VARCHAR(100) NULL,
+    tags VARCHAR(255) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -197,7 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
 					</div>
 					<div class="mb-3">
-						<label class="form-label">Category (optional)</label>
+						<label class="form-label">Category</label>
 						<input type="text" class="form-control" name="category" value="<?php echo htmlspecialchars($blog['category'] ?? ''); ?>" placeholder="Enter category name">
 					</div>
 					<div class="mb-3">

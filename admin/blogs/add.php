@@ -27,8 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	try {
 		$title = trim($_POST['title'] ?? '');
 		$content = trim($_POST['content'] ?? '');
-		$imageUrlInput = trim($_POST['image_url'] ?? '');
-		$category = trim($_POST['category'] ?? '');
+        $imageUrlInput = trim($_POST['image_url'] ?? '');
+        $category = trim($_POST['category'] ?? '');
+        $tags = trim($_POST['tags'] ?? '');
 
 		if ($title === '' || $content === '') { throw new Exception('Title and content are required'); }
 
@@ -56,27 +57,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$has_admin_id = ($mysqli->query("SHOW COLUMNS FROM blogs LIKE 'admin_id'")?->num_rows ?? 0) > 0;
 		if ($has_created_at) {
 			if ($has_admin_id) {
-				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, admin_id, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+                $stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, tags, admin_id, created_at) VALUES (?, ?, ?, ?, ?, ?, NOW())');
 				if ($stmt) {
 					// Use i for admin_id when not null; pass null safely via PHP by binding as null using set null variable
 					$adminParam = $adminId !== null ? $adminId : null;
 					// For NULL with mysqli bind, use 'i' and pass null — mysqli will send NULL for null variables
-					$stmt->bind_param('ssssi', $title, $content, $image_url, $category, $adminParam);
+                    $stmt->bind_param('sssssi', $title, $content, $image_url, $category, $tags, $adminParam);
 				}
 			} else {
-				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, created_at) VALUES (?, ?, ?, ?, NOW())');
-				$stmt && $stmt->bind_param('ssss', $title, $content, $image_url, $category);
+                $stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, tags, created_at) VALUES (?, ?, ?, ?, ?, NOW())');
+                $stmt && $stmt->bind_param('sssss', $title, $content, $image_url, $category, $tags);
 			}
 		} else {
 			if ($has_admin_id) {
-				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, admin_id) VALUES (?, ?, ?, ?, ?)');
+                $stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, tags, admin_id) VALUES (?, ?, ?, ?, ?, ?)');
 				if ($stmt) {
 					$adminParam = $adminId !== null ? $adminId : null;
-					$stmt->bind_param('ssssi', $title, $content, $image_url, $category, $adminParam);
+                    $stmt->bind_param('sssssi', $title, $content, $image_url, $category, $tags, $adminParam);
 				}
 			} else {
-				$stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category) VALUES (?, ?, ?, ?)');
-				$stmt && $stmt->bind_param('ssss', $title, $content, $image_url, $category);
+                $stmt = $mysqli->prepare('INSERT INTO blogs (title, content, image_url, category, tags) VALUES (?, ?, ?, ?, ?)');
+                $stmt && $stmt->bind_param('sssss', $title, $content, $image_url, $category, $tags);
 			}
 		}
 
@@ -206,8 +207,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						<input type="text" class="form-control" name="title" placeholder="Enter blog title" required>
 					</div>
 					<div class="mb-3">
-						<label class="form-label">Category (optional)</label>
+						<label class="form-label">Category</label>
 						<input type="text" class="form-control" name="category" placeholder="Enter category name">
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Tags (optional)</label>
+						<input type="text" class="form-control" name="tags" placeholder="e.g. housing, mortgage, loans">
+						<div class="form-text">Add one or more tags, separated by commas.</div>
 					</div>
 					<div class="mb-3">
 						<label class="form-label">Cover Image (optional)</label>
