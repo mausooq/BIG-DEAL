@@ -23,6 +23,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<style>
+  @media (max-width: 480px) {
+    .welcome-text .services-hero-content2 {
+      font-size: 1.4rem !important;
+    }
+  }
+</style>
 </head>
 
 
@@ -41,7 +48,7 @@
 
       <div class="welcome-text">
         <h2 class="hero-content1 about-hero-content1">COMPREHENSIVE</h2>
-        <h2 class="gugi hero-content2 about-hero-content2">Property Services</h2>
+        <h2 class="gugi hero-content2 about-hero-content2 services-hero-content2">Property Services</h2>
       </div>
     </div>
 </section>
@@ -51,8 +58,8 @@
     <div class="row">
         <div class="col-md-5" >
           <div class="about-img">
-            <img src="../assets/images/prop/aboutimg.png" alt="services-img1"  class="img-upper">
-            <img src="../assets/images/prop/aboutimg2.png" alt="services-img2"  class="img-lower">
+            <img src="../assets/images/sp3.jpg" alt="services-img1"  class="img-upper">
+            <img src="../assets/images/sp1.jpg" alt="services-img2"  class="img-lower">
         </div>
         </div>
         <div class="col-md-5 about-content">
