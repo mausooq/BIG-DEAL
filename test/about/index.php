@@ -133,7 +133,7 @@
 <?php include '../components/why-choose-us.php'; ?>
 
     <!-- Interior Designs -->
-<?php include '../components/interior.php'; ?>
+<?php include '../components/our-works.php'; ?>
 
 <?php include '../components/search-banner.php'; ?>
 
