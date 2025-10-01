@@ -200,7 +200,7 @@ body {
 .sidebar-section.no-box{ background: transparent; box-shadow: none; border: none; padding: 0; }
 
 .sidebar-title {
-    font-size: 16px;
+    font-size: 1.125rem; /* ~18px */
     font-weight: 700;
     margin-bottom: 16px;
     color: #111;
@@ -264,8 +264,8 @@ body {
 .categories-list.chips li { display: block; padding: 0; margin: 0; }
 .categories-list.chips .cat-chip { display: flex; align-items: center; justify-content: space-between; width: 100%; text-decoration: none; padding: 0.6em 0.8em; border-radius: 8px; background: #fff; border: 1px solid #eee; color: #111; }
 .categories-list.chips .cat-chip:hover { border-color: #cc1a1a; color: #cc1a1a; background: #fff6f6; }
-.categories-list.chips .cat-chip .label { font-size: 0.95em; }
-.categories-list.chips .cat-chip .count { font-size: 0.9em; color: #999; }
+.categories-list.chips .cat-chip .label { font-size: 1em; }
+.categories-list.chips .cat-chip .count { font-size: 0.95em; color: #999; }
 
 .categories-list li {
     display: flex;
@@ -299,13 +299,13 @@ body {
 }
 
 .recent-post-author {
-    font-size: 11px;
-    color: #999;
+    font-size: 13px;
+    color: #777;
     margin-bottom: 5px;
 }
 
 .recent-post-title {
-    font-size: 14px;
+    font-size: 1rem; /* 16px */
     font-weight: 600;
     color: #333;
     line-height: 1.4;
@@ -330,7 +330,7 @@ body {
 /* Tags */
 .tags-cloud { display:flex; flex-wrap:wrap; gap:10px; padding:0; background:transparent; border:none; }
 
-.tag { padding:8px 12px; background:#fff3f3; border:1px solid #f3c8c8; border-radius:999px; font-size:12px; color:#e14c4c; cursor:pointer; transition:all .2s ease; text-decoration:none; }
+.tag { padding:10px 14px; background:#fff3f3; border:1px solid #f3c8c8; border-radius:999px; font-size:14px; color:#e14c4c; cursor:pointer; transition:all .2s ease; text-decoration:none; }
 .tag:hover { background:#cc1a1a; border-color:#cc1a1a; color:#fff; }
 
 /* Pagination */

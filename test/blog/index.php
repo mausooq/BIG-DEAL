@@ -41,7 +41,8 @@
 </section>
 
 
-<?php include '../components/blog.php'; ?>
+<?php include '../components/blog-list.php'; ?>
+
 
 
 

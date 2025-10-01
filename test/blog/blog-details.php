@@ -9,7 +9,7 @@ $blog = null;
 $subtitles = [];
 
 // Load blog
-$stmt = $mysqli->prepare("SELECT id, title, content, image_url, created_at FROM blogs WHERE id = ?");
+$stmt = $mysqli->prepare("SELECT id, title, content, image_url, created_at, category FROM blogs WHERE id = ?");
 $stmt->bind_param('i', $blogId);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -77,39 +77,41 @@ try {
   $stmt3->close();
 } catch (Throwable $e) { /* ignore in UI */ }
 
-// Get categories for sidebar
+// Build tags cloud from blogs.tags (comma-separated across all blogs)
+$tagsCloud = [];
+try {
+  $tagRes = $mysqli->query("SELECT tags FROM blogs WHERE tags IS NOT NULL AND TRIM(tags) <> ''");
+  if ($tagRes) {
+    while ($row = $tagRes->fetch_assoc()) {
+      $list = explode(',', (string)$row['tags']);
+      foreach ($list as $raw) {
+        $tag = trim($raw);
+        if ($tag === '') continue;
+        $key = mb_strtolower($tag);
+        if (!isset($tagsCloud[$key])) { $tagsCloud[$key] = ['name' => $tag, 'count' => 0]; }
+        $tagsCloud[$key]['count']++;
+      }
+    }
+    $tagRes->free();
+  }
+  uasort($tagsCloud, function($a, $b){
+    if ($a['count'] === $b['count']) { return strcasecmp($a['name'], $b['name']); }
+    return $b['count'] <=> $a['count'];
+  });
+} catch (Throwable $e) { /* silent */ }
+
+// Get categories for sidebar (dynamic from blogs.category)
 $categories = [];
 try {
-    $catResult = $mysqli->query("SELECT 'Market Trends' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%market%' OR title LIKE '%trend%' 
-                                 UNION ALL
-                                 SELECT 'Property Investment' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%investment%' OR title LIKE '%invest%'
-                                 UNION ALL
-                                 SELECT 'Home Buying Tips' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%buying%' OR title LIKE '%tip%'
-                                 UNION ALL
-                                 SELECT 'Rental & Leasing' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%rental%' OR title LIKE '%lease%'
-                                 UNION ALL
-                                 SELECT 'Commercial Real Estate' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%commercial%'
-                                 UNION ALL
-                                 SELECT 'Smart Living & Design' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%design%' OR title LIKE '%living%'");
-    if ($catResult) {
-        while ($row = $catResult->fetch_assoc()) {
-            if ($row['count'] > 0) {
-                $categories[] = $row;
-            }
-        }
-        $catResult->free();
+  $catSql = "SELECT category AS name, COUNT(*) AS count FROM blogs WHERE category IS NOT NULL AND TRIM(category) <> '' GROUP BY category ORDER BY count DESC, name ASC";
+  $catResult = $mysqli->query($catSql);
+  if ($catResult) {
+    while ($row = $catResult->fetch_assoc()) {
+      if ((int)($row['count'] ?? 0) > 0) { $categories[] = $row; }
     }
-} catch (Throwable $e) {
-    // Fallback categories if query fails
-    $categories = [
-        ['name' => 'Market Trends', 'count' => 22],
-        ['name' => 'Property Investment', 'count' => 15],
-        ['name' => 'Home Buying Tips', 'count' => 16],
-        ['name' => 'Rental & Leasing', 'count' => 8],
-        ['name' => 'Commercial Real Estate', 'count' => 19],
-        ['name' => 'Smart Living & Design', 'count' => 21]
-    ];
-}
+    $catResult->free();
+  }
+} catch (Throwable $e) { /* silent */ }
 
 // Get recent posts for sidebar (5 posts)
 $recentPosts = [];
@@ -194,7 +196,8 @@ function resolveBlogImage($raw) {
     <div class="blog-main">
       <section class="container">
         <a href="#" class="go-back" onclick="history.back();return false;">Go Back</a>
-        <span class="m-btn">Market Trends</span>
+        <?php $catLabel = isset($blog['category']) && trim($blog['category']) !== '' ? htmlspecialchars($blog['category'], ENT_QUOTES, 'UTF-8') : 'Uncategorized'; ?>
+        <a class="m-btn" href="blog-list.php?category=<?php echo urlencode($blog['category'] ?? ''); ?>"><?php echo $catLabel; ?></a>
         <h1><?php echo htmlspecialchars($blog['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
         <div class="meta">
         <span>7 min Read</span>
@@ -254,13 +257,15 @@ function resolveBlogImage($raw) {
       </div>
       
       <!-- Categories -->
-      <div class="sidebar-section">
+      <div class="sidebar-section no-box">
         <h3 class="sidebar-title">Categories</h3>
-        <ul class="categories-list">
+        <ul class="categories-list chips">
           <?php foreach ($categories as $category): ?>
-            <li onclick="window.location.href='blog-list.php?search=<?php echo urlencode($category['name']); ?>'">
-              <span><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-              <span class="category-count">(<?php echo (int)$category['count']; ?>)</span>
+            <li>
+              <a class="cat-chip" href="blog-list.php?category=<?php echo urlencode($category['name']); ?>">
+                <span class="label"><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="count"><?php echo (int)$category['count']; ?></span>
+              </a>
             </li>
           <?php endforeach; ?>
         </ul>
@@ -284,15 +289,11 @@ function resolveBlogImage($raw) {
       <div class="sidebar-section no-box">
         <h3 class="sidebar-title">Tags</h3>
         <div class="tags-cloud">
-          <a href="blog-list.php?search=housing" class="tag">housing</a>
-          <a href="blog-list.php?search=mortgage" class="tag">mortgage</a>
-          <a href="blog-list.php?search=loans" class="tag">loans</a>
-          <a href="blog-list.php?search=crypto" class="tag">crypto</a>
-          <a href="blog-list.php?search=investment" class="tag">investment</a>
-          <a href="blog-list.php?search=commercial" class="tag">commercial</a>
-          <a href="blog-list.php?search=property" class="tag">property</a>
-          <a href="blog-list.php?search=condo" class="tag">condo</a>
-          <a href="blog-list.php?search=rental" class="tag">rental</a>
+          <?php foreach ($tagsCloud as $t): ?>
+            <a href="blog-list.php?tag=<?php echo urlencode($t['name']); ?>" class="tag" title="<?php echo (int)$t['count']; ?> posts">
+              <?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>
+            </a>
+          <?php endforeach; ?>
         </div>
       </div>
     </aside>
