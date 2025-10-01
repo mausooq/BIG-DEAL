@@ -72,6 +72,7 @@
     .navbar-brand img {
       width: 5rem;
       max-width: 120px;
+      margin-top: 1rem;
     }
   }
 </style>

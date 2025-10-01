@@ -98,6 +98,11 @@ try {
   
   <style>
     /* Enhanced dropdown interactions */
+    @media (max-width: 768px) {
+    .navbar-brand img {
+      margin-top: 0;
+    }
+  }
   </style>
   <script src="assets/js/custom-dropdown.js" defer></script>
 </head>
