@@ -27,7 +27,7 @@
 
 
 <body class="about-page">
-  <?php include '../components/smallloader.php'; ?>
+ 
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
 
  <section class="hero-banner">
