@@ -432,7 +432,7 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 									<h6 class="blog-title"><?php echo htmlspecialchars($row['title']); ?></h6>
 									<?php if (!empty($row['category'])): ?>
 									<div class="blog-category mb-2">
-										<span class="badge bg-primary"><?php echo htmlspecialchars($row['category']); ?></span>
+									<span class="badge bg-danger"><?php echo htmlspecialchars($row['category']); ?></span>
 									</div>
 									<?php endif; ?>
 									<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 80)) . '...'; ?></p>
