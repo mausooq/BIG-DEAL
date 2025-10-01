@@ -136,7 +136,7 @@ body {
 .blog-meta {
     display: flex;
     gap: 15px;
-    font-size: 0.95em;
+    font-size: 1em;
     color: #555;
     margin-bottom: 6px;
 }
@@ -148,7 +148,7 @@ body {
 }
 
 .blog-title {
-    font-size: 32px;
+    font-size: 36px;
     font-weight: 700;
     color: #1a1a1a;
     margin-bottom: 6px;
@@ -163,7 +163,7 @@ body {
 }
 
 .blog-excerpt {
-    font-size: 16px;
+    font-size: 17px;
     color: #666;
     line-height: 1.7;
     margin-bottom: 8px;
@@ -172,7 +172,7 @@ body {
 .read-more {
     display: inline-block;
     color: #111;
-    font-size: 0.95em;
+    font-size: 1em;
     font-weight: 600;
     text-decoration: underline;
     cursor: pointer;

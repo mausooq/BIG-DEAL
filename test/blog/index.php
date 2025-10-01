@@ -42,8 +42,7 @@
 
 
 <?php include '../components/blog-list.php'; ?>
-
-
+<?php include '../components/search-banner.php'; ?>
 
 
 <!-- contact  -->

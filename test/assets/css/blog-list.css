@@ -188,6 +188,10 @@ body {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    position: sticky;
+    top: 5em;
+    align-self: start;
+    height: max-content;
 }
 
 .sidebar-section {

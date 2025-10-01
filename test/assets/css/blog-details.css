@@ -1,5 +1,5 @@
 .blogd-page .blog-cover{width:1296px;max-width:100%;height:617px;object-fit:cover;display:block;margin:0 auto;border-radius:12px}
-.blogd-page .blog-content-text{font-size:1.125rem;line-height:1.75;color:#333;margin:16px 0}
+.blogd-page .blog-content-text{font-size:1.2rem;line-height:1.75;color:#333;margin:16px 0}
 .blogd-page .section-image-wrap{margin:16px 0;text-align:center}
 .blogd-page .section-image{width:100%;height:360px;object-fit:cover;border-radius:12px;display:block}
 .blogd-page .blog-panel{cursor:pointer}
@@ -27,6 +27,17 @@
     display: flex;
     flex-direction: column;
     gap: 30px;
+    position: sticky;
+    top: 5em;
+    align-self: start;
+    height: max-content;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        top: auto;
+    }
 }
 
 .sidebar-section {
@@ -163,15 +174,15 @@
 }
 
 .recent-post-author {
-    font-size: 13px;
-    color: #777;
+    font-size: 14px;
+    color: #555;
     margin-bottom: 5px;
 }
 
 .recent-post-title {
-    font-size: 1rem;
+    font-size: 1.0625rem; /* 17px */
     font-weight: 600;
-    color: #333;
+    color: #222;
     line-height: 1.4;
 }
 
