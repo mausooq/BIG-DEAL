@@ -97,13 +97,13 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
   
   <style>
-   /* @media (max-width: 480px) {
+   @media (max-width: 480px) {
     .location-grid-mobile{
       position: relative;
       right: 2em;
       gap: 1rem !important;
     } 
-   }*/
+   }
   </style>
   <script src="assets/js/custom-dropdown.js" defer></script>
 </head>
