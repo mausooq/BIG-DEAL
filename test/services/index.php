@@ -98,56 +98,56 @@
 <section class="other-services-section py-5">
   <div class="container other-services-wrap">
     <div class="property-title-section text-left">
-      <div class="property-title">Other Services</div>
-      <div class="property-subtitle">What we also offer</div>
+      <div class="property-title">Our Additional Services</div>
+      <div class="property-subtitle">Enhancing every detail with design, planning, and execution</div>
     </div>
     <div class="row g-4 align-items-stretch">
       <div class="col-md-4">
         <div class="svc-card">
           <span class="svc-icon"><img src="../assets/images/icon/planning.png" alt="Blueprint"></span>
           <div class="svc-title">Perfect Planning</div>
-          <div class="svc-desc">Smart property management with tenant screening, rent collection, and upkeep designed to keep your returns high.</div>
+          <div class="svc-desc">Smart property management with tenant screening, rent collection, and seamless upkeep to ensure maximum returns.</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
           <span class="svc-icon"><img src="../assets/images/icon/house-design.png" alt="Interior Design"></span>
           <div class="svc-title">Professional Design</div>
-          <div class="svc-desc">From renovations to smart automation, we upgrade spaces with modern layouts and stylish finishes.</div>
+          <div class="svc-desc">From stylish renovations to smart automation, we create modern layouts that blend comfort with elegance.</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
           <span class="svc-icon"><img src="../assets/images/icon/living-room.png" alt="Interior"></span>
-          <div class="svc-title">Best Interior</div>
-          <div class="svc-desc">With trusted partners, we deliver turnkey interior and furnishing solutions that align with your style and needs.</div>
+          <div class="svc-title">Premium Interiors</div>
+          <div class="svc-desc">Turnkey interior and furnishing solutions delivered by trusted experts — tailored to your unique taste and lifestyle.</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/sustainable.png" alt="Plan"></span>
-          <div class="svc-title">Furniture</div>
-          <div class="svc-desc">Eco-friendly designs for homes, offices, and commercial spaces with energy-efficient solutions.</div>
+          <span class="svc-icon"><img src="../assets/images/icon/sustainable.png" alt="Furniture"></span>
+          <div class="svc-title">Sustainable Furniture</div>
+          <div class="svc-desc">Eco-friendly and durable furniture designs for homes, offices, and commercial spaces that inspire smarter living.</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/trade.png" alt="Plot"></span>
-          <div class="svc-title">Complete decoration</div>
-          <div class="svc-desc">Expert guidance for buying, selling, or developing land with zoning and legal support included comprehensively.</div>
+          <span class="svc-icon"><img src="../assets/images/icon/trade.png" alt="Decoration"></span>
+          <div class="svc-title">Complete Decoration</div>
+          <div class="svc-desc">Expert styling and décor solutions — from concept to execution — that transform spaces into functional masterpieces.</div>
         </div>
       </div>
       <div class="col-md-4">
         <div class="svc-card">
-          <span class="svc-icon"><img src="../assets/images/icon/exterior.png" alt="Deals"></span>
+          <span class="svc-icon"><img src="../assets/images/icon/exterior.png" alt="Exterior"></span>
           <div class="svc-title">Exterior Design</div>
-          <div class="svc-desc">Fast, secure, and transparent transactions with expert negotiation and paperwork support efficiently.</div>
+          <div class="svc-desc">Creative outdoor designs and landscaping ideas that add elegance, value, and curb appeal to your property.</div>
         </div>
       </div>
-
     </div>
   </div>
 </section>
+
 
 <!-- Interior Designs -->
 <?php include '../components/our-works.php'; ?>
