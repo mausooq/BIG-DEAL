@@ -240,11 +240,11 @@
   }
   
   .banner-headline {
-    font-size: 24px;
+    font-size: 1.4rem;
   }
   
   .banner-description {
-    font-size: 14px;
+    font-size: 0.7rem;
     margin-bottom: 20px;
   }
   
