@@ -17,6 +17,7 @@
       position: relative;
       padding-top: 30px;
       font-family: "inter", sans-serif;
+      text-align: left;
     }
     
     .footer-column h3 {
@@ -128,7 +129,7 @@
       background-color: #fff;
       overflow: hidden;
       max-width: 400px;
-      margin: 10px 10px;
+      margin: 10px 0;
     }
     
     #search {
@@ -149,7 +150,7 @@
       cursor: pointer;
       color: #fff;
       background-color: #bf1d1d;
-      padding: 0px 10px;
+      padding: 0px 16px;
     }
     
     /* Footer Logo Styles */
@@ -212,6 +213,7 @@
         width: 100%;
         max-width: 100%;
         justify-content: flex-start;
+        margin: 10px 0;
       }
       #search {
         flex: 1 1 auto;
@@ -287,6 +289,7 @@
       #search-wrapper {
         max-width: 32.5em;
         margin: 0.8em 0;
+        justify-content: flex-start;
       }
       #search {
         padding: 0.75em;
