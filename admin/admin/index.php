@@ -228,7 +228,7 @@ $totalPages = (int)ceil($totalCount / $limit);
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">
-	<style>
+    <style>
 		/* Base */
 		
 		body{ background:var(--bg); color:#111827; }
@@ -278,7 +278,13 @@ $totalPages = (int)ceil($totalCount / $limit);
 		/* Buttons */
 		.btn-primary{ background:var(--primary); border-color:var(--primary); }
 		.btn-primary:hover{ background:var(--primary-600); border-color:var(--primary-600); }
-		/* Mobile responsiveness */
+        /* Modal backdrop blur */
+        .modal-backdrop.show{ background: rgba(0,0,0,.25); backdrop-filter: blur(6px); }
+
+        /* Ensure modals are nicely centered */
+        .modal-dialog.modal-dialog-centered{ display:flex; align-items:center; min-height: calc(100% - 1rem); }
+
+        /* Mobile responsiveness */
 
 			.table{ font-size:.9rem; }
 		}
@@ -359,14 +365,18 @@ $totalPages = (int)ceil($totalCount / $limit);
 										<?php endif; ?>
 									</td>
 									<td class="text-muted"><?php echo date('M d, Y', strtotime($row['created_at'])); ?></td>
-									<td class="text-end actions-cell">
-										<button class="modern-btn edit-btn btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><span class="icon"><i class="fa-solid fa-pen"></i></span></button>
-										<?php if ($row['status'] == 'active'): ?>
-											<button class="modern-btn view-btn btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="<?php echo $row['id'] == $_SESSION['admin_id'] ? 'Cannot suspend your own account' : 'Suspend Admin'; ?>" <?php echo $row['id'] == $_SESSION['admin_id'] ? 'disabled' : ''; ?>><span class="icon"><i class="fa-solid fa-ban"></i></span></button>
-										<?php else: ?>
-											<button class="modern-btn view-btn btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><span class="icon"><i class="fa-solid fa-check"></i></span></button>
-										<?php endif; ?>
-									</td>
+                                    <td class="text-end actions-cell">
+                                        <button class="modern-btn edit-btn btn-edit me-2" data-bs-toggle="modal" data-bs-target="#editAdminModal" title="Edit Admin"><span class="icon"><i class="fa-solid fa-pen"></i></span></button>
+                                        <?php if ($row['status'] == 'active'): ?>
+                                            <?php if ((int)$row['id'] !== (int)($_SESSION['admin_id'] ?? 0)): ?>
+                                                <button class="modern-btn view-btn btn-suspend" data-bs-toggle="modal" data-bs-target="#suspendModal" title="Suspend Admin"><span class="icon"><i class="fa-solid fa-ban"></i></span></button>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-muted border">You</span>
+                                            <?php endif; ?>
+                                        <?php else: ?>
+                                            <button class="modern-btn view-btn btn-activate" data-bs-toggle="modal" data-bs-target="#activateModal" title="Activate Admin"><span class="icon"><i class="fa-solid fa-check"></i></span></button>
+                                        <?php endif; ?>
+                                    </td>
 								</tr>
 								<?php endwhile; ?>
 							</tbody>
@@ -390,8 +400,8 @@ $totalPages = (int)ceil($totalCount / $limit);
 	</div>
 
 	<!-- Add Admin Modal -->
-	<div class="modal fade" id="addAdminModal" tabindex="-1">
-		<div class="modal-dialog">
+    <div class="modal fade" id="addAdminModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Add New Admin User</h5>
@@ -430,8 +440,8 @@ $totalPages = (int)ceil($totalCount / $limit);
 	</div>
 
 	<!-- Edit Admin Modal -->
-	<div class="modal fade" id="editAdminModal" tabindex="-1">
-		<div class="modal-dialog">
+    <div class="modal fade" id="editAdminModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title">Edit Admin User</h5>
