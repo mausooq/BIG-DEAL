@@ -5,8 +5,24 @@
 .contact-page .contact-form .form-control { font-size: 1em; padding: 0.8em 1em; }
 .contact-page .contact-form .btn { padding: 0.8em 1.2em; font-size: 1em; }
 .contact-page .contact-map { min-height: 22em; }
-.contact-page .contact-info-item { display: flex; gap: 0.75em; align-items: center; margin: 0.75em 0; text-align: left; }
-.contact-page .contact-info-item img { width: 1.75em; height: 1.75em; flex: 0 0 auto; margin-top: 1.8em; }
+.contact-page .contact-info-item { 
+  display: flex !important; 
+  gap: 0.75em; 
+  align-items: center; 
+  margin: 0.75em 0; 
+  text-align: left; 
+  padding: 0 !important;
+}
+.contact-page .contact-info-item img { 
+  width: 1.75em !important; 
+  height: 1.75em !important; 
+  flex: 0 0 auto; 
+  display: block !important;
+  object-fit: contain;
+  position: static !important;
+  padding: 0 !important;
+  margin-top: 1.5em;
+}
 .contact-page .contact-info-title { font-size: 1em; margin: 0; text-align: left; }
 .contact-page .contact-info-detail { font-size: 1em; text-align: left; }
 
@@ -23,7 +39,15 @@
   .contact-page .contact-map { min-height: 16.25em; }
 
   .contact-page .contact-info-item { gap: 0.625em; }
-  .contact-page .contact-info-item img { width: 1.5em; height: 1.5em; }
+  .contact-page .contact-info-item img { 
+    width: 1.5em !important; 
+    height: 1.5em !important; 
+    display: block !important;
+    object-fit: contain;
+    position: static !important;
+    padding: 0 !important;
+    margin-top: 0.5em;
+  }
   .contact-page .contact-info-title { font-size: 0.95em; }
   .contact-page .contact-info-detail { font-size: 0.95em; }
 
@@ -79,8 +103,19 @@
     gap: 0.75em;
     flex-wrap: nowrap;
     text-align: left;
+    position: relative;
+    z-index: 1;
   }
-  .contact-page .contact-info-item img { flex: 0 0 auto; }
+  .contact-page .contact-info-item img { 
+    flex: 0 0 auto; 
+    width: 1.5em; 
+    height: 1.5em; 
+    display: block;
+    object-fit: contain;
+    z-index: 1;
+    position: relative;
+    margin-top: 0.2em;
+  }
   .contact-page .contact-info-text { 
     flex: 1 1 auto; 
     display: flex; 
@@ -100,7 +135,11 @@
   .contact-page .contact-form .form-item { margin-top: 0.6em; margin-bottom: 0.6em; }
 
   /* Contact info row spacing */
-  .contact-page .contact-info-item img { width: 1.625em; height: 1.625em; color: red; }
+  .contact-page .contact-info-item img { 
+    width: 1.625em; 
+    height: 1.625em; 
+    margin-top: 2em;
+  }
 }
 
 /* For tablets */

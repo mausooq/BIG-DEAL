@@ -76,9 +76,9 @@
     Our team is here to help you find your perfect home.
   </p>
    <div class="btn-stack d-flex justify-content-start">
-    <a href="#" class="text-decoration-none">
+    <a href="../contact/" class="text-decoration-none">
     <div class="btn-black d-flex align-items-center">
-    <div class="btn-red">
+    <div class="btn-red" >
       <h1 class="contact-btn-title">
         Contact Us Now
       </h1>
