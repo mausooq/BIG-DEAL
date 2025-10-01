@@ -28,6 +28,17 @@
     .welcome-text .services-hero-content2 {
       font-size: 1.4rem !important;
     }
+    .about-page .about-img .img-upper {
+    width: 275px;
+  }
+
+  .about-page .about-img .img-lower {
+    width: 375px;
+    height: 50%;
+    margin-left: 4rem;
+    margin-top: 9rem;
+  }
+  
   }
 </style>
 </head>

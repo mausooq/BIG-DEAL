@@ -66,8 +66,8 @@
     <div class="row">
         <div class="col-md-5" >
           <div class="about-img">
-            <img src="../assets/images/about/img1.jpg" alt="about-img1"  class="img-upper">
-            <img src="../assets/images/prop/aboutimg2.png" alt="about-img2"  class="img-lower">
+            <img src="../assets/images/abt3.jpg" alt="about-img1"  class="img-upper">
+            <img src="../assets/images/abt2.jpg" alt="about-img2"  class="img-lower">
         </div>
         </div>
         <div class="col-md-5 about-content">
