@@ -5,25 +5,34 @@ $mysqli = getMysqliConnection();
 
 // Handle search and pagination
 $search = trim($_GET['search'] ?? '');
+$selectedCategory = trim($_GET['category'] ?? '');
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 6; // Show 6 blogs per page
 $offset = ($page - 1) * $limit;
 
-// Build search query
-$whereClause = '';
+// Build dynamic WHERE clause for search and category
+$conditions = [];
 $params = [];
 $types = '';
 
-if ($search) {
-    $whereClause = ' WHERE title LIKE ? OR content LIKE ?';
-    $types = 'ss';
-    $searchParam = '%' . $mysqli->real_escape_string($search) . '%';
-    $params[] = $searchParam;
-    $params[] = $searchParam;
+if ($search !== '') {
+    $conditions[] = '(title LIKE ? OR content LIKE ?)';
+    $types .= 'ss';
+    $like = '%' . $mysqli->real_escape_string($search) . '%';
+    $params[] = $like;
+    $params[] = $like;
 }
 
+if ($selectedCategory !== '') {
+    $conditions[] = 'category = ?';
+    $types .= 's';
+    $params[] = $selectedCategory;
+}
+
+$whereClause = $conditions ? (' WHERE ' . implode(' AND ', $conditions)) : '';
+
 // Get blogs with pagination
-$sql = "SELECT id, title, content, image_url, created_at FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$sql = "SELECT id, title, content, image_url, created_at, category FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
@@ -38,46 +47,43 @@ $blogs = $stmt->get_result();
 // Get total count for pagination
 $countSql = "SELECT COUNT(*) FROM blogs" . $whereClause;
 $countStmt = $mysqli->prepare($countSql);
-if ($countStmt && $search) {
-    $countSearchParam = '%' . $mysqli->real_escape_string($search) . '%';
-    $countStmt->bind_param('ss', $countSearchParam, $countSearchParam);
+if ($countStmt && $conditions) {
+    // Bind only the search/category params (not limit/offset)
+    $countTypes = '';
+    $countParams = [];
+    if ($search !== '') {
+        $countTypes .= 'ss';
+        $like2 = '%' . $mysqli->real_escape_string($search) . '%';
+        $countParams[] = $like2;
+        $countParams[] = $like2;
+    }
+    if ($selectedCategory !== '') {
+        $countTypes .= 's';
+        $countParams[] = $selectedCategory;
+    }
+    if ($countTypes !== '') {
+        $countStmt->bind_param($countTypes, ...$countParams);
+    }
 }
 $countStmt->execute();
 $totalCount = $countStmt->get_result()->fetch_row()[0];
 $totalPages = ceil($totalCount / $limit);
 
-// Get categories for sidebar
+// Get categories for sidebar from blogs.category
 $categories = [];
 try {
-    $catResult = $mysqli->query("SELECT 'Market Trends' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%market%' OR title LIKE '%trend%' 
-                                 UNION ALL
-                                 SELECT 'Property Investment' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%investment%' OR title LIKE '%invest%'
-                                 UNION ALL
-                                 SELECT 'Home Buying Tips' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%buying%' OR title LIKE '%tip%'
-                                 UNION ALL
-                                 SELECT 'Rental & Leasing' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%rental%' OR title LIKE '%lease%'
-                                 UNION ALL
-                                 SELECT 'Commercial Real Estate' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%commercial%'
-                                 UNION ALL
-                                 SELECT 'Smart Living & Design' as name, COUNT(*) as count FROM blogs WHERE title LIKE '%design%' OR title LIKE '%living%'");
+    $catSql = "SELECT category AS name, COUNT(*) AS count FROM blogs WHERE category IS NOT NULL AND TRIM(category) <> '' GROUP BY category ORDER BY count DESC, name ASC";
+    $catResult = $mysqli->query($catSql);
     if ($catResult) {
         while ($row = $catResult->fetch_assoc()) {
-            if ($row['count'] > 0) {
+            if ((int)($row['count'] ?? 0) > 0) {
                 $categories[] = $row;
             }
         }
         $catResult->free();
     }
 } catch (Throwable $e) {
-    // Fallback categories if query fails
-    $categories = [
-        ['name' => 'Market Trends', 'count' => 22],
-        ['name' => 'Property Investment', 'count' => 15],
-        ['name' => 'Home Buying Tips', 'count' => 16],
-        ['name' => 'Rental & Leasing', 'count' => 8],
-        ['name' => 'Commercial Real Estate', 'count' => 19],
-        ['name' => 'Smart Living & Design', 'count' => 21]
-    ];
+    // Silent fail; leave $categories empty
 }
 
 // Get recent posts for sidebar
@@ -136,40 +142,11 @@ function getExcerpt($content, $length = 150) {
     return mb_substr($content, 0, $length) . '...';
 }
 ?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blog List - Big Deal Ventures</title>
-    <link rel="icon" href="../assets/images/favicon.png" type="image/png">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/blog-list.css">
-    <link href="https://fonts.cdnfonts.com/css/sf-pro-display" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-    
-</head>
-<body class="blog-list-page">
-    <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
 
-    <!-- Hero (mirrors blog/index.php) -->
-    <section class="hero-banner">
-        <div class="centered">
-            <h1>Blog</h1>
-            <div class="breadcrumbs">
-                <a href="../index.php">Home</a> > <span>Blog</span>
-            </div>
-            <div class="welcome-text">
-                <h2 class="hero-content1">LATEST BLOG FOR</h2>
-                <h2 class="gugi hero-content2">Real Estate</h2>
-            </div>
-        </div>
-    </section>
+<div class="blog-list-page">
 
-    <div class="blog-list-container">
+
+    <div class="container-fluid blog-list-container">
         <!-- Main Content -->
         <div class="blog-main">
             <?php if ($search): ?>
@@ -185,7 +162,10 @@ function getExcerpt($content, $length = 150) {
                 $categoryIndex = 0;
                 $isFirst = true;
                 while ($blog = $blogs->fetch_assoc()): 
-                    $categoryName = $categoryNames[$categoryIndex % count($categoryNames)];
+                    if (!$isFirst) { echo '<hr class="blog-divider">'; }
+                    $categoryName = isset($blog['category']) && trim($blog['category']) !== ''
+                        ? strtoupper($blog['category'])
+                        : $categoryNames[$categoryIndex % count($categoryNames)];
                     $categoryIndex++;
                     $isFeatured = $isFirst; // first blog as featured
                 ?>
@@ -211,19 +191,19 @@ function getExcerpt($content, $length = 150) {
                     <div class="pagination-container">
                         <div class="pagination">
                             <?php if ($page > 1): ?>
-                                <a href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">&lt;</a>
+                                <a href="?page=<?php echo $page - 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $selectedCategory ? '&category=' . urlencode($selectedCategory) : ''; ?>">&lt;</a>
                             <?php endif; ?>
                             
                             <?php for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++): ?>
                                 <?php if ($i == $page): ?>
                                     <span class="current"><?php echo $i; ?></span>
                                 <?php else: ?>
-                                    <a href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>"><?php echo $i; ?></a>
+                                    <a href="?page=<?php echo $i; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $selectedCategory ? '&category=' . urlencode($selectedCategory) : ''; ?>"><?php echo $i; ?></a>
                                 <?php endif; ?>
                             <?php endfor; ?>
                             
                             <?php if ($page < $totalPages): ?>
-                                <a href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">&gt;</a>
+                                <a href="?page=<?php echo $page + 1; ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?><?php echo $selectedCategory ? '&category=' . urlencode($selectedCategory) : ''; ?>">&gt;</a>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -251,13 +231,15 @@ function getExcerpt($content, $length = 150) {
             </div>
             
             <!-- Categories -->
-            <div class="sidebar-section">
+            <div class="sidebar-section no-box">
                 <h3 class="sidebar-title">Categories</h3>
-                <ul class="categories-list">
+                <ul class="categories-list chips">
                     <?php foreach ($categories as $category): ?>
-                        <li onclick="window.location.href='?search=<?php echo urlencode($category['name']); ?>'">
-                            <span><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-                            <span class="category-count">(<?php echo (int)$category['count']; ?>)</span>
+                        <li>
+                            <a class="cat-chip" href="?category=<?php echo urlencode($category['name']); ?><?php echo $search ? '&search=' . urlencode($search) : ''; ?>">
+                                <span class="label"><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                <span class="count"><?php echo (int)$category['count']; ?></span>
+                            </a>
                         </li>
                     <?php endforeach; ?>
                 </ul>
@@ -297,13 +279,8 @@ function getExcerpt($content, $length = 150) {
         </aside>
     </div>
 
-    <!-- Contact -->
-    <?php include '../components/letsconnect.php'; ?>
-
-    <!-- Footer -->
-    <?php include '../components/footer.php'; ?>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/scripts.js" defer></script>
-</body>
-</html>
+                </div>
+

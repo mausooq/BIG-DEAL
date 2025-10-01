@@ -5,3 +5,530 @@
 .blogd-page .blog-panel{cursor:pointer}
 .blogd-page .recent-img{width:392px;height:290px;object-fit:cover;display:block;margin:0 auto;border-radius:12px}
 
+/* Blog Details Layout - Same as blog-list */
+.blog-details-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: 2fr 300px;
+    gap: 40px;
+}
+
+/* Blog Main Content */
+.blog-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Sidebar */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar-section {
+    background: #ffffff;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+    border: 1px solid #eee;
+}
+
+.sidebar-section.no-box{ 
+    background: transparent; 
+    box-shadow: none; 
+    border: none; 
+    padding: 0; 
+}
+
+.sidebar-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #111;
+}
+
+/* Search */
+#search-wrapper { 
+    display:flex; 
+    align-items:stretch; 
+    border-radius:50px; 
+    background-color:#fff; 
+    overflow:hidden; 
+    max-width:400px; 
+    margin: 0 !important; 
+}
+
+#search { 
+    border:none; 
+    width:350px; 
+    font-size:15px; 
+    padding:10px 20px; 
+    color:#111; 
+    background-color:#ffffff; 
+}
+
+#search:focus { 
+    outline:none; 
+}
+
+#search-button { 
+    border:none; 
+    cursor:pointer; 
+    color:#fff; 
+    background-color:#111; 
+    padding:0 12px; 
+}
+
+/* Categories */
+.categories-list {
+    list-style: none;
+}
+
+/* Category chips - match blog-list UI */
+.categories-list.chips { display: block; padding: 0; margin: 0.5em 0 0 0; }
+.categories-list.chips li { display: block; padding: 0; margin: 0; }
+.categories-list.chips .cat-chip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    text-decoration: none;
+    padding: 0.6em 0.8em;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #eee;
+    color: #111;
+}
+.categories-list.chips .cat-chip:hover { border-color: #cc1a1a; color: #cc1a1a; background: #fff6f6; }
+.categories-list.chips .cat-chip .label { font-size: 0.95em; }
+.categories-list.chips .cat-chip .count { font-size: 0.9em; color: #999; }
+
+.categories-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f4f4f4;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.categories-list li:hover { 
+    color:#cc1a1a; 
+    background:#fff6f6; 
+}
+
+.categories-list li:last-child {
+    border-bottom: none;
+}
+
+.category-count {
+    color: #999;
+    font-size: 13px;
+}
+
+/* Recent Posts */
+.recent-post { 
+    display:flex; 
+    gap:12px; 
+    margin-bottom:16px; 
+    cursor:pointer; 
+    padding:0; 
+    border:none; 
+    border-radius:0; 
+    background:transparent; 
+}
+
+.recent-post img { 
+    width:80px; 
+    height:80px; 
+    border-radius:8px; 
+    overflow:hidden; 
+    flex-shrink:0; 
+    object-fit:cover; 
+}
+
+.recent-post:hover{ 
+    border-color:#cc1a1a; 
+    background:#fff; 
+}
+
+.recent-post-content {
+    flex: 1;
+}
+
+.recent-post-author {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 5px;
+}
+
+.recent-post-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    line-height: 1.4;
+}
+
+.recent-post:hover .recent-post-title {
+    color: #cc1a1a;
+}
+
+/* Tags */
+.tags-cloud { 
+    display:flex; 
+    flex-wrap:wrap; 
+    gap:10px; 
+    padding:0; 
+    background:transparent; 
+    border:none; 
+}
+
+.tag { 
+    padding:10px 14px; 
+    background:#fff3f3; 
+    border:1px solid #f3c8c8; 
+    border-radius:999px; 
+    font-size:14px; 
+    color:#e14c4c; 
+    cursor:pointer; 
+    transition:all .2s ease; 
+    text-decoration:none; 
+}
+
+.tag:hover { 
+    background:#cc1a1a; 
+    border-color:#cc1a1a; 
+    color:#fff; 
+}
+
+.testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+    margin: 1em 0 0 0 !important;
+}
+
+.testimonial-author img {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.testimonial-author-info h5 {
+    margin: 0 0 0.2em 0;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.testimonial-author-info p {
+    margin: 0;
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Go Back Button */
+.go-back {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.05em 0.4em;
+    /* background: #000000; */
+    border-radius: 15px;
+    color: #000000 !important;
+    text-decoration: none;
+    font-size: 0.8em;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    margin-bottom: 20px !important;
+}
+
+.go-back:hover {
+    /* background: #000000; */
+    color: #000000;
+    transform: translateY(-1px);
+}
+
+.go-back:before {
+    content: "←";
+    font-size: 0.8  em;
+    transition: transform 0.2s ease;
+    margin-right: 0.2em !important;
+    padding-bottom: 0.1em !important;
+}
+
+.go-back:hover:before {
+    transform: translateX(-2px);
+}
+
+/* Market Trends Button */
+.m-btn {
+    display: inline-block;
+    padding: 0.3em 0.8em;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 999px;
+    color: #666;
+    font-size: 0.8em;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 1em;
+    transition: all 0.2s ease;
+}
+
+.m-btn:hover {
+    background: #000000;
+    border-color: #000000;
+    color: #ffffff;
+}
+
+/* Responsive Design */
+
+/* For tablets */
+@media (max-width: 1024px) {
+    .blog-details-container {
+        grid-template-columns: 1fr;
+        gap: 2em;
+        padding: 1.5em;
+    }
+    
+    .blog-main {
+        gap: 1.5em;
+    }
+    
+    .sidebar {
+        gap: 2em;
+    }
+    
+    .sidebar-section {
+        padding: 1.5em;
+    }
+    
+    .go-back {
+        font-size: 0.7em;
+        padding: 0.25em 0.6em;
+    }
+    
+    .go-back:before {
+        font-size: 0.7em;
+    }
+    
+    .m-btn {
+        font-size: 0.7em;
+        padding: 0.25em 0.6em;
+    }
+    
+    .blog-main h1 {
+        font-size: 1.8em;
+        line-height: 1.2;
+    }
+
+    .testimonial-author img { width: 2.75rem; height: 2.75rem; }
+    .testimonial-author-info h5 { font-size: 0.95rem; }
+    .testimonial-author-info p { font-size: 0.85rem; }
+}
+
+/* For larger phones (landscape) */
+@media (max-width: 768px) {
+    .blog-details-container {
+        padding: 1.25em;
+        gap: 1.5em;
+    }
+    
+    .sidebar-section {
+        padding: 1.25em;
+    }
+    
+    .sidebar-title {
+        font-size: 1.1em;
+        margin-bottom: 1em;
+    }
+    
+    .go-back {
+        font-size: 1.1em;
+        padding: 0.35em 0.7em;
+        margin-bottom: 1.5em;
+    }
+    
+    .go-back:before {
+        font-size: 1.1em;
+    }
+    
+    .categories-list li {
+        padding: 0.8em 1em;
+        font-size: 0.9em;
+    }
+    
+    .category-count {
+        font-size: 0.85em;
+    }
+    
+    .recent-post {
+        gap: 0.8em;
+        margin-bottom: 1.2em;
+    }
+    
+    .recent-post img {
+        width: 4em;
+        height: 4em;
+    }
+    
+    .recent-post-author {
+        font-size: 0.85em;
+    }
+    
+    .recent-post-title {
+        font-size: 0.9em;
+    }
+    
+    .tag {
+        padding: 0.6em 1em;
+        font-size: 0.85em;
+    }
+    
+    #search-wrapper {
+        max-width: 100%;
+    }
+    
+    #search {
+        width: 100%;
+        font-size: 0.9em;
+        padding: 0.8em 1.2em;
+    }
+    
+    #search-button {
+        padding: 0 1em;
+    }
+    
+    .go-back {
+        font-size: 1em !important;
+        padding: 0.20em 0.6em !important;
+    }
+    
+    .m-btn {
+        font-size: 1em !important;
+        padding: 0.20em 0.6em !important;
+    }
+    
+    .blog-main h1 {
+        font-size: 1.5em !important;
+        line-height: 1.2 !important;
+    }
+
+    .testimonial-author img { width: 2.5rem; height: 2.5rem; }
+    .testimonial-author-info h5 { font-size: 0.9rem; }
+    .testimonial-author-info p { font-size: 0.8rem; }
+}
+
+/* For small devices (phones, portrait) */
+@media (max-width: 480px) {
+    .blog-details-container {
+        padding: 1em;
+        gap: 1.25em;
+    }
+    
+    .sidebar-section {
+        padding: 1em;
+    }
+    
+    .sidebar-title {
+        font-size: 1em;
+        margin-bottom: 0.8em;
+    }
+    
+    .go-back {
+        font-size: 1em;
+        padding: 0.3em 0.6em;
+        margin-bottom: 1.25em;
+    }
+    
+    .go-back:before {
+        font-size: 1em;
+        margin-right: 0.2em;
+    }
+    
+    .categories-list li {
+        padding: 0.7em 0.8em;
+        font-size: 0.85em;
+    }
+    
+    .category-count {
+        font-size: 0.8em;
+    }
+    
+    .recent-post {
+        gap: 0.7em;
+        margin-bottom: 1em;
+    }
+    
+    .recent-post img {
+        width: 3.5em;
+        height: 3.5em;
+    }
+    
+    .recent-post-author {
+        font-size: 0.8em;
+    }
+    
+    .recent-post-title {
+        font-size: 0.85em;
+    }
+    
+    .tag {
+        padding: 0.5em 0.8em;
+        font-size: 0.8em;
+    }
+    
+    #search {
+        font-size: 0.85em;
+        padding: 0.7em 1em;
+    }
+    
+    #search-button {
+        padding: 0 0.8em;
+    }
+    
+    /* Blog content adjustments for mobile */
+    .blogd-page .blog-cover {
+        height: 15em;
+        border-radius: 0.8em;
+    }
+    
+    .blogd-page .blog-content-text {
+        font-size: 1em;
+        line-height: 1.6;
+    }
+    
+    .blogd-page .section-image {
+        height: 12em;
+        border-radius: 0.8em;
+    }
+
+    .go-back {
+        font-size: 0.45em;
+        padding: 0.1em 0.3em;
+    }
+    
+    .m-btn {
+        font-size: 0.45em;
+        padding: 0.1em 0.3em;
+    }
+    
+    .blog-main h1 {
+        font-size: 1.3em;
+        line-height: 1.2;
+    }
+    
+    .testimonial-author { gap: 0.6em; }
+    .testimonial-author img { width: 2.25rem; height: 2.25rem; }
+    .testimonial-author-info h5 { font-size: 0.9rem; }
+    .testimonial-author-info p { font-size: 0.8rem; }
+}
+

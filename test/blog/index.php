@@ -41,28 +41,9 @@
 </section>
 
 
-<?php include '../components/blog.php'; ?>
+<?php include '../components/blog-list.php'; ?>
 
-<div class="container blog3">
-    <h1>Recent Blogs</h1>
-    <div class="d-flex blog2">
-    <div class="blog-panel">
-      <img src="../assets/images/slider1/DHP1.png" alt="Living Room">
-      <div class="caption">Market Trend</div>
-      <div class="date">April 9, 2025</div>
-    </div>
-    <div class="blog-panel">
-      <img src="../assets/images/slider1/DHP1.png" alt="Modern TV Unit">
-      <div class="caption">Market Trend</div>
-      <div class="date">April 9, 2025</div>
-    </div>
-    <div class="blog-panel">
-      <img src="../assets/images/slider1/DHP1.png" alt="Contemporary Kitchen">
-      <div class="caption">Market Trend</div>
-      <div class="date">April 9, 2025</div>
-    </div>
-    </div>
-</div>
+
 
 
 <!-- contact  -->

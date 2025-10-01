@@ -9,7 +9,7 @@ $blog = null;
 $subtitles = [];
 
 // Load blog
-$stmt = $mysqli->prepare("SELECT id, title, content, image_url, created_at FROM blogs WHERE id = ?");
+$stmt = $mysqli->prepare("SELECT id, title, content, image_url, created_at, category FROM blogs WHERE id = ?");
 $stmt->bind_param('i', $blogId);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -77,9 +77,92 @@ try {
   $stmt3->close();
 } catch (Throwable $e) { /* ignore in UI */ }
 
+// Build tags cloud from blogs.tags (comma-separated across all blogs)
+$tagsCloud = [];
+try {
+  $tagRes = $mysqli->query("SELECT tags FROM blogs WHERE tags IS NOT NULL AND TRIM(tags) <> ''");
+  if ($tagRes) {
+    while ($row = $tagRes->fetch_assoc()) {
+      $list = explode(',', (string)$row['tags']);
+      foreach ($list as $raw) {
+        $tag = trim($raw);
+        if ($tag === '') continue;
+        $key = mb_strtolower($tag);
+        if (!isset($tagsCloud[$key])) { $tagsCloud[$key] = ['name' => $tag, 'count' => 0]; }
+        $tagsCloud[$key]['count']++;
+      }
+    }
+    $tagRes->free();
+  }
+  uasort($tagsCloud, function($a, $b){
+    if ($a['count'] === $b['count']) { return strcasecmp($a['name'], $b['name']); }
+    return $b['count'] <=> $a['count'];
+  });
+} catch (Throwable $e) { /* silent */ }
+
+// Get categories for sidebar (dynamic from blogs.category)
+$categories = [];
+try {
+  $catSql = "SELECT category AS name, COUNT(*) AS count FROM blogs WHERE category IS NOT NULL AND TRIM(category) <> '' GROUP BY category ORDER BY count DESC, name ASC";
+  $catResult = $mysqli->query($catSql);
+  if ($catResult) {
+    while ($row = $catResult->fetch_assoc()) {
+      if ((int)($row['count'] ?? 0) > 0) { $categories[] = $row; }
+    }
+    $catResult->free();
+  }
+} catch (Throwable $e) { /* silent */ }
+
+// Get recent posts for sidebar (5 posts)
+$recentPosts = [];
+try {
+    $recentResult = $mysqli->query("SELECT id, title, image_url, created_at FROM blogs ORDER BY created_at DESC LIMIT 5");
+    if ($recentResult) {
+        while ($row = $recentResult->fetch_assoc()) {
+            $recentPosts[] = $row;
+        }
+        $recentResult->free();
+    }
+} catch (Throwable $e) {
+    // Silent fail
+}
+
 // Resolve recent blog image path (same rules)
 function resolveRecentImage($raw) {
   return resolveSectionImage($raw);
+}
+
+// Image path resolution function for blog images
+function resolveBlogImage($raw) {
+    $raw = trim((string)($raw ?? ''));
+    if ($raw === '') { return '../assets/images/prop/bhouse3.png'; }
+    
+    // Absolute URLs
+    if (stripos($raw, 'http://') === 0 || stripos($raw, 'https://') === 0) { 
+        return $raw; 
+    }
+    
+    // From /test/blog/ to project root use '../../'
+    $toRoot = '../../';
+    
+    // If DB stored path starting with 'uploads/' (project-root relative)
+    if (stripos($raw, 'uploads/') === 0) {
+        return $toRoot . $raw;
+    }
+    
+    // If DB stored root-relative '/uploads/...'
+    if (strpos($raw, '/uploads/') === 0) {
+        return $toRoot . ltrim($raw, '/');
+    }
+    
+    // If DB stored other root-relative path like '/images/...'
+    if ($raw[0] === '/') {
+        return $toRoot . ltrim($raw, '/');
+    }
+    
+    // Treat as filename; point to project uploads/blogs
+    $name = basename($raw);
+    return $toRoot . 'uploads/blogs/' . $name;
 }
 ?>
 <!DOCTYPE html>
@@ -108,9 +191,13 @@ function resolveRecentImage($raw) {
 <body class="blogd-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
 
-   <section class="container">
+  <div class="container-fluid blog-details-container">
+    <!-- Main Content -->
+    <div class="blog-main">
+      <section class="container">
         <a href="#" class="go-back" onclick="history.back();return false;">Go Back</a>
-        <span class="m-btn">Market Trends</span>
+        <?php $catLabel = isset($blog['category']) && trim($blog['category']) !== '' ? htmlspecialchars($blog['category'], ENT_QUOTES, 'UTF-8') : 'Uncategorized'; ?>
+        <a class="m-btn" href="index.php?category=<?php echo urlencode($blog['category'] ?? ''); ?>"><?php echo $catLabel; ?></a>
         <h1><?php echo htmlspecialchars($blog['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
         <div class="meta">
         <span>7 min Read</span>
@@ -123,48 +210,98 @@ function resolveRecentImage($raw) {
         </div>
    </section>
     
-  <div class="container blog-points">
-   <div>
-     <?php if (!empty($blog['content'])): ?>
-       <p class="blog-content-text"><?php echo nl2br(htmlspecialchars($blog['content'], ENT_QUOTES, 'UTF-8')); ?></p>
-     <?php endif; ?>
-     <?php if (!empty($subtitles)): ?>
-       <?php foreach ($subtitles as $sec): ?>
-         <?php if (!empty($sec['subtitle'])): ?>
-           <h2><?php echo htmlspecialchars($sec['subtitle'], ENT_QUOTES, 'UTF-8'); ?></h2>
-         <?php endif; ?>
-         <?php $secImg = resolveSectionImage($sec['image_url'] ?? ''); if ($secImg !== ''): ?>
-           <div class="section-image-wrap">
-             <img src="<?php echo htmlspecialchars($secImg, ENT_QUOTES, 'UTF-8'); ?>" alt="Section image" class="section-image" />
-           </div>
-         <?php endif; ?>
-         <?php if (!empty($sec['content'])): ?>
-           <p><?php echo nl2br(htmlspecialchars($sec['content'], ENT_QUOTES, 'UTF-8')); ?></p>
-         <?php endif; ?>
-       <?php endforeach; ?>
-     <?php endif; ?>
-   </div>
-  </div>
-
-   <div class="container blog3">
-    <h1>Recent Blogs</h1>
-    <div class="d-flex blog2">
-    <?php foreach ($recentBlogs as $rb): ?>
-      <div class="blog-panel" onclick="window.location.href='blog-details.php?id=<?php echo (int)$rb['id']; ?>'">
-        <img src="<?php echo htmlspecialchars(resolveRecentImage($rb['image_url'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>" alt="Recent Blog" class="recent-img">
-        <div class="caption"><?php echo htmlspecialchars($rb['title'] ?? 'Blog', ENT_QUOTES, 'UTF-8'); ?></div>
-        <div class="date"><?php echo htmlspecialchars(date('F j, Y', strtotime($rb['created_at'] ?? 'now')), ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="container blog-points">
+        <div>
+          <?php if (!empty($blog['content'])): ?>
+            <p class="blog-content-text"><?php echo nl2br(htmlspecialchars($blog['content'], ENT_QUOTES, 'UTF-8')); ?></p>
+          <?php endif; ?>
+          <?php if (!empty($subtitles)): ?>
+            <?php foreach ($subtitles as $sec): ?>
+              <?php if (!empty($sec['subtitle'])): ?>
+                <h2><?php echo htmlspecialchars($sec['subtitle'], ENT_QUOTES, 'UTF-8'); ?></h2>
+              <?php endif; ?>
+              <?php $secImg = resolveSectionImage($sec['image_url'] ?? ''); if ($secImg !== ''): ?>
+                <div class="section-image-wrap">
+                  <img src="<?php echo htmlspecialchars($secImg, ENT_QUOTES, 'UTF-8'); ?>" alt="Section image" class="section-image" />
+                </div>
+              <?php endif; ?>
+              <?php if (!empty($sec['content'])): ?>
+                <p><?php echo nl2br(htmlspecialchars($sec['content'], ENT_QUOTES, 'UTF-8')); ?></p>
+              <?php endif; ?>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
       </div>
-    <?php endforeach; ?>
-    </div>
-    
-    <div class="testimonial-author">
-                <img src="../assets/images/avatar/test1.png" alt="Munazza">
+
+      <div class="testimonial-author">
+                <img src="../assets/images/avatar/test1.png" alt="Profile">
                 <div class="testimonial-author-info">
-                  <h5>Munazza</h5>
-                  <p>Software Developer</p>
+                  <h5>Admin</h5>
+                  <p>Content Writer</p>
                 </div>
               </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <!-- Search -->
+      <div class="sidebar-section no-box">
+        <form method="GET" action="blog-list.php">
+          <div id="search-wrapper">
+            <input id="search" name="search" type="text" placeholder="Search blogs" value="">
+            <button id="search-button" type="submit" aria-label="Search">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <!-- Categories -->
+      <div class="sidebar-section no-box">
+        <h3 class="sidebar-title">Categories</h3>
+        <ul class="categories-list chips">
+          <?php foreach ($categories as $category): ?>
+            <li>
+              <a class="cat-chip" href="blog-list.php?category=<?php echo urlencode($category['name']); ?>">
+                <span class="label"><?php echo htmlspecialchars($category['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                <span class="count"><?php echo (int)$category['count']; ?></span>
+              </a>
+            </li>
+          <?php endforeach; ?>
+        </ul>
+      </div>
+      
+      <!-- Recent Posts -->
+      <div class="sidebar-section no-box">
+        <h3 class="sidebar-title">Recent Posts</h3>
+        <?php foreach ($recentPosts as $recent): ?>
+          <div class="recent-post" onclick="window.location.href='blog-details.php?id=<?php echo (int)$recent['id']; ?>'">
+            <img src="<?php echo htmlspecialchars(resolveBlogImage($recent['image_url']), ENT_QUOTES, 'UTF-8'); ?>" alt="Recent Post">
+            <div class="recent-post-content">
+              <div class="recent-post-author">Real Estate • <?php echo date('M j, Y', strtotime($recent['created_at'])); ?></div>
+              <div class="recent-post-title"><?php echo htmlspecialchars($recent['title'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      </div>
+      
+      <!-- Tags -->
+      <div class="sidebar-section no-box">
+        <h3 class="sidebar-title">Tags</h3>
+        <div class="tags-cloud">
+          <?php foreach ($tagsCloud as $t): ?>
+            <a href="blog-list.php?tag=<?php echo urlencode($t['name']); ?>" class="tag" title="<?php echo (int)$t['count']; ?> posts">
+              <?php echo htmlspecialchars($t['name'], ENT_QUOTES, 'UTF-8'); ?>
+            </a>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+
+    
+    
 </div>
 
  

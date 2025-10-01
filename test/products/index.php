@@ -728,7 +728,7 @@ function shareProperty(propertyId) {
 
 function contactProperty(propertyId) {
     // Call the phone number directly
-    const phoneNumber = '9187654321';
+    const phoneNumber = '80888 55555';
     window.location.href = 'tel:' + phoneNumber;
 }
 

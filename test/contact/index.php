@@ -97,6 +97,7 @@
   </div>
   <?php include '../components/search-banner.php'; ?>
 
+    <?php include '../components/process.php';?> 
 <!-- contact  -->
 <?php include '../components/letsconnect.php'; ?>
 

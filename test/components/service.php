@@ -13,12 +13,17 @@
                 <div class="carousel__slider">
                 <div class="carousel__item" id="our-work-1">
                         <div class="blurred-box__step wow animated" style="visibility: visible;">1</div>
-                        <h2 class="blurred-box__title wow animated" style="visibility: visible;">Tech-Driven Search & Support</h2>
-                        <div class="blurred-box__footer">
-                            <span class="blurred-box__footer-line wow animated" style="visibility: visible;"></span>
-                            <p class="blurred-box__text wow animated" style="visibility: visible;">We begin with a detailed consultation to understand your goals (buy, rent, or invest). <br>
-                            Leverage our data platform for <span class="highlight">AI-powered property recommendations</span> and initial market support.</p>
-                        </div>
+						<h2 class="blurred-box__title wow animated" style="visibility: visible;">
+    Tech-Driven Search & Support
+</h2>
+<div class="blurred-box__footer">
+    <span class="blurred-box__footer-line wow animated" style="visibility: visible;"></span>
+    <p class="blurred-box__text wow animated" style="visibility: visible;">
+        <p>We begin with a detailed consultation to understand your goals (buy, rent, or invest).</p>
+        <p>Tap into our technology-enabled platform for tailored property recommendations.</p>
+    </p>
+</div>
+
                     </div>
                     <div class="carousel__item" id="our-work-2">
                         <div class="blurred-box__step">2</div>
