@@ -201,6 +201,7 @@ function formatPrice($price)
 
       <div class=" col-md-4 property2-title">
         <h2><?php echo htmlspecialchars($property['title']); ?></h2>
+        <button type="button" class="btn btn-dark" style="margin: 6px 0 14px;" onclick="shareCurrentProperty()">Share</button>
         <div class="property-details2">
           <div class="detail-box">
             <span class="plabel">Facing</span>
@@ -375,6 +376,52 @@ function formatPrice($price)
   <script src="../assets/js/scripts.js"></script>
 
   <script>
+    async function shareCurrentProperty() {
+      try {
+        var title = <?php echo json_encode($property['title']); ?> || 'Property';
+        var price = <?php echo json_encode(formatPrice($property['price'])); ?> || '';
+        var locationTxt = <?php echo json_encode($property['location']); ?> || '';
+        var detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + <?php echo (int)$propertyId; ?>;
+        var mainImgEl = document.getElementById('mainImage');
+        var imageUrl = mainImgEl ? mainImgEl.getAttribute('src') : '';
+
+        var lines = [
+          title,
+          price ? 'Price: ' + price : '',
+          locationTxt ? 'Location: ' + locationTxt : '',
+          '\nView details: ' + detailsUrl
+        ].filter(Boolean);
+        var text = lines.join('\n');
+
+        if (navigator.share) {
+          var shareData = { title: title, text: text, url: detailsUrl };
+          var absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+          if (absImageUrl && window.File && window.Blob) {
+            try {
+              var res = await fetch(absImageUrl);
+              var blob = await res.blob();
+              var file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
+              if (('canShare' in navigator) && navigator.canShare({ files: [file] })) {
+                shareData.files = [file];
+                delete shareData.url;
+              } else {
+                shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
+              }
+            } catch (_) {
+              shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
+            }
+          }
+          await navigator.share(shareData);
+          return;
+        }
+
+        var absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+        await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
+        alert('Property details copied. Paste to share!');
+      } catch (e) {
+        try { window.open(detailsUrl, '_blank'); } catch (_) {}
+      }
+    }
     function changeMainImage(imageSrc) {
       document.getElementById('mainImage').src = imageSrc;
     }
