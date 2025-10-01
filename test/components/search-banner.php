@@ -74,7 +74,7 @@
 
 .interior-image {
   width: 100%;
-  height: 150%;
+  height: 140%;
   object-fit: cover;
   object-position: center;
   will-change: transform;
@@ -176,7 +176,7 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .search-banner {
-    height: 18em;
+    height: 28em;
   }
   
   .interior-image {
@@ -223,7 +223,7 @@
   }
   
   .interior-image {
-    height: 100%;
+    height: 150%;
   }
   
   .white-banner-overlay {
