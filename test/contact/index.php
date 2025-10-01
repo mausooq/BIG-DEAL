@@ -32,7 +32,7 @@
      
       <h1>Contact Us</h1>
        <div class="breadcrumbs">
-        <a href="#">Home</a> > <span>Contact Us</span>
+        <a href="../index.php">Home</a> > <span>Contact Us</span>
       </div>
     </div>
 
