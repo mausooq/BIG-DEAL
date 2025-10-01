@@ -709,20 +709,74 @@ function generateRandomString(length) {
     return result;
 }
 
-function shareProperty(propertyId) {
-    // Handle share functionality
-    if (navigator.share) {
-        navigator.share({
-            title: 'Property Details',
-            text: 'Check out this property',
-            url: window.location.origin + '/test/products/product-details.php?id=' + propertyId
-        });
-    } else {
-        // Fallback: copy URL to clipboard
-        const url = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
-        navigator.clipboard.writeText(url).then(() => {
-            alert('Property link copied to clipboard!');
-        });
+async function shareProperty(propertyId) {
+    try {
+        const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
+        // Try to find the card to extract richer info and image
+        const card = document.querySelector(`.aproperty-card[data-property-id="${propertyId}"]`);
+        let title = 'Property Details';
+        let text = 'Check out this property';
+        let imageUrl = '';
+        if (card) {
+            const titleEl = card.querySelector('h3');
+            const subtitleEl = titleEl ? titleEl.querySelector('span') : null;
+            const descEl = card.querySelector('p');
+            const detailsSpans = card.querySelectorAll('.property-details span');
+            const imgEl = card.querySelector('img.property-image');
+            title = titleEl ? (titleEl.childNodes[0]?.textContent || titleEl.textContent || title) : title;
+            const subtitle = subtitleEl ? subtitleEl.textContent.trim() : '';
+            const desc = descEl ? descEl.textContent.trim() : '';
+            const confPrice = detailsSpans[0] ? detailsSpans[0].textContent.trim() : '';
+            const areaTxt = detailsSpans[1] ? detailsSpans[1].textContent.trim() : '';
+            const possTxt = detailsSpans[2] ? detailsSpans[2].textContent.trim() : '';
+            imageUrl = imgEl ? imgEl.getAttribute('src') || '' : '';
+
+            const lines = [
+                title.trim(),
+                subtitle ? subtitle : '',
+                confPrice ? confPrice : '',
+                areaTxt ? areaTxt : '',
+                possTxt ? possTxt : '',
+                desc ? '\n' + desc : '',
+                '\nView details: ' + detailsUrl
+            ].filter(Boolean);
+            text = lines.join('\n');
+        } else {
+            text = text + '\n' + detailsUrl;
+        }
+
+        // Attempt Web Share with image file
+        if (navigator.share) {
+            const shareData = { title: title.trim(), text, url: detailsUrl };
+            const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+            if (absImageUrl && window.File && window.Blob) {
+                try {
+                    const res = await fetch(absImageUrl);
+                    const blob = await res.blob();
+                    const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
+                    if (('canShare' in navigator) ? navigator.canShare({ files: [file] }) : false) {
+                        shareData.files = [file];
+                        delete shareData.url; // keep text clean when sending files
+                    } else {
+                        // If files not supported, include image URL in text
+                        shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
+                    }
+                } catch (_) {
+                    // If fetch fails, include image URL in text
+                    shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
+                }
+            }
+            await navigator.share(shareData);
+            return;
+        }
+
+        // Fallback: copy composed text + link and image URL
+        const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+        const fallbackText = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
+        await navigator.clipboard.writeText(fallbackText);
+        alert('Property details copied. Paste to share!');
+    } catch (err) {
+        try { window.open('/test/products/product-details.php?id=' + propertyId, '_blank'); } catch (_) {}
     }
 }
 
@@ -766,7 +820,8 @@ async function sharePropertyFromBtn(btn, propertyId) {
             // Attempt image share if fetchable and File constructor exists
             if (imageUrl && window.File && window.Blob) {
                 try {
-                    const res = await fetch(imageUrl, { mode: 'cors' });
+                    const absImageUrl = new URL(imageUrl, window.location.href).href;
+                    const res = await fetch(absImageUrl);
                     const blob = await res.blob();
                     const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
                     if ('files' in navigator.canShare ? navigator.canShare({ files: [file] }) : false) {
@@ -774,7 +829,8 @@ async function sharePropertyFromBtn(btn, propertyId) {
                         delete shareData.url; // with files, keep text clean
                     }
                 } catch (_) {
-                    // Ignore image attachment failures; proceed with text share
+                    // Include image URL in text if attachment fails
+                    shareData.text = text + (imageUrl ? '\nImage: ' + new URL(imageUrl, window.location.href).href : '');
                 }
             }
 
@@ -782,8 +838,9 @@ async function sharePropertyFromBtn(btn, propertyId) {
             return;
         }
 
-        // Fallback: copy composed text + link to clipboard
-        await navigator.clipboard.writeText(text);
+        // Fallback: copy composed text + link (+image URL) to clipboard
+        const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+        await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
         alert('Property details copied. Paste to share!');
     } catch (err) {
         try {
