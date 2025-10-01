@@ -28,7 +28,7 @@ function logActivity(mysqli $mysqli, string $action, string $details): void {
 $mysqli = db();
 
 // Fetch existing blog
-$stmt = $mysqli->prepare('SELECT id, title, content, image_url, created_at, admin_id FROM blogs WHERE id = ?');
+$stmt = $mysqli->prepare('SELECT id, title, content, image_url, category, created_at, admin_id FROM blogs WHERE id = ?');
 $stmt && $stmt->bind_param('i', $id) && $stmt->execute();
 $blog = $stmt ? $stmt->get_result()->fetch_assoc() : null;
 $stmt && $stmt->close();
@@ -46,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$title = trim($_POST['title'] ?? '');
 		$content = trim($_POST['content'] ?? '');
 		$imageUrlInput = trim($_POST['image_url'] ?? '');
+		$category = trim($_POST['category'] ?? '');
 		if ($title === '' || $content === '') { throw new Exception('Title and content are required'); }
 
 		$image_url = $blog['image_url'];
@@ -64,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 			$image_url = $filename; // Store only filename, not full path
 		}
 
-		$stmt = $mysqli->prepare('UPDATE blogs SET title = ?, content = ?, image_url = ? WHERE id = ?');
-		$stmt && $stmt->bind_param('sssi', $title, $content, $image_url, $id);
+		$stmt = $mysqli->prepare('UPDATE blogs SET title = ?, content = ?, image_url = ?, category = ? WHERE id = ?');
+		$stmt && $stmt->bind_param('ssssi', $title, $content, $image_url, $category, $id);
 		if (!$stmt || !$stmt->execute()) { throw new Exception('Failed to update blog post'); }
 		$stmt && $stmt->close();
 
@@ -194,6 +195,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					<div class="mb-3">
 						<label class="form-label">Title</label>
 						<input type="text" class="form-control" name="title" value="<?php echo htmlspecialchars($blog['title']); ?>" required>
+					</div>
+					<div class="mb-3">
+						<label class="form-label">Category (optional)</label>
+						<input type="text" class="form-control" name="category" value="<?php echo htmlspecialchars($blog['category'] ?? ''); ?>" placeholder="Enter category name">
 					</div>
 					<div class="mb-3">
 						<label class="form-label">Replace Cover-Image (optional)</label>

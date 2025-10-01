@@ -19,19 +19,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$title = trim($_POST['title'] ?? '');
 		$content = trim($_POST['content'] ?? '');
 		$image_url = trim($_POST['image_url'] ?? '');
+		$category = trim($_POST['category'] ?? '');
 		
         if ($title && $content) {
             $has_admin_id = ($mysqli->query("SHOW COLUMNS FROM blogs LIKE 'admin_id'")?->num_rows ?? 0) > 0;
             if ($has_admin_id) {
-                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url, admin_id) VALUES (?, ?, ?, ?)");
+                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url, category, admin_id) VALUES (?, ?, ?, ?, ?)");
                 if ($stmt) {
                     $adminId = isset($_SESSION['admin_id']) ? (int)$_SESSION['admin_id'] : null;
-                    $stmt->bind_param("sssi", $title, $content, $image_url, $adminId);
+                    $stmt->bind_param("ssssi", $title, $content, $image_url, $category, $adminId);
                 }
             } else {
-                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url) VALUES (?, ?, ?)");
+                $stmt = $mysqli->prepare("INSERT INTO blogs (title, content, image_url, category) VALUES (?, ?, ?, ?)");
                 if ($stmt) {
-                    $stmt->bind_param("sss", $title, $content, $image_url);
+                    $stmt->bind_param("ssss", $title, $content, $image_url, $category);
                 }
             }
             if ($stmt) {
@@ -52,11 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$title = trim($_POST['title'] ?? '');
 		$content = trim($_POST['content'] ?? '');
 		$image_url = trim($_POST['image_url'] ?? '');
+		$category = trim($_POST['category'] ?? '');
 		
 		if ($id && $title && $content) {
-			$stmt = $mysqli->prepare("UPDATE blogs SET title = ?, content = ?, image_url = ? WHERE id = ?");
+			$stmt = $mysqli->prepare("UPDATE blogs SET title = ?, content = ?, image_url = ?, category = ? WHERE id = ?");
 			if ($stmt) {
-				$stmt->bind_param("sssi", $title, $content, $image_url, $id);
+				$stmt->bind_param("ssssi", $title, $content, $image_url, $category, $id);
 				if ($stmt->execute()) {
 					if ($stmt->affected_rows > 0) {
 						$_SESSION['success_message'] = 'Blog post updated successfully!';
@@ -119,7 +121,7 @@ if ($search) {
 	$params[] = $searchParam2;
 }
 
-$sql = "SELECT id, title, content, image_url, created_at FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$sql = "SELECT id, title, content, image_url, created_at, category FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
@@ -428,6 +430,11 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 								</div>
 								<div class="blog-body">
 									<h6 class="blog-title"><?php echo htmlspecialchars($row['title']); ?></h6>
+									<?php if (!empty($row['category'])): ?>
+									<div class="blog-category mb-2">
+										<span class="badge bg-primary"><?php echo htmlspecialchars($row['category']); ?></span>
+									</div>
+									<?php endif; ?>
 									<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 80)) . '...'; ?></p>
 									<div class="blog-meta"></div>
 								</div>
