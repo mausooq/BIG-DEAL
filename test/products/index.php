@@ -501,20 +501,23 @@ function timeAgo($datetime) {
           );
           if (count($properties) > 0 && $hasAnyFilter):
         ?>
-        <h2>
-          <?php echo count($properties); ?> results | 
-          <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
-          <?php if ($selectedCity !== ''): ?>
-            in <span class="highlight-city"><?php echo htmlspecialchars($selectedCity); ?></span>
-          <?php endif; ?>
-          for Sale
-        </h2>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <h2 class="m-0">
+            <?php echo count($properties); ?> results | 
+            <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
+            <?php if ($selectedCity !== ''): ?>
+              in <span class="highlight-city"><?php echo htmlspecialchars($selectedCity); ?></span>
+            <?php endif; ?>
+            for Sale
+          </h2>
+          <button type="button" class="btn btn-primary" onclick="shareAllProperties()">Share all</button>
+        </div>
         <?php endif; ?>
 
         <div class="aproperty-cards">
           <?php if (!empty($properties)): ?>
             <?php foreach ($properties as $property): ?>
-              <div class="aproperty-card" style="display: flex; align-items: center; gap: 20px; cursor: pointer;" onclick="goToPropertyDetails(<?php echo $property['id']; ?>)">
+              <div class="aproperty-card" data-property-id="<?php echo (int)$property['id']; ?>" style="display: flex; align-items: center; gap: 20px; cursor: pointer;" onclick="goToPropertyDetails(<?php echo $property['id']; ?>)">
                 <img src="<?php echo !empty($property['main_image']) ? '../../uploads/properties/' . $property['main_image'] : ''; ?>" 
                      alt="<?php echo htmlspecialchars($property['title']); ?>" class="property-image" 
                      style="width: 300px; height: 228px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" />
@@ -530,7 +533,19 @@ function timeAgo($datetime) {
                   <div class="property-actions" style="display: flex; justify-content: space-between; align-items: center; max-width: 600px;">
                     <p class="property-time"><?php echo timeAgo($property['created_at']); ?></p>
                       <div class="btn-grp" style="display: flex; gap: 10px;">
-                          <button class="btn btn-share" onclick="event.stopPropagation(); shareProperty(<?php echo $property['id']; ?>)">Share</button>
+                          <button
+                            class="btn btn-share"
+                            onclick="event.stopPropagation(); sharePropertyFromBtn(this, <?php echo $property['id']; ?>)"
+                            data-id="<?php echo (int)$property['id']; ?>"
+                            data-title="<?php echo htmlspecialchars($property['title']); ?>"
+                            data-desc="<?php echo htmlspecialchars($property['description']); ?>"
+                            data-config="<?php echo htmlspecialchars($property['configuration']); ?>"
+                            data-price="<?php echo formatPrice($property['price']); ?>"
+                            data-area="<?php echo number_format($property['area']); ?>"
+                            data-furniture="<?php echo htmlspecialchars($property['furniture_status']); ?>"
+                            data-location="<?php echo htmlspecialchars($property['location']); ?>"
+                            data-image="<?php echo !empty($property['main_image']) ? '../../uploads/properties/' . $property['main_image'] : ''; ?>"
+                          >Share</button>
                         <button class="btn btn-contact" onclick="event.stopPropagation(); contactProperty(<?php echo $property['id']; ?>)">Contact us</button>
                       </div>
                   </div>
@@ -717,6 +732,67 @@ function contactProperty(propertyId) {
     window.location.href = 'tel:' + phoneNumber;
 }
 
+// Share full card: title, description, attributes and image
+async function sharePropertyFromBtn(btn, propertyId) {
+    try {
+        const title = btn.getAttribute('data-title') || 'Property';
+        const desc = btn.getAttribute('data-desc') || '';
+        const config = btn.getAttribute('data-config') || '';
+        const price = btn.getAttribute('data-price') || '';
+        const area = btn.getAttribute('data-area') || '';
+        const furniture = btn.getAttribute('data-furniture') || '';
+        const location = btn.getAttribute('data-location') || '';
+        const imageUrl = btn.getAttribute('data-image') || '';
+
+        const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
+
+        // Build share text
+        const lines = [
+            `${title}`,
+            location ? `Location: ${location}` : '',
+            config ? `Configuration: ${config}` : '',
+            area ? `Area: ${area} sq.ft` : '',
+            price ? `Price: ${price}` : '',
+            furniture ? `Furniture: ${furniture}` : '',
+            desc ? `\n${desc}` : '',
+            `\nView details: ${detailsUrl}`
+        ].filter(Boolean);
+        const text = lines.join('\n');
+
+        // Try Web Share Level 2 with files (if supported and image available)
+        if (navigator.share) {
+            const shareData = { title, text, url: detailsUrl };
+
+            // Attempt image share if fetchable and File constructor exists
+            if (imageUrl && window.File && window.Blob) {
+                try {
+                    const res = await fetch(imageUrl, { mode: 'cors' });
+                    const blob = await res.blob();
+                    const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
+                    if ('files' in navigator.canShare ? navigator.canShare({ files: [file] }) : false) {
+                        shareData.files = [file];
+                        delete shareData.url; // with files, keep text clean
+                    }
+                } catch (_) {
+                    // Ignore image attachment failures; proceed with text share
+                }
+            }
+
+            await navigator.share(shareData);
+            return;
+        }
+
+        // Fallback: copy composed text + link to clipboard
+        await navigator.clipboard.writeText(text);
+        alert('Property details copied. Paste to share!');
+    } catch (err) {
+        try {
+            // Last fallback: open details page
+            window.open('/test/products/product-details.php?id=' + propertyId, '_blank');
+        } catch (_) {}
+    }
+}
+
 // Add click handlers for better UX
 document.addEventListener('DOMContentLoaded', function() {
     const categoryButtons = document.querySelectorAll('.nav-tabs-custom button');
@@ -740,6 +816,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initial sync between nav-tabs-custom and property type filters
     syncInitialStates();
+
+    // Optional: attach Share All shortcut on keyboard (Ctrl/Cmd+Shift+S)
+    document.addEventListener('keydown', function(e){
+        const isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
+        if ((isMac ? e.metaKey : e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === 's')) {
+            e.preventDefault();
+            shareAllProperties();
+        }
+    });
 });
 
 // Function to sync initial states on page load
@@ -1296,6 +1381,87 @@ function updateApplyButtonState() {
         const shouldEnable = hasActiveTag || hasCheckedLocality || priceChanged || areaChanged;
         btn.disabled = !shouldEnable;
     } catch (_) {}
+}
+
+// Share all currently visible properties: titles, details, description and attempt attaching a few images
+async function shareAllProperties() {
+  try {
+    const cards = Array.from(document.querySelectorAll('.aproperty-card'));
+    if (cards.length === 0) {
+      alert('No properties to share.');
+      return;
+    }
+
+    // Build text block with each property's info
+    const items = cards.map(card => {
+      const id = card.getAttribute('data-property-id') || '';
+      const titleEl = card.querySelector('h3');
+      const subtitleEl = titleEl ? titleEl.querySelector('span') : null;
+      const descEl = card.querySelector('p');
+      const detailsSpans = card.querySelectorAll('.property-details span');
+      const imgEl = card.querySelector('img.property-image');
+
+      const title = titleEl ? (titleEl.childNodes[0]?.textContent || titleEl.textContent || '').trim() : 'Property';
+      const subtitle = subtitleEl ? subtitleEl.textContent.trim() : '';
+      const desc = descEl ? descEl.textContent.trim() : '';
+      const confPrice = detailsSpans[0] ? detailsSpans[0].textContent.trim() : '';
+      const areaTxt = detailsSpans[1] ? detailsSpans[1].textContent.trim() : '';
+      const possTxt = detailsSpans[2] ? detailsSpans[2].textContent.trim() : '';
+      const imageUrl = imgEl ? imgEl.getAttribute('src') : '';
+
+      const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + id;
+
+      const lines = [
+        title,
+        subtitle ? subtitle : '',
+        confPrice ? confPrice : '',
+        areaTxt ? areaTxt : '',
+        possTxt ? possTxt : '',
+        desc ? '\n' + desc : '',
+        '\nView details: ' + detailsUrl
+      ].filter(Boolean);
+
+      return { id, title, text: lines.join('\n'), imageUrl };
+    });
+
+    // Combine into one share text
+    const header = 'Property list from Big Deal Ventures\n\n';
+    const combinedText = header + items.map((it, idx) => (idx+1) + '. ' + it.text).join('\n\n');
+
+    // Try Web Share with up to 3 images if supported
+    if (navigator.share) {
+      const shareData = { title: 'Property list', text: combinedText };
+
+      // Attempt fetching a few images to include
+      const imageUrls = items.map(i => i.imageUrl).filter(Boolean).slice(0, 3);
+      const files = [];
+      if (imageUrls.length && window.File && window.Blob) {
+        for (let i = 0; i < imageUrls.length; i++) {
+          try {
+            const res = await fetch(imageUrls[i], { mode: 'cors' });
+            const blob = await res.blob();
+            const fname = 'property_' + (i+1) + (blob.type && blob.type.includes('png') ? '.png' : '.jpg');
+            files.push(new File([blob], fname, { type: blob.type || 'image/jpeg' }));
+          } catch (_) { /* ignore individual image failures */ }
+        }
+      }
+
+      if (files.length && ('canShare' in navigator) && navigator.canShare({ files })) {
+        shareData.files = files;
+        delete shareData.url;
+      }
+
+      await navigator.share(shareData);
+      return;
+    }
+
+    // Fallback: copy to clipboard
+    await navigator.clipboard.writeText(combinedText);
+    alert('Property list copied. Paste to share!');
+  } catch (err) {
+    // Last fallback: open current page, allowing manual share
+    try { window.open(window.location.href, '_blank'); } catch (_) {}
+  }
 }
 </script>
 </body>
