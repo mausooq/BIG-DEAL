@@ -9,7 +9,7 @@
 				<h2 class="process-title">Our Process</h2>
 				<p class="process-eyebrow">Homebuying Steps</p>
 
-				<div class="process-step" data-image="<?php echo $asset_path; ?>images/prop/prop1.png">
+				<div class="process-step" data-image="<?php echo $asset_path; ?>images/process/dream-house.jpg">
 					<div class="process-bar"></div>
 					<div>
 						<h3 class="process-step-title">Step 1: Discover Your Dream Home</h3>
@@ -17,7 +17,7 @@
 					</div>
 				</div>
 
-				<div class="process-step" data-image="<?php echo $asset_path; ?>images/prop/prop2.png">
+				<div class="process-step" data-image="<?php echo $asset_path; ?>images/process/seal.jpg">
 					<div class="process-bar"></div>
 					<div>
 						<h3 class="process-step-title">Step 2: Schedule A Viewing</h3>
@@ -25,7 +25,7 @@
 					</div>
 				</div>
 
-				<div class="process-step" data-image="<?php echo $asset_path; ?>images/prop/prop3.png">
+				<div class="process-step" data-image="<?php echo $asset_path; ?>images/process/deal.jpg">
 					<div class="process-bar"></div>
 					<div>
 						<h3 class="process-step-title">Step 3: Seal The Deal</h3>

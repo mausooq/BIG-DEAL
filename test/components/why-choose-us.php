@@ -345,14 +345,14 @@
 	}
 	
     .wcu-icon {
-		width: 6.5em !important;   /* increase further on small phones */
-		height: 6.5em !important;
+		width: 2.5em !important;   /* increase further on small phones */
+		height: 2.5em !important;
         margin-bottom: 1em;
     }
 	
     .wcu-icon svg {
-		width: 2.8em !important;  /* increase SVG icon size */
-		height: 2.8em !important;
+		width: 1.8em !important;  /* increase SVG icon size */
+		height: 1.8em !important;
     }
 	
 	.wcu-icon-title {
