@@ -1428,27 +1428,23 @@ async function shareAllProperties() {
     const header = 'Property list from Big Deal Ventures\n\n';
     const combinedText = header + items.map((it, idx) => (idx+1) + '. ' + it.text).join('\n\n');
 
-    // Try Web Share with up to 3 images if supported
+    // Try Web Share with 1 image (first property's image) if supported
     if (navigator.share) {
       const shareData = { title: 'Property list', text: combinedText };
 
-      // Attempt fetching a few images to include
-      const imageUrls = items.map(i => i.imageUrl).filter(Boolean).slice(0, 3);
-      const files = [];
-      if (imageUrls.length && window.File && window.Blob) {
-        for (let i = 0; i < imageUrls.length; i++) {
-          try {
-            const res = await fetch(imageUrls[i], { mode: 'cors' });
-            const blob = await res.blob();
-            const fname = 'property_' + (i+1) + (blob.type && blob.type.includes('png') ? '.png' : '.jpg');
-            files.push(new File([blob], fname, { type: blob.type || 'image/jpeg' }));
-          } catch (_) { /* ignore individual image failures */ }
-        }
-      }
-
-      if (files.length && ('canShare' in navigator) && navigator.canShare({ files })) {
-        shareData.files = files;
-        delete shareData.url;
+      // Attempt fetching the first available image to include
+      const firstImageUrl = (items.find(i => i.imageUrl) || {}).imageUrl;
+      if (firstImageUrl && window.File && window.Blob) {
+        try {
+          const res = await fetch(firstImageUrl, { mode: 'cors' });
+          const blob = await res.blob();
+          const fname = 'property.jpg';
+          const file = new File([blob], fname, { type: blob.type || 'image/jpeg' });
+          if ('canShare' in navigator && navigator.canShare({ files: [file] })) {
+            shareData.files = [file];
+            delete shareData.url;
+          }
+        } catch (_) { /* ignore image fetch failure; continue with text only */ }
       }
 
       await navigator.share(shareData);
