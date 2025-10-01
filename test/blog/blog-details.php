@@ -197,7 +197,7 @@ function resolveBlogImage($raw) {
       <section class="container">
         <a href="#" class="go-back" onclick="history.back();return false;">Go Back</a>
         <?php $catLabel = isset($blog['category']) && trim($blog['category']) !== '' ? htmlspecialchars($blog['category'], ENT_QUOTES, 'UTF-8') : 'Uncategorized'; ?>
-        <a class="m-btn" href="blog-list.php?category=<?php echo urlencode($blog['category'] ?? ''); ?>"><?php echo $catLabel; ?></a>
+        <a class="m-btn" href="index.php?category=<?php echo urlencode($blog['category'] ?? ''); ?>"><?php echo $catLabel; ?></a>
         <h1><?php echo htmlspecialchars($blog['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></h1>
         <div class="meta">
         <span>7 min Read</span>
@@ -234,10 +234,10 @@ function resolveBlogImage($raw) {
       </div>
 
       <div class="testimonial-author">
-                <img src="../assets/images/avatar/test1.png" alt="Munazza">
+                <img src="../assets/images/avatar/test1.png" alt="Profile">
                 <div class="testimonial-author-info">
-                  <h5>Munazza</h5>
-                  <p>Software Developer</p>
+                  <h5>Admin</h5>
+                  <p>Content Writer</p>
                 </div>
               </div>
     </div>
