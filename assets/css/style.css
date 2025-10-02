@@ -10,7 +10,7 @@ body {
   opacity: 1;
   top: 15px;
   padding-left: 0;
-  z-index: 1;
+  z-index: 10;
   position: absolute;
 }
 
@@ -486,19 +486,21 @@ body:not(.article-page) .custom-select option {
   .navbar-brand {
     position: relative;
     top: 0;
-    z-index: 0;
+    z-index: 10;
     padding: 0;
   }
 
   .about-page .navbar-brand,
   .blog-page .navbar-brand,
-  .contact-page .navbar-brand {
+  .contact-page .navbar-brand,
+  .product-page .navbar-brand,
+  .article-page .navbar-brand {
     position: absolute;
     top: 0;
     right: 10px;
     left: auto;
     margin-top: -10px;
-    z-index: 3;
+    z-index: 10;
   }
 
   .navbar {
@@ -848,7 +850,7 @@ body:not(.article-page) .custom-select option {
 
   .navbar-brand {
     position: relative;
-    z-index: -1;
+    z-index: 10;
     margin-top: 0;
   }
 
@@ -866,10 +868,12 @@ body:not(.article-page) .custom-select option {
   /* About/Contact/Blog page navbar */
   .about-page .navbar-brand,
   .blog-page .navbar-brand,
-  .contact-page .navbar-brand {
+  .contact-page .navbar-brand,
+  .product-page .navbar-brand,
+  .article-page .navbar-brand {
     position: absolute;
     margin-left: auto;
-    z-index: 3;
+    z-index: 10;
     right: 10px;
     top: 0;
     left: auto;
