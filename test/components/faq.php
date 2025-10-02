@@ -2,13 +2,8 @@
 // Ensure DB connection is available (follow footer component pattern)
 // Try to reuse existing connection; otherwise bootstrap like other components
 if (!isset($mysqli) || !($mysqli instanceof mysqli)) {
-  // First try test config
+  // Use root config
   if (!function_exists('getMysqliConnection')) {
-    $testCfg = __DIR__ . '/../config/config.php';
-    if (file_exists($testCfg)) { require_once $testCfg; }
-  }
-  if (!function_exists('getMysqliConnection')) {
-    // Fallback to root config (used by admin/front)
     $rootCfg = __DIR__ . '/../../config/config.php';
     if (file_exists($rootCfg)) { require_once $rootCfg; }
   }

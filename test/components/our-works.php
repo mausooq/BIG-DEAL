@@ -1,6 +1,6 @@
 <?php
 // Interior component with 3D album carousel
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 // Get projects with their first images
 $mysqli = getMysqliConnection();

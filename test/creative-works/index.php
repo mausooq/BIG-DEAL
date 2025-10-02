@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../../config/config.php';
 
 // Build asset path and uploads path (this page sits at test/creative-works)
 $asset_path = '../assets/';

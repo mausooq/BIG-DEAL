@@ -1,5 +1,5 @@
 <?php
-require_once '../config/config.php';
+require_once '../../config/config.php';
 
 // Get selected filters from URL parameters
 $mysqli = getMysqliConnection();

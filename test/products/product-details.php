@@ -1,5 +1,5 @@
 <?php
-require_once '../config/config.php';
+require_once '../../config/config.php';
 
 // Handle AJAX enquiry submit (stay on same page)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'submit_enquiry') {

@@ -338,7 +338,7 @@
         // Ensure DB connection is available
         if (!isset($mysqli) || !($mysqli instanceof mysqli)) {
           if (!function_exists('getMysqliConnection')) {
-            $cfg = __DIR__ . '/../config/config.php';
+            $cfg = __DIR__ . '/../../config/config.php';
             if (file_exists($cfg)) { require_once $cfg; }
           }
           if (function_exists('getMysqliConnection')) {
