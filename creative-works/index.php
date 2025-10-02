@@ -2,8 +2,8 @@
 require_once __DIR__ . '/../config/config.php';
 
 // Build asset path and uploads path - use correct relative paths
-$asset_path = 'assets/';
-$uploads_prefix = 'uploads/projects/';
+$asset_path = '../assets/';
+$uploads_prefix = '../uploads/projects/';
 
 $mysqli = getMysqliConnection();
 
@@ -115,7 +115,7 @@ try {
   </style>
 </head>
 <body>
-  <?php include __DIR__ . '/../components/smallloader.php'; ?>
+  <?php include __DIR__ . '/../components/loader.php'; ?>
   <?php require_once __DIR__ . '/../components/navbar.php'; ?>
 
   <section class="hero-banner">

@@ -1,8 +1,9 @@
 <!-- Modern GIF Loader Component -->
-<link rel="stylesheet" href="assets/css/loader.css">
+<?php $loader_asset_path = isset($asset_path) ? $asset_path : 'assets/'; ?>
+<link rel="stylesheet" href="<?php echo $loader_asset_path; ?>css/loader.css">
 
 <div id="loader" class="loader-overlay">
-  <img src="assets/building.gif" alt="Building animation" class="loader-gif">
+  <img src="<?php echo $loader_asset_path; ?>building.gif" alt="Building animation" class="loader-gif">
   
   <div class="loader-content">
     <div class="loader-text ">Big<span>Deal</span>.property</div>

@@ -109,9 +109,9 @@ try {
 </head>
 
 <body>
+<?php $asset_path = 'assets/'; ?>
 <?php include __DIR__ . '/components/loader.php'; ?>
-  <?php $asset_path = 'assets/';
-  include __DIR__ . '/components/navbar.php'; ?>
+  <?php include __DIR__ . '/components/navbar.php'; ?>
   <section class=" hero-section">
     <div class="text-center  headh ">
       <h1 class="fw-bold"><span style="color:rgba(230, 27, 27, 0.93)">Next-Gen </span>Real Estate</h1>
