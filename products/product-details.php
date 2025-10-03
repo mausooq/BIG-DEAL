@@ -74,8 +74,23 @@ if (!isset($_GET['share'])) {
   $_GET['share'] = $randomChars;
   // Update the URL in browser without redirect
   $currentUrl = $_SERVER['REQUEST_URI'];
-  $separator = strpos($currentUrl, '?') !== false ? '&' : '?';
-  $newUrl = $currentUrl . $separator . 'share=' . $randomChars;
+  
+  // Clean up any existing share parameters to avoid duplicates
+  $parsedUrl = parse_url($currentUrl);
+  $queryParams = [];
+  if (isset($parsedUrl['query'])) {
+    parse_str($parsedUrl['query'], $queryParams);
+  }
+  
+  // Remove any existing share parameters
+  unset($queryParams['share']);
+  
+  // Add the new share parameter
+  $queryParams['share'] = $randomChars;
+  
+  // Rebuild the URL
+  $newQuery = http_build_query($queryParams);
+  $newUrl = $parsedUrl['path'] . '?' . $newQuery;
   
   // Use JavaScript to update URL without page reload
   echo '<script>history.replaceState(null, null, "' . htmlspecialchars($newUrl) . '");</script>';
@@ -454,7 +469,7 @@ function formatPrice($price)
         var title = <?php echo json_encode($property['title']); ?> || 'Property';
         var price = <?php echo json_encode(formatPrice($property['price'])); ?> || '';
         var locationTxt = <?php echo json_encode($property['location']); ?> || '';
-        var detailsUrl = window.location.origin + '/products/product-details.php?id=' + <?php echo (int)$propertyId; ?>;
+        var detailsUrl = window.location.origin + '/products/product-details.php?id=' + <?php echo (int)$propertyId; ?> + '&share=' + <?php echo json_encode($randomChars); ?>;
         var mainImgEl = document.getElementById('mainImage');
         var imageUrl = mainImgEl ? mainImgEl.getAttribute('src') : '';
 
