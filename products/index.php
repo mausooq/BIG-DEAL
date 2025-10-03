@@ -5,11 +5,11 @@ require_once __DIR__ . '/../config/config.php';
 $mysqli = getMysqliConnection();
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
 $selectedListing = isset($_GET['listing']) ? $_GET['listing'] : '';
+$selectedFurnished = isset($_GET['furnished']) ? $_GET['furnished'] : '';
 $selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
 $isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
 
 // Get additional filter parameters
-$selectedPropertyType = isset($_GET['propertyType']) ? $_GET['propertyType'] : '';
 $selectedBedrooms = isset($_GET['bedrooms']) ? $_GET['bedrooms'] : '';
 $selectedConstructionStatus = isset($_GET['constructionStatus']) ? $_GET['constructionStatus'] : '';
 $selectedLocalities = isset($_GET['localities']) ? $_GET['localities'] : '';
@@ -28,7 +28,27 @@ try {
     }
 } catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
 
-// Load categories for Types of Property filter
+// Load listing types for Types of Property filter
+$listingTypes = [];
+try {
+    $listingTypeSql = "SELECT DISTINCT listing_type FROM properties WHERE listing_type IS NOT NULL AND status = 'Available' ORDER BY listing_type";
+    if ($resListingType = $mysqli->query($listingTypeSql)) {
+        while ($row = $resListingType->fetch_assoc()) { $listingTypes[] = $row['listing_type']; }
+        $resListingType->free();
+    }
+} catch (Throwable $e) { error_log('Listing types load error: ' . $e->getMessage()); }
+
+// Load furnished statuses for Furnished Status filter
+$furnishedStatuses = [];
+try {
+    $furnSql = "SELECT DISTINCT furniture_status FROM properties WHERE furniture_status IS NOT NULL AND furniture_status <> '' ORDER BY furniture_status";
+    if ($resFurn = $mysqli->query($furnSql)) {
+        while ($row = $resFurn->fetch_assoc()) { $furnishedStatuses[] = $row['furniture_status']; }
+        $resFurn->free();
+    }
+} catch (Throwable $e) { error_log('Furnished statuses load error: ' . $e->getMessage()); }
+
+// Load categories for Category filter
 $categories = [];
 try {
     $categorySql = "SELECT id, name FROM categories ORDER BY name";
@@ -103,6 +123,9 @@ if (!empty($selectedCategory)) {
     $query .= " AND c.name = '" . $mysqli->real_escape_string($selectedCategory) . "'";
 }
 
+// Add listing type filter for Types of Property (reuse existing selectedListing logic)
+// This is now handled above in the listing filter section
+
 // Add city filter if selected (match against location and landmark)
 if (!empty($selectedCity)) {
     $city = $mysqli->real_escape_string($selectedCity);
@@ -115,14 +138,14 @@ if (!empty($selectedListing)) {
     $query .= " AND p.listing_type = '" . $listing . "'";
 }
 
-// Add property type filter (category-based)
-if (!empty($selectedPropertyType)) {
-    $query .= " AND c.name = '" . $mysqli->real_escape_string($selectedPropertyType) . "'";
-}
-
 // Add bedroom configuration filter
 if (!empty($selectedBedrooms)) {
     $query .= " AND p.configuration = '" . $mysqli->real_escape_string($selectedBedrooms) . "'";
+}
+
+// Add furnished status filter
+if (!empty($selectedFurnished)) {
+    $query .= " AND p.furniture_status = '" . $mysqli->real_escape_string($selectedFurnished) . "'";
 }
 
 // Construction status filter removed
@@ -179,12 +202,14 @@ if (!empty($selectedListing)) {
     $countQuery .= " AND p.listing_type = '" . $listing . "'";
 }
 
-if (!empty($selectedPropertyType)) {
-    $countQuery .= " AND c.name = '" . $mysqli->real_escape_string($selectedPropertyType) . "'";
-}
+// PropertyType filter removed - now handled by listing parameter
 
 if (!empty($selectedBedrooms)) {
     $countQuery .= " AND p.configuration = '" . $mysqli->real_escape_string($selectedBedrooms) . "'";
+}
+
+if (!empty($selectedFurnished)) {
+    $countQuery .= " AND p.furniture_status = '" . $mysqli->real_escape_string($selectedFurnished) . "'";
 }
 
 if (!empty($selectedLocalities)) {
@@ -374,15 +399,32 @@ function timeAgo($datetime) {
     </section>
 
     <!-- Types of property -->
-    <section class="filter-section" id="propertyTypeSection">
-      <div class="filter-section-header" tabindex="0" data-toggle-target="propertyTypeSection">
+    <section class="filter-section" id="listingSection">
+      <div class="filter-section-header" tabindex="0" data-toggle-target="listingSection">
         Types of property
         <span class="caret"></span>
       </div>
       <div class="filter-section-content">
-        <div class="tag-list" id="propertyTypeTags">
+        <div class="tag-list" id="listingTags">
+          <?php foreach ($listingTypes as $listingType): ?>
+            <div class="tag <?php echo ($selectedListing === $listingType) ? 'active' : ''; ?>" data-filter="listing" data-value="<?php echo htmlspecialchars($listingType); ?>">
+              <?php echo htmlspecialchars($listingType); ?> <span class="add-icon">+</span>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </section>
+
+    <!-- Category Section -->
+    <section class="filter-section" id="categorySection">
+      <div class="filter-section-header" tabindex="0" data-toggle-target="categorySection">
+        Category
+        <span class="caret"></span>
+      </div>
+      <div class="filter-section-content">
+        <div class="tag-list" id="categoryTags">
           <?php foreach ($categories as $category): ?>
-            <div class="tag <?php echo ($selectedPropertyType === $category['name']) ? 'active' : ''; ?>" data-filter="propertyType" data-value="<?php echo htmlspecialchars($category['name']); ?>">
+            <div class="tag <?php echo ($selectedCategory === $category['name']) ? 'active' : ''; ?>" data-filter="category" data-value="<?php echo htmlspecialchars($category['name']); ?>">
               <?php echo htmlspecialchars($category['name']); ?> <span class="add-icon">+</span>
             </div>
           <?php endforeach; ?>
@@ -390,8 +432,25 @@ function timeAgo($datetime) {
       </div>
     </section>
 
+    <!-- Furnished Status -->
+    <section class="filter-section<?php echo ($selectedCategory === 'Plot') ? ' disabled' : ''; ?>" id="furnishedSection">
+      <div class="filter-section-header" tabindex="0" data-toggle-target="furnishedSection">
+        Furnished Status
+        <span class="caret"></span>
+      </div>
+      <div class="filter-section-content">
+        <div class="tag-list" id="furnishedTags">
+          <?php foreach ($furnishedStatuses as $status): ?>
+            <div class="tag <?php echo ($selectedFurnished === $status) ? 'active' : ''; ?>" data-filter="furnished" data-value="<?php echo htmlspecialchars($status); ?>">
+              <?php echo htmlspecialchars($status); ?> <span class="add-icon">+</span>
+            </div>
+          <?php endforeach; ?>
+        </div>
+      </div>
+    </section>
+
     <!-- No of Bedrooms -->
-    <section class="filter-section" id="bedroomsSection">
+    <section class="filter-section<?php echo ($selectedCategory === 'Plot') ? ' disabled' : ''; ?>" id="bedroomsSection">
       <div class="filter-section-header" tabindex="0" data-toggle-target="bedroomsSection">
         No of Bedrooms
         <span class="caret"></span>
@@ -517,9 +576,14 @@ function timeAgo($datetime) {
           <?php if (!empty($properties)): ?>
             <?php foreach ($properties as $property): ?>
               <div class="aproperty-card" data-property-id="<?php echo (int)$property['id']; ?>" style="display: flex; align-items: center; gap: 20px; cursor: pointer;" onclick="goToPropertyDetails(<?php echo $property['id']; ?>)">
-                <img src="<?php echo !empty($property['main_image']) ? '../uploads/properties/' . $property['main_image'] : ''; ?>" 
-                     alt="<?php echo htmlspecialchars($property['title']); ?>" class="property-image" 
-                     style="width: 300px; height: 228px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" />
+                <div style="position: relative; flex-shrink: 0;">
+                  <img src="<?php echo !empty($property['main_image']) ? '../uploads/properties/' . $property['main_image'] : ''; ?>" 
+                       alt="<?php echo htmlspecialchars($property['title']); ?>" class="property-image" 
+                       style="width: 300px; height: 228px; object-fit: cover; border-radius: 8px;" />
+                  <span class="listing-type-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.35); color:rgb(0, 0, 0); padding: 6px 12px; border: 1px solid rgba(0, 0, 0, 0.55); border-radius: 20px; font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                    <?php echo htmlspecialchars($property['listing_type']); ?>
+                  </span>
+                </div>
                 <div class="property-info" style="flex: 1;">
                   <h3><?php echo htmlspecialchars($property['title']); ?> <br>
                   <span><?php echo htmlspecialchars($property['configuration']); ?> House in <?php echo htmlspecialchars($property['location']); ?></span></h3>
@@ -622,12 +686,14 @@ function timeAgo($datetime) {
      const url = new URL(window.location);
      // Toggle: clicking active clears it
      const current = url.searchParams.get('listing');
+     
+     // Clear all other nav button filters first (mutual exclusivity)
+     url.searchParams.delete('category');
+     
      if (current === listing) {
          url.searchParams.delete('listing');
      } else {
          url.searchParams.set('listing', listing);
-         // Clear category to avoid conflicting UI states
-         url.searchParams.delete('category');
      }
      url.searchParams.delete('page');
      window.location.href = url.toString();
@@ -635,52 +701,22 @@ function timeAgo($datetime) {
 function filterByCategory(category) {
     const url = new URL(window.location);
     const current = url.searchParams.get('category');
+    
+    // Clear all other nav button filters first (mutual exclusivity)
+    url.searchParams.delete('listing');
+    
     // Toggle: if already active, remove the filter
     if (current === category) {
         url.searchParams.delete('category');
-        // Sync with property type filter - remove active state
-        syncNavWithPropertyType(category, false);
     } else {
         url.searchParams.set('category', category);
-        // Sync with property type filter - add active state
-        syncNavWithPropertyType(category, true);
     }
     window.location.href = url.toString();
 }
 
-// Function to sync nav-tabs-custom with property type filters
-function syncNavWithPropertyType(category, isActive) {
-    // Find matching property type tag
-    const propertyTypeTag = document.querySelector(`[data-filter="propertyType"][data-value="${category}"]`);
-    if (propertyTypeTag) {
-        if (isActive) {
-            // Remove active from all property type tags
-            document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
-            // Add active to matching tag
-            propertyTypeTag.classList.add('active');
-        } else {
-            // Remove active from matching tag
-            propertyTypeTag.classList.remove('active');
-        }
-    }
-}
+// Function to sync nav-tabs-custom with property type filters (no longer needed since sidebar now uses listing_type)
 
-// Function to sync property type filters with nav-tabs-custom
-function syncPropertyTypeWithNav(propertyType, isActive) {
-    // Find matching nav button
-    const navButton = document.querySelector(`.nav-tabs-custom button[onclick*="${propertyType}"]`);
-    if (navButton) {
-        if (isActive) {
-            // Remove active from all nav buttons
-            document.querySelectorAll('.nav-tabs-custom button').forEach(btn => btn.classList.remove('active'));
-            // Add active to matching button
-            navButton.classList.add('active');
-        } else {
-            // Remove active from matching button
-            navButton.classList.remove('active');
-        }
-    }
-}
+// Function to sync property type filters with nav-tabs-custom (no longer needed since sidebar now uses listing_type)
 
 function onCityChange(city) {
     const url = new URL(window.location);
@@ -880,35 +916,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize dropdown interactions
     initializeDropdowns();
     
-    // Initial sync between nav-tabs-custom and property type filters
-    syncInitialStates();
+    // Note: Property type filters now work independently (listing_type based)
 
 });
 
-// Function to sync initial states on page load
-function syncInitialStates() {
-    // Check if any nav button is active
-    const activeNavButton = document.querySelector('.nav-tabs-custom button.active');
-    if (activeNavButton) {
-        const category = activeNavButton.textContent.trim();
-        // Sync with property type filter
-        syncNavWithPropertyType(category, true);
-    }
-    
-    // Check if any property type tag is active
-    const activePropertyTypeTag = document.querySelector('#propertyTypeSection .tag.active');
-    if (activePropertyTypeTag) {
-        const propertyType = activePropertyTypeTag.getAttribute('data-value');
-        // Sync with nav-tabs-custom
-        syncPropertyTypeWithNav(propertyType, true);
-    }
-}
+// Initial states function removed - property type filters now work independently with listing_type
 
 // Filter functionality
 function initializeFilters() {
-    // Handle property type filter tags (do NOT navigate immediately; apply on Apply Filter)
-    const propertyTypeTags = document.querySelectorAll('[data-filter="propertyType"]');
-    propertyTypeTags.forEach(tag => {
+    // Handle listing type filter tags (do NOT navigate immediately; apply on Apply Filter)
+    const listingTags = document.querySelectorAll('[data-filter="listing"]');
+    listingTags.forEach(tag => {
         tag.addEventListener('click', function(e) {
             const value = this.getAttribute('data-value');
             // Detect cross (remove) click region
@@ -919,15 +937,68 @@ function initializeFilters() {
 
             if (isCrossClick && this.classList.contains('active')) {
                 this.classList.remove('active');
-                syncPropertyTypeWithNav(value, false);
                 updateApplyButtonState();
                 return;
             }
 
             // Single-select behavior: one active at a time
-            document.querySelectorAll('#propertyTypeSection .tag').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('[data-filter="listing"]').forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            syncPropertyTypeWithNav(value, true);
+            updateApplyButtonState();
+        });
+    });
+
+    // Handle category filter tags (do NOT navigate immediately; apply on Apply Filter)
+    const categoryTags = document.querySelectorAll('[data-filter="category"]');
+    categoryTags.forEach(tag => {
+        tag.addEventListener('click', function(e) {
+            const value = this.getAttribute('data-value');
+            // Detect cross (remove) click region
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
+
+            if (isCrossClick && this.classList.contains('active')) {
+                this.classList.remove('active');
+                updateApplyButtonState();
+                return;
+            }
+
+            // Single-select behavior: one active at a time
+            document.querySelectorAll('[data-filter="category"]').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+
+            // Disable furnished and bedrooms when category is Plot
+            const isPlot = (value === 'Plot');
+            toggleFurnishedBedroomsDisabled(isPlot);
+            updateApplyButtonState();
+        });
+    });
+
+    // Handle furnished filter tags (do NOT navigate immediately)
+    const furnishedTags = document.querySelectorAll('[data-filter="furnished"]');
+    furnishedTags.forEach(tag => {
+        tag.addEventListener('click', function(e) {
+            // Prevent selection when disabled (Plot selected)
+            if (document.getElementById('furnishedSection').classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
+            const value = this.getAttribute('data-value');
+            const rect = this.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+            const isCrossClick = clickX > (rect.width - 35) && clickY > (rect.height / 2 - 10) && clickY < (rect.height / 2 + 10);
+
+            if (isCrossClick && this.classList.contains('active')) {
+                this.classList.remove('active');
+                updateApplyButtonState();
+                return;
+            }
+
+            document.querySelectorAll('[data-filter="furnished"]').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
             updateApplyButtonState();
         });
     });
@@ -936,6 +1007,11 @@ function initializeFilters() {
     const bedroomTags = document.querySelectorAll('[data-filter="bedrooms"]');
     bedroomTags.forEach(tag => {
         tag.addEventListener('click', function(e) {
+            // Prevent selection when disabled (Plot selected)
+            if (document.getElementById('bedroomsSection').classList.contains('disabled')) {
+                e.preventDefault();
+                return;
+            }
             const value = this.getAttribute('data-value');
             // Check if cross button was clicked
             const rect = this.getBoundingClientRect();
@@ -1264,7 +1340,7 @@ function clearRangeFilter(type) {
 function clearAllFilters() {
     const url = new URL(window.location);
     // Keep only essential parameters
-    const keepParams = ['category', 'city', 'featured'];
+    const keepParams = ['city', 'featured'];
     const newUrl = new URL(window.location.pathname, window.location.origin);
     
     keepParams.forEach(param => {
@@ -1315,15 +1391,35 @@ function applyAllFilters() {
         }
     }
 
-    // Selected tags (only overwrite when a selection is explicitly active in UI)
-    const activePropertyType = document.querySelector('#propertyTypeSection .tag.active');
-    if (activePropertyType) {
-        url.searchParams.set('propertyType', activePropertyType.getAttribute('data-value'));
+    // Selected listing type (only overwrite when a selection is explicitly active in UI)
+    const activeListing = document.querySelector('[data-filter="listing"].tag.active');
+    if (activeListing) {
+        url.searchParams.set('listing', activeListing.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('listing');
+    }
+
+    // Selected category (only overwrite when a selection is explicitly active in UI)
+    const activeCategory = document.querySelector('[data-filter="category"].tag.active');
+    if (activeCategory) {
+        url.searchParams.set('category', activeCategory.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('category');
+    }
+
+    // Selected furnished status
+    const activeFurnished = document.querySelector('[data-filter="furnished"].tag.active');
+    if (activeFurnished && !document.getElementById('furnishedSection').classList.contains('disabled')) {
+        url.searchParams.set('furnished', activeFurnished.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('furnished');
     }
 
     const activeBedrooms = document.querySelector('#bedroomsSection .tag.active');
-    if (activeBedrooms) {
+    if (activeBedrooms && !document.getElementById('bedroomsSection').classList.contains('disabled')) {
         url.searchParams.set('bedrooms', activeBedrooms.getAttribute('data-value'));
+    } else {
+        url.searchParams.delete('bedrooms');
     }
 
     // construction status removed
@@ -1353,17 +1449,34 @@ function setFilterActiveState(filterType, value, isActive) {
             checkbox.checked = isActive;
         }
     } else {
-        const sectionMap = {
-            'propertyType': '#propertyTypeSection',
-            'bedrooms': '#bedroomsSection'
-        };
-        const selector = sectionMap[filterType];
-        if (selector) {
-            const tag = document.querySelector(`${selector} .tag[data-value="${value}"]`);
+        if (filterType === 'listing') {
+            const tag = document.querySelector(`[data-filter="listing"].tag[data-value="${value}"]`);
             if (tag) {
                 if (isActive) {
-                    // Remove active from all tags in section
-                    document.querySelectorAll(`${selector} .tag`).forEach(t => t.classList.remove('active'));
+                    // Remove active from all listing tags
+                    document.querySelectorAll('[data-filter="listing"].tag').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            }
+        } else if (filterType === 'category') {
+            const tag = document.querySelector(`[data-filter="category"].tag[data-value="${value}"]`);
+            if (tag) {
+                if (isActive) {
+                    // Remove active from all category tags
+                    document.querySelectorAll('[data-filter="category"].tag').forEach(t => t.classList.remove('active'));
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            }
+        } else if (filterType === 'bedrooms') {
+            const tag = document.querySelector(`#bedroomsSection .tag[data-value="${value}"]`);
+            if (tag) {
+                if (isActive) {
+                    // Remove active from all bedroom tags
+                    document.querySelectorAll('#bedroomsSection .tag').forEach(t => t.classList.remove('active'));
                     tag.classList.add('active');
                 } else {
                     tag.classList.remove('active');
@@ -1388,15 +1501,23 @@ function syncUIFromParams() {
         if (!isMobile) return;
 
         const map = [
-            { key: 'propertyType', section: '#propertyTypeSection' },
+            { key: 'listing', selector: '[data-filter="listing"]' },
+            { key: 'category', selector: '[data-filter="category"]' },
+            { key: 'furnished', selector: '[data-filter="furnished"]' },
             { key: 'bedrooms', section: '#bedroomsSection' }
         ];
-        map.forEach(({ key, section }) => {
+        map.forEach(({ key, section, selector }) => {
             const val = params.get(key);
             if (!val) return;
-            const target = document.querySelector(section + ' .tag[data-value="' + CSS.escape ? CSS.escape(val) : val + '"]');
+            const target = document.querySelector((selector || section) + ' .tag[data-value="' + (window.CSS && window.CSS.escape ? CSS.escape(val) : val) + '"]');
             if (target) target.classList.add('active');
         });
+
+        // If Plot is selected, disable furnished and bedrooms on load
+        const selectedCategory = params.get('category');
+        if (selectedCategory === 'Plot') {
+            toggleFurnishedBedroomsDisabled(true);
+        }
 
         const localities = params.get('localities');
         if (localities) {
@@ -1424,8 +1545,16 @@ function updateApplyButtonState() {
         const isMobile = window.matchMedia && window.matchMedia('(max-width: 768px)').matches;
         if (!isMobile) { btn.disabled = false; return; }
 
+        // Determine disabled states
+        const furnishedEnabled = !document.getElementById('furnishedSection').classList.contains('disabled');
+        const bedroomsEnabled = !document.getElementById('bedroomsSection').classList.contains('disabled');
+
         // Any active tag selections
-        const hasActiveTag = document.querySelector('#propertyTypeSection .tag.active, #bedroomsSection .tag.active') !== null;
+        const hasActiveTag = (
+            document.querySelector('[data-filter="listing"].tag.active, [data-filter="category"].tag.active') !== null ||
+            (furnishedEnabled && document.querySelector('[data-filter="furnished"].tag.active') !== null) ||
+            (bedroomsEnabled && document.querySelector('#bedroomsSection .tag.active') !== null)
+        );
         // Any checked locality
         const hasCheckedLocality = document.querySelector('input[data-filter="localities"]:checked') !== null;
         // Any range moved away from defaults
@@ -1439,6 +1568,22 @@ function updateApplyButtonState() {
         const shouldEnable = hasActiveTag || hasCheckedLocality || priceChanged || areaChanged;
         btn.disabled = !shouldEnable;
     } catch (_) {}
+}
+
+// Helper to disable/enable Furnished and Bedrooms when Plot is selected
+function toggleFurnishedBedroomsDisabled(disabled) {
+    const furn = document.getElementById('furnishedSection');
+    const beds = document.getElementById('bedroomsSection');
+    if (!furn || !beds) return;
+    if (disabled) {
+        furn.classList.add('disabled');
+        beds.classList.add('disabled');
+        // Clear any active tags visually
+        document.querySelectorAll('#furnishedSection .tag.active, #bedroomsSection .tag.active').forEach(t => t.classList.remove('active'));
+    } else {
+        furn.classList.remove('disabled');
+        beds.classList.remove('disabled');
+    }
 }
 
 </script>

@@ -208,8 +208,11 @@ function formatPrice($price)
   <div class=" container">
     <div class="row mt-5">
       <div class=" col-md-8">
-        <div class="property-main-image">
+        <div class="property-main-image" style="position: relative;">
           <img id="mainImage" src="<?php echo !empty($propertyImages) ? '../uploads/properties/' . $propertyImages[0] : '../assets/images/prop/prop6.png'; ?>" alt="<?php echo htmlspecialchars($property['title']); ?>" />
+          <a href="../products/?listing=<?php echo urlencode($property['listing_type']); ?>" onclick="filterByListingFromDetails(event, '<?php echo htmlspecialchars($property['listing_type']); ?>')" class="listing-type-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.35); color: rgb(0, 0, 0); padding: 6px 12px; border: 1px solid rgba(0, 0, 0, 0.55); border-radius: 20px; font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-block; text-decoration: none; cursor: pointer;">
+            <?php echo htmlspecialchars($property['listing_type']); ?>
+          </a>
         </div>
         <div class="thumbs-carousel">
           <button class="thumbs-nav prev" type="button" aria-label="Previous" id="thumbPrev">‹</button>
@@ -409,8 +412,13 @@ function formatPrice($price)
         <?php foreach ($relatedProperties as $relatedProperty): ?>
           <div class="col-md-4">
             <div class="card property-card" onclick="goToPropertyDetails(<?php echo $relatedProperty['id']; ?>)" style="cursor: pointer;">
-              <img src="<?php echo !empty($relatedProperty['main_image']) ? '../uploads/properties/' . $relatedProperty['main_image'] : '../assets/images/prop/prop1.png'; ?>"
-                alt="<?php echo htmlspecialchars($relatedProperty['title']); ?>" class="propimg">
+              <div style="position: relative;">
+                <img src="<?php echo !empty($relatedProperty['main_image']) ? '../uploads/properties/' . $relatedProperty['main_image'] : '../assets/images/prop/prop1.png'; ?>"
+                  alt="<?php echo htmlspecialchars($relatedProperty['title']); ?>" class="propimg">
+                <a href="../products/?listing=<?php echo urlencode($relatedProperty['listing_type']); ?>" onclick="event.stopPropagation(); filterByListingFromDetails(event, '<?php echo htmlspecialchars($relatedProperty['listing_type']); ?>')" class="listing-type-badge" style="position: absolute; top: 12px; left: 12px; background: rgba(255,255,255,0.35); color: rgb(0, 0, 0); padding: 6px 12px; border: 1px solid rgba(0, 0, 0, 0.55); border-radius: 20px; font-size: 12px; font-weight: 500; box-shadow: 0 4px 12px rgba(0,0,0,0.12); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: inline-block; text-decoration: none; cursor: pointer;">
+                  <?php echo htmlspecialchars($relatedProperty['listing_type']); ?>
+                </a>
+              </div>
               <div class="card-body">
                 <div class="card-title"><?php echo htmlspecialchars($relatedProperty['title']); ?></div>
                 <div class="property-attrs">
@@ -443,6 +451,20 @@ function formatPrice($price)
   <script src="../assets/js/scripts.js"></script>
 
   <script>
+    // Navigate to products listing page with listing= param
+    function filterByListingFromDetails(e, listing) {
+      if (e && e.preventDefault) e.preventDefault();
+      try {
+        var url = new URL(window.location.origin + '/BIG-DEAL/products/');
+        url.searchParams.set('listing', listing);
+        // mutual exclusivity with category param
+        url.searchParams.delete('category');
+        window.location.href = url.toString();
+      } catch (_) {
+        // Fallback relative navigation
+        window.location.href = '../products/?listing=' + encodeURIComponent(listing);
+      }
+    }
     function changeMainImage(imageSrc) {
       document.getElementById('mainImage').src = imageSrc;
     }

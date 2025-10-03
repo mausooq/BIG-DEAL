@@ -363,6 +363,21 @@
   color: white;
 }
 
+/* Disabled filter section - suppress interactions and hover */
+.filter-section.disabled .tag {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.filter-section.disabled .tag:hover {
+  background-color: inherit;
+  color: inherit;
+}
+.filter-section.disabled .filter-section-header {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .apply-filter-btn {
 display: none;
 }
