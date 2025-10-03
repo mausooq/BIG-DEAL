@@ -10,7 +10,7 @@
 			<li class="certifications-item">
 				<div class="certifications-stack">
 					<div class="certifications-caption">Recognized by</div>
-					<img src="assets/images/certification/startupindia.png" alt="DPIIT Startup India Logo" loading="lazy" />
+					<img src="assets/images/certification/startupindia.png" alt="DPIIT Startup India Logo" loading="lazy" style="padding-top:20px;"/>
 				</div>
 			</li>
 			<li class="certifications-item">
@@ -33,12 +33,12 @@
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 	gap: 16px;
-	align-items: center;
+	align-items: start;
 	justify-items: center;
 }
 .certifications-item { display: flex; align-items: center; justify-content: center; }
 .certifications-stack { display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.certifications-caption { font-family: "DM Sans", Arial, sans-serif; font-weight: 300; font-size: 12px; color: #6b7280; line-height: 1; text-align: center; white-space: nowrap; min-height: 1.2em; }
+.certifications-caption { font-family: "DM Sans", Arial, sans-serif; font-weight: bold; font-size: 12px; color: #6b7280; line-height: 1; text-align: center; white-space: nowrap; min-height: 1.2em;}
 .certifications-item img {
 	max-width: 100%;
 	max-height: 64px;

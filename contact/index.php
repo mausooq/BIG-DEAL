@@ -1,3 +1,59 @@
+<?php
+// Handle contact form submission
+$contactSuccess = false;
+$contactError = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  $first = isset($_POST['first_name']) ? trim((string)$_POST['first_name']) : '';
+  $last = isset($_POST['last_name']) ? trim((string)$_POST['last_name']) : '';
+  $email = isset($_POST['email']) ? trim((string)$_POST['email']) : '';
+  $message = isset($_POST['message']) ? trim((string)$_POST['message']) : '';
+
+  if ($first === '' || $email === '' || $message === '') {
+    $contactError = 'Please fill in the required fields.';
+  } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    $contactError = 'Please enter a valid email address.';
+  } else {
+    $to = 'office@bigdeal.property';
+    $subject = 'New contact form submission';
+    $fullName = trim($first . ' ' . $last);
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+    $bodyLines = [
+      'You have received a new message from the website contact form.',
+      '',
+      'Name: ' . ($fullName !== '' ? $fullName : '—'),
+      'Email: ' . $email,
+      '',
+      'Message:',
+      $message,
+      '',
+      '---',
+      'Meta:',
+      'IP: ' . $ip,
+      'UA: ' . $ua,
+      'Time: ' . date('Y-m-d H:i:s')
+    ];
+    $body = implode("\r\n", $bodyLines);
+
+    // Use a safe default From and set Reply-To to the user's email
+    $from = 'no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'bigdeal.property');
+    $headers = [];
+    $headers[] = 'From: Big Deal Website <' . $from . '>';
+    $headers[] = 'Reply-To: ' . $fullName . ' <' . $email . '>';
+    $headers[] = 'MIME-Version: 1.0';
+    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+
+    $sent = @mail($to, $subject, $body, implode("\r\n", $headers));
+    if ($sent) {
+      $contactSuccess = true;
+      // Clear fields after successful send
+      $_POST = [];
+    } else {
+      $contactError = 'We could not send your message right now. Please try again later.';
+    }
+  }
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,20 +95,25 @@
     <div class=" container-fluid forms px-5">
         <div class="row ">
             <div class="col-md-7">
-                <form action="" class="contact-form" autocomplete="on">
+                <form action="" method="post" class="contact-form" autocomplete="on" novalidate>
+                    <?php if ($contactSuccess): ?>
+                      <div class="alert alert-success" role="alert">Thank you! Your message has been sent.</div>
+                    <?php elseif ($contactError !== ''): ?>
+                      <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($contactError, ENT_QUOTES, 'UTF-8'); ?></div>
+                    <?php endif; ?>
                     <div class=" row g-3">
                         <div class="col-md-6">
-                            <input type="text" name="first_name" placeholder="First name" required class="form-control" autocomplete="given-name" autocapitalize="words" spellcheck="false" />
+                            <input type="text" name="first_name" placeholder="First name" required class="form-control" autocomplete="given-name" autocapitalize="words" spellcheck="false" value="<?php echo htmlspecialchars($_POST['first_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                         </div>
                         <div class="col-md-6">
-                            <input type="text" name="last_name" placeholder="Last name" class="form-control" autocomplete="family-name" autocapitalize="words" spellcheck="false" />
+                            <input type="text" name="last_name" placeholder="Last name" class="form-control" autocomplete="family-name" autocapitalize="words" spellcheck="false" value="<?php echo htmlspecialchars($_POST['last_name'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                         </div>
                     </div>
                     <div class="form-item">
-                        <input type="email" name="email" placeholder="email@example.com" required class="form-control" autocomplete="email" inputmode="email" spellcheck="false" />
+                        <input type="email" name="email" placeholder="email@example.com" required class="form-control" autocomplete="email" inputmode="email" spellcheck="false" value="<?php echo htmlspecialchars($_POST['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" />
                     </div>
                     <div class="form-item">
-                        <textarea name="message" placeholder="Enter your question or message" rows="8" required class="form-control" autocomplete="on"></textarea>
+                        <textarea name="message" placeholder="Enter your question or message" rows="8" required class="form-control" autocomplete="on"><?php echo htmlspecialchars($_POST['message'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
                     </div>
                     <div class="form-item">
                         <button type="submit" class="btn btn-dark w-100">Submit</button>
