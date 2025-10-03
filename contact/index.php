@@ -39,20 +39,20 @@
     <div class=" container-fluid forms px-5">
         <div class="row ">
             <div class="col-md-7">
-                <form action="" class="contact-form">
+                <form action="" class="contact-form" autocomplete="on">
                     <div class=" row g-3">
                         <div class="col-md-6">
-                            <input type="text" placeholder="First name" required class="form-control" />
+                            <input type="text" name="first_name" placeholder="First name" required class="form-control" autocomplete="given-name" autocapitalize="words" spellcheck="false" />
                         </div>
                         <div class="col-md-6">
-                            <input type="text" placeholder="Last name" class="form-control" />
+                            <input type="text" name="last_name" placeholder="Last name" class="form-control" autocomplete="family-name" autocapitalize="words" spellcheck="false" />
                         </div>
                     </div>
                     <div class="form-item">
-                        <input type="email" placeholder="email@example.com" required class="form-control" />
+                        <input type="email" name="email" placeholder="email@example.com" required class="form-control" autocomplete="email" inputmode="email" spellcheck="false" />
                     </div>
                     <div class="form-item">
-                        <textarea placeholder="Enter your question or message" rows="8" required class="form-control"></textarea>
+                        <textarea name="message" placeholder="Enter your question or message" rows="8" required class="form-control" autocomplete="on"></textarea>
                     </div>
                     <div class="form-item">
                         <button type="submit" class="btn btn-dark w-100">Submit</button>
@@ -61,7 +61,7 @@
             </div>
             <div class="col-md-5  ">
                 <div class="contact-map shadow rounded-4 overflow-hidden" style="height: 100%;">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.5891905270946!2d74.85795507572209!3d12.86978921710093!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35b42801d3787%3A0x6382971e18a25583!2sBig%20Deal%20Ventures%20India!5e0!3m2!1sen!2sin!4v1759227103128!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.5891905270946!2d74.85795507572209!3d12.86978921710093!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35b42801d3787%3A0x6382971e18a25583!2sBig%20Deal%20Ventures%20India!5e0!3m2!1sen!2sin!4v1759227103128!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map location: Big Deal Ventures India" fetchpriority="low"></iframe>
                     
                 </div>
             </div>
@@ -73,21 +73,21 @@
   <div class=" container">
     <div class="row ">
       <div class="col-4 col-md-4  contact-info-item">
-        <img src="../assets/images/icon/phone.svg" alt="phone">
+        <img src="../assets/images/icon/phone.svg" alt="phone" loading="lazy" decoding="async" fetchpriority="low">
         <div class="contact-info-text">
           <p class="contact-info-title">Call Now</p>
           <a href="tel:+91 99018 05505" class="contact-info-detail">+91 99018 05505</a>
         </div>
       </div>
       <div class="col-3 col-md-4  contact-info-item">
-        <img src="../assets/images/icon/location.svg" alt="location" >
+        <img src="../assets/images/icon/location.svg" alt="location" loading="lazy" decoding="async" fetchpriority="low" >
         <div class="contact-info-text">
           <p class="contact-info-title">Location</p>
           <p class="contact-info-detail">First Floor, Gate Building, Kankanady Bypass Rd, Kankanady, Mangaluru, Karnataka 575002</p>
         </div>
       </div>
       <div class="col-5 col-md-4 contact-info-item">
-        <img src="../assets/images/icon/mail.svg" alt="email">
+        <img src="../assets/images/icon/mail.svg" alt="email" loading="lazy" decoding="async" fetchpriority="low">
         <div class="contact-info-text">
           <p class="contact-info-title">Email Now</p>
           <a href="mailto:office@bigdeal.property" class="contact-info-detail">office@bigdeal.property</a>
@@ -107,7 +107,7 @@
 <?php include '../components/footer.php'; ?>
 
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="../assets/js/scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+  <script src="../assets/js/scripts.js" defer></script>
 </body>
 </html>

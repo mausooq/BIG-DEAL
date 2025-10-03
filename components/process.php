@@ -36,14 +36,14 @@
 
 			<div class="col-12 col-lg-6">
 				<div class="process-image-wrap">
-					<img src="<?php echo $asset_path; ?>images/prop/prop1.png" alt="Process" class="process-image" id="process-image">
+                    <img src="<?php echo $asset_path; ?>images/prop/prop1.png" alt="Process" class="process-image" id="process-image" loading="lazy" decoding="async" fetchpriority="low">
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
 
-<style>
+<style> 
 /* Process - Scoped Styles */
 .process-section {
     /* Center content while pinned */
@@ -127,6 +127,8 @@
 	object-fit: cover;
 	transition: transform 0.6s ease;
 	border-radius: 16px;
+    will-change: transform, opacity;
+    backface-visibility: hidden;
 }
 
 .process-image-wrap:hover .process-image { transform: scale(1.03); }
@@ -138,6 +140,9 @@
 @media (max-width: 576px) {
 	.process-title { font-size: 1.875rem; }
     .process-image { height: 360px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .process-image { transition: none; }
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -151,8 +156,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
 
+    var lastActiveIndex = -1;
     function setActive(index) {
-        steps.forEach(function(s){ s.classList.remove('active'); });
+        if (index === lastActiveIndex) return;
+        if (lastActiveIndex >= 0 && steps[lastActiveIndex]) {
+            steps[lastActiveIndex].classList.remove('active');
+        }
         var el = steps[index];
         if (!el) return;
         el.classList.add('active');
@@ -165,18 +174,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 img.style.opacity = '1';
             }, 250);
         }
+        lastActiveIndex = index;
     }
 
     // Pin the section and snap between three steps
     var currentIdx = 0;
+    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var st = ScrollTrigger.create({
         id: 'process-st',
         trigger: '.process-section',
-        start: 'center center',
-        end: '+=300%',
-        pin: true,
-        scrub: false,
-        snap: { snapTo: [0, 0.5, 1], duration: 0.6, ease: 'power1.inOut' },
+        start: 'top top',
+        end: '+=250%',
+        pin: reduceMotion ? false : true,
+        scrub: reduceMotion ? false : 0.5,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
         onUpdate: function(self){
             currentIdx = Math.round(self.progress * (steps.length - 1));
             setActive(currentIdx);
@@ -193,11 +205,15 @@ document.addEventListener('DOMContentLoaded', function () {
         isAnimating = true;
         gsap.to(window, { duration: 0.6, scrollTo: y, ease: 'power1.out', onComplete: function(){ isAnimating = false; currentIdx = t; } });
     }
+    var lastWheelTime = 0;
     function wheelHandler(e){
-        if (!st || !st.pin) return; // not active
+        if (!st || !st.isActive()) return; // only handle while pinned/active
+        var now = performance.now();
+        if (now - lastWheelTime < 180) return; // throttle rapid wheel events
+        lastWheelTime = now;
         var dir = e.deltaY > 0 ? 1 : -1;
         var p = st.progress || 0;
-        var eps = 0.02;
+        var eps = 0.08;
         // If at boundaries and user scrolls outward, allow default behavior to exit the section
         if ((dir < 0 && p <= eps) || (dir > 0 && p >= 1 - eps)) {
             return; // do not preventDefault so page can scroll past
