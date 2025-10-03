@@ -121,7 +121,7 @@ if ($search) {
 	$params[] = $searchParam2;
 }
 
-$sql = "SELECT id, title, content, image_url, created_at, category FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+$sql = "SELECT id, title, content, image_url, created_at, category, tags FROM blogs" . $whereClause . " ORDER BY created_at DESC LIMIT ? OFFSET ?";
 $types .= 'ii';
 $params[] = $limit;
 $params[] = $offset;
@@ -435,6 +435,21 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 									<span class="badge bg-danger"><?php echo htmlspecialchars($row['category']); ?></span>
 									</div>
 									<?php endif; ?>
+									<?php if (!empty($row['tags'])): ?>
+									<div class="blog-tags mb-2">
+									<?php 
+									$tags = explode(',', $row['tags']);
+									foreach ($tags as $tag): 
+										$tag = trim($tag);
+										if (!empty($tag)):
+									?>
+									<span class="badge bg-secondary me-1"><?php echo htmlspecialchars($tag); ?></span>
+									<?php 
+										endif;
+									endforeach; 
+									?>
+									</div>
+									<?php endif; ?>
 									<p class="blog-preview"><?php echo htmlspecialchars(substr($row['content'], 0, 80)) . '...'; ?></p>
 									<div class="blog-meta"></div>
 								</div>
@@ -523,6 +538,8 @@ $recentBlogs = $mysqli->query("SELECT id, title, DATE_FORMAT(created_at,'%b %d, 
 			body.innerHTML = `
 				${imgSrc ? `<img src="${imgSrc}" alt="Cover" class="img-fluid mb-3" style=\"border-radius:12px; border:1px solid var(--line);\">` : ''}
 				<div class="text-muted small mb-2"><i class="fa-regular fa-calendar me-1"></i>${blog.created_at || ''}</div>
+				${blog.category ? `<div class="mb-2"><span class="badge bg-danger">${blog.category}</span></div>` : ''}
+				${blog.tags ? `<div class="mb-2">${blog.tags.split(',').map(tag => `<span class="badge bg-secondary me-1">${tag.trim()}</span>`).join('')}</div>` : ''}
 				<div style="white-space:pre-wrap; line-height:1.6;">${(blog.content || '').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
 				<div class=\"d-flex gap-2 mt-3\"> 
 					<a href=\"edit.php?id=${blog.id || ''}\" class=\"btn btn-primary btn-sm\" target=\"_blank\" rel=\"noopener\"> 
