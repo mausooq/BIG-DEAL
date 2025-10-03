@@ -1,5 +1,10 @@
 <?php
-// Handle contact form submission
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Handle contact form submission (PHPMailer via SMTP)
 $contactSuccess = false;
 $contactError = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,43 +18,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $contactError = 'Please enter a valid email address.';
   } else {
-    $to = 'office@bigdeal.property';
-    $subject = 'New contact form submission';
     $fullName = trim($first . ' ' . $last);
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
-    $bodyLines = [
-      'You have received a new message from the website contact form.',
-      '',
-      'Name: ' . ($fullName !== '' ? $fullName : '—'),
-      'Email: ' . $email,
-      '',
-      'Message:',
-      $message,
-      '',
-      '---',
-      'Meta:',
-      'IP: ' . $ip,
-      'UA: ' . $ua,
-      'Time: ' . date('Y-m-d H:i:s')
-    ];
-    $body = implode("\r\n", $bodyLines);
 
-    // Use a safe default From and set Reply-To to the user's email
-    $from = 'no-reply@' . ($_SERVER['HTTP_HOST'] ?? 'bigdeal.property');
-    $headers = [];
-    $headers[] = 'From: Big Deal Website <' . $from . '>';
-    $headers[] = 'Reply-To: ' . $fullName . ' <' . $email . '>';
-    $headers[] = 'MIME-Version: 1.0';
-    $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+    $mailer = new PHPMailer(true);
+    try {
+      // SMTP settings
+      $mailer->isSMTP();
+      $mailer->Host = 'smtp.hostinger.com';
+      $mailer->SMTPAuth = true;
+      $mailer->Username = 'office@bigdeal.property';
+      // Prefer env var if present, else placeholder (replace in production)
+      $smtpPassword = getenv('SMTP_PASSWORD') ?: 'Brandweave@24';
+      $mailer->Password = $smtpPassword;
+      $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+      $mailer->Port = 587;
 
-    $sent = @mail($to, $subject, $body, implode("\r\n", $headers));
-    if ($sent) {
+      // Sender & recipient
+      $mailer->setFrom('office@bigdeal.property', 'Big Deal Website');
+      $mailer->addAddress('office@bigdeal.property');
+      $mailer->addReplyTo($email, $fullName !== '' ? $fullName : $email);
+
+      // Content
+      $mailer->isHTML(false);
+      $mailer->Subject = 'New contact form submission';
+      $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+      $ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+      $mailer->Body = "Name: {$fullName}\nEmail: {$email}\n\nMessage:\n{$message}\n\n---\nIP: {$ip}\nUA: {$ua}\nTime: " . date('Y-m-d H:i:s');
+
+      $mailer->send();
       $contactSuccess = true;
-      // Clear fields after successful send
       $_POST = [];
-    } else {
-      $contactError = 'We could not send your message right now. Please try again later.';
+    } catch (Exception $e) {
+      $contactError = 'Message could not be sent. Error: ' . $mailer->ErrorInfo;
     }
   }
 }
