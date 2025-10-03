@@ -55,46 +55,6 @@ if (!$propertyId) {
   exit;
 }
 
-// Generate random characters for URL if not present
-$randomChars = isset($_GET['share']) ? $_GET['share'] : generateRandomString(12);
-
-// Function to generate random string
-function generateRandomString($length = 12) {
-  $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  $charactersLength = strlen($characters);
-  $randomString = '';
-  for ($i = 0; $i < $length; $i++) {
-    $randomString .= $characters[rand(0, $charactersLength - 1)];
-  }
-  return $randomString;
-}
-
-// If no share parameter, add random characters to current URL without redirect
-if (!isset($_GET['share'])) {
-  $_GET['share'] = $randomChars;
-  // Update the URL in browser without redirect
-  $currentUrl = $_SERVER['REQUEST_URI'];
-  
-  // Clean up any existing share parameters to avoid duplicates
-  $parsedUrl = parse_url($currentUrl);
-  $queryParams = [];
-  if (isset($parsedUrl['query'])) {
-    parse_str($parsedUrl['query'], $queryParams);
-  }
-  
-  // Remove any existing share parameters
-  unset($queryParams['share']);
-  
-  // Add the new share parameter
-  $queryParams['share'] = $randomChars;
-  
-  // Rebuild the URL
-  $newQuery = http_build_query($queryParams);
-  $newUrl = $parsedUrl['path'] . '?' . $newQuery;
-  
-  // Use JavaScript to update URL without page reload
-  echo '<script>history.replaceState(null, null, "' . htmlspecialchars($newUrl) . '");</script>';
-}
 
 // Fetch property details with category and images
 $mysqli = getMysqliConnection();
@@ -270,7 +230,6 @@ function formatPrice($price)
 
       <div class=" col-md-4 property2-title">
         <h2><?php echo htmlspecialchars($property['title']); ?></h2>
-        <button type="button" class="btn btn-dark" style="margin: 6px 0 14px;" onclick="shareCurrentProperty()">Share</button>
         <div class="property-details2">
           <div class="detail-box">
             <span class="plabel">Facing</span>
@@ -314,6 +273,26 @@ function formatPrice($price)
             <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3889.58734013592!2d74.85801117481817!3d12.869908517100171!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3ba35a3245f37f65%3A0x66a8be45c5d10bc9!2sKankanady%20gate!5e0!3m2!1sen!2sin!4v1757567792855!5m2!1sen!2sin"
               width="100%" height="250" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
           <?php endif; ?>
+        </div>
+
+        <!-- Share Button -->
+        <div class="property-actions" style="margin-top: 20px;">
+          <div class="btn-grp" style="display: flex; gap: 10px;">
+            <button
+              class="btn btn-share"
+              onclick="sharePropertyFromBtn(this, <?php echo $property['id']; ?>)"
+              data-id="<?php echo (int)$property['id']; ?>"
+              data-title="<?php echo htmlspecialchars($property['title']); ?>"
+              data-desc="<?php echo htmlspecialchars($property['description']); ?>"
+              data-config="<?php echo htmlspecialchars($property['configuration']); ?>"
+              data-price="<?php echo formatPrice($property['price']); ?>"
+              data-area="<?php echo number_format($property['area']); ?>"
+              data-furniture="<?php echo htmlspecialchars($property['furniture_status']); ?>"
+              data-location="<?php echo htmlspecialchars($property['location']); ?>"
+              data-image="<?php echo !empty($propertyImages[0]) ? '../uploads/properties/' . $propertyImages[0] : ''; ?>"
+            >Share</button>
+            <button class="btn btn-contact" onclick="contactProperty(<?php echo $property['id']; ?>)">Contact us</button>
+          </div>
         </div>
       </div>
 
@@ -464,52 +443,6 @@ function formatPrice($price)
   <script src="../assets/js/scripts.js"></script>
 
   <script>
-    async function shareCurrentProperty() {
-      try {
-        var title = <?php echo json_encode($property['title']); ?> || 'Property';
-        var price = <?php echo json_encode(formatPrice($property['price'])); ?> || '';
-        var locationTxt = <?php echo json_encode($property['location']); ?> || '';
-        var detailsUrl = window.location.origin + '/products/product-details.php?id=' + <?php echo (int)$propertyId; ?> + '&share=' + <?php echo json_encode($randomChars); ?>;
-        var mainImgEl = document.getElementById('mainImage');
-        var imageUrl = mainImgEl ? mainImgEl.getAttribute('src') : '';
-
-        var lines = [
-          title,
-          price ? 'Price: ' + price : '',
-          locationTxt ? 'Location: ' + locationTxt : '',
-          '\nView details: ' + detailsUrl
-        ].filter(Boolean);
-        var text = lines.join('\n');
-
-        if (navigator.share) {
-          var shareData = { title: title, text: text, url: detailsUrl };
-          var absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
-          if (absImageUrl && window.File && window.Blob) {
-            try {
-              var res = await fetch(absImageUrl);
-              var blob = await res.blob();
-              var file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
-              if (('canShare' in navigator) && navigator.canShare({ files: [file] })) {
-                shareData.files = [file];
-                delete shareData.url;
-              } else {
-                shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
-              }
-            } catch (_) {
-              shareData.text = text + (absImageUrl ? '\nImage: ' + absImageUrl : '');
-            }
-          }
-          await navigator.share(shareData);
-          return;
-        }
-
-        var absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
-        await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
-        alert('Property details copied. Paste to share!');
-      } catch (e) {
-        try { window.open(detailsUrl, '_blank'); } catch (_) {}
-      }
-    }
     function changeMainImage(imageSrc) {
       document.getElementById('mainImage').src = imageSrc;
     }
@@ -600,6 +533,81 @@ function formatPrice($price)
 
     function goToPropertyDetails(propertyId) {
       window.location.href = 'product-details.php?id=' + propertyId;
+    }
+
+    // Share full card: title, description, attributes and image
+    async function sharePropertyFromBtn(btn, propertyId) {
+        try {
+            const title = btn.getAttribute('data-title') || 'Property';
+            const desc = btn.getAttribute('data-desc') || '';
+            const config = btn.getAttribute('data-config') || '';
+            const price = btn.getAttribute('data-price') || '';
+            const area = btn.getAttribute('data-area') || '';
+            const furniture = btn.getAttribute('data-furniture') || '';
+            const location = btn.getAttribute('data-location') || '';
+            const imageUrl = btn.getAttribute('data-image') || '';
+
+            // Generate proper sharing URL - use current page URL as base and modify it
+            const currentUrl = window.location.href;
+            const urlParts = currentUrl.split('?');
+            const baseUrl = urlParts[0]; // Get URL without query parameters
+            const projectPath = baseUrl.replace('/products/product-details.php', '');
+            const detailsUrl = projectPath + '/products/product-details.php?id=' + propertyId;
+
+            // Build share text
+            const lines = [
+                `${title}`,
+                location ? `Location: ${location}` : '',
+                config ? `Configuration: ${config}` : '',
+                area ? `Area: ${area} sq.ft` : '',
+                price ? `Price: ${price}` : '',
+                furniture ? `Furniture: ${furniture}` : '',
+                desc ? `\n${desc}` : '',
+                `\nView details: ${detailsUrl}`
+            ].filter(Boolean);
+            const text = lines.join('\n');
+
+            // Try Web Share Level 2 with files (if supported and image available)
+            if (navigator.share) {
+                const shareData = { title, text, url: detailsUrl };
+
+                // Attempt image share if fetchable and File constructor exists
+                if (imageUrl && window.File && window.Blob) {
+                    try {
+                        const absImageUrl = new URL(imageUrl, window.location.href).href;
+                        const res = await fetch(absImageUrl);
+                        const blob = await res.blob();
+                        const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
+                        if ('files' in navigator.canShare ? navigator.canShare({ files: [file] }) : false) {
+                            shareData.files = [file];
+                            delete shareData.url; // with files, keep text clean
+                        }
+                    } catch (_) {
+                        // Include image URL in text if attachment fails
+                        shareData.text = text + (imageUrl ? '\nImage: ' + new URL(imageUrl, window.location.href).href : '');
+                    }
+                }
+
+                await navigator.share(shareData);
+                return;
+            }
+
+            // Fallback: copy composed text + link (+image URL) to clipboard
+            const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
+            await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
+            alert('Property details copied. Paste to share!');
+        } catch (err) {
+            try {
+                // Last fallback: open details page
+                window.open('/products/product-details.php?id=' + propertyId, '_blank');
+            } catch (_) {}
+        }
+    }
+
+    function contactProperty(propertyId) {
+        // Call the phone number directly
+        const phoneNumber = '80888 55555';
+        window.location.href = 'tel:' + phoneNumber;
     }
 
     function toggleDescription(e) {

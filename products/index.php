@@ -710,7 +710,12 @@ function generateRandomString(length) {
 
 async function shareProperty(propertyId) {
     try {
-        const detailsUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
+        // Generate proper sharing URL - use current page URL as base and modify it
+        const currentUrl = window.location.href;
+        const urlParts = currentUrl.split('?');
+        const baseUrl = urlParts[0]; // Get URL without query parameters
+        const projectPath = baseUrl.replace('/products/index.php', '');
+        const detailsUrl = projectPath + '/products/product-details.php?id=' + propertyId;
         // Try to find the card to extract richer info and image
         const card = document.querySelector(`.aproperty-card[data-property-id="${propertyId}"]`);
         let title = 'Property Details';
@@ -797,7 +802,12 @@ async function sharePropertyFromBtn(btn, propertyId) {
         const location = btn.getAttribute('data-location') || '';
         const imageUrl = btn.getAttribute('data-image') || '';
 
-        const detailsUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
+        // Generate proper sharing URL - use current page URL as base and modify it
+        const currentUrl = window.location.href;
+        const urlParts = currentUrl.split('?');
+        const baseUrl = urlParts[0]; // Get URL without query parameters
+        const projectPath = baseUrl.replace('/products/index.php', '');
+        const detailsUrl = projectPath + '/products/product-details.php?id=' + propertyId;
 
         // Build share text
         const lines = [
