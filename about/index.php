@@ -108,8 +108,6 @@
               </div>
             </div>
 </div>
-<?php include '../components/certification.php'; ?>
-
 <?php include '../components/trusted-clients.php'; ?>
 
 <div class="container">
