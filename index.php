@@ -239,6 +239,8 @@ try {
     </div>
   </div>
 
+<?php include 'components/certification.php'; ?>
+
   <!-- partner section -->
   <?php include 'components/trusted-clients.php'; ?>
 

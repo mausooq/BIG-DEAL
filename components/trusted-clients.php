@@ -26,15 +26,6 @@
       <div class="col-md-12">
         <div class="owl-carousel owl-theme tc-clients-carousel">
           <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/rear.jpg">
-          </div>
-          <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/startupindia.png">
-          </div>
-          <div class="item tc-logo-box">
-            <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/startupkarantaka.jpg">
-          </div>
-          <div class="item tc-logo-box">
             <img alt="client logo" class="tc-logo-img" src="<?php echo $asset_path; ?>images/Partners/rohancorpration.jpg">
           </div>
           <div class="item tc-logo-box">
