@@ -9,7 +9,7 @@
 			</li>
 			<li class="certifications-item">
 				<div class="certifications-stack">
-					<div class="certifications-caption">"Recognized by</div>
+					<div class="certifications-caption">Recognized by</div>
 					<img src="assets/images/certification/startupindia.png" alt="DPIIT Startup India Logo" loading="lazy" />
 				</div>
 			</li>
