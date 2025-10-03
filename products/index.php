@@ -841,7 +841,7 @@ function contactProperty(propertyId) {
 }
 
 function whatsappProperty(propertyId) {
-    const phoneNumber = '919901845606'; // WhatsApp number without + and spaces
+    const phoneNumber = '919901805505'; // WhatsApp number without + and spaces
     const btn = event.target.closest('.btn-whatsapp');
     const propertyTitle = btn.getAttribute('data-title') || 'Property';
     const propertyPrice = btn.getAttribute('data-price') || '';

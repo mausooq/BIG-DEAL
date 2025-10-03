@@ -639,7 +639,7 @@ function formatPrice($price)
     }
 
     function whatsappProperty(propertyId) {
-        const phoneNumber = '919901845606'; // WhatsApp number without + and spaces
+        const phoneNumber = '919901805505'; // WhatsApp number without + and spaces
         const propertyTitle = '<?php echo addslashes($property['title']); ?>';
         const propertyPrice = '<?php echo formatPrice($property['price']); ?>';
         const propertyConfig = '<?php echo addslashes($property['configuration']); ?>';
