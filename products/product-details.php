@@ -454,7 +454,7 @@ function formatPrice($price)
         var title = <?php echo json_encode($property['title']); ?> || 'Property';
         var price = <?php echo json_encode(formatPrice($property['price'])); ?> || '';
         var locationTxt = <?php echo json_encode($property['location']); ?> || '';
-        var detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + <?php echo (int)$propertyId; ?>;
+        var detailsUrl = window.location.origin + '/products/product-details.php?id=' + <?php echo (int)$propertyId; ?>;
         var mainImgEl = document.getElementById('mainImage');
         var imageUrl = mainImgEl ? mainImgEl.getAttribute('src') : '';
 
