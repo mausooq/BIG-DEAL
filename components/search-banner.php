@@ -26,7 +26,7 @@
               Discover premium properties with our advanced search platform. Get personalized recommendations and expert guidance every step of the way.
             </p>
             
-            <a href="/BIG-DEAL/test/products/index.php" class="search-now-btn">
+            <a href="/products/" class="search-now-btn">
               EXPLORE PROPERTIES
               <span>→</span>
             </a>
