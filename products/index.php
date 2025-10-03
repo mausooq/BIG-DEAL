@@ -822,7 +822,7 @@ async function shareProperty(propertyId) {
 
 function contactProperty(propertyId) {
     // Call the phone number directly
-    const phoneNumber = '80888 55555';
+    const phoneNumber = '99018 05505';
     window.location.href = 'tel:' + phoneNumber;
 }
 

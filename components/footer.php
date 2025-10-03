@@ -396,7 +396,7 @@
       <div class=" col-md-3 footer-column">
                         <h3>Contact</h3>
                         <ul class="footer-links">
-                            <li>+91 80888 55555</li>
+                            <li>+91 99018 05505</li>
                             <li>office@bigdeal.property</li>
                             <li>First Floor, Gate Building, Kankanady Bypass Rd, Kankanady, Mangaluru, Karnataka 575002
                             </li>  

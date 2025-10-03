@@ -76,7 +76,7 @@
         <img src="../assets/images/icon/phone.svg" alt="phone">
         <div class="contact-info-text">
           <p class="contact-info-title">Call Now</p>
-          <a href="tel:+91 80888 55555" class="contact-info-detail">+91 80888 55555</a>
+          <a href="tel:+91 99018 05505" class="contact-info-detail">+91 99018 05505</a>
         </div>
       </div>
       <div class="col-3 col-md-4  contact-info-item">
