@@ -510,7 +510,6 @@ function timeAgo($datetime) {
             <?php endif; ?>
             for Sale
           </h2>
-          <button type="button" class="btn btn-primary" onclick="shareAllProperties()">Share all</button>
         </div>
         <?php endif; ?>
 
@@ -711,7 +710,7 @@ function generateRandomString(length) {
 
 async function shareProperty(propertyId) {
     try {
-        const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
+        const detailsUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
         // Try to find the card to extract richer info and image
         const card = document.querySelector(`.aproperty-card[data-property-id="${propertyId}"]`);
         let title = 'Property Details';
@@ -776,7 +775,7 @@ async function shareProperty(propertyId) {
         await navigator.clipboard.writeText(fallbackText);
         alert('Property details copied. Paste to share!');
     } catch (err) {
-        try { window.open('/test/products/product-details.php?id=' + propertyId, '_blank'); } catch (_) {}
+        try { window.open('/products/product-details.php?id=' + propertyId, '_blank'); } catch (_) {}
     }
 }
 
@@ -798,7 +797,7 @@ async function sharePropertyFromBtn(btn, propertyId) {
         const location = btn.getAttribute('data-location') || '';
         const imageUrl = btn.getAttribute('data-image') || '';
 
-        const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + propertyId;
+        const detailsUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
 
         // Build share text
         const lines = [
@@ -845,7 +844,7 @@ async function sharePropertyFromBtn(btn, propertyId) {
     } catch (err) {
         try {
             // Last fallback: open details page
-            window.open('/test/products/product-details.php?id=' + propertyId, '_blank');
+            window.open('/products/product-details.php?id=' + propertyId, '_blank');
         } catch (_) {}
     }
 }
@@ -874,14 +873,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial sync between nav-tabs-custom and property type filters
     syncInitialStates();
 
-    // Optional: attach Share All shortcut on keyboard (Ctrl/Cmd+Shift+S)
-    document.addEventListener('keydown', function(e){
-        const isMac = navigator.platform.toUpperCase().indexOf('MAC')>=0;
-        if ((isMac ? e.metaKey : e.ctrlKey) && e.shiftKey && (e.key === 'S' || e.key === 's')) {
-            e.preventDefault();
-            shareAllProperties();
-        }
-    });
 });
 
 // Function to sync initial states on page load
@@ -1440,82 +1431,6 @@ function updateApplyButtonState() {
     } catch (_) {}
 }
 
-// Share all currently visible properties: titles, details, description and attempt attaching a few images
-async function shareAllProperties() {
-  try {
-    const cards = Array.from(document.querySelectorAll('.aproperty-card'));
-    if (cards.length === 0) {
-      alert('No properties to share.');
-      return;
-    }
-
-    // Build text block with each property's info
-    const items = cards.map(card => {
-      const id = card.getAttribute('data-property-id') || '';
-      const titleEl = card.querySelector('h3');
-      const subtitleEl = titleEl ? titleEl.querySelector('span') : null;
-      const descEl = card.querySelector('p');
-      const detailsSpans = card.querySelectorAll('.property-details span');
-      const imgEl = card.querySelector('img.property-image');
-
-      const title = titleEl ? (titleEl.childNodes[0]?.textContent || titleEl.textContent || '').trim() : 'Property';
-      const subtitle = subtitleEl ? subtitleEl.textContent.trim() : '';
-      const desc = descEl ? descEl.textContent.trim() : '';
-      const confPrice = detailsSpans[0] ? detailsSpans[0].textContent.trim() : '';
-      const areaTxt = detailsSpans[1] ? detailsSpans[1].textContent.trim() : '';
-      const possTxt = detailsSpans[2] ? detailsSpans[2].textContent.trim() : '';
-      const imageUrl = imgEl ? imgEl.getAttribute('src') : '';
-
-      const detailsUrl = window.location.origin + '/test/products/product-details.php?id=' + id;
-
-      const lines = [
-        title,
-        subtitle ? subtitle : '',
-        confPrice ? confPrice : '',
-        areaTxt ? areaTxt : '',
-        possTxt ? possTxt : '',
-        desc ? '\n' + desc : '',
-        '\nView details: ' + detailsUrl
-      ].filter(Boolean);
-
-      return { id, title, text: lines.join('\n'), imageUrl };
-    });
-
-    // Combine into one share text
-    const header = 'Property list from Big Deal Ventures\n\n';
-    const combinedText = header + items.map((it, idx) => (idx+1) + '. ' + it.text).join('\n\n');
-
-    // Try Web Share with 1 image (first property's image) if supported
-    if (navigator.share) {
-      const shareData = { title: 'Property list', text: combinedText };
-
-      // Attempt fetching the first available image to include
-      const firstImageUrl = (items.find(i => i.imageUrl) || {}).imageUrl;
-      if (firstImageUrl && window.File && window.Blob) {
-        try {
-          const res = await fetch(firstImageUrl, { mode: 'cors' });
-          const blob = await res.blob();
-          const fname = 'property.jpg';
-          const file = new File([blob], fname, { type: blob.type || 'image/jpeg' });
-          if ('canShare' in navigator && navigator.canShare({ files: [file] })) {
-            shareData.files = [file];
-            delete shareData.url;
-          }
-        } catch (_) { /* ignore image fetch failure; continue with text only */ }
-      }
-
-      await navigator.share(shareData);
-      return;
-    }
-
-    // Fallback: copy to clipboard
-    await navigator.clipboard.writeText(combinedText);
-    alert('Property list copied. Paste to share!');
-  } catch (err) {
-    // Last fallback: open current page, allowing manual share
-    try { window.open(window.location.href, '_blank'); } catch (_) {}
-  }
-}
 </script>
 </body>
 </html>
