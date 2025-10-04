@@ -100,7 +100,7 @@
   text-decoration: none;
 }
 
-/* For small devices (phones, portrait) */
+/* For very small devices (phones, portrait) */
 @media (max-width: 480px) {
   /* CSS for very small phones */
   .contact-page .hero-banner .centered h1 { font-size: 1.6em; }
@@ -121,12 +121,14 @@
   .contact-page .contact-info-section .row {
     gap: 1rem;
     flex-direction: column;
+    align-items: center;
   }
 
   .contact-page .contact-info-section .col-12,
   .contact-page .contact-info-section .col-md-3 {
     max-width: 100%;
     flex: none;
+    width: 100%;
   }
 
   .contact-page .contact-info-item {
@@ -136,6 +138,13 @@
 
   .contact-page .contact-info-item .d-flex {
     gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: center;
   }
 
   .contact-page .contact-icon-wrapper {
@@ -180,6 +189,31 @@
     align-self: stretch;
   }
 
+}
+
+/* For small phones - ensure stacking */
+@media (max-width: 576px) {
+  .contact-page .contact-info-section .row {
+    flex-direction: column !important;
+    align-items: center;
+  }
+  
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
+  }
+
+  .contact-page .contact-info-item .d-flex {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: center;
+  }
 }
 
 /* For larger phones (landscape) */
