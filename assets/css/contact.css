@@ -7,9 +7,7 @@
 .contact-page .contact-map { min-height: 22em; }
 
 /* Contact Information Section */
-.contact-page .contact-info-section {
-  margin: 3rem 0;
-}
+
 
 .contact-page .contact-info-section .row {
   align-items: stretch;
@@ -28,8 +26,6 @@
   padding: 1.5rem 1rem;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   height: 100%;
   min-height: 140px;
   display: flex;
@@ -42,15 +38,11 @@
   gap: 1rem;
 }
 
-.contact-page .contact-info-item:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-}
 
 .contact-page .contact-icon-wrapper {
   width: 50px;
   height: 50px;
-  background: linear-gradient(43deg, #000000 0%, #ad1919 100%);
+  background: #d44646;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -67,9 +59,7 @@
   color: white;
 }
 
-.contact-page .contact-icon-wrapper .whatsapp-icon {
-  background: linear-gradient(43deg, #000000 0%, #ad1919 100%);
-}
+
 
 .contact-page .contact-info-text {
   flex: 1;
@@ -87,9 +77,9 @@
 }
 
 .contact-page .contact-info-detail {
-  color: #666;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
+  font-weight: 400;
   transition: color 0.3s ease;
   display: block;
   line-height: 1.4;
