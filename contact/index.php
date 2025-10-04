@@ -130,32 +130,58 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </section>
 
-
-  <div class=" container">
-    <div class="row ">
-      <div class="col-4 col-md-4  contact-info-item">
-        <img src="../assets/images/icon/phone.svg" alt="phone" loading="lazy" decoding="async" fetchpriority="low">
-        <div class="contact-info-text">
-          <p class="contact-info-title">Call Now</p>
-          <a href="tel:+91 99018 05505" class="contact-info-detail">+91 99018 05505</a>
+  <!-- Contact Information Section -->
+  <section class="contact-info-section py-5">
+    <div class="container">
+      <div class="row g-4 justify-content-center">
+        <div class="col-12 col-md-3 contact-info-item">
+          <div class="d-flex align-items-center gap-3">
+            <div class="contact-icon-wrapper">
+              <i class="fas fa-phone contact-icon"></i>
+            </div>
+            <div class="contact-info-text">
+              <h6 class="contact-info-title mb-1">Call Now</h6>
+              <a href="tel:+919901805505" class="contact-info-detail">+91 99018 05505</a>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-3 col-md-4  contact-info-item">
-        <img src="../assets/images/icon/location.svg" alt="location" loading="lazy" decoding="async" fetchpriority="low" >
-        <div class="contact-info-text">
-          <p class="contact-info-title">Location</p>
-          <p class="contact-info-detail">First Floor, Gate Building, Kankanady Bypass Rd, Kankanady, Mangaluru, Karnataka 575002</p>
+        <div class="col-12 col-md-3 contact-info-item">
+          <div class="d-flex align-items-center gap-3">
+            <div class="contact-icon-wrapper">
+              <i class="fas fa-map-marker-alt contact-icon"></i>
+            </div>
+            <div class="contact-info-text">
+              <h6 class="contact-info-title mb-1">Location</h6>
+              <p class="contact-info-detail mb-0">Kankanady, Mangaluru, Karnataka 575002</p>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="col-5 col-md-4 contact-info-item">
-        <img src="../assets/images/icon/mail.svg" alt="email" loading="lazy" decoding="async" fetchpriority="low">
-        <div class="contact-info-text">
-          <p class="contact-info-title">Email Now</p>
-          <a href="mailto:office@bigdeal.property" class="contact-info-detail">office@bigdeal.property</a>
+        <div class="col-12 col-md-3 contact-info-item">
+          <div class="d-flex align-items-center gap-3">
+            <div class="contact-icon-wrapper">
+              <i class="fas fa-envelope contact-icon"></i>
+            </div>
+            <div class="contact-info-text">
+              <h6 class="contact-info-title mb-1">Email</h6>
+              <a href="mailto:office@bigdeal.property" class="contact-info-detail">office@bigdeal.property</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-3 contact-info-item">
+          <div class="d-flex align-items-center gap-3">
+            <div class="contact-icon-wrapper">
+              <i class="fab fa-whatsapp contact-icon whatsapp-icon"></i>
+            </div>
+            <div class="contact-info-text">
+              <h6 class="contact-info-title mb-1">WhatsApp</h6>
+              <a href="https://wa.me/919901805505?text=Hi! I'm interested in your properties. Please provide more information." class="contact-info-detail" target="_blank">Chat with us</a>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
+  </section>
+
   <?php include '../components/search-banner.php'; ?>
 
     <?php include '../components/process.php';?> 
