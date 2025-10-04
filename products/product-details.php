@@ -55,6 +55,11 @@ if (!$propertyId) {
   exit;
 }
 
+// Build absolute URLs for sharing
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$host = $_SERVER['HTTP_HOST'];
+$currentUrl = $protocol . "://" . $host . $_SERVER['REQUEST_URI'];
+
 
 // Fetch property details with category and images
 $mysqli = getMysqliConnection();
@@ -183,6 +188,26 @@ function formatPrice($price)
 
   <title><?php echo htmlspecialchars($property['title']); ?> - Big Deal Ventures</title>
   <link rel="icon" href="../assets/images/favicon.png" type="image/png">
+  
+  <!-- Open Graph Meta Tags for Rich Sharing -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="<?php echo htmlspecialchars($currentUrl); ?>" />
+  <meta property="og:title" content="<?php echo htmlspecialchars($property['title']); ?>" />
+  <meta property="og:description" content="<?php echo htmlspecialchars($property['configuration'] . ' House in ' . $property['location'] . ' - ' . formatPrice($property['price'])); ?>" />
+  <?php if (!empty($propertyImages[0])): ?>
+  <meta property="og:image" content="<?php echo htmlspecialchars($protocol . "://" . $host . "/uploads/properties/" . $propertyImages[0]); ?>" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <?php endif; ?>
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="<?php echo htmlspecialchars($currentUrl); ?>" />
+  <meta name="twitter:title" content="<?php echo htmlspecialchars($property['title']); ?>" />
+  <meta name="twitter:description" content="<?php echo htmlspecialchars($property['description']); ?>" />
+  <?php if (!empty($propertyImages[0])): ?>
+  <meta name="twitter:image" content="<?php echo htmlspecialchars($protocol . "://" . $host . "/uploads/properties/" . $propertyImages[0]); ?>" />
+  <?php endif; ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -563,7 +588,7 @@ function formatPrice($price)
       window.location.href = 'product-details.php?id=' + propertyId;
     }
 
-    // Share full card: title, description, attributes and image
+    // Enhanced sharing function with proper image handling
     async function sharePropertyFromBtn(btn, propertyId) {
         try {
             const title = btn.getAttribute('data-title') || 'Property';
@@ -575,60 +600,79 @@ function formatPrice($price)
             const location = btn.getAttribute('data-location') || '';
             const imageUrl = btn.getAttribute('data-image') || '';
 
-            // Generate proper sharing URL - use current page URL as base and modify it
-            const currentUrl = window.location.href;
-            const urlParts = currentUrl.split('?');
-            const baseUrl = urlParts[0]; // Get URL without query parameters
-            const projectPath = baseUrl.replace('/products/product-details.php', '');
-            const detailsUrl = projectPath + '/products/product-details.php?id=' + propertyId;
+            // Build proper absolute URL for sharing
+            const protocol = window.location.protocol;
+            const host = window.location.host;
+            const detailsUrl = `${protocol}//${host}/products/product-details.php?id=${propertyId}`;
 
-            // Build share text
-            const lines = [
-                `${title}`,
-                location ? `Location: ${location}` : '',
-                config ? `Configuration: ${config}` : '',
-                area ? `Area: ${area} sq.ft` : '',
-                price ? `Price: ${price}` : '',
-                furniture ? `Furniture: ${furniture}` : '',
-                desc ? `\n${desc}` : '',
-                `\nView details: ${detailsUrl}`
-            ].filter(Boolean);
-            const text = lines.join('\n');
+            // Build share text with emojis for better visual appeal
+            const shareText = `${title}\n\n` +
+                (location ? `📍 ${location}\n` : '') +
+                (config ? `🏠 ${config}\n` : '') +
+                (price ? `💰 ${price}\n` : '') +
+                (area ? `📐 ${area} sq.ft\n` : '') +
+                (furniture ? `🛋️ ${furniture}\n` : '') +
+                (desc ? `\n${desc}\n` : '') +
+                `\n👉 View details: ${detailsUrl}`;
 
-            // Try Web Share Level 2 with files (if supported and image available)
+            // Try Web Share API (works on mobile)
             if (navigator.share) {
-                const shareData = { title, text, url: detailsUrl };
-
-                // Attempt image share if fetchable and File constructor exists
-                if (imageUrl && window.File && window.Blob) {
-                    try {
-                        const absImageUrl = new URL(imageUrl, window.location.href).href;
-                        const res = await fetch(absImageUrl);
-                        const blob = await res.blob();
-                        const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
-                        if ('files' in navigator.canShare ? navigator.canShare({ files: [file] }) : false) {
-                            shareData.files = [file];
-                            delete shareData.url; // with files, keep text clean
+                try {
+                    // Try sharing with image file
+                    if (imageUrl) {
+                        const absImageUrl = imageUrl.startsWith('http') ? imageUrl : `${protocol}//${host}${imageUrl}`;
+                        
+                        try {
+                            const response = await fetch(absImageUrl);
+                            const blob = await response.blob();
+                            const file = new File([blob], 'property.jpg', { type: blob.type });
+                            
+                            // Check if we can share files
+                            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                await navigator.share({
+                                    title: title,
+                                    text: shareText,
+                                    files: [file]
+                                });
+                                return;
+                            }
+                        } catch (e) {
+                            console.log('Image sharing not supported, falling back to URL share');
                         }
-                    } catch (_) {
-                        // Include image URL in text if attachment fails
-                        shareData.text = text + (imageUrl ? '\nImage: ' + new URL(imageUrl, window.location.href).href : '');
                     }
+                    
+                    // Fallback: share without image
+                    await navigator.share({
+                        title: title,
+                        text: shareText,
+                        url: detailsUrl
+                    });
+                    return;
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        throw err;
+                    }
+                    return; // User cancelled
                 }
-
-                await navigator.share(shareData);
-                return;
             }
 
-            // Fallback: copy composed text + link (+image URL) to clipboard
-            const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
-            await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
-            alert('Property details copied. Paste to share!');
+            // Fallback for desktop: copy to clipboard
+            await navigator.clipboard.writeText(shareText);
+            
+            // Show feedback
+            const originalText = btn.textContent;
+            btn.textContent = '✓ Copied!';
+            btn.style.backgroundColor = '#10b981';
+            
+            setTimeout(() => {
+                btn.textContent = originalText;
+                btn.style.backgroundColor = '';
+            }, 2000);
+            
         } catch (err) {
-            try {
-                // Last fallback: open details page
-                window.open('/products/product-details.php?id=' + propertyId, '_blank');
-            } catch (_) {}
+            console.error('Share failed:', err);
+            // Last fallback: open in new tab
+            window.open(`/products/product-details.php?id=${propertyId}`, '_blank');
         }
     }
 

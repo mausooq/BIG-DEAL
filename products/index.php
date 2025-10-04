@@ -873,7 +873,7 @@ Please provide more information about this property.`;
     window.open(whatsappUrl, '_blank');
 }
 
-// Share full card: title, description, attributes and image
+// Enhanced sharing function with proper image handling
 async function sharePropertyFromBtn(btn, propertyId) {
     try {
         const title = btn.getAttribute('data-title') || 'Property';
@@ -885,60 +885,79 @@ async function sharePropertyFromBtn(btn, propertyId) {
         const location = btn.getAttribute('data-location') || '';
         const imageUrl = btn.getAttribute('data-image') || '';
 
-        // Generate proper sharing URL - use current page URL as base and modify it
-        const currentUrl = window.location.href;
-        const urlParts = currentUrl.split('?');
-        const baseUrl = urlParts[0]; // Get URL without query parameters
-        const projectPath = baseUrl.replace('/products/index.php', '');
-        const detailsUrl = projectPath + '/products/product-details.php?id=' + propertyId;
+        // Build proper absolute URL for sharing
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        const detailsUrl = `${protocol}//${host}/products/product-details.php?id=${propertyId}`;
 
-        // Build share text
-        const lines = [
-            `${title}`,
-            location ? `Location: ${location}` : '',
-            config ? `Configuration: ${config}` : '',
-            area ? `Area: ${area} sq.ft` : '',
-            price ? `Price: ${price}` : '',
-            furniture ? `Furniture: ${furniture}` : '',
-            desc ? `\n${desc}` : '',
-            `\nView details: ${detailsUrl}`
-        ].filter(Boolean);
-        const text = lines.join('\n');
+        // Build share text with emojis for better visual appeal
+        const shareText = `${title}\n\n` +
+            (location ? `📍 ${location}\n` : '') +
+            (config ? `🏠 ${config}\n` : '') +
+            (price ? `💰 ${price}\n` : '') +
+            (area ? `📐 ${area} sq.ft\n` : '') +
+            (furniture ? `🛋️ ${furniture}\n` : '') +
+            (desc ? `\n${desc}\n` : '') +
+            `\n👉 View details: ${detailsUrl}`;
 
-        // Try Web Share Level 2 with files (if supported and image available)
+        // Try Web Share API (works on mobile)
         if (navigator.share) {
-            const shareData = { title, text, url: detailsUrl };
-
-            // Attempt image share if fetchable and File constructor exists
-            if (imageUrl && window.File && window.Blob) {
-                try {
-                    const absImageUrl = new URL(imageUrl, window.location.href).href;
-                    const res = await fetch(absImageUrl);
-                    const blob = await res.blob();
-                    const file = new File([blob], 'property.jpg', { type: blob.type || 'image/jpeg' });
-                    if ('files' in navigator.canShare ? navigator.canShare({ files: [file] }) : false) {
-                        shareData.files = [file];
-                        delete shareData.url; // with files, keep text clean
+            try {
+                // Try sharing with image file
+                if (imageUrl) {
+                    const absImageUrl = imageUrl.startsWith('http') ? imageUrl : `${protocol}//${host}${imageUrl}`;
+                    
+                    try {
+                        const response = await fetch(absImageUrl);
+                        const blob = await response.blob();
+                        const file = new File([blob], 'property.jpg', { type: blob.type });
+                        
+                        // Check if we can share files
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({
+                                title: title,
+                                text: shareText,
+                                files: [file]
+                            });
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('Image sharing not supported, falling back to URL share');
                     }
-                } catch (_) {
-                    // Include image URL in text if attachment fails
-                    shareData.text = text + (imageUrl ? '\nImage: ' + new URL(imageUrl, window.location.href).href : '');
                 }
+                
+                // Fallback: share without image
+                await navigator.share({
+                    title: title,
+                    text: shareText,
+                    url: detailsUrl
+                });
+                return;
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    throw err;
+                }
+                return; // User cancelled
             }
-
-            await navigator.share(shareData);
-            return;
         }
 
-        // Fallback: copy composed text + link (+image URL) to clipboard
-        const absImageUrl = imageUrl ? new URL(imageUrl, window.location.href).href : '';
-        await navigator.clipboard.writeText(text + (absImageUrl ? '\nImage: ' + absImageUrl : ''));
-        alert('Property details copied. Paste to share!');
+        // Fallback for desktop: copy to clipboard
+        await navigator.clipboard.writeText(shareText);
+        
+        // Show feedback
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        btn.style.backgroundColor = '#10b981';
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.backgroundColor = '';
+        }, 2000);
+        
     } catch (err) {
-        try {
-            // Last fallback: open details page
-            window.open('/products/product-details.php?id=' + propertyId, '_blank');
-        } catch (_) {}
+        console.error('Share failed:', err);
+        // Last fallback: open in new tab
+        window.open(`/products/product-details.php?id=${propertyId}`, '_blank');
     }
 }
 
