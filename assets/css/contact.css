@@ -228,8 +228,8 @@
 
   .contact-page .contact-info-section .col-12,
   .contact-page .contact-info-section .col-md-3 {
-    max-width: calc(25% - 0.9375rem);
-    flex: 1;
+    max-width: calc(50% - 0.5rem);
+    flex: 0 0 calc(50% - 0.5rem);
   }
 
   .contact-page .contact-info-item {
@@ -239,16 +239,72 @@
 
   .contact-page .contact-info-item .d-flex {
     gap: 0.875rem;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: left;
   }
 
 }
 
-/* For tablets */
-@media (max-width: 1024px) {
+/* For tablets and iPads */
+@media (min-width: 769px) and (max-width: 1024px) {
   /* CSS for iPads, small laptops */
-  .contact-page .hero-banner .centered h1 { font-size: 2em; }
-  .contact-page .forms { padding:0 !important; }
-  .contact-page .contact-map { min-height: 21.25em; }
+  .contact-page .hero-banner .centered h1 { font-size: 2.2em; }
+  .contact-page .forms { padding: 0 2rem !important; }
+  .contact-page .contact-map { min-height: 22em; }
+
+  /* Contact info section for tablets */
+  .contact-page .contact-info-section {
+    margin: 3rem 0;
+    padding: 0 1rem;
+  }
+
+  .contact-page .contact-info-section .row {
+    gap: 1.5rem;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    max-width: calc(50% - 0.75rem);
+    flex: 0 0 calc(50% - 0.75rem);
+  }
+
+  .contact-page .contact-info-item {
+    padding: 1.5rem 1rem;
+    min-height: 150px;
+  }
+
+  .contact-page .contact-info-item .d-flex {
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: left;
+  }
+
+  .contact-page .contact-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .contact-page .contact-icon {
+    font-size: 1.2rem;
+  }
+
+  .contact-page .contact-info-title {
+    font-size: 1.1rem;
+  }
+
+  .contact-page .contact-info-detail {
+    font-size: 1rem;
+  }
 
   /* Balance columns */
   .contact-page .col-md-7, .contact-page .col-md-5 { margin-top: 1em; }
