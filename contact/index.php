@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
   <!-- Contact Information Section -->
   <section class="contact-info-section py-5">
-    <div class="container">
+    <div class="container" style="background-color:rgb(40, 40, 150)">
       <div class="row g-4 justify-content-center">
         <div class="col-12 col-md-3 contact-info-item">
           <div class="d-flex align-items-center gap-3">
