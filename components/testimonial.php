@@ -8,7 +8,8 @@ $testimonials = [];
 if (!isset($asset_path)) { $asset_path = 'assets/'; }
 $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
 $dotdotCount = substr_count($asset_path, '../');
-$uploads_prefix = str_repeat('../', $dotdotCount + 1);
+// Match URL depth: if asset_path is 'assets/', no '../' needed; if '../assets/', use '../', etc.
+$uploads_prefix = str_repeat('../', $dotdotCount);
 
 // Helper to resolve testimonial image path; prefer uploads/testimonials when a filename only is stored
 function resolveTestimonialImageSrc($raw, $type = 'profile') {
@@ -28,8 +29,7 @@ function resolveTestimonialImageSrc($raw, $type = 'profile') {
     if ($isAbs) { return $raw; }
     
     $name = basename($raw);
-    $testRoot = dirname(__DIR__);        // .../BIG-DEAL/test
-    $projectRoot = dirname($testRoot);   // .../BIG-DEAL
+    $projectRoot = dirname(__DIR__);   // .../BIG-DEAL
 
     // Check under project uploads first
     $projCandidates = [
@@ -44,22 +44,6 @@ function resolveTestimonialImageSrc($raw, $type = 'profile') {
             }
             if (strpos($abs, $projectRoot . '/uploads/') === 0) {
                 return $uploads_prefix . 'uploads/' . $name;
-            }
-        }
-    }
-
-    // Fallback to test assets
-    $testCandidates = [
-        $testRoot . '/assets/images/avatar/' . $name,
-        $testRoot . '/assets/images/prop/' . $name,
-    ];
-    foreach ($testCandidates as $abs) {
-        if (file_exists($abs)) {
-            if (strpos($abs, '/avatar/') !== false) {
-                return $asset_path . 'images/avatar/' . $name;
-            }
-            if (strpos($abs, '/prop/') !== false) {
-                return $asset_path . 'images/prop/' . $name;
             }
         }
     }
