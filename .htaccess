@@ -21,3 +21,10 @@ RewriteRule ^(.*)$ /BIG-DEAL/error/index.php [L]
     Order Allow,Deny
     Deny from all
 </FilesMatch>
+
+# Global rewrites
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Ensure global favicon works from any path
+RewriteRule ^favicon\.ico$ assets/images/favicon.png [L]
+</IfModule>
