@@ -1,6 +1,6 @@
 <?php
 // Maintenance page configuration
-$asset_path = '/BIG-DEAL/assets/';
+$asset_path = 'assets/';
 ?>
 <!DOCTYPE html>
 <html lang="en">
