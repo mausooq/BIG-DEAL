@@ -184,11 +184,11 @@ $asset_path = 'assets/';
       Please check back again soon.
     </p>
 
-    <a href="mailto:office@bigdeal.property" class="notify-button">
+    <!-- <a href="mailto:office@bigdeal.property" class="notify-button">
       <i class="fas fa-envelope"></i> Contact Support
-    </a>
+    </a> -->
 
-    <div class="social-links">
+    <!-- <div class="social-links">
       <?php
         // Ensure DB connection is available
         if (!isset($mysqli) || !($mysqli instanceof mysqli)) {
@@ -238,7 +238,7 @@ $asset_path = 'assets/';
           }
         }
       ?>
-    </div>
+    </div> -->
   </div>
 </body>
 </html>
