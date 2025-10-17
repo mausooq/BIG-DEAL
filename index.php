@@ -127,6 +127,7 @@ try {
 
   <div class="place">
     <div class="container">
+      
       <div class="row">
         <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
           <button type="button" data-category="Buy" onclick="onStaticListingClick('Buy')">Buy</button>

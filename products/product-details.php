@@ -486,7 +486,7 @@ function formatPrice($price)
     function filterByListingFromDetails(e, listing) {
       if (e && e.preventDefault) e.preventDefault();
       try {
-        var url = new URL(window.location.origin + '/BIG-DEAL/products/');
+        var url = new URL(window.location.origin + '/products/');
         url.searchParams.set('listing', listing);
         // mutual exclusivity with category param
         url.searchParams.delete('category');
