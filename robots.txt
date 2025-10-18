@@ -1,0 +1,47 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bigdeal.property/sitemap.php
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /config/
+Disallow: /vendor/
+Disallow: /backup_root_files/
+Disallow: /error/
+Disallow: /uploads/
+Disallow: /*.sql$
+Disallow: /*.log$
+Disallow: /check_images.php
+Disallow: /maintenance.php
+
+# Allow important directories
+Allow: /assets/
+Allow: /components/
+Allow: /products/
+Allow: /blog/
+Allow: /about/
+Allow: /services/
+Allow: /contact/
+
+# Crawl delay (optional - be respectful to server resources)
+Crawl-delay: 1
+
+# Specific bot instructions
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 1
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
