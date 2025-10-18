@@ -132,7 +132,15 @@
       margin: 10px 0;
     }
     
-    #search {
+    /* Ensure inner form does not affect layout */
+    #email-form {
+      display: flex;
+      align-items: stretch;
+      margin: 0;
+      width: 100%;
+    }
+    
+    #search, #email-input {
       border: none;
       width: 350px;
       font-size: 15px;
@@ -141,7 +149,7 @@
       background-color: #ffe3e3;
     }
     
-    #search:focus {
+    #search:focus, #email-input:focus {
       outline: none;
     }
     
@@ -151,6 +159,23 @@
       color: #fff;
       background-color: #bf1d1d;
       padding: 0px 16px;
+    }
+    
+    /* Subscription message styles (no box, theme red text) */
+    .subscribe-msg {
+      color: var(--primary, #bf1d1d);
+      font-size: 14px;
+      margin-top: 10px;
+      display: block;
+      width: 100%;
+      text-align: center;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .subscribe-msg.hide {
+      opacity: 0;
+      transition: opacity 0.4s ease;
     }
     
     /* Footer Logo Styles */
@@ -215,7 +240,7 @@
         justify-content: flex-start;
         margin: 10px 0;
       }
-      #search {
+      #search, #email-input {
         flex: 1 1 auto;
         min-width: 0;
         width: 100%;
@@ -406,9 +431,60 @@
       <div class=" col-md-3 footer-column">
           <h3>Get the latest information</h3>
            <div id="search-wrapper">
-            <input type="email" id="search" placeholder="Email address">
-            <button id="search-button"><img src="<?php echo $asset_path; ?>images/icon/sendw.png" alt="send"></button>
+            <form id="email-form" method="POST" action="<?php echo $_SERVER['REQUEST_URI']; ?>">
+              <input type="email" id="email-input" name="email" placeholder="Email address" required>
+              <button type="submit" id="search-button"><img src="<?php echo $asset_path; ?>images/icon/sendw.png" alt="send"></button>
+            </form>
           </div>
+          <script>
+            (function () {
+              var form = document.getElementById('email-form');
+              if (!form) return;
+              var wrapper = document.getElementById('search-wrapper');
+              var input = document.getElementById('email-input');
+              var button = document.getElementById('search-button');
+              // Resolve endpoint relative to site root regardless of nesting
+              var endpoint = '<?php echo isset($site_base_path) ? $site_base_path : (isset($asset_path) ? preg_replace('~assets/?$~','',$asset_path) : '/'); ?>components/subscribe.php';
+
+              function showMessage(text) {
+                // Remove any existing message
+                var existing = wrapper.querySelector('.subscribe-msg');
+                if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
+                // Create and insert new message
+                var msg = document.createElement('div');
+                msg.className = 'subscribe-msg';
+                msg.textContent = text;
+                wrapper.parentNode.insertBefore(msg, wrapper.nextSibling);
+                // Auto-hide
+                setTimeout(function() { msg.classList.add('hide'); }, 3500);
+                msg.addEventListener('transitionend', function () {
+                  if (msg.classList.contains('hide') && msg.parentNode) {
+                    msg.parentNode.removeChild(msg);
+                  }
+                }, { once: true });
+              }
+
+              form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!input || !input.value) { showMessage('Please enter a valid email address.'); return; }
+                button.disabled = true;
+                var fd = new FormData();
+                fd.append('email', input.value.trim());
+                fetch(endpoint, { method: 'POST', body: fd, credentials: 'same-origin' })
+                  .then(function (r) { return r.json().catch(function(){ return { status:'error', message:'Unexpected response' }; }); })
+                  .then(function (data) {
+                    if (data && data.status === 'ok') {
+                      showMessage(data.message || 'Thank you for subscribing!');
+                      form.reset();
+                    } else {
+                      showMessage((data && data.message) || 'Error subscribing. Please try again.');
+                    }
+                  })
+                  .catch(function () { showMessage('Error subscribing. Please try again.'); })
+                  .finally(function () { button.disabled = false; });
+              });
+            })();
+          </script>
       </div>
 
     <hr class="section-divider">

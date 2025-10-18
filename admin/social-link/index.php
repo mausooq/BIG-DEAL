@@ -562,6 +562,24 @@ function getPlatformColor($platform) {
 	</div>
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+	<style>
+		.fab-export{
+			position:fixed; right:24px; bottom:24px; z-index:1080;
+			display:inline-flex; align-items:center; gap:8px;
+			background:var(--primary); color:#fff; text-decoration:none;
+			border:1px solid var(--primary-600, var(--primary));
+			border-radius:9999px; padding:10px 14px;
+			box-shadow:0 10px 24px rgba(0,0,0,0.15);
+		}
+		.fab-export:hover{ background:var(--primary-600, #b91c1c); color:#fff; }
+		.fab-export .fa-download{ font-size:.95rem; }
+		@media (max-width:575.98px){ .fab-export{ right:16px; bottom:16px; padding:10px 12px; } }
+	</style>
+
+	<a href="../subscribed-email/export.php" class="fab-export" target="_blank" rel="noopener">
+		<i class="fa-solid fa-download"></i>
+		<span>Export Subscribed Emails</span>
+	</a>
 	<script>
 		document.addEventListener('DOMContentLoaded', function(){
 			// Ripple + click animation for modern buttons

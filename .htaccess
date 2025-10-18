@@ -1,0 +1,30 @@
+# Custom 404 Error Page
+ErrorDocument 404 /BIG-DEAL/error/index.php
+
+# Enable rewrite engine
+RewriteEngine On
+
+# Handle common 404 scenarios
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ /BIG-DEAL/error/index.php [L]
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# Prevent access to sensitive files
+<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Global rewrites
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# Ensure global favicon works from any path
+RewriteRule ^favicon\.ico$ assets/images/favicon.png [L]
+</IfModule>

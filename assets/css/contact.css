@@ -5,28 +5,92 @@
 .contact-page .contact-form .form-control { font-size: 1em; padding: 0.8em 1em; }
 .contact-page .contact-form .btn { padding: 0.8em 1.2em; font-size: 1em; }
 .contact-page .contact-map { min-height: 22em; }
-.contact-page .contact-info-item { 
-  display: flex !important; 
-  gap: 0.75em; 
-  align-items: center; 
-  margin: 0.75em 0; 
-  text-align: left; 
-  padding: 0 !important;
-}
-.contact-page .contact-info-item img { 
-  width: 1.75em !important; 
-  height: 1.75em !important; 
-  flex: 0 0 auto; 
-  display: block !important;
-  object-fit: contain;
-  position: static !important;
-  padding: 0 !important;
-  margin-top: 1.5em;
-}
-.contact-page .contact-info-title { font-size: 1em; margin: 0; text-align: left; }
-.contact-page .contact-info-detail { font-size: 1em; text-align: left; }
 
-/* For small devices (phones, portrait) */
+/* Contact Information Section */
+
+
+.contact-page .contact-info-section .row {
+  align-items: stretch;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.contact-page .contact-info-section .col-12,
+.contact-page .contact-info-section .col-md-3 {
+  display: flex;
+  flex: 1;
+  max-width: calc(25% - 1.125rem);
+}
+
+.contact-page .contact-info-item {
+  padding: 1.5rem 1rem;
+  background: white;
+  border-radius: 12px;
+  height: 100%;
+  min-height: 140px;
+  display: flex;
+  align-items: center;
+}
+
+.contact-page .contact-info-item .d-flex {
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+
+.contact-page .contact-icon-wrapper {
+  width: 50px;
+  height: 50px;
+  background: #d44646;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.contact-page .contact-icon {
+  font-size: 1.2rem;
+  color: white;
+}
+
+.contact-page .contact-icon.whatsapp-icon {
+  color: white;
+}
+
+
+
+.contact-page .contact-info-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.contact-page .contact-info-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.contact-page .contact-info-detail {
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 400;
+  transition: color 0.3s ease;
+  display: block;
+  line-height: 1.4;
+}
+
+.contact-page .contact-info-detail:hover {
+  color: #667eea;
+  text-decoration: none;
+}
+
+/* For very small devices (phones, portrait) */
 @media (max-width: 480px) {
   /* CSS for very small phones */
   .contact-page .hero-banner .centered h1 { font-size: 1.6em; }
@@ -38,18 +102,50 @@
 
   .contact-page .contact-map { min-height: 16.25em; }
 
-  .contact-page .contact-info-item { gap: 0.625em; }
-  .contact-page .contact-info-item img { 
-    width: 1.5em !important; 
-    height: 1.5em !important; 
-    display: block !important;
-    object-fit: contain;
-    position: static !important;
-    padding: 0 !important;
-    margin-top: 0.5em;
+  /* Contact info section mobile */
+  .contact-page .contact-info-section {
+    margin: 2rem 0;
+    padding: 1rem 0;
   }
-  .contact-page .contact-info-title { font-size: 0.95em; }
-  .contact-page .contact-info-detail { font-size: 0.95em; }
+
+  .contact-page .contact-info-section .row {
+    gap: 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    max-width: 100%;
+    flex: none;
+    width: 100%;
+  }
+
+  .contact-page .contact-info-item {
+    padding: 1rem;
+    min-height: 120px;
+  }
+
+  .contact-page .contact-info-item .d-flex {
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: center;
+  }
+
+  .contact-page .contact-icon-wrapper {
+    width: 40px;
+    height: 40px;
+  }
+
+  .contact-page .contact-icon {
+    font-size: 1rem;
+  }
+
 
   /* Center the whole form on mobile */
   .contact-page .forms .row { justify-content: center; }
@@ -83,44 +179,30 @@
     align-self: stretch;
   }
 
-  /* Ensure info columns stack nicely */
-  .contact-page .contact-info-item[class*="col-"] {
-    padding-top: 0.5em;
-    padding-bottom: 0.5em;
-    flex: 0 0 100%;
-    max-width: 100%;
-  }
-  /* Align container and row to left on mobile */
-  .contact-page .container { margin-left: 0; margin-right: auto; }
-  .contact-page .row { justify-content: flex-start; }
-  /* Force one item per row on mobile */
-  .contact-page .contact-info-item { width: 100%; }
-  /* Keep icon and text inline in a single row */
-  .contact-page .contact-info-item {
-    display: flex;
-    flex-direction: row;
+}
+
+/* For small phones - ensure stacking */
+@media (max-width: 576px) {
+  .contact-page .contact-info-section .row {
+    flex-direction: column !important;
     align-items: center;
-    gap: 0.75em;
-    flex-wrap: nowrap;
-    text-align: left;
-    position: relative;
-    z-index: 1;
   }
-  .contact-page .contact-info-item img { 
-    flex: 0 0 auto; 
-    width: 1.5em; 
-    height: 1.5em; 
-    display: block;
-    object-fit: contain;
-    z-index: 1;
-    position: relative;
-    margin-top: 0.2em;
+  
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: none !important;
   }
-  .contact-page .contact-info-text { 
-    flex: 1 1 auto; 
-    display: flex; 
-    flex-direction: column; 
-    text-align: left;
+
+  .contact-page .contact-info-item .d-flex {
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: center;
   }
 }
 
@@ -134,23 +216,112 @@
   /* Form spacing */
   .contact-page .contact-form .form-item { margin-top: 0.6em; margin-bottom: 0.6em; }
 
-  /* Contact info row spacing */
-  .contact-page .contact-info-item img { 
-    width: 1.625em; 
-    height: 1.625em; 
-    margin-top: 2em;
+  /* Contact info section tablet */
+  .contact-page .contact-info-section {
+    margin: 2.5rem 0;
   }
+
+  .contact-page .contact-info-section .row {
+    gap: 1.25rem;
+    flex-direction: row;
+  }
+
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    max-width: calc(50% - 0.5rem);
+    flex: 0 0 calc(50% - 0.5rem);
+  }
+
+  .contact-page .contact-info-item {
+    padding: 1.25rem;
+    min-height: 130px;
+  }
+
+  .contact-page .contact-info-item .d-flex {
+    gap: 0.875rem;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: left;
+  }
+
 }
 
-/* For tablets */
-@media (max-width: 1024px) {
+/* For tablets and iPads */
+@media (min-width: 769px) and (max-width: 1024px) {
   /* CSS for iPads, small laptops */
-  .contact-page .hero-banner .centered h1 { font-size: 2em; }
-  .contact-page .forms { padding:0 !important; }
-  .contact-page .contact-map { min-height: 21.25em; }
+  .contact-page .hero-banner .centered h1 { font-size: 2.2em; }
+  .contact-page .forms { padding: 0 2rem !important; }
+  .contact-page .contact-map { min-height: 22em; }
+
+  /* Contact info section for tablets */
+  .contact-page .contact-info-section {
+    margin: 3rem 0;
+    padding: 0 1rem;
+  }
+
+  .contact-page .contact-info-section .row {
+    gap: 1.5rem;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    max-width: calc(50% - 0.75rem);
+    flex: 0 0 calc(50% - 0.75rem);
+  }
+
+  .contact-page .contact-info-item {
+    padding: 1.5rem 1rem;
+    min-height: 150px;
+  }
+
+  .contact-page .contact-info-item .d-flex {
+    gap: 1rem;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .contact-page .contact-info-text {
+    text-align: left;
+  }
+
+  .contact-page .contact-icon-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .contact-page .contact-icon {
+    font-size: 1.2rem;
+  }
+
+  .contact-page .contact-info-title {
+    font-size: 1.1rem;
+  }
+
+  .contact-page .contact-info-detail {
+    font-size: 1rem;
+  }
 
   /* Balance columns */
   .contact-page .col-md-7, .contact-page .col-md-5 { margin-top: 1em; }
+}
+
+/* Ensure cards stay in one line on larger screens */
+@media (min-width: 769px) {
+  .contact-page .contact-info-section .row {
+    flex-direction: row !important;
+    justify-content: center;
+  }
+  
+  .contact-page .contact-info-section .col-12,
+  .contact-page .contact-info-section .col-md-3 {
+    flex: 1;
+    max-width: calc(25% - 1.125rem);
+  }
 }
 
 
