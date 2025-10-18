@@ -158,7 +158,7 @@ try {
         </div>
         <div class="inter col-md-7">
           <div class="small-text">Check out</div>
-          <div class="large-text">
+          <div class="large-text" onclick="goToFeaturedProperties()" style="cursor: pointer;">
             <span class="gugi">Featured <span style="color: red;">Properties</span></span>
             <img src="assets/images/ARROW.png" alt="arrow" class="arrow">
           </div>
@@ -537,6 +537,11 @@ try {
     function onHeroCityChange(cityName) {
       const url = 'products/index.php' + (cityName ? ('?city=' + encodeURIComponent(cityName)) : '');
       window.location.href = url;
+    }
+
+    // Navigate to featured properties page
+    function goToFeaturedProperties() {
+      window.location.href = 'products/index.php?featured=1';
     }
   </script>
 </body>
