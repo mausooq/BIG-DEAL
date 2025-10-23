@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../config/seo_config.php';
 
 // Get selected filters from URL parameters
 $mysqli = getMysqliConnection();
@@ -278,16 +277,9 @@ function timeAgo($datetime) {
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <?php 
-  // Determine SEO page key based on listing type
-  $seoPageKey = 'home';
-  if ($selectedListing === 'Buy') {
-    $seoPageKey = 'products_buy';
-  } elseif ($selectedListing === 'Rent') {
-    $seoPageKey = 'products_rent';
-  }
-  echo SEOConfig::generateMetaTags($seoPageKey);
-  ?>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <title>Big Deal Ventures</title>
   <link rel="icon" href="../assets/images/favicon.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -308,34 +300,6 @@ function timeAgo($datetime) {
     /* Enhanced dropdown interactions */
   </style>
   <script src="../assets/js/custom-dropdown.js" defer></script>
-  
-  <!-- Structured Data -->
-  <?php 
-  $breadcrumbs = [
-    ['name' => 'Home', 'url' => '/'],
-    ['name' => 'Properties', 'url' => '/products/']
-  ];
-  if ($selectedListing === 'Buy') {
-    $breadcrumbs[] = ['name' => 'Properties for Sale', 'url' => '/products/?listing=Buy'];
-  } elseif ($selectedListing === 'Rent') {
-    $breadcrumbs[] = ['name' => 'Properties for Rent', 'url' => '/products/?listing=Rent'];
-  }
-  echo SEOConfig::generateBreadcrumbData($breadcrumbs);
-  
-  // Prepare properties data for structured data
-  $propertiesForStructuredData = [];
-  if (!empty($properties)) {
-    foreach ($properties as $property) {
-      $propertiesForStructuredData[] = [
-        'title' => $property['title'],
-        'description' => $property['description'],
-        'price' => $property['price'],
-        'image' => !empty($property['main_image']) ? 'uploads/properties/' . $property['main_image'] : 'assets/images/prop/prop1.png'
-      ];
-    }
-  }
-  echo SEOConfig::generateStructuredData($seoPageKey, $propertiesForStructuredData);
-  ?>
 </head>
 <body class="article-page">
   <?php $asset_path = '../assets/'; require_once __DIR__ . '/../components/navbar.php'; ?>
@@ -932,7 +896,7 @@ function whatsappProperty(propertyId) {
     const propertyFurniture = btn.getAttribute('data-furniture') || '';
     const propertyLocation = btn.getAttribute('data-location') || '';
     const propertyDesc = btn.getAttribute('data-desc') || '';
-    const propertyUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
+    const propertyUrl = window.location.origin + '/BIG-DEAL/products/product-details.php?id=' + propertyId;
     
     const message = `Hi! I'm interested in this property:
 
