@@ -400,7 +400,7 @@ $mysqli->close();
   <div class="container">
     <div class="interior-header">
       <div>
-        <h2 class="interior-title">Creative Works</h2>
+        <h2 class="interior-title">Our Creative Works</h2>
         <p class="interior-subtitle">Transform your space with our innovative design solutions</p>
       </div>
       <a class="interior-title-link" href="<?php echo $interior_page_link; ?>" aria-label="View all interiors">

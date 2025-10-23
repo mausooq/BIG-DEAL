@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/config/config.php';
+require_once __DIR__ . '/config/seo_config.php';
 $mysqli = getMysqliConnection();
 
 // Load featured properties BEFORE rendering the carousel
@@ -78,9 +79,7 @@ try {
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Big Deal Ventures</title>
+  <?php echo SEOConfig::generateMetaTags('home'); ?>
   <link rel="icon" href="assets/images/favicon.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -106,6 +105,23 @@ try {
    }
   </style>
   <script src="assets/js/custom-dropdown.js" defer></script>
+  
+  <!-- Structured Data -->
+  <?php 
+  // Prepare properties data for structured data
+  $propertiesForStructuredData = [];
+  if (!empty($featuredProperties)) {
+    foreach ($featuredProperties as $property) {
+      $propertiesForStructuredData[] = [
+        'title' => $property['title'],
+        'description' => $property['description'],
+        'price' => $property['price'],
+        'image' => !empty($property['cover_image_url']) ? 'uploads/properties/' . $property['cover_image_url'] : 'assets/images/prop/prop1.png'
+      ];
+    }
+  }
+  echo SEOConfig::generateStructuredData('home', $propertiesForStructuredData);
+  ?>
 </head>
 
 <body>
@@ -159,7 +175,7 @@ try {
         </div>
         <div class="inter col-md-7">
           <div class="small-text">Check out</div>
-          <div class="large-text">
+          <div class="large-text" onclick="goToFeaturedProperties()" style="cursor: pointer;">
             <span class="gugi">Featured <span style="color: red;">Properties</span></span>
             <img src="assets/images/ARROW.png" alt="arrow" class="arrow">
           </div>
@@ -538,6 +554,11 @@ try {
     function onHeroCityChange(cityName) {
       const url = 'products/index.php' + (cityName ? ('?city=' + encodeURIComponent(cityName)) : '');
       window.location.href = url;
+    }
+
+    // Navigate to featured properties page
+    function goToFeaturedProperties() {
+      window.location.href = 'products/index.php?featured=1';
     }
   </script>
 </body>

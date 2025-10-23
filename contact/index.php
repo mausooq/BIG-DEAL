@@ -54,13 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 }
 ?>
+<?php
+require_once __DIR__ . '/../config/seo_config.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  
-  <title>Big Deal Ventures</title>
+  <?php echo SEOConfig::generateMetaTags('contact'); ?>
   <link rel="icon" href="../assets/images/favicon.png" type="image/png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -76,6 +77,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Figtree:ital,wght@0,300..900;1,300..900&family=Gugi&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Structured Data -->
+  <?php 
+  $breadcrumbs = [
+    ['name' => 'Home', 'url' => '/'],
+    ['name' => 'Contact Us', 'url' => '/contact/']
+  ];
+  echo SEOConfig::generateBreadcrumbData($breadcrumbs);
+  echo SEOConfig::generateStructuredData('contact');
+  
+  // Add FAQ structured data if FAQs are available
+  try {
+    if (isset($mysqli) && $mysqli instanceof mysqli) {
+      $faqQuery = "SELECT question, answer FROM faqs ORDER BY COALESCE(order_id, 1000000), id LIMIT 10";
+      if ($faqResult = $mysqli->query($faqQuery)) {
+        $faqs = [];
+        while ($faq = $faqResult->fetch_assoc()) {
+          $faqs[] = $faq;
+        }
+        if (!empty($faqs)) {
+          echo SEOConfig::generateFAQData($faqs);
+        }
+        $faqResult->free();
+      }
+    }
+  } catch (Throwable $e) {
+    error_log('FAQ structured data error: ' . $e->getMessage());
+  }
+  ?>
 </head>
 
 
