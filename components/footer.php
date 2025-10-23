@@ -407,9 +407,9 @@
                         <h3>Navigation</h3>
                         <ul class="footer-links">
                             <?php
-                              // Reuse navbar path logic to build correct links from any directory
+                              // Fix: Use absolute path from domain root, not relative to current directory
                               if (!isset($asset_path)) { $asset_path = 'assets/'; }
-                              $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
+                              $site_base_path = '/';
                             ?>
                             <li><a href="<?php echo $site_base_path; ?>about/">About</a></li>
                             <li><a href="<?php echo $site_base_path; ?>services/">Services</a></li>
@@ -444,7 +444,7 @@
               var input = document.getElementById('email-input');
               var button = document.getElementById('search-button');
               // Resolve endpoint relative to site root regardless of nesting
-              var endpoint = '<?php echo isset($site_base_path) ? $site_base_path : (isset($asset_path) ? preg_replace('~assets/?$~','',$asset_path) : '/'); ?>components/subscribe.php';
+              var endpoint = '/components/subscribe.php';
 
               function showMessage(text) {
                 // Remove any existing message

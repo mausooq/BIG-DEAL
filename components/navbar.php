@@ -4,7 +4,9 @@
   if (!isset($asset_path)) {
     $asset_path = 'assets/';
   }
-  $site_base_path = preg_replace('~assets/?$~', '', $asset_path);
+  
+  // Fix: Use absolute path from domain root, not relative to current directory
+  $site_base_path = '/';
   $current_full_path = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?? '';
 ?>
 <style>

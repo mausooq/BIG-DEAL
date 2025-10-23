@@ -1,7 +1,7 @@
 <?php
 // Set asset path for proper asset loading
 // Use absolute path from document root to ensure it works from any directory
-$asset_path = '/BIG-DEAL/assets/';
+$asset_path = '/assets/';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -165,7 +165,7 @@ $asset_path = '/BIG-DEAL/assets/';
       <a href="#" class="retry-button" onclick="goBack()">
         <i class="fas fa-arrow-left"></i> Go Back
       </a>
-      <a href="<?php echo $asset_path; ?>../index.php" class="home-button">
+      <a href="/index.php" class="home-button">
         <i class="fas fa-home"></i> Go Home
       </a>
     </div>
@@ -184,7 +184,7 @@ $asset_path = '/BIG-DEAL/assets/';
         if (window.history.length > 1) {
           window.history.back();
         } else {
-          window.location.href = '<?php echo $asset_path; ?>../index.php';
+          window.location.href = '/index.php';
         }
       }, 1000);
     }
