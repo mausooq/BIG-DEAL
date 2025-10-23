@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/config.php';
 // Get selected filters from URL parameters
 $mysqli = getMysqliConnection();
 $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
-$selectedListing = isset($_GET['listing']) ? $_GET['listing'] : '';
+$selectedListing = isset($_GET['listing']) ? ucfirst(strtolower($_GET['listing'])) : '';
 $selectedFurnished = isset($_GET['furnished']) ? $_GET['furnished'] : '';
 $selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
 $isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';

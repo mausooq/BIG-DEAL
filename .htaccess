@@ -9,12 +9,16 @@ RewriteEngine On
 # Redirect old BIG-DEAL paths to clean URLs
 RewriteRule ^BIG-DEAL/(.*)$ /$1 [R=301,L]
 
+# Handle case-insensitive listing parameter
+RewriteCond %{QUERY_STRING} ^(.*)listing=rent(.*)$ [NC]
+RewriteRule ^(.*)$ /$1?%1listing=Rent%2 [R=301,L]
+
 # SEO-friendly URL redirects
-RewriteRule ^about/?$ /about/index.php [L]
-RewriteRule ^services/?$ /services/index.php [L]
-RewriteRule ^blog/?$ /blog/index.php [L]
-RewriteRule ^contact/?$ /contact/index.php [L]
-RewriteRule ^products/?$ /products/index.php [L]
+RewriteRule ^about/?$ /about/ [R=301,L]
+RewriteRule ^services/?$ /services/ [R=301,L]
+RewriteRule ^blog/?$ /blog/ [R=301,L]
+RewriteRule ^contact/?$ /contact/ [R=301,L]
+RewriteRule ^products/?$ /products/ [R=301,L]
 
 # Handle common 404 scenarios
 
