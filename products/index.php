@@ -896,7 +896,7 @@ function whatsappProperty(propertyId) {
     const propertyFurniture = btn.getAttribute('data-furniture') || '';
     const propertyLocation = btn.getAttribute('data-location') || '';
     const propertyDesc = btn.getAttribute('data-desc') || '';
-    const propertyUrl = window.location.origin + '/BIG-DEAL/products/product-details.php?id=' + propertyId;
+    const propertyUrl = window.location.origin + '/products/product-details.php?id=' + propertyId;
     
     const message = `Hi! I'm interested in this property:
 
