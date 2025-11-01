@@ -585,14 +585,16 @@ try {
 
   <?php include 'components/invest-dubai.php'; ?>
 
+  <?php include 'components/mini-banner-connect.php'; ?>
 
 
 
-  <script src="https://hammerjs.github.io/dist/hammer.js"></script>
 
-
+  
+  
   <?php include 'components/footer.php'; ?>
-
+  
+  <script src="https://hammerjs.github.io/dist/hammer.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/scripts.js"></script>
