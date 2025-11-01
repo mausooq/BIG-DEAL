@@ -129,9 +129,30 @@ body {
 
 /* Layout Styles */
 .place {
-  background-color: black;
+  background-image: url("../images/featured-prop.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
   padding: 20px;
   border-radius: 0px 0px 413px 0px;
+}
+
+.place::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-radius: 0px 0px 413px 0px;
+  z-index: 0;
+}
+
+.place > * {
+  position: relative;
+  z-index: 1;
 }
 
 .blackprop {
@@ -444,13 +465,14 @@ body:not(.article-page) .custom-select option {
   body {
     overflow-x: hidden;
   }
-  
-  .container, .container-fluid {
+
+  .container,
+  .container-fluid {
     max-width: 100%;
     padding-left: 15px;
     padding-right: 15px;
   }
-  
+
   /* Typography */
   .subtitle {
     font-size: 10px;
@@ -944,7 +966,15 @@ body:not(.article-page) .custom-select option {
     filter: brightness(1) contrast(1.1);
   }
   .place {
-    border-bottom-right-radius: 12em !important;
+    border-bottom-right-radius: 8em !important;
+    background-attachment: scroll;
+    background-size: cover;
+    background-position: center;
+    min-height: auto;
+  }
+
+  .place::before {
+    border-bottom-right-radius: 8em !important;
   }
 
   .info-top,
@@ -1320,7 +1350,7 @@ body:not(.article-page) .custom-select option {
     font-size: 2.5em !important;
     margin-left: 0px;
   }
- 
+
   .about-img .img-upper {
     width: 150px;
     box-shadow: 10px 10px #fff;
@@ -1575,7 +1605,7 @@ body:not(.article-page) .custom-select option {
     grid-auto-rows: 160px;
     position: relative;
   }
-  
+
   .location-grid > div:nth-child(5) {
     margin: 0px !important;
   }
@@ -4006,7 +4036,7 @@ body:not(.article-page) .custom-select option {
   overflow: hidden;
 }
 .contact-page .hero-banner h1 {
-  color: #ffffff ;
+  color: #ffffff;
   vertical-align: middle;
   padding-top: 150px;
   font-weight: 800;
@@ -4029,8 +4059,6 @@ body:not(.article-page) .custom-select option {
   background-position: center;
   opacity: 0.9; /* Adjusted opacity for better visibility */
   z-index: -1;
-  
-
 }
 
 .breadcrumbs {

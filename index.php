@@ -103,6 +103,69 @@ try {
       gap: 1rem !important;
     } 
    }
+.feature-stats-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 3rem;
+    padding: 0.7rem;
+    gap: 16px;
+    border-radius: 10px;
+    background-color:rgb(37, 36, 36);
+    color: #fff;
+    flex-wrap: wrap;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
+.feature-icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1px solid rgb(212, 211, 211);
+    flex-shrink: 0;
+}
+
+.feature-icon {
+    width: 10px;
+    height: 10px;
+    color: rgb(212, 211, 211);
+    flex-shrink: 0;
+    transition: transform 0.3s ease;
+}
+
+.feature-text {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 200;
+    line-height: 100%;
+    vertical-align: middle;
+    flex-shrink: 1;
+}
+
+@media (max-width: 1250px) {
+    .feature-stats-container {
+      width: 60vw;
+      margin-top: 0.5rem;
+    }
+  }
+/* Tablet styles (768px - 1024px) */
+@media (max-width: 1024px) {
+    .feature-stats-container {
+      display:none;
+      
+    }
+  }
   </style>
   <script src="assets/js/custom-dropdown.js" defer></script>
   
@@ -178,10 +241,38 @@ try {
           <div class="large-text" onclick="goToFeaturedProperties()" style="cursor: pointer;">
             <span class="gugi">Featured <span style="color: red;">Properties</span></span>
             <img src="assets/images/ARROW.png" alt="arrow" class="arrow">
+            <div class="feature-stats-container" style="margin-bottom: 20px;">
+          <div class="feature-item">
+              <div class="feature-icon-circle">
+                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              </div>
+              <span class="feature-text">250+ New Listings Weekly</span>
+          </div>
+          <div class="feature-item">
+              <div class="feature-icon-circle">
+                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              </div>
+              <span class="feature-text">Advanced Search Tools</span>
+          </div>
+          <div class="feature-item">
+              <div class="feature-icon-circle">
+                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+              </div>
+              <span class="feature-text">Top-Rated Local Agents</span>
+          </div>
+      </div>
           </div>
         </div>
       </div>
 
+    
 
       <div class="carousel-container">
         <?php if (!empty($featuredProperties)): ?>
@@ -490,26 +581,9 @@ try {
   </div>
 
 
-<!-- service section -->
-<?php include 'components/service.php'; ?>
-  
-  <!-- about section  -->
-  <?php include 'components/about.php'; ?>
-
-    <!-- blog section  -->
-    <?php include 'components/blog.php'; ?>
-  
-  
-  <!-- contact  -->
-  <?php include 'components/letsconnect.php'; ?>
-
-  <!-- Testimonials -->
-  <?php include 'components/testimonial.php'; ?> 
-  
 
 
-  <!-- Faq  -->
-  <?php include 'components/faq.php'; ?>
+  <?php include 'components/invest-dubai.php'; ?>
 
 
 
