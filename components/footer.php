@@ -490,7 +490,6 @@
     <hr class="section-divider">
       <div class="col-md-12 d-flex justify-content-between align-items-center footer-bottom">
       <p class="copyright-text">&copy;<script>document.write(new Date().getFullYear());</script> Big Deal PROPERTY - Subsidiary of <a href="https://www.urbanbiz.in/" target="_blank" rel="noopener" class="urbanbiz-link">UrbanBiz Ventures Pvt Ltd</a></p>
- <p class="developer-text">   Developed by <a href="https://thebrandweave.com" target="_blank" rel="noopener" class="brandweave-link"><img src="<?php echo $asset_path; ?>images/brandweave.png" alt="The Brand Weave" class="brandweave-logo"></a></p>
           </div>
 
 </footer>

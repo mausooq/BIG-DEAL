@@ -393,9 +393,9 @@ $mysqli = getMysqliConnection();
   }
 
   .compact-nav-btn {
-    background: #f5f5f5;
+    background:rgb(26, 26, 26);
     border: 1px solid #e0e0e0;
-    color: #666;
+    color:rgb(234, 235, 229);
     font-size: 12px;
     font-weight: 500;
     text-transform: uppercase;
@@ -408,7 +408,7 @@ $mysqli = getMysqliConnection();
   }
 
   .compact-nav-btn:hover {
-    background: #e8e8e8;
+    background:rgb(243, 243, 243);
     border-color: #d0d0d0;
     color: #333;
     transform: translateY(-1px);
