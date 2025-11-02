@@ -2,60 +2,362 @@ let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel-slide');
 const dots = document.querySelectorAll('.dot');
 
-function showSlide(index) {
-  slides.forEach((slide, i) => {
-    slide.classList.remove('active', 'next');
-    if (i === index) {
-      slide.classList.add('active');
-    } else if (i === (index + 1) % slides.length) {
-      slide.classList.add('next');
-    }
-  });
-  dots.forEach((dot, i) => {
-    dot.classList.toggle('active', i === index);
-  });
+// Modern carousel elements
+const modernSlides = document.querySelectorAll('.modern-carousel-slide');
+const modernDots = document.querySelectorAll('.modern-dot');
+let modernCurrentSlide = 0;
+
+// Small carousel elements
+const smallSlides = document.querySelectorAll('.small-carousel-slide');
+const smallDots = document.querySelectorAll('.small-dot');
+let smallCurrentSlide = 0;
+
+// Compact carousel elements - wait for DOM to be ready
+let compactCards = [];
+let compactDots = [];
+let compactTrack = null;
+let compactCurrentSlide = 0;
+
+// Initialize compact carousel elements when DOM is ready
+function initCompactCarousel() {
+  compactCards = document.querySelectorAll('.compact-property-card');
+  compactDots = document.querySelectorAll('.compact-dot');
+  compactTrack = document.getElementById('compact-carousel-track');
 }
 
-// Next slide click handler
+function showOldSlide(index) {
+  // Handle old carousel
+  if (slides.length > 0) {
+    slides.forEach((slide, i) => {
+      slide.classList.remove('active', 'next');
+      if (i === index) {
+        slide.classList.add('active');
+      } else if (i === (index + 1) % slides.length) {
+        slide.classList.add('next');
+      }
+    });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    currentSlide = index;
+  }
+}
+
+function showModernSlide(index) {
+  // Handle modern carousel
+  if (modernSlides.length > 0) {
+    modernSlides.forEach((slide, i) => {
+      slide.classList.remove('active', 'next', 'prev');
+      if (i === index) {
+        slide.classList.add('active');
+      } else if (i === (index + 1) % modernSlides.length) {
+        slide.classList.add('next');
+      } else if (i === (index - 1 + modernSlides.length) % modernSlides.length) {
+        slide.classList.add('prev');
+      }
+    });
+    modernDots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    modernCurrentSlide = index;
+  }
+}
+
+// Global function for onclick handlers (maintains backward compatibility)
+function showSlide(index) {
+  // Try modern carousel first
+  if (modernSlides.length > 0) {
+    showModernSlide(index);
+  } else if (slides.length > 0) {
+    // Fall back to old carousel
+    showOldSlide(index);
+  }
+}
+
+function nextSlide() {
+  if (slides.length > 0) {
+    currentSlide = (currentSlide + 1) % slides.length;
+    showOldSlide(currentSlide);
+  }
+  if (modernSlides.length > 0) {
+    modernCurrentSlide = (modernCurrentSlide + 1) % modernSlides.length;
+    showModernSlide(modernCurrentSlide);
+  }
+}
+
+// Next slide click handler for old carousel
 slides.forEach((slide, i) => {
   slide.onclick = () => {
     if (slide.classList.contains('next')) {
       currentSlide = (currentSlide + 1) % slides.length;
-      showSlide(currentSlide);
+      showOldSlide(currentSlide);
+    }
+  };
+});
+
+// Next slide click handler for modern carousel
+modernSlides.forEach((slide, i) => {
+  slide.onclick = () => {
+    if (slide.classList.contains('next') || slide.classList.contains('prev')) {
+      const clickedIndex = Array.from(modernSlides).indexOf(slide);
+      modernCurrentSlide = clickedIndex;
+      showModernSlide(modernCurrentSlide);
     }
   };
 });
 
 function prevSlide() {
-  currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-  showSlide(currentSlide);
+  if (slides.length > 0) {
+    currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+    showOldSlide(currentSlide);
+  }
+  if (modernSlides.length > 0) {
+    modernCurrentSlide = (modernCurrentSlide - 1 + modernSlides.length) % modernSlides.length;
+    showModernSlide(modernCurrentSlide);
+  }
 }
 
-function autoScrollCarousel(interval = 4000) {
-  setInterval(() => {
-    nextSlide();
-  }, interval);
-}
-
-// Add click handlers to dots
+// Add click handlers to dots (old carousel)
 dots.forEach((dot, index) => {
   dot.addEventListener('click', () => {
     currentSlide = index;
-    showSlide(currentSlide);
+    showOldSlide(currentSlide);
   });
 });
 
-showSlide(currentSlide);
-setInterval(() => {
-  currentSlide = (currentSlide + 1) % slides.length;
-  showSlide(currentSlide);
-}, 4000);
+// Add click handlers to modern dots
+modernDots.forEach((dot, index) => {
+  dot.addEventListener('click', () => {
+    modernCurrentSlide = index;
+    showModernSlide(modernCurrentSlide);
+  });
+});
 
-// Initialize the carousel
-showSlide(currentSlide);
+function showSmallSlide(index) {
+  // Handle small carousel
+  if (smallSlides.length > 0) {
+    smallSlides.forEach((slide, i) => {
+      slide.classList.remove('active', 'next', 'prev');
+      if (i === index) {
+        slide.classList.add('active');
+      } else if (i === (index + 1) % smallSlides.length) {
+        slide.classList.add('next');
+      } else if (i === (index - 1 + smallSlides.length) % smallSlides.length) {
+        slide.classList.add('prev');
+      }
+    });
+    smallDots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === index);
+    });
+    smallCurrentSlide = index;
+  }
+}
 
-// Start auto-scrolling the carousel
-autoScrollCarousel();
+// Next slide click handler for small carousel
+smallSlides.forEach((slide, i) => {
+  slide.onclick = () => {
+    if (slide.classList.contains('next') || slide.classList.contains('prev')) {
+      const clickedIndex = Array.from(smallSlides).indexOf(slide);
+      smallCurrentSlide = clickedIndex;
+      showSmallSlide(smallCurrentSlide);
+    }
+  };
+});
+
+// Add click handlers to small dots
+smallDots.forEach((dot, index) => {
+  dot.addEventListener('click', () => {
+    smallCurrentSlide = index;
+    showSmallSlide(smallCurrentSlide);
+  });
+});
+
+let isScrollingProgrammatically = false;
+
+function showCompactSlide(index) {
+  if (compactCards.length > 0 && compactTrack) {
+    isScrollingProgrammatically = true;
+    
+    // Calculate scroll position - use only original cards (first half)
+    const originalCardsCount = Math.floor(compactCards.length / 2);
+    let scrollPosition = 0;
+    
+    // Ensure index is within original cards range
+    const normalizedIndex = index % originalCardsCount;
+    
+    for (let i = 0; i < normalizedIndex && i < originalCardsCount; i++) {
+      scrollPosition += compactCards[i].offsetWidth + 20; // 20px is gap
+    }
+    
+    compactTrack.scrollTo({
+      left: scrollPosition,
+      behavior: 'smooth'
+    });
+    
+    // Update dots (only show dots for original set)
+    const dotIndex = normalizedIndex;
+    compactDots.forEach((dot, i) => {
+      dot.classList.toggle('active', i === dotIndex);
+    });
+    compactCurrentSlide = normalizedIndex;
+    
+    // Reset flag after scroll completes
+    setTimeout(() => {
+      isScrollingProgrammatically = false;
+    }, 600);
+  }
+}
+
+// Add click handlers to compact dots
+compactDots.forEach((dot, index) => {
+  dot.addEventListener('click', () => {
+    compactCurrentSlide = index;
+    showCompactSlide(compactCurrentSlide);
+  });
+});
+
+// Initialize compact carousel scroll detection
+if (compactTrack && compactCards.length > 0) {
+  let scrollTimeout;
+  const originalCardsCount = Math.floor(compactCards.length / 2);
+  
+  // Calculate original set width for scroll detection
+  let originalSetWidth = 0;
+  if (originalCardsCount > 0) {
+    for (let i = 0; i < originalCardsCount; i++) {
+      originalSetWidth += compactCards[i].offsetWidth + 20; // 20px gap
+    }
+  }
+  
+  compactTrack.addEventListener('scroll', () => {
+    if (isScrollingProgrammatically) return; // Prevent updates during programmatic scrolling
+    
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      if (compactCards.length === 0 || originalCardsCount === 0) return;
+      
+      let scrollLeft = compactTrack.scrollLeft;
+      // Normalize scroll position if beyond original set
+      if (scrollLeft >= originalSetWidth) {
+        scrollLeft = scrollLeft % originalSetWidth;
+      }
+      
+      scrollLeft += (compactTrack.offsetWidth / 2);
+      let currentIndex = 0;
+      let minDistance = Infinity;
+      
+      // Only check original cards (first half) for dot navigation
+      for (let i = 0; i < originalCardsCount; i++) {
+        const card = compactCards[i];
+        const cardLeft = card.offsetLeft;
+        const cardCenter = cardLeft + (card.offsetWidth / 2);
+        
+        const distance = Math.abs(scrollLeft - cardCenter);
+        
+        if (distance < minDistance) {
+          minDistance = distance;
+          currentIndex = i;
+        }
+      }
+      
+      if (currentIndex !== compactCurrentSlide && currentIndex >= 0 && currentIndex < originalCardsCount) {
+        compactCurrentSlide = currentIndex;
+        compactDots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === compactCurrentSlide);
+        });
+      }
+    }, 150);
+  });
+}
+
+// Make showSlide available globally for onclick handlers
+window.showSlide = showSlide;
+window.showModernSlide = showModernSlide;
+window.showSmallSlide = showSmallSlide;
+window.showCompactSlide = showCompactSlide; // Already updated above
+
+// Initialize carousels
+if (slides.length > 0) {
+  showOldSlide(currentSlide);
+}
+if (modernSlides.length > 0) {
+  showModernSlide(modernCurrentSlide);
+}
+if (smallSlides.length > 0) {
+  showSmallSlide(smallCurrentSlide);
+}
+
+// Auto-scroll carousels (single interval for all)
+if (slides.length > 0 || modernSlides.length > 0 || smallSlides.length > 0 || compactCards.length > 0) {
+  setInterval(() => {
+    nextSlide();
+    // Also auto-scroll small carousel
+    if (smallSlides.length > 0) {
+      smallCurrentSlide = (smallCurrentSlide + 1) % smallSlides.length;
+      showSmallSlide(smallCurrentSlide);
+    }
+  }, 4000);
+}
+
+// Initialize compact carousel on DOM ready
+document.addEventListener('DOMContentLoaded', function() {
+  initCompactCarousel();
+  
+  // Continuous auto-scroll for compact carousel (LEFT TO RIGHT movement)
+  if (compactTrack && compactCards.length > 0) {
+    let position = 0;
+    let isPaused = false;
+    let animationId = null;
+    
+    // Calculate width of one set (divide by 3 since we render 3 sets)
+    const cardCount = Math.floor(compactCards.length / 3);
+    let oneSetWidth = 0;
+    if (cardCount > 0) {
+      for (let i = 0; i < cardCount; i++) {
+        oneSetWidth += compactCards[i].offsetWidth + 20; // 20px gap
+      }
+    }
+    
+    function animate() {
+      if (isPaused) {
+        animationId = requestAnimationFrame(animate);
+        return;
+      }
+      
+      // Move LEFT to RIGHT: decrease position (transform: translateX goes negative)
+      position -= 0.6; // Slow speed
+      
+      // Reset when we've moved one full set
+      if (Math.abs(position) >= oneSetWidth) {
+        position = 0;
+      }
+      
+      if (compactTrack) {
+        compactTrack.style.transform = `translateX(${position}px)`;
+      }
+      
+      animationId = requestAnimationFrame(animate);
+    }
+    
+    // Pause on hover
+    const section = compactTrack.closest('.compact-carousel-section');
+    if (section) {
+      section.addEventListener('mouseenter', () => {
+        isPaused = true;
+      });
+      
+      section.addEventListener('mouseleave', () => {
+        isPaused = false;
+        if (!animationId) {
+          animate();
+        }
+      });
+    }
+    
+    // Start animation
+    animate();
+  }
+});
 
 // Testimonial Carousel
 let currentTestimonial = 0;

@@ -2,77 +2,6 @@
 require_once __DIR__ . '/config/config.php';
 require_once __DIR__ . '/config/seo_config.php';
 $mysqli = getMysqliConnection();
-
-// Load featured properties BEFORE rendering the carousel
-$featuredProperties = [];
-try {
-  $sqlFeatured = "
-    SELECT 
-      p.id,
-      p.title,
-      p.description,
-      p.configuration,
-      p.parking,
-      p.area,
-      p.furniture_status,
-      p.balcony,
-      p.price,
-      (
-        SELECT pi.image_url 
-        FROM property_images pi 
-        WHERE pi.property_id = p.id 
-        ORDER BY pi.id ASC 
-        LIMIT 1
-      ) AS cover_image_url
-    FROM properties p
-    INNER JOIN features f ON p.id = f.property_id
-    WHERE p.status = 'Available'
-    ORDER BY p.created_at DESC, p.id DESC
-    LIMIT 3
-  ";
-  if (isset($mysqli) && $result = $mysqli->query($sqlFeatured)) {
-    while ($row = $result->fetch_assoc()) {
-      $featuredProperties[] = $row;
-    }
-    $result->free();
-  }
-} catch (Throwable $e) {
-  error_log('Featured properties load error: ' . $e->getMessage());
-}
-
-// Load categories to validate static search buttons against DB
-$availableCategoryNames = [];
-try {
-  if (isset($mysqli)) {
-    $resCats = $mysqli->query("SELECT name FROM categories");
-    if ($resCats) {
-      while ($r = $resCats->fetch_assoc()) {
-        $availableCategoryNames[strtolower(trim($r['name']))] = true;
-      }
-      $resCats->free();
-    }
-  }
-} catch (Throwable $e) {
-  error_log('Categories load error: ' . $e->getMessage());
-}
-
-// Selected city from query (for preserving selection in dropdown)
-$selectedCity = isset($_GET['city']) ? trim((string)$_GET['city']) : '';
-
-// Load cities for the hero search select
-$allCityNames = [];
-try {
-  if (isset($mysqli)) {
-    if ($resAllCities = $mysqli->query("SELECT name FROM cities ORDER BY name")) {
-      while ($row = $resAllCities->fetch_assoc()) {
-        $allCityNames[] = $row['name'];
-      }
-      $resAllCities->free();
-    }
-  }
-} catch (Throwable $e) {
-  error_log('All cities load error: ' . $e->getMessage());
-}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -166,6 +95,708 @@ try {
       
     }
   }
+
+  /* ===== MODERN SEARCH SECTION ===== */
+  .modern-search-section {
+    background: transparent;
+    padding: 20px 0;
+    margin-bottom: 40px;
+  }
+
+  .modern-nav-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    padding: 0 15px;
+  }
+
+  .modern-nav-tabs button {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .modern-nav-tabs button:hover,
+  .modern-nav-tabs button.active {
+    color: #fff;
+  }
+
+  .modern-nav-tabs button.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: #cc1a1a;
+    border-radius: 2px;
+  }
+
+  .modern-search-bar-wrapper {
+    max-width: 600px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+  }
+
+  .modern-search-bar {
+    background: #ffffff;
+    border-radius: 50px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .modern-search-bar:focus-within {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .modern-search-bar select {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    color: #333;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 30px;
+  }
+
+  .modern-search-bar select:focus {
+    outline: none;
+  }
+
+  /* ===== MODERN CAROUSEL STYLES ===== */
+  .modern-carousel-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 40px 0;
+    padding: 0 15px;
+  }
+
+  .modern-carousel-container {
+    position: relative;
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    height: 650px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modern-carousel-slide {
+    position: absolute;
+    width: 480px;
+    max-width: 90%;
+    height: 600px;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+    opacity: 0;
+    z-index: 1;
+    pointer-events: none;
+    cursor: pointer;
+  }
+
+  .modern-carousel-slide.active {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+    z-index: 3;
+    pointer-events: auto;
+  }
+
+  .modern-carousel-slide.next {
+    transform: translateX(200px) scale(0.85);
+    opacity: 0.7;
+    z-index: 2;
+    pointer-events: auto;
+    filter: blur(2px);
+  }
+
+  .modern-carousel-slide.prev {
+    transform: translateX(-200px) scale(0.85);
+    opacity: 0.7;
+    z-index: 2;
+    pointer-events: auto;
+    filter: blur(2px);
+  }
+
+  .modern-property-card {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .modern-carousel-slide.active .modern-property-card {
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .modern-property-image-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .modern-property-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .modern-carousel-slide:hover .modern-property-image {
+    transform: scale(1.05);
+  }
+
+  .modern-property-info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.7) 70%, transparent 100%);
+    padding: 30px 25px 25px;
+    color: #fff;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .modern-info-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+
+  .modern-info-row:last-of-type {
+    margin-bottom: 15px;
+  }
+
+  .modern-info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .modern-info-icon {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+    opacity: 0.9;
+  }
+
+  .modern-info-text {
+    white-space: nowrap;
+  }
+
+  .modern-property-meta {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .modern-price {
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 5px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .modern-location {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 300;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Modern Navigation Dots */
+  .modern-carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding: 10px 0;
+  }
+
+  .modern-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    outline: none;
+  }
+
+  .modern-dot:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(1.2);
+  }
+
+  .modern-dot.active {
+    background: #cc1a1a;
+    width: 12px;
+    height: 12px;
+    box-shadow: 0 0 10px rgba(204, 26, 26, 0.5);
+  }
+
+  /* ===== COMPACT FEATURED SECTION - NEW MINIMAL DESIGN ===== */
+  .compact-featured-section {
+    background: #f8f9fa;
+    padding: 30px 15px;
+    margin: 20px 0;
+  }
+
+  /* ===== COMPACT SEARCH BAR ===== */
+  .compact-search-wrapper {
+    max-width: 800px;
+    margin: 0 auto 25px;
+  }
+
+  .compact-nav-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+  }
+
+  .compact-nav-btn {
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    color: #666;
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .compact-nav-btn:hover {
+    background: #e8e8e8;
+    border-color: #d0d0d0;
+    color: #333;
+    transform: translateY(-1px);
+  }
+
+  .compact-nav-btn.active {
+    background: #cc1a1a;
+    border-color: #cc1a1a;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(204, 26, 26, 0.3);
+  }
+
+  .compact-nav-btn.active:hover {
+    background: #b31717;
+    border-color: #b31717;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(204, 26, 26, 0.4);
+  }
+
+  .compact-search-bar {
+    background: #fff;
+    border-radius: 50px;
+    padding: 14px 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .compact-search-bar:focus-within {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: #cc1a1a;
+  }
+
+  .compact-search-bar select {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 400;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="none" height="20" stroke="%23999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24" width="20"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    padding-right: 32px;
+    padding-left: 0;
+  }
+
+  .compact-search-bar select:focus {
+    outline: none;
+  }
+
+  .compact-search-bar select option {
+    padding: 12px 20px;
+    font-size: 15px;
+    color: #333;
+    background: #fff;
+  }
+
+  .compact-search-bar select option:hover,
+  .compact-search-bar select option:checked {
+    background: #f5f5f5;
+    color: #cc1a1a;
+  }
+
+  /* ===== COMPACT TITLE ===== */
+  .compact-title-section {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .compact-title {
+    font-size: 32px;
+    font-weight: 400;
+    color: #333;
+    margin: 0;
+    font-family: 'Gugi', sans-serif;
+  }
+  
+  .compact-title.gugi {
+    font-family: 'Gugi', sans-serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== COMPACT HORIZONTAL CAROUSEL ===== */
+  .compact-carousel-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .compact-carousel-track {
+    display: flex;
+    gap: 20px;
+    width: fit-content;
+    will-change: transform;
+  }
+
+  .compact-property-card {
+    flex: 0 0 auto;
+    width: 320px;
+    min-width: 280px;
+    max-width: 380px;
+  }
+
+  .compact-property-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .compact-card-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .compact-card-image {
+    position: relative;
+    width: 100%;
+    height: 220px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .compact-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .compact-property-card:hover .compact-card-image img {
+    transform: scale(1.05);
+  }
+
+  .compact-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 100%);
+    padding: 15px;
+    color: #fff;
+  }
+
+  .compact-card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .compact-info-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .compact-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .compact-badge svg {
+    width: 12px;
+    height: 12px;
+    stroke: currentColor;
+  }
+
+  .compact-card-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .compact-card-location {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 400;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Compact Navigation Dots */
+  .compact-carousel-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    padding: 10px 0;
+  }
+
+  .compact-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: none;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+    outline: none;
+  }
+
+  .compact-dot:hover {
+    background: #cc1a1a;
+    transform: scale(1.2);
+  }
+
+  .compact-dot.active {
+    background: #cc1a1a;
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  /* Responsive Styles */
+  @media (max-width: 1024px) {
+    .modern-carousel-container {
+      height: 550px;
+    }
+
+    .modern-carousel-slide {
+      width: 420px;
+      height: 500px;
+    }
+
+    .modern-carousel-slide.next {
+      transform: translateX(150px) scale(0.8);
+    }
+
+    .modern-carousel-slide.prev {
+      transform: translateX(-150px) scale(0.8);
+    }
+
+    .compact-property-card {
+      flex: 0 0 calc(50% - 10px);
+      min-width: 250px;
+    }
+
+    .compact-card-image {
+      height: 200px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .compact-featured-section {
+      padding: 20px 10px;
+    }
+
+    .compact-nav-btn {
+      font-size: 11px;
+      padding: 6px 12px;
+    }
+
+    .compact-title {
+      font-size: 20px;
+    }
+
+    .compact-property-card {
+      flex: 0 0 calc(50% - 10px);
+      min-width: 240px;
+    }
+
+    .compact-card-image {
+      height: 180px;
+    }
+
+    .compact-card-price {
+      font-size: 16px;
+    }
+
+    .modern-carousel-container {
+      height: 500px;
+    }
+
+    .modern-carousel-slide {
+      width: 90%;
+      max-width: 380px;
+      height: 450px;
+    }
+
+    .modern-carousel-slide.next,
+    .modern-carousel-slide.prev {
+      display: none;
+    }
+
+    .modern-property-info {
+      padding: 20px 15px 15px;
+    }
+
+    .modern-info-row {
+      gap: 15px;
+    }
+
+    .modern-price {
+      font-size: 20px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .compact-featured-section {
+      padding: 15px 8px;
+    }
+
+    .compact-nav-buttons {
+      gap: 4px;
+    }
+
+    .compact-nav-btn {
+      font-size: 10px;
+      padding: 5px 10px;
+    }
+
+    .compact-title {
+      font-size: 18px;
+      margin-bottom: 15px;
+    }
+
+    .compact-property-card {
+      flex: 0 0 85%;
+      min-width: 200px;
+    }
+
+    .compact-card-image {
+      height: 160px;
+    }
+
+    .compact-card-price {
+      font-size: 15px;
+    }
+
+    .compact-badge {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+
+    .modern-nav-tabs {
+      gap: 4px;
+    }
+
+    .modern-nav-tabs button {
+      font-size: 11px;
+      padding: 8px 12px;
+    }
+
+    .modern-search-bar {
+      padding: 12px 20px;
+    }
+
+    .modern-search-bar select {
+      font-size: 14px;
+    }
+
+    .modern-carousel-container {
+      height: 450px;
+    }
+
+    .modern-carousel-slide {
+      height: 400px;
+    }
+
+    .modern-info-row {
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    .modern-property-info {
+      padding: 15px 12px 12px;
+    }
+  }
   </style>
   <script src="assets/js/custom-dropdown.js" defer></script>
   
@@ -202,150 +833,16 @@ try {
     </div>
   </section>
 
+<?php 
+  // Include featured properties carousel component with place div
+  include __DIR__ . '/components/search-input.php'; 
+  ?>
 
 
-  <div class="place">
-    <div class="container">
-      
-      <div class="row">
-        <div class="nav-tabs-custom mx-auto justify-content-evenly flex-wrap gap-1">
-          <button type="button" data-category="Buy" onclick="onStaticListingClick('Buy')">Buy</button>
-          <button type="button" data-category="Rent" onclick="onStaticListingClick('Rent')">Rent</button>
-          <button type="button" data-category="Plot" onclick="onStaticCategoryClick('Plot')">Plot</button>
-          <button type="button" data-category="Commercial" onclick="onStaticCategoryClick('Commercial')">Commercial</button>
-          <button type="button" data-category="PG/Co-living" onclick="onStaticListingClick('PG/Co-living')">PG/Co-living</button>
-          <button type="button" data-category="1BHK/Studio" onclick="onStaticCategoryClick('1BHK/Studio')">1BHK/Studio</button>
-        </div>
-      </div>
-
-      <!-- Select city with enhanced UI -->
-      <div class="custom-select-wrapper">
-        <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onHeroCityChange(this.value)">
-          <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
-          <?php foreach ($allCityNames as $cityName): ?>
-            <option value="<?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($selectedCity, $cityName) === 0 ? 'selected' : ''; ?>>
-              <?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
-      </div>
-
-
-
-      <div class="d-flex row blackprop">
-        <div class="col-md-4">
-          <img src="assets/images/black_hero.png" alt="prop1" class="">
-        </div>
-        <div class="inter col-md-7">
-          <div class="small-text">Check out</div>
-          <div class="large-text" onclick="goToFeaturedProperties()" style="cursor: pointer;">
-            <span class="gugi">Featured <span style="color: red;">Properties</span></span>
-            <img src="assets/images/ARROW.png" alt="arrow" class="arrow">
-            <div class="feature-stats-container" style="margin-bottom: 20px;">
-          <div class="feature-item">
-              <div class="feature-icon-circle">
-                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.5523 5.44772 21 6 21H9M19 10L21 12M19 10V20C19 20.5523 18.5523 21 18 21H15M9 21C9.55228 21 10 20.5523 10 20V16C10 15.4477 10.4477 15 11 15H13C13.5523 15 14 15.4477 14 16V20C14 20.5523 14.4477 21 15 21M9 21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-              </div>
-              <span class="feature-text">250+ New Listings Weekly</span>
-          </div>
-          <div class="feature-item">
-              <div class="feature-icon-circle">
-                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                      <path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-              </div>
-              <span class="feature-text">Advanced Search Tools</span>
-          </div>
-          <div class="feature-item">
-              <div class="feature-icon-circle">
-                  <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-              </div>
-              <span class="feature-text">Top-Rated Local Agents</span>
-          </div>
-      </div>
-          </div>
-        </div>
-      </div>
-
-    
-
-      <div class="carousel-container">
-        <?php if (!empty($featuredProperties)): ?>
-          <?php foreach ($featuredProperties as $index => $featured): ?>
-            <?php
-            $img = trim((string)($featured['cover_image_url'] ?? ''));
-            if ($img !== '') {
-              // Check if it's already an absolute URL
-              if (str_starts_with($img, 'http://') || str_starts_with($img, 'https://') || str_starts_with($img, '/')) {
-                // leave as-is
-              } else {
-                // Handle relative paths - assume they're from uploads/properties/
-                if (strpos($img, '/') === false) {
-                  // Just a filename, check in uploads/properties/
-                  $img = 'uploads/properties/' . $img;
-                } else {
-                  // Has path, clean it up
-                  $img = ltrim($img, './');
-                  // If it doesn't start with uploads/, prepend it
-                  if (!str_starts_with($img, 'uploads/')) {
-                    $img = 'uploads/properties/' . basename($img);
-                  }
-                }
-              }
-            }
-            // Fallback to default image if empty
-            if (empty($img)) {
-              $img = 'assets/images/prop/prop1.png';
-            }
-            ?>
-            <a href="products/product-details.php?id=<?php echo (int)$featured['id']; ?>" class="carousel-slide <?php echo $index === 0 ? 'active' : ($index === 1 ? 'next' : ''); ?>" style="display: block;">
-              <img src="<?php echo htmlspecialchars($img, ENT_QUOTES, 'UTF-8'); ?>" alt="<?php echo htmlspecialchars($featured['title'] ?? 'Property', ENT_QUOTES, 'UTF-8'); ?>" class="imgs">
-              <div class="info-box">
-                <div class="info-top">
-                  <div class="info-item" title="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>" aria-label="<?php echo htmlspecialchars($featured['configuration'] ?? 'Configuration', ENT_QUOTES, 'UTF-8'); ?>">
-                    <img src="assets/images/icon/Home.svg" class="svg">
-                    <?php echo htmlspecialchars($featured['configuration'] ?? '—', ENT_QUOTES, 'UTF-8'); ?>
-                  </div>
-                  <div class="info-item" title="Parking" aria-label="parking">
-                    <img src="assets/images/icon/park.svg" class="svg">
-                    <?php echo ($featured['parking'] ?? '') === 'Yes' ? '1' : '0'; ?> Cars
-                  </div>
-                  <div class="info-item" title="Area" aria-label="area">
-                    <img src="assets/images/icon/sqft.svg" class="svg">
-                    <?php echo htmlspecialchars((string)($featured['area'] ?? '—')); ?> sq.ft.
-                  </div>
-                </div>
-                <div class="info-bottom">
-                  <div class="info-item" title="Balcony" aria-label="balcony">
-                    <img src="assets/images/icon/terrace.svg" class="svg">
-                    <?php echo $featured['balcony'] ?? '—'; ?> Balcony
-                  </div>
-                  <div class="info-item" title="Furniture Status" aria-label="furniture status">
-                    <img src="assets/images/icon/sofa.svg" class="svg">
-                    <?php echo htmlspecialchars($featured['furniture_status'] ?? '—', ENT_QUOTES, 'UTF-8'); ?>
-                  </div>
-                </div>
-              </div>
-            </a>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </div>
-      <!-- Navigation dots -->
-      <div class="carousel-dots">
-        <?php if (!empty($featuredProperties)): ?>
-          <?php foreach ($featuredProperties as $index => $featured): ?>
-            <span class="dot <?php echo $index === 0 ? 'active' : ''; ?>" onclick="showSlide(<?php echo $index; ?>)"></span>
-          <?php endforeach; ?>
-        <?php endif; ?>
-      </div>
-
-    </div>
-  </div>
+  <?php 
+  // Include featured properties carousel component with place div
+  include __DIR__ . '/components/featured-prop.php'; 
+  ?>
 
 <?php include 'components/certification.php'; ?>
 
@@ -604,38 +1101,39 @@ try {
       window.location.href = 'products/product-details.php?id=' + propertyId;
     }
 
-    // Static search bar buttons → navigate to products with category, validated vs DB categories
+    // Static search bar buttons → navigate to products with category
     function onStaticCategoryClick(categoryName) {
-      try {
-        var available = <?php echo json_encode(array_keys($availableCategoryNames), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>;
-        // We always navigate; the products page will filter by category if it exists in DB
-        var url = 'products/index.php?category=' + encodeURIComponent(categoryName);
-        window.location.href = url;
-      } catch (e) {
-        window.location.href = 'products/index.php?category=' + encodeURIComponent(categoryName);
-      }
+      if (!categoryName) return;
+      var url = 'products/index.php?category=' + encodeURIComponent(categoryName);
+      window.location.href = url;
     }
 
     // Listing type buttons (Buy / Rent / PG/Co-living)
     function onStaticListingClick(listingType) {
-      try {
-        var url = 'products/index.php?listing=' + encodeURIComponent(listingType);
-        window.location.href = url;
-      } catch (e) {
-        window.location.href = 'products/index.php?listing=' + encodeURIComponent(listingType);
-      }
+      if (!listingType) return;
+      var url = 'products/index.php?listing=' + encodeURIComponent(listingType);
+      window.location.href = url;
     }
 
     // City change on hero search: navigate to products page with city param
     function onHeroCityChange(cityName) {
-      const url = 'products/index.php' + (cityName ? ('?city=' + encodeURIComponent(cityName)) : '');
-      window.location.href = url;
+      if (!cityName || cityName.trim() === '') {
+        window.location.href = 'products/index.php';
+      } else {
+        var url = 'products/index.php?city=' + encodeURIComponent(cityName.trim());
+        window.location.href = url;
+      }
     }
 
     // Navigate to featured properties page
     function goToFeaturedProperties() {
       window.location.href = 'products/index.php?featured=1';
     }
+
+    // Make functions available globally immediately
+    window.onStaticCategoryClick = onStaticCategoryClick;
+    window.onStaticListingClick = onStaticListingClick;
+    window.onHeroCityChange = onHeroCityChange;
   </script>
 </body>
 
