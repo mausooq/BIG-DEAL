@@ -29,11 +29,12 @@ try {
     }
 } catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
 
-// If a city_id is given but city name is empty, resolve the display name
-if ($selectedCityId > 0 && $selectedCity === '') {
+// Resolve display city name from id when available
+$displayCity = $selectedCity;
+if ($selectedCityId > 0) {
     try {
         if ($res = $mysqli->query("SELECT name FROM cities WHERE id = " . (int)$selectedCityId . " LIMIT 1")) {
-            if ($row = $res->fetch_assoc()) { $selectedCity = (string)$row['name']; }
+            if ($row = $res->fetch_assoc()) { $displayCity = (string)$row['name']; }
             $res->free();
         }
     } catch (Throwable $e) { /* ignore */ }
@@ -338,7 +339,7 @@ function timeAgo($datetime) {
         <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onCityChange(this)">
           <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
           <?php foreach ($cities as $city): ?>
-            <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo $selectedCity === $city['name'] ? 'selected' : ''; ?> data-city-id="<?php echo (int)$city['id']; ?>">
+            <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo ($selectedCityId === (int)$city['id'] || $selectedCity === $city['name']) ? 'selected' : ''; ?> data-city-id="<?php echo (int)$city['id']; ?>">
               <?php echo htmlspecialchars($city['name']); ?>
             </option>
           <?php endforeach; ?>
@@ -581,8 +582,8 @@ function timeAgo($datetime) {
           <h2 class="m-0">
             <?php echo count($properties); ?> results | 
             <?php echo !empty($selectedCategory) ? $selectedCategory . ' Properties' : 'All Properties'; ?>
-            <?php if ($selectedCity !== ''): ?>
-              in <span class="highlight-city"><?php echo htmlspecialchars($selectedCity); ?></span>
+            <?php if ($selectedCity !== '' || $selectedCityId > 0): ?>
+              in <span class="highlight-city"><?php echo htmlspecialchars($displayCity); ?></span>
             <?php endif; ?>
             for Sale
           </h2>
