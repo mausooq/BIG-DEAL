@@ -70,6 +70,43 @@ class SEOConfig {
     }
     
     /**
+     * Generate comprehensive favicon tags for all browsers and search engines
+     */
+    public static function generateFaviconTags() {
+        $faviconBase = self::$baseUrl . '/assets/images/favicon.png';
+        $faviconRoot = self::$baseUrl . '/favicon.png'; // Root level for search engines
+        $html = '';
+        
+        // Root-level favicon (search engines and browsers check this first)
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconRoot . '">' . "\n";
+        
+        // Standard favicon sizes (multiple sizes for different contexts)
+        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $faviconBase . '">' . "\n";
+        
+        // Apple Touch Icon (for iOS devices)
+        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $faviconBase . '">' . "\n";
+        
+        // Android Chrome icons (for PWA and Android)
+        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $faviconBase . '">' . "\n";
+        
+        // Standard favicon fallback (for older browsers and maximum compatibility)
+        $html .= '<link rel="shortcut icon" href="' . $faviconRoot . '" type="image/png">' . "\n";
+        
+        // Manifest link (if you have one)
+        // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
+        
+        // Theme color for mobile browsers
+        $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
+        $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $faviconBase . '">' . "\n";
+        
+        return $html;
+    }
+    
+    /**
      * Generate meta tags HTML
      */
     public static function generateMetaTags($pageKey, $customData = []) {
@@ -80,6 +117,9 @@ class SEOConfig {
         $image = self::$baseUrl . (isset($data['image']) ? $data['image'] : self::$defaultImage);
         
         $html = '';
+        
+        // Favicon tags (must be early in head for search engines)
+        $html .= self::generateFaviconTags();
         
         // Basic meta tags
         $html .= '<title>' . htmlspecialchars($data['title'], ENT_QUOTES, 'UTF-8') . '</title>' . "\n";

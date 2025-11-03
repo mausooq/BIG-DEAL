@@ -187,7 +187,7 @@ function formatPrice($price)
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <title><?php echo htmlspecialchars($property['title']); ?> - Big Deal Ventures</title>
-  <link rel="icon" href="../assets/images/favicon.png" type="image/png">
+  <?php if (!class_exists('SEOConfig')) { require_once __DIR__ . '/../config/seo_config.php'; } echo SEOConfig::generateFaviconTags(); ?>
   
   <!-- Open Graph Meta Tags for Rich Sharing -->
   <meta property="og:type" content="website" />
