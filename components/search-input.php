@@ -4,10 +4,11 @@
  * Compact search bar with category buttons and city selector
  */
 
-// Get selected city and cities list
+// Get selected city and cities list (with ids)
 $selectedCity = isset($_GET['city']) ? trim((string)$_GET['city']) : '';
-if (!isset($allCityNames) || empty($allCityNames)) {
-  $allCityNames = [];
+$selectedCityId = isset($_GET['city_id']) ? (int)$_GET['city_id'] : 0;
+if (!isset($allCities) || empty($allCities)) {
+  $allCities = [];
   
   if (!isset($mysqli)) {
     if (file_exists(__DIR__ . '/../config/config.php')) {
@@ -18,9 +19,9 @@ if (!isset($allCityNames) || empty($allCityNames)) {
   
   try {
     if (isset($mysqli) && $mysqli) {
-      if ($resAllCities = $mysqli->query("SELECT name FROM cities ORDER BY name")) {
+      if ($resAllCities = $mysqli->query("SELECT id, name FROM cities ORDER BY name")) {
         while ($row = $resAllCities->fetch_assoc()) {
-          $allCityNames[] = $row['name'];
+          $allCities[] = ['id' => (int)$row['id'], 'name' => $row['name']];
         }
         $resAllCities->free();
       }
@@ -43,11 +44,11 @@ if (!isset($allCityNames) || empty($allCityNames)) {
       </div>
 
         <div class="custom-select-wrapper" style="width: 100% !important;">
-          <select class="custom-select" name="city" id="city-select-compact" aria-label="Select city" onchange="onHeroCityChange(this.value)">
+          <select class="custom-select" name="city" id="city-select-compact" aria-label="Select city" onchange="onHeroCityChange(this)">
             <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
-            <?php foreach ($allCityNames as $cityName): ?>
-              <option value="<?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($selectedCity, $cityName) === 0 ? 'selected' : ''; ?>>
-                <?php echo htmlspecialchars($cityName, ENT_QUOTES, 'UTF-8'); ?>
+            <?php foreach ($allCities as $city): ?>
+              <option value="<?php echo htmlspecialchars($city['name'], ENT_QUOTES, 'UTF-8'); ?>" data-city-id="<?php echo (int)$city['id']; ?>" <?php echo ($selectedCityId === (int)$city['id'] || strcasecmp($selectedCity, $city['name']) === 0) ? 'selected' : ''; ?>>
+                <?php echo htmlspecialchars($city['name'], ENT_QUOTES, 'UTF-8'); ?>
               </option>
             <?php endforeach; ?>
           </select>

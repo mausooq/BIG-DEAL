@@ -1115,13 +1115,15 @@ $mysqli = getMysqliConnection();
     }
 
     // City change on hero search: navigate to products page with city param
-    function onHeroCityChange(cityName) {
-      if (!cityName || cityName.trim() === '') {
-        window.location.href = 'products/index.php';
-      } else {
-        var url = 'products/index.php?city=' + encodeURIComponent(cityName.trim());
-        window.location.href = url;
-      }
+    function onHeroCityChange(selectEl) {
+      var cityName = selectEl && selectEl.value ? selectEl.value.trim() : '';
+      var selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
+      var cityId = selectedOption ? selectedOption.getAttribute('data-city-id') : '';
+      var base = 'products/index.php';
+      if (!cityName) { window.location.href = base; return; }
+      var url = base + '?city=' + encodeURIComponent(cityName);
+      if (cityId) { url += '&city_id=' + encodeURIComponent(cityId); }
+      window.location.href = url;
     }
 
     // Navigate to featured properties page
