@@ -1119,6 +1119,16 @@ $mysqli = getMysqliConnection();
       var cityName = selectEl && selectEl.value ? selectEl.value.trim() : '';
       var selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
       var cityId = selectedOption ? selectedOption.getAttribute('data-city-id') : '';
+      // Fallback for custom dropdown (option mirrored outside native select)
+      if (!cityId) {
+        try {
+          var wrapper = selectEl.closest('.select-wrapper');
+          var customSelected = wrapper ? wrapper.querySelector('.dropdown-option.selected') : null;
+          if (customSelected && customSelected.dataset && customSelected.dataset.cityId) {
+            cityId = customSelected.dataset.cityId;
+          }
+        } catch (e) {}
+      }
       var base = 'products/index.php';
       if (!cityName) { window.location.href = base; return; }
       var url = base + '?city=' + encodeURIComponent(cityName);
