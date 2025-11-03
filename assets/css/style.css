@@ -5024,7 +5024,7 @@ body:not(.article-page) .custom-select option {
   font-size: 1.2rem;
   position: relative;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-  border:1px solid rgba(255, 0, 0, 0.233);
+  border:1px solid rgba(255, 0, 0, 0.435) !important;
   color: #000000;
   font-weight: 400;
   min-height: 60px;
