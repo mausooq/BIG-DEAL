@@ -7,6 +7,7 @@ $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
 $selectedListing = isset($_GET['listing']) ? ucfirst(strtolower($_GET['listing'])) : '';
 $selectedFurnished = isset($_GET['furnished']) ? $_GET['furnished'] : '';
 $selectedCity = isset($_GET['city']) ? $_GET['city'] : '';
+$selectedCityId = isset($_GET['city_id']) ? (int)$_GET['city_id'] : 0;
 $isFeaturedOnly = isset($_GET['featured']) && $_GET['featured'] === '1';
 
 // Get additional filter parameters
@@ -126,8 +127,12 @@ if (!empty($selectedCategory)) {
 // Add listing type filter for Types of Property (reuse existing selectedListing logic)
 // This is now handled above in the listing filter section
 
-// Add city filter if selected (match against location and landmark)
-if (!empty($selectedCity)) {
+// Add city filter
+if ($selectedCityId > 0) {
+    // Prefer exact match by city id through properties_location mapping
+    $query .= " AND EXISTS (SELECT 1 FROM properties_location pl WHERE pl.property_id = p.id AND pl.city_id = " . (int)$selectedCityId . ")";
+} elseif (!empty($selectedCity)) {
+    // Fallback: match against free-text location fields
     $city = $mysqli->real_escape_string($selectedCity);
     $query .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
 }
@@ -192,7 +197,9 @@ if (!empty($selectedCategory)) {
     $countQuery .= " AND c.name = '" . $mysqli->real_escape_string($selectedCategory) . "'";
 }
 
-if (!empty($selectedCity)) {
+if ($selectedCityId > 0) {
+    $countQuery .= " AND EXISTS (SELECT 1 FROM properties_location pl WHERE pl.property_id = p.id AND pl.city_id = " . (int)$selectedCityId . ")";
+} elseif (!empty($selectedCity)) {
     $city = $mysqli->real_escape_string($selectedCity);
     $countQuery .= " AND (p.location = '" . $city . "' OR p.location LIKE '%" . $city . "%' OR p.landmark LIKE '%" . $city . "%')";
 }
@@ -318,7 +325,7 @@ function timeAgo($datetime) {
 
       <!-- Select city with enhanced UI -->
       <div class="custom-select-wrapper">
-        <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onCityChange(this.value)">
+        <select class="custom-select" name="city" id="city-select" aria-label="Select city" onchange="onCityChange(this)">
           <option value="" <?php echo $selectedCity === '' ? 'selected' : ''; ?>>All Cities</option>
           <?php foreach ($cities as $city): ?>
             <option value="<?php echo htmlspecialchars($city['name']); ?>" <?php echo $selectedCity === $city['name'] ? 'selected' : ''; ?> data-city-id="<?php echo (int)$city['id']; ?>">
@@ -554,7 +561,7 @@ function timeAgo($datetime) {
       <div  class="col-lg-8 col-md-7 aproperty" id="results">
         <?php 
           $hasAnyFilter = (
-            !empty($selectedCategory) || !empty($selectedCity) || !empty($selectedPropertyType) ||
+            !empty($selectedCategory) || !empty($selectedCity) || ($selectedCityId > 0) ||
             !empty($selectedBedrooms) || !empty($selectedLocalities) ||
             ($minPrice > 0) || ($maxPrice > 0) || ($minArea > 0) || ($maxArea > 0) || $isFeaturedOnly
           );
@@ -732,13 +739,24 @@ function filterByCategory(category) {
 
 // Function to sync property type filters with nav-tabs-custom (no longer needed since sidebar now uses listing_type)
 
-function onCityChange(city) {
+function onCityChange(selectEl) {
     const url = new URL(window.location);
-    if (city) {
-        url.searchParams.set('city', city);
+    const cityName = selectEl && selectEl.value ? selectEl.value : '';
+    const selectedOption = selectEl ? selectEl.options[selectEl.selectedIndex] : null;
+    const cityId = selectedOption ? selectedOption.getAttribute('data-city-id') : '';
+
+    if (cityName) {
+        url.searchParams.set('city', cityName);
     } else {
         url.searchParams.delete('city');
     }
+    // Always pass an exact city_id when available for reliable filtering
+    if (cityId) {
+        url.searchParams.set('city_id', cityId);
+    } else {
+        url.searchParams.delete('city_id');
+    }
+    url.searchParams.delete('page');
     window.location.href = url.toString();
 }
 
