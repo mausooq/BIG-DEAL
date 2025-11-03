@@ -29,6 +29,16 @@ try {
     }
 } catch (Throwable $e) { error_log('Cities load error: ' . $e->getMessage()); }
 
+// If a city_id is given but city name is empty, resolve the display name
+if ($selectedCityId > 0 && $selectedCity === '') {
+    try {
+        if ($res = $mysqli->query("SELECT name FROM cities WHERE id = " . (int)$selectedCityId . " LIMIT 1")) {
+            if ($row = $res->fetch_assoc()) { $selectedCity = (string)$row['name']; }
+            $res->free();
+        }
+    } catch (Throwable $e) { /* ignore */ }
+}
+
 // Load listing types for Types of Property filter
 $listingTypes = [];
 try {
@@ -1470,7 +1480,7 @@ function clearRangeFilter(type) {
 function clearAllFilters() {
     const url = new URL(window.location);
     // Keep only essential parameters
-    const keepParams = ['city', 'featured'];
+    const keepParams = ['city', 'city_id', 'featured'];
     const newUrl = new URL(window.location.pathname, window.location.origin);
     
     keepParams.forEach(param => {
