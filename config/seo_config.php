@@ -87,6 +87,7 @@ class SEOConfig {
         $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $preferred . '?v=1">' . "\n";
         $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $preferred . '?v=1">' . "\n";
         $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="48x48" href="' . $preferred . '?v=1">' . "\n";
         
         // Apple Touch Icon (for iOS devices)
         $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $preferred . '?v=1">' . "\n";

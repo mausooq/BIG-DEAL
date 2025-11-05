@@ -1,3 +1,10 @@
+# Ensure Google and browsers can find a favicon at /favicon.ico
+Redirect 301 /favicon.ico /favicon.png
+
+# Optional: cache favicon aggressively (safe to change version via query string)
+<FilesMatch "^(favicon\.png)$">
+  Header set Cache-Control "public, max-age=2592000, immutable"
+</FilesMatch>
 # Custom 404 Error Page
 
 ErrorDocument 404 /error/index.php
