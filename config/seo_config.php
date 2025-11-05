@@ -73,27 +73,34 @@ class SEOConfig {
      * Generate comprehensive favicon tags for all browsers and search engines
      */
     public static function generateFaviconTags() {
-        $faviconBase = self::$baseUrl . '/assets/images/favicon.png';
-        $faviconRoot = self::$baseUrl . '/favicon.png'; // Root level for search engines
+        // Use root-relative paths so they work in both local (XAMPP) and production
+        $faviconRoot = '/favicon.png';
+        $faviconAssets = '/assets/favicon.png';
+        $faviconImages = '/assets/images/favicon.png';
+        $preferred = $faviconImages; // main high-res source present in repo
         $html = '';
         
         // Root-level favicon (search engines and browsers check this first)
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconRoot . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconRoot . '?v=1">' . "\n";
         
         // Standard favicon sizes (multiple sizes for different contexts)
-        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $faviconBase . '">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $faviconBase . '">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $preferred . '?v=1">' . "\n";
         
         // Apple Touch Icon (for iOS devices)
-        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $preferred . '?v=1">' . "\n";
         
         // Android Chrome icons (for PWA and Android)
-        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $faviconBase . '">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $faviconBase . '">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $preferred . '?v=1">' . "\n";
         
         // Standard favicon fallback (for older browsers and maximum compatibility)
-        $html .= '<link rel="shortcut icon" href="' . $faviconRoot . '" type="image/png">' . "\n";
+        $html .= '<link rel="shortcut icon" href="' . $faviconRoot . '?v=1" type="image/png">' . "\n";
+
+        // Additional fallbacks to cover different existing locations in the repo
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconAssets . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconImages . '?v=1">' . "\n";
         
         // Manifest link (if you have one)
         // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
@@ -101,7 +108,7 @@ class SEOConfig {
         // Theme color for mobile browsers
         $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
         $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
-        $html .= '<meta name="msapplication-TileImage" content="' . $faviconBase . '">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $preferred . '?v=1">' . "\n";
         
         return $html;
     }
