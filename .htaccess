@@ -5,11 +5,9 @@ ErrorDocument 404 /error/index.php
 RewriteEngine On
 
 # Favicon handling for search engines (Google/Bing check /favicon.ico first)
-# Ensure /favicon.ico is accessible at root level for search engines
-# If favicon.ico doesn't exist, serve from assets/images/favicon.png as fallback
-RewriteCond %{REQUEST_URI} ^/favicon\.ico$
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^favicon\.ico$ assets/images/favicon.png [L]
+# CRITICAL: favicon.ico must be served directly without redirects
+# The file exists in root, so it will be served directly
+# No rewrite needed - Apache will serve it automatically
 
 # Redirect older paths to the root favicon with cache-busting
 RewriteRule ^assets/favicon\.png$ /favicon.ico?v=3 [R=302,L]
@@ -30,7 +28,8 @@ RewriteRule ^contact/?$ /contact/ [R=301,L]
 RewriteRule ^products/?$ /products/ [R=301,L]
 
 # Handle common 404 scenarios
-
+# Exclude favicon.ico from 404 handling - it must be served directly
+RewriteCond %{REQUEST_URI} !^/favicon\.ico$ [NC]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^(.*)$ /error/index.php [L]
@@ -48,7 +47,9 @@ RewriteRule ^(.*)$ /error/index.php [L]
 # Favicon cache control - force browsers to revalidate so updates show up quickly
 <IfModule mod_headers.c>
   # Force browsers to revalidate the favicon so updates show up quickly
+  # IMPORTANT: Set correct content-type for favicon.ico
   <Files "favicon.ico">
+    Header set Content-Type "image/x-icon"
     Header set Cache-Control "no-cache, must-revalidate"
     Header set Pragma "no-cache"
     Header set Expires "0"
