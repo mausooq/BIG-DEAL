@@ -1,17 +1,19 @@
-# Ensure Google and browsers can find a favicon at /favicon.ico
-Redirect 301 /favicon.ico /favicon.png
-
-# Optional: cache favicon aggressively (safe to change version via query string)
-<FilesMatch "^(favicon\.png)$">
-  Header set Cache-Control "public, max-age=2592000, immutable"
-</FilesMatch>
 # Custom 404 Error Page
-
 ErrorDocument 404 /error/index.php
 
 # Enable rewrite engine
-
 RewriteEngine On
+
+# Favicon handling for search engines (Google/Bing check /favicon.ico first)
+# Ensure /favicon.ico is accessible at root level for search engines
+# If favicon.ico doesn't exist, serve from assets/images/favicon.png as fallback
+RewriteCond %{REQUEST_URI} ^/favicon\.ico$
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^favicon\.ico$ assets/images/favicon.png [L]
+
+# Redirect older paths to the root favicon with cache-busting
+RewriteRule ^assets/favicon\.png$ /favicon.ico?v=3 [R=302,L]
+RewriteRule ^assets/favicon\.ico$ /favicon.ico?v=3 [R=302,L]
 
 # Redirect old BIG-DEAL paths to clean URLs
 RewriteRule ^BIG-DEAL/(.*)$ /$1 [R=301,L]
@@ -43,6 +45,21 @@ RewriteRule ^(.*)$ /error/index.php [L]
     Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
 </IfModule>
 
+# Favicon cache control - force browsers to revalidate so updates show up quickly
+<IfModule mod_headers.c>
+  # Force browsers to revalidate the favicon so updates show up quickly
+  <Files "favicon.ico">
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </Files>
+  <FilesMatch "^favicon\.(png|jpg|jpeg)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+</IfModule>
+
 # Performance and SEO headers
 
 <IfModule mod_headers.c>
@@ -59,8 +76,8 @@ RewriteRule ^(.*)$ /error/index.php [L]
         AddOutputFilterByType DEFLATE application/x-javascript
     </IfModule>
     
-    # Cache control for static assets
-    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    # Cache control for static assets (except favicon which needs special handling)
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$">
         Header set Cache-Control "max-age=31536000, public"
     </FilesMatch>
     
@@ -87,11 +104,9 @@ Deny from all
 # Global rewrites
 
 <IfModule mod_rewrite.c>
-RewriteEngine On
+# RewriteEngine is already enabled at the top
 
-# Ensure global favicon works from any path
-
-RewriteRule ^favicon\.ico$ assets/images/favicon.png [L]
+# Global favicon is handled above - ensure it's accessible from root
 
 # Redirect www to non-www (if needed)
 
@@ -119,6 +134,7 @@ RewriteRule ^ /%1%2 [R=301,L]
     AddType application/javascript .js
     AddType text/css .css
     AddType image/svg+xml .svg
+    AddType image/x-icon .ico
     AddType application/font-woff .woff
     AddType application/font-woff2 .woff2
 </IfModule>

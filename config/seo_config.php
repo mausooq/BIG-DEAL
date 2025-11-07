@@ -74,34 +74,37 @@ class SEOConfig {
      */
     public static function generateFaviconTags() {
         // Use root-relative paths so they work in both local (XAMPP) and production
-        $faviconRoot = '/favicon.png';
+        // CRITICAL: Google/Bing search engines check /favicon.ico first - this must be prioritized
+        $faviconRootICO = '/favicon.ico'; // Primary favicon for search engines
+        $faviconRootPNG = '/favicon.png';
         $faviconAssets = '/assets/favicon.png';
         $faviconImages = '/assets/images/favicon.png';
         $preferred = $faviconImages; // main high-res source present in repo
         $html = '';
         
-        // Root-level favicon (search engines and browsers check this first)
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconRoot . '?v=1">' . "\n";
+        // Root-level favicon.ico (search engines and browsers check this FIRST - Google/Bing requirement)
+        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . '?v=3" type="image/x-icon">' . "\n";
+        
+        // Root-level PNG fallback
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconRootPNG . '?v=3">' . "\n";
         
         // Standard favicon sizes (multiple sizes for different contexts)
-        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $preferred . '?v=1">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $preferred . '?v=1">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $preferred . '?v=1">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="48x48" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $preferred . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $preferred . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $preferred . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="48x48" href="' . $preferred . '?v=3">' . "\n";
         
         // Apple Touch Icon (for iOS devices)
-        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $preferred . '?v=1">' . "\n";
+        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $preferred . '?v=3">' . "\n";
         
         // Android Chrome icons (for PWA and Android)
-        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $preferred . '?v=1">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $preferred . '?v=1">' . "\n";
-        
-        // Standard favicon fallback (for older browsers and maximum compatibility)
-        $html .= '<link rel="shortcut icon" href="' . $faviconRoot . '?v=1" type="image/png">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $preferred . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $preferred . '?v=3">' . "\n";
 
         // Additional fallbacks to cover different existing locations in the repo
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconAssets . '?v=1">' . "\n";
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconImages . '?v=1">' . "\n";
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconAssets . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/png" href="' . $faviconImages . '?v=3">' . "\n";
         
         // Manifest link (if you have one)
         // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
@@ -109,7 +112,7 @@ class SEOConfig {
         // Theme color for mobile browsers
         $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
         $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
-        $html .= '<meta name="msapplication-TileImage" content="' . $preferred . '?v=1">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $preferred . '?v=3">' . "\n";
         
         return $html;
     }
