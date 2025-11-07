@@ -97,6 +97,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Category</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
+    <link rel="shortcut icon" href="/favicon.ico?v=3" type="image/x-icon">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
         :root { --border-color:#E0E0E0; --text:#333; --bg:#F4F7FA; --card:#fff; --primary:#ef4444; }

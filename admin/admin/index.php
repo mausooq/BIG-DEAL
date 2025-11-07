@@ -225,6 +225,9 @@ $totalPages = (int)ceil($totalCount / $limit);
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Admin Users - Big Deal</title>
+	<!-- Favicon -->
+	<link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
+	<link rel="shortcut icon" href="/favicon.ico?v=3" type="image/x-icon">
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 	<link href="../../assets/css/animated-buttons.css" rel="stylesheet">

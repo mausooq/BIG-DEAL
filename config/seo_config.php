@@ -75,36 +75,26 @@ class SEOConfig {
     public static function generateFaviconTags() {
         // Use root-relative paths so they work in both local (XAMPP) and production
         // CRITICAL: Google/Bing search engines check /favicon.ico first - this must be prioritized
-        $faviconRootICO = '/favicon.ico'; // Primary favicon for search engines
-        $faviconRootPNG = '/favicon.png';
-        $faviconAssets = '/assets/favicon.png';
-        $faviconImages = '/assets/images/favicon.png';
-        $preferred = $faviconImages; // main high-res source present in repo
+        // Using ONLY favicon.ico for consistency - no PNG files needed
+        $faviconRootICO = '/favicon.ico'; // Primary favicon for search engines and all browsers
         $html = '';
         
         // Root-level favicon.ico (search engines and browsers check this FIRST - Google/Bing requirement)
         $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '?v=3">' . "\n";
         $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . '?v=3" type="image/x-icon">' . "\n";
         
-        // Root-level PNG fallback
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconRootPNG . '?v=3">' . "\n";
+        // Standard favicon sizes using ICO format (for different contexts)
+        $html .= '<link rel="icon" type="image/x-icon" sizes="32x32" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="16x16" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="96x96" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="48x48" href="' . $faviconRootICO . '?v=3">' . "\n";
         
-        // Standard favicon sizes (multiple sizes for different contexts)
-        $html .= '<link rel="icon" type="image/png" sizes="32x32" href="' . $preferred . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="16x16" href="' . $preferred . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="96x96" href="' . $preferred . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="48x48" href="' . $preferred . '?v=3">' . "\n";
+        // Apple Touch Icon (for iOS devices) - using ICO
+        $html .= '<link rel="apple-touch-icon" href="' . $faviconRootICO . '?v=3">' . "\n";
         
-        // Apple Touch Icon (for iOS devices)
-        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $preferred . '?v=3">' . "\n";
-        
-        // Android Chrome icons (for PWA and Android)
-        $html .= '<link rel="icon" type="image/png" sizes="192x192" href="' . $preferred . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/png" sizes="512x512" href="' . $preferred . '?v=3">' . "\n";
-
-        // Additional fallbacks to cover different existing locations in the repo
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconAssets . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/png" href="' . $faviconImages . '?v=3">' . "\n";
+        // Android Chrome icons (for PWA and Android) - using ICO
+        $html .= '<link rel="icon" type="image/x-icon" sizes="192x192" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="512x512" href="' . $faviconRootICO . '?v=3">' . "\n";
         
         // Manifest link (if you have one)
         // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
@@ -112,7 +102,7 @@ class SEOConfig {
         // Theme color for mobile browsers
         $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
         $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
-        $html .= '<meta name="msapplication-TileImage" content="' . $preferred . '?v=3">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $faviconRootICO . '?v=3">' . "\n";
         
         return $html;
     }

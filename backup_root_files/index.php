@@ -6,7 +6,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" href="assets/favicon.png" type="image/png">
+<link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
+<link rel="shortcut icon" href="/favicon.ico?v=3" type="image/x-icon">
 <title>BIG DEAL | Coming Soon</title>
 <style>
   :root { color-scheme: light dark; }
