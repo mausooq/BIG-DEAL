@@ -157,6 +157,7 @@ class SEOConfig {
         return $html;
     }
     
+    
     /**
      * Generate JSON-LD structured data for real estate business
      */
