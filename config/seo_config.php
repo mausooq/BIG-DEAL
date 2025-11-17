@@ -80,21 +80,21 @@ class SEOConfig {
         $html = '';
         
         // Root-level favicon.ico (search engines and browsers check this FIRST - Google/Bing requirement)
-        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '?v=3">' . "\n";
-        $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . '?v=3" type="image/x-icon">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . '?v=4" type="image/x-icon">' . "\n";
         
         // Standard favicon sizes using ICO format (for different contexts)
-        $html .= '<link rel="icon" type="image/x-icon" sizes="32x32" href="' . $faviconRootICO . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="16x16" href="' . $faviconRootICO . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="96x96" href="' . $faviconRootICO . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="48x48" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="32x32" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="16x16" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="96x96" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="48x48" href="' . $faviconRootICO . '?v=4">' . "\n";
         
         // Apple Touch Icon (for iOS devices) - using ICO
-        $html .= '<link rel="apple-touch-icon" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="apple-touch-icon" href="' . $faviconRootICO . '?v=4">' . "\n";
         
         // Android Chrome icons (for PWA and Android) - using ICO
-        $html .= '<link rel="icon" type="image/x-icon" sizes="192x192" href="' . $faviconRootICO . '?v=3">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="512x512" href="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="192x192" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="512x512" href="' . $faviconRootICO . '?v=4">' . "\n";
         
         // Manifest link (if you have one)
         // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
@@ -102,7 +102,7 @@ class SEOConfig {
         // Theme color for mobile browsers
         $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
         $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
-        $html .= '<meta name="msapplication-TileImage" content="' . $faviconRootICO . '?v=3">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $faviconRootICO . '?v=4">' . "\n";
         
         return $html;
     }

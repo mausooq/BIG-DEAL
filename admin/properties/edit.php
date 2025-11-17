@@ -298,8 +298,8 @@ $pl_stmt && $pl_stmt->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Property</title>
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=3">
-    <link rel="shortcut icon" href="/favicon.ico?v=3" type="image/x-icon">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico?v=4">
+    <link rel="shortcut icon" href="/favicon.ico?v=4" type="image/x-icon">
     <link href="../../assets/css/loader.css" rel="stylesheet">
     <link href="../../assets/css/animated-buttons.css" rel="stylesheet">
     <style>
