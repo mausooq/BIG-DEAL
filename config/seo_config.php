@@ -77,24 +77,30 @@ class SEOConfig {
         // CRITICAL: Google/Bing search engines check /favicon.ico first - this must be prioritized
         // Using ONLY favicon.ico for consistency - no PNG files needed
         $faviconRootICO = '/favicon.ico'; // Primary favicon for search engines and all browsers
+        // Increment this version number whenever you update the favicon to force browser cache refresh
+        $cacheVersion = '?v=5'; // Updated to v5 to force browser reload after favicon fix
         $html = '';
         
-        // Root-level favicon.ico (search engines and browsers check this FIRST - Google/Bing requirement)
-        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '?v=4">' . "\n";
-        $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . '?v=4" type="image/x-icon">' . "\n";
+        // CRITICAL: Place favicon FIRST in head - browsers check this immediately
+        // Root-level favicon.ico without query string first (for maximum compatibility and browser fallback)
+        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . '">' . "\n";
+        // Then with cache busting version to ensure latest icon loads
+        $html .= '<link rel="icon" type="image/x-icon" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="shortcut icon" href="' . $faviconRootICO . $cacheVersion . '" type="image/x-icon">' . "\n";
         
         // Standard favicon sizes using ICO format (for different contexts)
-        $html .= '<link rel="icon" type="image/x-icon" sizes="32x32" href="' . $faviconRootICO . '?v=4">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="16x16" href="' . $faviconRootICO . '?v=4">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="96x96" href="' . $faviconRootICO . '?v=4">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="48x48" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="16x16" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="32x32" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="48x48" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="96x96" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
         
         // Apple Touch Icon (for iOS devices) - using ICO
-        $html .= '<link rel="apple-touch-icon" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="apple-touch-icon" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="apple-touch-icon" sizes="180x180" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
         
         // Android Chrome icons (for PWA and Android) - using ICO
-        $html .= '<link rel="icon" type="image/x-icon" sizes="192x192" href="' . $faviconRootICO . '?v=4">' . "\n";
-        $html .= '<link rel="icon" type="image/x-icon" sizes="512x512" href="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="192x192" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
+        $html .= '<link rel="icon" type="image/x-icon" sizes="512x512" href="' . $faviconRootICO . $cacheVersion . '">' . "\n";
         
         // Manifest link (if you have one)
         // $html .= '<link rel="manifest" href="' . self::$baseUrl . '/manifest.json">' . "\n";
@@ -102,7 +108,7 @@ class SEOConfig {
         // Theme color for mobile browsers
         $html .= '<meta name="theme-color" content="#cc1a1a">' . "\n";
         $html .= '<meta name="msapplication-TileColor" content="#cc1a1a">' . "\n";
-        $html .= '<meta name="msapplication-TileImage" content="' . $faviconRootICO . '?v=4">' . "\n";
+        $html .= '<meta name="msapplication-TileImage" content="' . $faviconRootICO . $cacheVersion . '">' . "\n";
         
         return $html;
     }
